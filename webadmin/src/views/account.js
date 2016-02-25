@@ -12,47 +12,45 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         error: {},
         password: '',
         newPassword: '',
-        newPasswordRepeat: ''
+        newPasswordRepeat: '',
+
+        reset: function () {
+            $scope.passwordchange.error.password = null;
+            $scope.passwordchange.error.newPassword = null;
+            $scope.passwordchange.error.newPasswordRepeat = null;
+            $scope.passwordchange.password = '';
+            $scope.passwordchange.newPassword = '';
+            $scope.passwordchange.newPasswordRepeat = '';
+
+            $scope.passwordChangeForm.$setPristine();
+            $scope.passwordChangeForm.$setUntouched();
+        }
     };
 
     $scope.emailchange = {
         busy: false,
         error: {},
-        email: ''
+        email: '',
+
+        reset: function () {
+            $scope.emailchange.busy = false;
+            $scope.emailchange.error.email = null;
+            $scope.emailchange.email = '';
+
+            $scope.emailChangeForm.$setPristine();
+            $scope.emailChangeForm.$setUntouched();
+        }
     };
 
-    function passwordChangeReset (form) {
-        $scope.passwordchange.error.password = null;
-        $scope.passwordchange.error.newPassword = null;
-        $scope.passwordchange.error.newPasswordRepeat = null;
-        $scope.passwordchange.password = '';
-        $scope.passwordchange.newPassword = '';
-        $scope.passwordchange.newPasswordRepeat = '';
-
-        if (form) {
-            form.$setPristine();
-            form.$setUntouched();
-        }
-    }
-
-    function emailChangeReset(form) {
-        $scope.emailchange.busy = false;
-        $scope.emailchange.error.email = null;
-        $scope.emailchange.email = '';
-
-        if (form) {
-            form.$setPristine();
-            form.$setUntouched();
-        }
-    }
-
-    $scope.doChangePassword = function (form) {
+    $scope.doChangePassword = function () {
         $scope.passwordchange.error.password = null;
         $scope.passwordchange.error.newPassword = null;
         $scope.passwordchange.error.newPasswordRepeat = null;
         $scope.passwordchange.busy = true;
 
         Client.changePassword($scope.passwordchange.password, $scope.passwordchange.newPassword, function (error) {
+            $scope.passwordchange.busy = false;
+
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.passwordchange.error.password = true;
@@ -69,17 +67,15 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                 } else {
                     console.error('Unable to change password.', error);
                 }
-            } else {
-                passwordChangeReset(form);
-
-                $('#passwordChangeModal').modal('hide');
+                return;
             }
 
-            $scope.passwordchange.busy = false;
+            $scope.passwordchange.reset();
+            $('#passwordChangeModal').modal('hide');
         });
     };
 
-    $scope.doChangeEmail = function (form) {
+    $scope.doChangeEmail = function () {
         $scope.emailchange.error.email = null;
         $scope.emailchange.busy = true;
 
@@ -96,24 +92,21 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                 return;
             }
 
-            emailChangeReset(form);
-
             // update user info in the background
             Client.refreshUserInfo();
 
+            $scope.emailchange.reset();
             $('#emailChangeModal').modal('hide');
         });
     };
 
-    $scope.showChangePassword = function (form) {
-        passwordChangeReset(form);
-
+    $scope.showChangePassword = function () {
+        $scope.passwordchange.reset();
         $('#passwordChangeModal').modal('show');
     };
 
-    $scope.showChangeEmail = function (form) {
-        emailChangeReset(form);
-
+    $scope.showChangeEmail = function () {
+        $scope.emailchange.reset();
         $('#emailChangeModal').modal('show');
     };
 

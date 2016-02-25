@@ -6,39 +6,38 @@
                 <h4 class="modal-title">Change Your Password</h4>
             </div>
             <div class="modal-body">
-                <form name="passwordchange_form" role="form" novalidate ng-submit="doChangePassword(passwordchange_form)" autocomplete="off">
-                    <fieldset>
-                        <div class="form-group" ng-class="{ 'has-error': (!passwordchange_form.password.$dirty && passwordchange.error.password) || (passwordchange_form.password.$dirty && passwordchange_form.password.$invalid) }">
-                            <label class="control-label" for="inputPasswordChangePassword">Current Password</label>
-                            <div class="control-label" ng-show="(!passwordchange_form.password.$dirty && passwordchange.error.password) || (passwordchange_form.password.$dirty && passwordchange_form.password.$invalid)">
-                                <small ng-show="!passwordchange_form.password.$dirty && passwordchange.error.password">Wrong password</small>
-                                <small ng-show="passwordchange_form.password.$dirty && passwordchange_form.password.$error.required">A password is required</small>
-                            </div>
-                            <input type="password" class="form-control" ng-model="passwordchange.password" id="inputPasswordChangePassword" name="password" required autofocus>
+                <form name="passwordChangeForm" role="form" novalidate ng-submit="doChangePassword()" autocomplete="off">
+                    <input type="password" style="display: none;">
+                    <div class="form-group" ng-class="{ 'has-error': (!passwordChangeForm.password.$dirty && passwordchange.error.password) || (passwordChangeForm.password.$dirty && passwordChangeForm.password.$invalid) }">
+                        <label class="control-label" for="inputPasswordChangePassword">Current Password</label>
+                        <div class="control-label" ng-show="(!passwordChangeForm.password.$dirty && passwordchange.error.password) || (passwordChangeForm.password.$dirty && passwordChangeForm.password.$invalid)">
+                            <small ng-show="!passwordChangeForm.password.$dirty && passwordchange.error.password">Wrong password</small>
+                            <small ng-show="passwordChangeForm.password.$dirty && passwordChangeForm.password.$error.required">A password is required</small>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': (!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (passwordchange_form.newPassword.$dirty && passwordchange_form.newPassword.$invalid) }">
-                            <label class="control-label" for="inputPasswordChangeNewPassword">New Password</label>
-                            <div class="control-label" ng-show="(!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (passwordchange_form.newPassword.$dirty && passwordchange_form.newPassword.$invalid)">
-                                <small ng-show="!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword">{{ passwordchange.error.newPassword }}<br/><br/></small>
-                                <small ng-show=" passwordchange_form.newPassword.$dirty && passwordchange_form.newPassword.$invalid">Password must be 8-30 character with at least one uppercase, one numeric and one special character</small>
-                            </div>
-                            <input type="password" class="form-control" ng-model="passwordchange.newPassword" id="inputPasswordChangeNewPassword" name="newPassword" ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/" required autofocus>
+                        <input type="password" class="form-control" ng-model="passwordchange.password" id="inputPasswordChangePassword" name="password" required autofocus>
+                    </div>
+                    <div class="form-group" ng-class="{ 'has-error': (!passwordChangeForm.newPassword.$dirty && passwordchange.error.newPassword) || (passwordChangeForm.newPassword.$dirty && passwordChangeForm.newPassword.$invalid) }">
+                        <label class="control-label" for="inputPasswordChangeNewPassword">New Password</label>
+                        <div class="control-label" ng-show="(!passwordChangeForm.newPassword.$dirty && passwordchange.error.newPassword) || (passwordChangeForm.newPassword.$dirty && passwordChangeForm.newPassword.$invalid)">
+                            <small ng-show="!passwordChangeForm.newPassword.$dirty && passwordchange.error.newPassword">{{ passwordchange.error.newPassword }}<br/><br/></small>
+                            <small ng-show=" passwordChangeForm.newPassword.$dirty && passwordChangeForm.newPassword.$invalid">Password must be 8-30 character with at least one uppercase, one numeric and one special character</small>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': (!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$error.required) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat) }">
-                            <label class="control-label" for="inputPasswordChangeNewPasswordRepeat">Repeat New Password</label>
-                            <div class="control-label" ng-show="(!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$error.required) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat)">
-                                <small ng-show="passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$error.required">A password is required</small>
-                                <small ng-show="passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat && passwordchange.newPasswordRepeat">Passwords don't match</small>
-                            </div>
-                            <input type="password" class="form-control" ng-model="passwordchange.newPasswordRepeat" id="inputPasswordChangeNewPasswordRepeat" name="newPasswordRepeat" required autofocus>
+                        <input type="password" class="form-control" ng-model="passwordchange.newPassword" id="inputPasswordChangeNewPassword" name="newPassword" ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/" required autofocus>
+                    </div>
+                    <div class="form-group" ng-class="{ 'has-error': (!passwordChangeForm.newPassword.$dirty && passwordchange.error.newPassword) || (passwordChangeForm.newPasswordRepeat.$dirty && passwordChangeForm.newPasswordRepeat.$error.required) || (passwordChangeForm.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat) }">
+                        <label class="control-label" for="inputPasswordChangeNewPasswordRepeat">Repeat New Password</label>
+                        <div class="control-label" ng-show="(!passwordChangeForm.newPassword.$dirty && passwordchange.error.newPassword) || (passwordChangeForm.newPasswordRepeat.$dirty && passwordChangeForm.newPasswordRepeat.$error.required) || (passwordChangeForm.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat)">
+                            <small ng-show="passwordChangeForm.newPasswordRepeat.$dirty && passwordChangeForm.newPasswordRepeat.$error.required">A password is required</small>
+                            <small ng-show="passwordChangeForm.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat && passwordchange.newPasswordRepeat">Passwords don't match</small>
                         </div>
-                        <input class="ng-hide" type="submit" ng-disabled="passwordchange_form.$invalid"/>
-                    </fieldset>
-                </form>
+                        <input type="password" class="form-control" ng-model="passwordchange.newPasswordRepeat" id="inputPasswordChangeNewPasswordRepeat" name="newPasswordRepeat" required autofocus>
+                    </div>
+                    <input class="ng-hide" type="submit" ng-disabled="passwordChangeForm.$invalid"/>
+                </fieldset>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" ng-click="doChangePassword(passwordchange_form)" ng-disabled="passwordchange_form.$invalid || passwordchange.busy"><i class="fa fa-spinner fa-pulse" ng-show="passwordchange.busy"></i> Change</button>
+                <button type="button" class="btn btn-danger" ng-click="doChangePassword()" ng-disabled="passwordChangeForm.$invalid || passwordchange.busy"><i class="fa fa-spinner fa-pulse" ng-show="passwordchange.busy"></i> Change</button>
             </div>
         </div>
     </div>
@@ -52,22 +51,22 @@
                 <h4 class="modal-title">Change Your Email</h4>
             </div>
             <div class="modal-body">
-                <form name="emailchange_form" role="form" novalidate ng-submit="doChangeEmail(emailchange_form)" autocomplete="off">
+                <form name="emailChangeForm" role="form" novalidate ng-submit="doChangeEmail()" autocomplete="off">
                     <input type="password" style="display: none;">
-                    <div class="form-group" ng-class="{ 'has-error': (emailchange_form.email.$dirty && emailchange_form.email.$invalid) }">
+                    <div class="form-group" ng-class="{ 'has-error': (emailChangeForm.email.$dirty && emailChangeForm.email.$invalid) }">
                         <label class="control-label" for="inputEmailChangeEmail">New Email Address</label>
-                        <div class="control-label" ng-show="(!emailchange_form.email.$dirty && emailchange.error.email) || (emailchange_form.email.$dirty && emailchange_form.email.$invalid)">
-                            <small ng-show="emailchange_form.email.$error.required">A valid email address is required</small>
-                            <small ng-show="(emailchange_form.email.$dirty && emailchange_form.email.$invalid) && !emailchange_form.email.$error.required">The Email address is not valid</small>
+                        <div class="control-label" ng-show="(!emailChangeForm.email.$dirty && emailchange.error.email) || (emailChangeForm.email.$dirty && emailChangeForm.email.$invalid)">
+                            <small ng-show="emailChangeForm.email.$error.required">A valid email address is required</small>
+                            <small ng-show="(emailChangeForm.email.$dirty && emailChangeForm.email.$invalid) && !emailChangeForm.email.$error.required">The Email address is not valid</small>
                         </div>
                         <input type="email" class="form-control" ng-model="emailchange.email" id="inputEmailChangeEmail" name="email" required autofocus>
                     </div>
-                    <input class="ng-hide" type="submit" ng-disabled="emailchange_form.$invalid"/>
+                    <input class="ng-hide" type="submit" ng-disabled="emailChangeForm.$invalid"/>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doChangeEmail(emailchange_form)" ng-disabled="emailchange_form.$invalid || emailchange.busy"><i class="fa fa-spinner fa-pulse" ng-show="emailchange.busy"></i> Change</button>
+                <button type="button" class="btn btn-success" ng-click="doChangeEmail()" ng-disabled="emailChangeForm.$invalid || emailchange.busy"><i class="fa fa-spinner fa-pulse" ng-show="emailchange.busy"></i> Change</button>
             </div>
         </div>
     </div>
@@ -95,12 +94,12 @@
                     </tr>
                     <tr>
                         <td class="text-muted" style="vertical-align: top;">Email</td>
-                        <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ user.email }} <a href="" ng-click="showChangeEmail(emailchange_form)"><i class="fa fa-pencil text-small"></i></a></td>
+                        <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ user.email }} <a href="" ng-click="showChangeEmail()"><i class="fa fa-pencil text-small"></i></a></td>
                     </tr>
                     <tr>
                         <td class="text-right" colspan="2" style="vertical-align: top;">
                         <br/>
-                            <button class="btn btn-outline btn-xs btn-danger" ng-click="showChangePassword(passwordchange_form)">Change Password</button>
+                            <button class="btn btn-outline btn-xs btn-danger" ng-click="showChangePassword()">Change Password</button>
                         </td>
                     </tr>
                 </table>
