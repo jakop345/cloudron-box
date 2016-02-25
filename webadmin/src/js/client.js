@@ -162,6 +162,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         this._userInfo.id = userInfo.id;
         this._userInfo.username = userInfo.username;
         this._userInfo.email = userInfo.email;
+        this._userInfo.displayName = userInfo.displayName;
         this._userInfo.admin = !!userInfo.admin;
         this._userInfo.gravatar = 'https://www.gravatar.com/avatar/' + md5.createHash(userInfo.email.toLowerCase()) + '.jpg?s=24&d=mm';
         this._userInfo.gravatarHuge = 'https://www.gravatar.com/avatar/' + md5.createHash(userInfo.email.toLowerCase()) + '.jpg?s=128&d=mm';

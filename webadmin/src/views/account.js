@@ -110,6 +110,52 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         }
     };
 
+    $scope.displayNameChange = {
+        busy: false,
+        error: {},
+        displayName: '',
+
+        reset: function () {
+            $scope.displayNameChange.busy = false;
+            $scope.displayNameChange.error.displayName = null;
+            $scope.displayNameChange.displayName = '';
+
+            $scope.displayNameChangeForm.$setUntouched();
+            $scope.displayNameChangeForm.$setPristine();
+        },
+
+        show: function () {
+            $scope.displayNameChange.reset();
+            $scope.displayNameChange.displayName = $scope.user.displayName;
+            $('#displayNameChangeModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.displayNameChange.error.displayName = null;
+            $scope.displayNameChange.busy = true;
+
+            var user = {
+                id: $scope.user.id,
+                displayName: $scope.displayNameChange.displayName
+            };
+
+            Client.updateUser(user, function (error) {
+                $scope.displayNameChange.busy = false;
+
+                if (error) {
+                    console.error('Unable to change displayName.', error);
+                    return;
+                }
+
+                // update user info in the background
+                Client.refreshUserInfo();
+
+                $scope.displayNameChange.reset();
+                $('#displayNameChangeModal').modal('hide');
+            });
+        }
+    };
+
     $scope.removeAccessTokens = function (client) {
         client.busy = true;
 
@@ -138,7 +184,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
     });
 
     // setup all the dialog focus handling
-    ['passwordChangeModal', 'emailChangeModal'].forEach(function (id) {
+    ['passwordChangeModal', 'emailChangeModal', 'displayNameChangeModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
