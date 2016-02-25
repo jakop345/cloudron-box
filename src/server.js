@@ -109,7 +109,7 @@ function initializeExpressSync() {
 
     // user routes for admins and users operating on their own account
     router.get ('/api/v1/users/:userId', usersScope, routes.user.info);
-    router.put ('/api/v1/users/:userId', usersScope, routes.user.verifyPassword, routes.user.update);
+    router.put ('/api/v1/users/:userId', usersScope, routes.user.update);
     router.post('/api/v1/users/:userId/password', usersScope, routes.user.changePassword); // changePassword verifies password
 
     // Group management

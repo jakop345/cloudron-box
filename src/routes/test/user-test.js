@@ -508,26 +508,6 @@ describe('User API', function () {
         });
     });
 
-    it('change email fails due to missing password', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ access_token: token })
-               .send({ email: EMAIL_0_NEW })
-               .end(function (error, result) {
-            expect(result.statusCode).to.equal(400);
-            done();
-        });
-    });
-
-    it('change email fails due to wrong password', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ access_token: token })
-               .send({ password: PASSWORD+PASSWORD, email: EMAIL_0_NEW })
-               .end(function (error, result) {
-            expect(result.statusCode).to.equal(403);
-            done();
-        });
-    });
-
     it('change email fails due to invalid email', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })
