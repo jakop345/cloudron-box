@@ -157,13 +157,16 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstallForm.$setUntouched();
     };
 
-    $scope.showInstallForm = function () {
-        if (Client.enoughResourcesAvailable($scope.appInstall.app)) {
+    $scope.showInstallForm = function (force) {
+        if (Client.enoughResourcesAvailable($scope.appInstall.app) || force) {
             $scope.appInstall.installFormVisible = true;
+            $scope.appInstall.resourceConstraintVisible = false;
             $('#collapseMediaLinksCarousel').collapse('hide');
+            $('#collapseResourceConstraint').collapse('hide');
             $('#collapseInstallForm').collapse('show');
             $('#appInstallLocationInput').focus();
         } else {
+            $scope.appInstall.installFormVisible = false;
             $scope.appInstall.resourceConstraintVisible = true;
             $('#collapseMediaLinksCarousel').collapse('hide');
             $('#collapseResourceConstraint').collapse('show');
