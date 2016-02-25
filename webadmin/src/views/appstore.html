@@ -80,12 +80,13 @@
                     </div>
                 </div>
                 <div class="collapse" id="collapseResourceConstraint" data-toggle="false">
-                    <h4 class="text-danger">Not enough resources left to install this application.</h4>
-                    <p>The Cloudron's resources can be extended with a model upgrade or available resources may be freed up by uninstalling unused applications.</p>
+                    <h4 class="text-danger">This Cloudron is running low on resources.</h4>
+                    <p>Installing this app might decrease the performance of other apps. The Cloudron's resources can be extended with a model upgrade or available resources may be freed up by uninstalling unused applications.</p>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" ng-show="!appInstall.installFormVisible && user.admin && appInstall.resourceConstraintVisible" ng-click="showInstallForm(true)">Install anyway</button>
                 <button type="button" class="btn btn-success" ng-show="!appInstall.installFormVisible && user.admin && !appInstall.resourceConstraintVisible" ng-click="showInstallForm()">Install</button>
                 <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible && user.admin && !appInstall.resourceConstraintVisible" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
             </div>
