@@ -110,9 +110,9 @@ function initializeExpressSync() {
     router.post('/api/v1/users/:userId/invite', usersScope, routes.user.requireAdmin, routes.user.sendInvite);
 
     // Group management
-    router.get ('/api/v1/groups', usersScope, routes.groups.list);
+    router.get ('/api/v1/groups', usersScope, routes.user.requireAdmin, routes.groups.list);
     router.post('/api/v1/groups', usersScope, routes.user.requireAdmin, routes.groups.create);
-    router.get ('/api/v1/groups/:groupId', usersScope, routes.groups.get);
+    router.get ('/api/v1/groups/:groupId', usersScope, routes.user.requireAdmin, routes.groups.get);
     router.del ('/api/v1/groups/:groupId', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.groups.remove);
 
     // form based login routes used by oauth2 frame

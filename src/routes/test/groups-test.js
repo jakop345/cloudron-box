@@ -15,13 +15,15 @@ var appdb = require('../../appdb.js'),
     superagent = require('superagent'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
+    tokendb = require('../../tokendb.js'),
     nock = require('nock'),
     userdb = require('../../userdb.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='silly@me.com';
-var token = null;
+var USERNAME_1 = 'user', PASSWORD_1 = 'Foobar?1337', EMAIL_1 ='happy@me.com';
+var token, token_1 = null;
 
 var server;
 function setup(done) {
@@ -48,8 +50,22 @@ function setup(done) {
 
                 callback();
             });
+        },
+        function (callback) {
+            superagent.post(SERVER_URL + '/api/v1/users')
+                   .query({ access_token: token })
+                   .send({ username: USERNAME_1, email: EMAIL_1, invite: false })
+                   .end(function (error, result) {
+                expect(result).to.be.ok();
+                expect(result.statusCode).to.eql(201);
+
+                token_1 = tokendb.generateToken();
+
+                // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
+                tokendb.add(token_1, tokendb.PREFIX_USER + USERNAME_1, 'test-client-id',  Date.now() + 100000, '*', callback);
+            });
         }
-    ], done);
+  ], done);
 }
 
 function cleanup(done) {
@@ -69,6 +85,15 @@ describe('Groups API', function () {
             superagent.get(SERVER_URL + '/api/v1/groups')
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('cannot get groups as normal user', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/groups')
+                   .query({ access_token: token_1 })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(403);
                 done();
             });
         });
@@ -123,6 +148,15 @@ describe('Groups API', function () {
                   .query({ access_token: token })
                   .end(function (error, result) {
                 expect(result.statusCode).to.equal(404);
+                done();
+            });
+        });
+
+        it('cannot get existing group with normal user', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/groups/admin')
+                  .query({ access_token: token_1 })
+                  .end(function (error, result) {
+                expect(result.statusCode).to.equal(403);
                 done();
             });
         });
