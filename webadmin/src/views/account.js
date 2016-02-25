@@ -22,8 +22,46 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
             $scope.passwordchange.newPassword = '';
             $scope.passwordchange.newPasswordRepeat = '';
 
-            $scope.passwordChangeForm.$setPristine();
             $scope.passwordChangeForm.$setUntouched();
+            $scope.passwordChangeForm.$setPristine();
+        },
+
+        show: function () {
+            $scope.passwordchange.reset();
+            $('#passwordChangeModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.passwordchange.error.password = null;
+            $scope.passwordchange.error.newPassword = null;
+            $scope.passwordchange.error.newPasswordRepeat = null;
+            $scope.passwordchange.busy = true;
+
+            Client.changePassword($scope.passwordchange.password, $scope.passwordchange.newPassword, function (error) {
+                $scope.passwordchange.busy = false;
+
+                if (error) {
+                    if (error.statusCode === 403) {
+                        $scope.passwordchange.error.password = true;
+                        $scope.passwordchange.password = '';
+                        $('#inputPasswordChangePassword').focus();
+                        $scope.passwordChangeForm.password.$setPristine();
+                    } else if (error.statusCode === 400) {
+                        $scope.passwordchange.error.newPassword = error.message;
+                        $scope.passwordchange.newPassword = '';
+                        $scope.passwordchange.newPasswordRepeat = '';
+                        $scope.passwordChangeForm.newPassword.$setPristine();
+                        $scope.passwordChangeForm.newPasswordRepeat.$setPristine();
+                        $('#inputPasswordChangeNewPassword').focus();
+                    } else {
+                        console.error('Unable to change password.', error);
+                    }
+                    return;
+                }
+
+                $scope.passwordchange.reset();
+                $('#passwordChangeModal').modal('hide');
+            });
         }
     };
 
@@ -37,77 +75,39 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
             $scope.emailchange.error.email = null;
             $scope.emailchange.email = '';
 
-            $scope.emailChangeForm.$setPristine();
             $scope.emailChangeForm.$setUntouched();
-        }
-    };
+            $scope.emailChangeForm.$setPristine();
+        },
 
-    $scope.doChangePassword = function () {
-        $scope.passwordchange.error.password = null;
-        $scope.passwordchange.error.newPassword = null;
-        $scope.passwordchange.error.newPasswordRepeat = null;
-        $scope.passwordchange.busy = true;
-
-        Client.changePassword($scope.passwordchange.password, $scope.passwordchange.newPassword, function (error) {
-            $scope.passwordchange.busy = false;
-
-            if (error) {
-                if (error.statusCode === 403) {
-                    $scope.passwordchange.error.password = true;
-                    $scope.passwordchange.password = '';
-                    $('#inputPasswordChangePassword').focus();
-                    $scope.passwordchange_form.password.$setPristine();
-                } else if (error.statusCode === 400) {
-                    $scope.passwordchange.error.newPassword = error.message;
-                    $scope.passwordchange.newPassword = '';
-                    $scope.passwordchange.newPasswordRepeat = '';
-                    $scope.passwordchange_form.newPassword.$setPristine();
-                    $scope.passwordchange_form.newPasswordRepeat.$setPristine();
-                    $('#inputPasswordChangeNewPassword').focus();
-                } else {
-                    console.error('Unable to change password.', error);
-                }
-                return;
-            }
-
-            $scope.passwordchange.reset();
-            $('#passwordChangeModal').modal('hide');
-        });
-    };
-
-    $scope.doChangeEmail = function () {
-        $scope.emailchange.error.email = null;
-        $scope.emailchange.busy = true;
-
-        var user = {
-            id: $scope.user.id,
-            email: $scope.emailchange.email
-        };
-
-        Client.updateUser(user, function (error) {
-            $scope.emailchange.busy = false;
-
-            if (error) {
-                console.error('Unable to change email.', error);
-                return;
-            }
-
-            // update user info in the background
-            Client.refreshUserInfo();
-
+        show: function () {
             $scope.emailchange.reset();
-            $('#emailChangeModal').modal('hide');
-        });
-    };
+            $('#emailChangeModal').modal('show');
+        },
 
-    $scope.showChangePassword = function () {
-        $scope.passwordchange.reset();
-        $('#passwordChangeModal').modal('show');
-    };
+        submit: function () {
+            $scope.emailchange.error.email = null;
+            $scope.emailchange.busy = true;
 
-    $scope.showChangeEmail = function () {
-        $scope.emailchange.reset();
-        $('#emailChangeModal').modal('show');
+            var user = {
+                id: $scope.user.id,
+                email: $scope.emailchange.email
+            };
+
+            Client.updateUser(user, function (error) {
+                $scope.emailchange.busy = false;
+
+                if (error) {
+                    console.error('Unable to change email.', error);
+                    return;
+                }
+
+                // update user info in the background
+                Client.refreshUserInfo();
+
+                $scope.emailchange.reset();
+                $('#emailChangeModal').modal('hide');
+            });
+        }
     };
 
     $scope.removeAccessTokens = function (client) {
