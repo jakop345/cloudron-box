@@ -18,8 +18,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
     $scope.emailchange = {
         busy: false,
         error: {},
-        email: '',
-        password: ''
+        email: ''
     };
 
     function passwordChangeReset (form) {
@@ -36,11 +35,10 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         }
     }
 
-    function emailChangeReset (form) {
+    function emailChangeReset(form) {
+        $scope.emailchange.busy = false;
         $scope.emailchange.error.email = null;
-        $scope.emailchange.error.password = null;
         $scope.emailchange.email = '';
-        $scope.emailchange.password = '';
 
         if (form) {
             form.$setPristine();
@@ -83,29 +81,27 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
 
     $scope.doChangeEmail = function (form) {
         $scope.emailchange.error.email = null;
-        $scope.emailchange.error.password = null;
         $scope.emailchange.busy = true;
 
-        Client.changeEmail($scope.emailchange.email, $scope.emailchange.password, function (error) {
+        var user = {
+            id: $scope.user.id,
+            email: $scope.emailchange.email
+        };
+
+        Client.updateUser(user, function (error) {
+            $scope.emailchange.busy = false;
+
             if (error) {
-                if (error.statusCode === 403) {
-                    $scope.emailchange.error.password = true;
-                    $scope.emailchange.password = '';
-                    $scope.emailchange_form.password.$setPristine();
-                    $('#inputEmailChangePassword').focus();
-                } else {
-                    console.error('Unable to change email.', error);
-                }
-            } else {
-                emailChangeReset(form);
-
-                // update user info in the background
-                Client.refreshUserInfo();
-
-                $('#emailChangeModal').modal('hide');
+                console.error('Unable to change email.', error);
+                return;
             }
 
-            $scope.emailchange.busy = false;
+            emailChangeReset(form);
+
+            // update user info in the background
+            Client.refreshUserInfo();
+
+            $('#emailChangeModal').modal('hide');
         });
     };
 

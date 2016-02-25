@@ -53,25 +53,16 @@
             </div>
             <div class="modal-body">
                 <form name="emailchange_form" role="form" novalidate ng-submit="doChangeEmail(emailchange_form)" autocomplete="off">
-                    <fieldset>
-                        <div class="form-group" ng-class="{ 'has-error': (emailchange_form.email.$dirty && emailchange_form.email.$invalid) }">
-                            <label class="control-label" for="inputEmailChangeEmail">New Email Address</label>
-                            <div class="control-label" ng-show="(!emailchange_form.email.$dirty && emailchange.error.email) || (emailchange_form.email.$dirty && emailchange_form.email.$invalid)">
-                                <small ng-show="emailchange_form.email.$error.required">A valid email address is required</small>
-                                <small ng-show="(emailchange_form.email.$dirty && emailchange_form.email.$invalid) && !emailchange_form.email.$error.required">The Email address is not valid</small>
-                            </div>
-                            <input type="email" class="form-control" ng-model="emailchange.email" id="inputEmailChangeEmail" name="email" required autofocus>
+                    <input type="password" style="display: none;">
+                    <div class="form-group" ng-class="{ 'has-error': (emailchange_form.email.$dirty && emailchange_form.email.$invalid) }">
+                        <label class="control-label" for="inputEmailChangeEmail">New Email Address</label>
+                        <div class="control-label" ng-show="(!emailchange_form.email.$dirty && emailchange.error.email) || (emailchange_form.email.$dirty && emailchange_form.email.$invalid)">
+                            <small ng-show="emailchange_form.email.$error.required">A valid email address is required</small>
+                            <small ng-show="(emailchange_form.email.$dirty && emailchange_form.email.$invalid) && !emailchange_form.email.$error.required">The Email address is not valid</small>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': (emailchange_form.password.$dirty && emailchange_form.password.$invalid) || (!emailchange_form.password.$dirty && emailchange.error.password) }">
-                            <label class="control-label" for="inputEmailChangePassword">Password</label>
-                            <div class="control-label" ng-show="(emailchange_form.password.$dirty && emailchange_form.password.$invalid) || (!emailchange_form.password.$dirty && emailchange.error.password)">
-                                <small ng-show=" emailchange_form.password.$dirty && emailchange_form.password.$invalid">Password required</small>
-                                <small ng-show="!emailchange_form.password.$dirty && emailchange.error.password">Wrong password</small>
-                            </div>
-                            <input type="password" class="form-control" ng-model="emailchange.password" id="inputEmailChangePassword" name="password" required autofocus>
-                        </div>
-                        <input class="ng-hide" type="submit" ng-disabled="emailchange_form.$invalid"/>
-                    </fieldset>
+                        <input type="email" class="form-control" ng-model="emailchange.email" id="inputEmailChangeEmail" name="email" required autofocus>
+                    </div>
+                    <input class="ng-hide" type="submit" ng-disabled="emailchange_form.$invalid"/>
                 </form>
             </div>
             <div class="modal-footer">
