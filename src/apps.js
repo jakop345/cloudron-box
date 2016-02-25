@@ -12,6 +12,7 @@ exports = module.exports = {
     getBySubdomain: getBySubdomain,
     getByIpAddress: getByIpAddress,
     getAll: getAll,
+    getAllByUser: getAllByUser,
     purchase: purchase,
     install: install,
     configure: configure,
@@ -354,6 +355,21 @@ function getAll(callback) {
         });
 
         callback(null, apps);
+    });
+}
+
+function getAllByUser(user, callback) {
+    assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    getAll(function (error, result) {
+        if (error) return callback(error);
+
+        async.filter(result, function (app, callback) {
+            hasAccessTo(app, user, function (error, hasAccess) {
+                callback(hasAccess);
+            });
+        }, callback.bind(null, null));  // never error
     });
 }
 
