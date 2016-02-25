@@ -76,7 +76,10 @@ function getAppBySubdomain(req, res, next) {
 }
 
 function getApps(req, res, next) {
-    apps.getAll(function (error, allApps) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    var func = req.user.admin ? apps.getAll : apps.getAllByUser.bind(null, req.user);
+    func(function (error, allApps) {
         if (error) return next(new HttpError(500, error));
 
         allApps = allApps.map(removeInternalAppFields);
