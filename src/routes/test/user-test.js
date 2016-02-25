@@ -376,9 +376,18 @@ describe('User API', function () {
         });
     });
 
-    it('second user userInfo', function (done) {
+    it('second user userInfo fails for first user', function (done) {
         superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_2)
                .query({ access_token: token_1 })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(403);
+            done();
+        });
+    });
+
+    it('second user userInfo succeeds for second user', function (done) {
+        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+               .query({ access_token: token_2 })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(200);
             expect(result.body.username).to.equal(USERNAME_2);
@@ -399,9 +408,18 @@ describe('User API', function () {
         });
     });
 
-    it('list users', function (done) {
+    it('list users fails for normal user', function (done) {
         superagent.get(SERVER_URL + '/api/v1/users')
         .query({ access_token: token_2 })
+        .end(function (error, res) {
+            expect(res.statusCode).to.equal(403);
+            done();
+        });
+    });
+
+    it('list users succeeds for admin', function (done) {
+        superagent.get(SERVER_URL + '/api/v1/users')
+        .query({ access_token: token })
         .end(function (error, res) {
             expect(error).to.be(null);
             expect(res.statusCode).to.equal(200);
