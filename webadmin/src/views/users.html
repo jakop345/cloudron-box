@@ -228,6 +228,7 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th style="width: 1px;"></th>
                                 <th style="">User</th>
                                 <th style="width: 1px" class="text-right">Groups</th>
                                 <th style="width: 150px" class="text-right">Actions</th>
@@ -235,13 +236,16 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="user in users">
+                                <td>
+                                    <i class="fa fa-briefcase" ng-show="user.admin" title="Superuser"></i>
+                                </td>
                                 <td class="text-overflow: ellipsis; white-space: nowrap;">
                                     {{ user.username }}
                                     <span class="text-muted">{{ user.email }}</span>
                                     <span ng-show="isMe(user)" class="label label-success">This is you!</span>
                                 </td>
                                 <td class="text-right">
-                                    <span ng-repeat="groupId in user.groupIds" class="label label-default" ng-class="{ 'label-danger': groupId === 'admin' }">{{ groupId === 'admin' ? 'Admin' : groupId }}</span>
+                                    <span ng-repeat="groupId in user.groupIds | ignoreAdminGroup" class="label label-default">{{ groupId }}</span>
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
                                     <button ng-show="!isMe(user)" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>

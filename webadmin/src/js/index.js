@@ -144,6 +144,15 @@ app.filter('inProgressApps', function () {
     };
 });
 
+app.filter('ignoreAdminGroup', function () {
+    return function (groups) {
+        return groups.filter(function (group) {
+            if (group.id) return group.id !== 'admin';
+            return group !== 'admin';
+        });
+    };
+});
+
 app.filter('applicationLink', function() {
     return function(app) {
         if (app.installationState === ISTATES.INSTALLED && app.health === HSTATES.HEALTHY) {
