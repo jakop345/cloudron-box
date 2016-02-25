@@ -607,9 +607,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.updateUser = function (user, password, callback) {
+    Client.prototype.updateUser = function (user, callback) {
         var data = {
-            password: password,
             email: user.email,
             displayName: user.displayName
         };

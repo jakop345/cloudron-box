@@ -31,8 +31,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         error: {},
         userInfo: {},
         email: '',
-        displayName: '',
-        password: ''
+        displayName: ''
     };
 
     $scope.showBubble = function ($event) {
@@ -231,7 +230,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     };
 
     $scope.showUserEdit = function (userInfo) {
-        $scope.useredit.error.password = null;
         $scope.useredit.error.displayName = null;
         $scope.useredit.error.email = null;
         $scope.useredit.displayName = userInfo.displayName;
@@ -257,7 +255,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     $scope.doUserEdit = function () {
         $scope.useredit.error.displayName = null;
         $scope.useredit.error.email = null;
-        $scope.useredit.error.password = null;
         $scope.useredit.busy = true;
 
         var data = {
@@ -266,15 +263,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             displayName: $scope.useredit.displayName
         };
 
-        Client.updateUser(data, $scope.useredit.password, function (error) {
-            if (error && error.statusCode === 403) {
-                $scope.useredit.busy = false;
-                $scope.useredit.error.password = 'Wrong password';
-                $scope.useredit.password = '';
-                $scope.useredit_form.password.$setPristine();
-                $('#inputUserEditPassword').focus();
-                return;
-            }
+        Client.updateUser(data, function (error) {
             if (error) {
                 $scope.useredit.busy = false;
                 return console.error('Unable to update user:', error);
@@ -288,7 +277,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 $scope.useredit.userInfo = {};
                 $scope.useredit.email = '';
                 $scope.useredit.displayName = '';
-                $scope.useredit.password = '';
                 $scope.useredit.groupIds = [];
 
                 $scope.useredit_form.$setPristine();

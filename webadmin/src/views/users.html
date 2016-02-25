@@ -130,14 +130,6 @@
                             </span>
                         </div>
                     </div>
-                    <div class="form-group" ng-class="{ 'has-error': (useredit_form.password.$dirty && useredit_form.password.$invalid) || (!useredit_form.password.$dirty && useredit.error.password)}">
-                        <label class="control-label">Give your password to verify that you are performing that action</label>
-                        <div class="control-label" ng-show="(!useredit_form.password.$dirty && useredit.error.password) || (useredit_form.password.$dirty && useredit_form.password.$invalid)">
-                            <small ng-show="useredit_form.password.$error.required && !useredit.error.password">A password is required</small>
-                            <small ng-show="!useredit_form.password.$dirty && useredit.error.password">{{ useredit.error.password }}</small>
-                        </div>
-                        <input type="password" class="form-control" ng-model="useredit.password" name="password" id="inputUserEditPassword" placeholder="Password" required>
-                    </div>
                     <input class="hide" type="submit" ng-disabled="useredit_form.$invalid || useredit.busy"/>
                 </form>
             </div>
