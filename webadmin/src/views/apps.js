@@ -193,8 +193,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             portBindings: finalPortBindings,
             accessRestriction: !$scope.appConfigure.accessRestrictionOption ? null : $scope.appConfigure.accessRestriction,
             cert: $scope.appConfigure.certificateFile,
-            key: $scope.appConfigure.keyFile,
-            memoryLimit: $scope.appConfigure.memoryLimit
+            key: $scope.appConfigure.keyFile
+            // memoryLimit: $scope.appConfigure.memoryLimit
         };
 
         Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, data, function (error) {
