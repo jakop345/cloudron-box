@@ -16,6 +16,7 @@ var assert = require('assert'),
     debug = require('debug')('box:auth'),
     LocalStrategy = require('passport-local').Strategy,
     crypto = require('crypto'),
+    groups = require('./groups'),
     passport = require('passport'),
     tokendb = require('./tokendb'),
     user = require('./user'),
@@ -123,7 +124,14 @@ function initialize(callback) {
                 // amend the tokenType of the token owner
                 user.tokenType = tokenType;
 
-                callback(null, user, info);
+                // amend the admin flag
+                groups.isMember(groups.ADMIN_GROUP_ID, user.id, function (error, isAdmin) {
+                    if (error) return callback(error);
+
+                    user.admin = isAdmin;
+
+                    callback(null, user, info);
+                });
             });
         });
     }));
