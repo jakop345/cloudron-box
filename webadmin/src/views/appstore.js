@@ -327,30 +327,34 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         }
     }
 
+    function fetchUsers() {
+        Client.getUsers(function (error, users) {
+            if (error) {
+                console.error(error);
+                return $timeout(fetchUsers, 5000);
+            }
+
+            $scope.users = users;
+        });
+    }
+
     (function refresh() {
         $scope.ready = false;
 
-        Client.getUsers(function (error, users) {
+        getAppList(function (error, apps) {
             if (error) {
                 console.error(error);
                 return $timeout(refresh, 1000);
             }
 
-            $scope.users = users;
+            $scope.apps = apps;
 
-            getAppList(function (error, apps) {
-                if (error) {
-                    console.error(error);
-                    return $timeout(refresh, 1000);
-                }
+            // show install app dialog immediately if an app id was passed in the query
+            hashChangeListener();
 
-                $scope.apps = apps;
+            if ($scope.user.admin) fetchUsers();
 
-                // show install app dialog immediately if an app id was passed in the query
-                hashChangeListener();
-
-                $scope.ready = true;
-            });
+            $scope.ready = true;
         });
     })();
 
