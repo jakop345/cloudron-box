@@ -85,7 +85,7 @@ describe('Apps', function () {
             tcpPorts: {}
         },
         portBindings: null,
-        accessRestriction: { users: [ 'someuser' ], groups: [] },
+        accessRestriction: { users: [ 'someuser' ], groups: [ GROUP_0 ] },
         memoryLimit: 0
     };
 
@@ -98,7 +98,7 @@ describe('Apps', function () {
             tcpPorts: {}
         },
         portBindings: null,
-        accessRestriction: { users: [ 'someuser', USER_0.id ], groups: [] },
+        accessRestriction: { users: [ 'someuser', USER_0.id ], groups: [ GROUP_1 ] },
         memoryLimit: 0
     };
 
@@ -111,6 +111,8 @@ describe('Apps', function () {
             userdb.add.bind(null, USER_1.id, USER_1),
             groups.create.bind(null, GROUP_0),
             groups.create.bind(null, GROUP_1),
+            groups.addMember.bind(null, groups.ADMIN_GROUP_ID, ADMIN_0.id),
+            groups.addMember.bind(null, GROUP_0, USER_1.id),
             appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit),
             appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.memoryLimit),
             appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.memoryLimit)
@@ -323,19 +325,18 @@ describe('Apps', function () {
         it('succeeds for USER_1', function (done) {
             apps.getAllByUser(USER_1, function (error, result) {
                 expect(error).to.equal(null);
-                expect(result.length).to.equal(1);
+                expect(result.length).to.equal(2);
                 expect(result[0].id).to.equal(APP_0.id);
+                expect(result[1].id).to.equal(APP_1.id);
                 done();
             });
         });
 
-        it('succeeds for ADMIN_0', function (done) {
+        it('succeeds with admin not being special', function (done) {
             apps.getAllByUser(ADMIN_0, function (error, result) {
                 expect(error).to.equal(null);
-                expect(result.length).to.equal(3);
+                expect(result.length).to.equal(1);
                 expect(result[0].id).to.equal(APP_0.id);
-                expect(result[1].id).to.equal(APP_1.id);
-                expect(result[2].id).to.equal(APP_2.id);
                 done();
             });
         });
