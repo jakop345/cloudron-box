@@ -242,7 +242,6 @@
                                 <td class="text-overflow: ellipsis; white-space: nowrap;">
                                     {{ user.username }}
                                     <span class="text-muted">{{ user.email }}</span>
-                                    <span ng-show="isMe(user)" class="label label-success">This is you!</span>
                                 </td>
                                 <td class="text-right">
                                     <span ng-repeat="groupId in user.groupIds | ignoreAdminGroup" class="label label-default">{{ groupId }}</span>
