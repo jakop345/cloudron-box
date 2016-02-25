@@ -31,7 +31,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         error: {},
         userInfo: {},
         email: '',
-        displayName: ''
+        displayName: '',
+        superuser: false
     };
 
     $scope.showBubble = function ($event) {
@@ -236,6 +237,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.useredit.email = userInfo.email;
         $scope.useredit.userInfo = userInfo;
         $scope.useredit.groupIds = angular.copy(userInfo.groupIds);
+        $scope.useredit.superuser = userInfo.groupIds.indexOf('admin') !== -1;
 
         $scope.useredit_form.$setPristine();
         $scope.useredit_form.$setUntouched();
@@ -269,6 +271,9 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 return console.error('Unable to update user:', error);
             }
 
+            if ($scope.useredit.superuser) $scope.useredit.groupIds.push('admin');
+            else $scope.useredit.groupIds = $scope.useredit.groupIds.filter(function (groupId) { return groupId !== 'admin'; });
+
             Client.setGroups(data.id, $scope.useredit.groupIds, function (error) {
                 $scope.useredit.busy = false;
 
@@ -277,6 +282,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 $scope.useredit.userInfo = {};
                 $scope.useredit.email = '';
                 $scope.useredit.displayName = '';
+                $scope.useredit.superuser = false;
                 $scope.useredit.groupIds = [];
 
                 $scope.useredit_form.$setPristine();

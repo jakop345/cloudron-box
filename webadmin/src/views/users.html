@@ -118,14 +118,17 @@
                         <input type="email" class="form-control" ng-model="useredit.email" name="email" required>
                     </div>
                     <div class="form-group">
+                        <label class="control-label">Superuser</label>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" ng-model="useredit.superuser"> Allow this user to manage apps, groups and other users
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="control-label">Groups</label>
                         <div>
-                            <span>
-                                <button class="btn btn-admin" type="button" ng-show="useredit.userInfo.id === userInfo.id" ng-click="showBubble($event)" data-toggle="tooltip" data-trigger="manual" title="Removing yourself from admin group is not allowed">Admin</button>
-                                <button class="btn btn-default" type="button" ng-hide="useredit.userInfo.id === userInfo.id" ng-click="userEditToggleGroup({ id: 'admin', name: 'admin' })" ng-class="{ 'btn-admin': (useredit.groupIds.indexOf('admin') !== -1) }">Admin</button>
-                            </span>
-
-                            <span ng-repeat="group in groups" ng-show="group.id !== 'admin'">
+                            <span ng-repeat="group in groups | ignoreAdminGroup" ng-show="group.id !== 'admin'">
                                 <button class="btn btn-default" type="button" ng-click="userEditToggleGroup(group);" ng-class="{ 'btn-primary': (useredit.groupIds.indexOf(group.id) !== -1) }">{{ group.name }}</button>
                             </span>
                         </div>
