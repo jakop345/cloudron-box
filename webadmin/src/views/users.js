@@ -357,6 +357,10 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
     refresh();
 
+    $scope.initTooltip = function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    };
+
     // setup all the dialog focus handling
     ['userAddModal', 'userRemoveModal', 'userEditModal', 'groupAddModal', 'groupRemoveModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {

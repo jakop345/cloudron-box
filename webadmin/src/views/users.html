@@ -237,7 +237,7 @@
                         <tbody>
                             <tr ng-repeat="user in users">
                                 <td>
-                                    <i class="fa fa-briefcase" ng-show="user.admin" title="Superuser"></i>
+                                    <i class="fa fa-briefcase" ng-show="user.admin" data-toggle="tooltip" title="Superuser" ng-init="initTooltip()"></i>
                                 </td>
                                 <td class="text-overflow: ellipsis; white-space: nowrap;">
                                     {{ user.username }}
