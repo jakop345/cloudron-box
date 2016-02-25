@@ -100,14 +100,17 @@ function initializeExpressSync() {
 
     router.get ('/api/v1/profile', profileScope, routes.user.profile);
 
-    router.get ('/api/v1/users', usersScope, routes.user.list);
+    // user routes only for admins
+    router.get ('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.list);
     router.post('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.create);
-    router.get ('/api/v1/users/:userId', usersScope, routes.user.info);
-    router.put ('/api/v1/users/:userId', usersScope, routes.user.verifyPassword, routes.user.update);
     router.del ('/api/v1/users/:userId', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.user.remove);
-    router.post('/api/v1/users/:userId/password', usersScope, routes.user.changePassword); // changePassword verifies password
     router.put ('/api/v1/users/:userId/set_groups', usersScope, routes.user.requireAdmin, routes.user.setGroups);
     router.post('/api/v1/users/:userId/invite', usersScope, routes.user.requireAdmin, routes.user.sendInvite);
+
+    // user routes for admins and users operating on their own account
+    router.get ('/api/v1/users/:userId', usersScope, routes.user.info);
+    router.put ('/api/v1/users/:userId', usersScope, routes.user.verifyPassword, routes.user.update);
+    router.post('/api/v1/users/:userId/password', usersScope, routes.user.changePassword); // changePassword verifies password
 
     // Group management
     router.get ('/api/v1/groups', usersScope, routes.user.requireAdmin, routes.groups.list);
