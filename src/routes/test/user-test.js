@@ -19,9 +19,9 @@ var config = require('../../config.js'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
-var USERNAME_0 = 'admin', PASSWORD = 'Foobar?1337', EMAIL = 'silly@me.com', EMAIL_0_NEW = 'stupid@me.com', DISPLAY_NAME_0_NEW = 'New Name';
+var USERNAME_0 = 'admin', PASSWORD = 'Foobar?1337', EMAIL_0 = 'silly@me.com', EMAIL_0_NEW = 'stupid@me.com', DISPLAY_NAME_0_NEW = 'New Name';
 var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'tao@zen.mac';
-var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'user@foo.bar';
+var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'user@foo.bar', EMAIL_2_NEW = 'happy@me.com';
 var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@foo.bar';
 
 var server;
@@ -105,7 +105,7 @@ describe('User API', function () {
 
         superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                .query({ setupToken: 'somesetuptoken' })
-               .send({ username: USERNAME_0, password: PASSWORD, email: EMAIL })
+               .send({ username: USERNAME_0, password: PASSWORD, email: EMAIL_0 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
 
@@ -133,7 +133,7 @@ describe('User API', function () {
         .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME_0);
-            expect(res.body.email).to.equal(EMAIL);
+            expect(res.body.email).to.equal(EMAIL_0);
             expect(res.body.admin).to.be.ok();
 
             // stash for further use
@@ -167,7 +167,7 @@ describe('User API', function () {
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME_0);
-            expect(res.body.email).to.equal(EMAIL);
+            expect(res.body.email).to.equal(EMAIL_0);
             expect(res.body.admin).to.be.ok();
             done();
         });
@@ -206,7 +206,7 @@ describe('User API', function () {
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME_0);
-            expect(res.body.email).to.equal(EMAIL);
+            expect(res.body.email).to.equal(EMAIL_0);
             expect(res.body.admin).to.be.ok();
             expect(res.body.displayName).to.be.a('string');
             expect(res.body.password).to.not.be.ok();
@@ -401,7 +401,7 @@ describe('User API', function () {
     it('create user with same username should fail', function (done) {
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
-               .send({ username: USERNAME_2, email: EMAIL, invite: false })
+               .send({ username: USERNAME_2, email: EMAIL_0, invite: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(409);
             done();
@@ -501,7 +501,7 @@ describe('User API', function () {
     // Change email
     it('change email fails due to missing token', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .send({ password: PASSWORD, email: EMAIL_0_NEW })
+               .send({ email: EMAIL_0_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(401);
             done();
@@ -511,9 +511,19 @@ describe('User API', function () {
     it('change email fails due to invalid email', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })
-               .send({ password: PASSWORD, email: 'foo@bar' })
+               .send({ email: 'foo@bar' })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('change email for other user fails', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+               .query({ access_token: token_2 })
+               .send({ email: 'foobar@bar.baz' })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(403);
             done();
         });
     });
@@ -521,27 +531,48 @@ describe('User API', function () {
     it('change user succeeds without email nor displayName', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })
-               .send({ password: PASSWORD })
+               .send({})
                .end(function (error, result) {
             expect(result.statusCode).to.equal(204);
             done();
         });
     });
 
-    it('change email succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ access_token: token })
-               .send({ password: PASSWORD, email: EMAIL_0_NEW })
+    it('change email for own user succeeds', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+               .query({ access_token: token_2 })
+               .send({ email: EMAIL_2_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(204);
 
-            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+                  .query({ access_token: token_2 })
+                  .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.username).to.equal(USERNAME_2);
+                expect(res.body.email).to.equal(EMAIL_2_NEW);
+                expect(res.body.admin).to.equal(false);
+                expect(res.body.displayName).to.equal('');
+
+                done();
+            });
+        });
+    });
+
+    it('change email as admin for other user succeeds', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+               .query({ access_token: token })
+               .send({ email: EMAIL_2 })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(204);
+
+            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_2)
                   .query({ access_token: token })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                expect(res.body.username).to.equal(USERNAME_0);
-                expect(res.body.email).to.equal(EMAIL_0_NEW);
-                expect(res.body.admin).to.be.ok();
+                expect(res.body.username).to.equal(USERNAME_2);
+                expect(res.body.email).to.equal(EMAIL_2);
+                expect(res.body.admin).to.equal(false);
                 expect(res.body.displayName).to.equal('');
 
                 done();
@@ -552,7 +583,7 @@ describe('User API', function () {
     it('change displayName succeeds', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })
-               .send({ password: PASSWORD, displayName: DISPLAY_NAME_0_NEW })
+               .send({ displayName: DISPLAY_NAME_0_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(204);
 
@@ -561,7 +592,7 @@ describe('User API', function () {
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.username).to.equal(USERNAME_0);
-                expect(res.body.email).to.equal(EMAIL_0_NEW);
+                expect(res.body.email).to.equal(EMAIL_0);
                 expect(res.body.admin).to.be.ok();
                 expect(res.body.displayName).to.equal(DISPLAY_NAME_0_NEW);
 

@@ -92,6 +92,7 @@ function update(req, res, next) {
     if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be string'));
 
     if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
+    if (req.user.id !== req.params.userId && !req.user.admin) return next(new HttpError(403, 'Not allowed'));
 
     user.get(req.params.userId, function (error, result) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
@@ -135,6 +136,7 @@ function listUser(req, res, next) {
 
 function info(req, res, next) {
     assert.strictEqual(typeof req.params.userId, 'string');
+    assert.strictEqual(typeof req.user, 'object');
 
     if (req.user.id !== req.params.userId && !req.user.admin) return next(new HttpError(403, 'Not allowed'));
 
