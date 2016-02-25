@@ -378,7 +378,7 @@ describe('Apps', function () {
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
+                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: { users: [ 'someuser' ], groups: [] } })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 expect(res.body.id).to.be.a('string');
@@ -433,14 +433,13 @@ describe('Apps', function () {
              });
         });
 
-        it('non admin can get all apps', function (done) {
+        it('non admin cannot see the app due to accessRestriction', function (done) {
             superagent.get(SERVER_URL + '/api/v1/apps')
                    .query({ access_token: token_1 })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.apps).to.be.an('array');
-                expect(res.body.apps[0].id).to.eql(APP_ID);
-                expect(res.body.apps[0].installationState).to.be.ok();
+                expect(res.body.apps.length).to.equal(0);
                 done();
              });
         });
