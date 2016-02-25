@@ -202,15 +202,9 @@ function verifyPassword(req, res, next) {
 function requireAdmin(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
-        if (error) return next(new HttpError(500, error));
+    if (!req.user.admin) return next(new HttpError(403, 'API call requires admin rights.'));
 
-        if (!isAdmin) return next(new HttpError(403, 'API call requires admin rights.'));
-
-        req.user.admin = true;
-
-        next();
-    });
+    next();
 }
 
 function sendInvite(req, res, next) {
