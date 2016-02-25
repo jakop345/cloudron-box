@@ -13,15 +13,54 @@ var appdb = require('../appdb.js'),
     config = require('../config.js'),
     constants = require('../constants.js'),
     database = require('../database.js'),
-    expect = require('expect.js');
+    expect = require('expect.js'),
+    groups = require('../groups.js'),
+    hat = require('hat'),
+    userdb = require('../userdb.js');
 
 describe('Apps', function () {
+    var ADMIN_0 = {
+        id: 'admin123',
+        username: 'admin123',
+        password: 'secret',
+        email: 'admin@me.com',
+        salt: 'morton',
+        createdAt: 'sometime back',
+        modifiedAt: 'now',
+        resetToken: hat(256),
+        displayName: ''
+    };
+
+    var USER_0 = {
+        id: 'uuid213',
+        username: 'uuid213',
+        password: 'secret',
+        email: 'safe@me.com',
+        salt: 'morton',
+        createdAt: 'sometime back',
+        modifiedAt: 'now',
+        resetToken: hat(256),
+        displayName: ''
+    };
+
+    var USER_1 = {
+        id: 'uuid2134',
+        username: 'uuid2134',
+        password: 'secret',
+        email: 'safe1@me.com',
+        salt: 'morton',
+        createdAt: 'sometime back',
+        modifiedAt: 'now',
+        resetToken: hat(256),
+        displayName: ''
+    };
+
+    var GROUP_0 = 'somegroup';
+    var GROUP_1 = 'someothergroup';
+
     var APP_0 = {
         id: 'appid-0',
         appStoreId: 'appStoreId-0',
-        installationState: appdb.ISTATE_PENDING_INSTALL,
-        installationProgress: null,
-        runState: null,
         location: 'some-location-0',
         manifest: {
             version: '0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'app0',
@@ -32,11 +71,34 @@ describe('Apps', function () {
                 }
             }
         },
-        httpPort: null,
-        containerId: null,
         portBindings: { PORT: 5678 },
-        healthy: null,
         accessRestriction: null,
+        memoryLimit: 0
+    };
+
+    var APP_1 = {
+        id: 'appid-1',
+        appStoreId: 'appStoreId-1',
+        location: 'some-location-1',
+        manifest: {
+            version: '0.1', dockerImage: 'docker/app1', healthCheckPath: '/', httpPort: 80, title: 'app1',
+            tcpPorts: {}
+        },
+        portBindings: null,
+        accessRestriction: { users: [ 'someuser' ], groups: [] },
+        memoryLimit: 0
+    };
+
+    var APP_2 = {
+        id: 'appid-2',
+        appStoreId: 'appStoreId-2',
+        location: 'some-location-2',
+        manifest: {
+            version: '0.1', dockerImage: 'docker/app2', healthCheckPath: '/', httpPort: 80, title: 'app2',
+            tcpPorts: {}
+        },
+        portBindings: null,
+        accessRestriction: { users: [ 'someuser', USER_0.id ], groups: [] },
         memoryLimit: 0
     };
 
@@ -44,7 +106,14 @@ describe('Apps', function () {
         async.series([
             database.initialize,
             database._clear,
-            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit)
+            userdb.add.bind(null, ADMIN_0.id, ADMIN_0),
+            userdb.add.bind(null, USER_0.id, USER_0),
+            userdb.add.bind(null, USER_1.id, USER_1),
+            groups.create.bind(null, GROUP_0),
+            groups.create.bind(null, GROUP_1),
+            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit),
+            appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.memoryLimit),
+            appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.memoryLimit)
         ], done);
     });
 
@@ -238,6 +307,37 @@ describe('Apps', function () {
                 done();
             });
         });
+    });
 
+    describe('getAllByUser', function () {
+        it('succeeds for USER_0', function (done) {
+            apps.getAllByUser(USER_0, function (error, result) {
+                expect(error).to.equal(null);
+                expect(result.length).to.equal(2);
+                expect(result[0].id).to.equal(APP_0.id);
+                expect(result[1].id).to.equal(APP_2.id);
+                done();
+            });
+        });
+
+        it('succeeds for USER_1', function (done) {
+            apps.getAllByUser(USER_1, function (error, result) {
+                expect(error).to.equal(null);
+                expect(result.length).to.equal(1);
+                expect(result[0].id).to.equal(APP_0.id);
+                done();
+            });
+        });
+
+        it('succeeds for ADMIN_0', function (done) {
+            apps.getAllByUser(ADMIN_0, function (error, result) {
+                expect(error).to.equal(null);
+                expect(result.length).to.equal(3);
+                expect(result[0].id).to.equal(APP_0.id);
+                expect(result[1].id).to.equal(APP_1.id);
+                expect(result[2].id).to.equal(APP_2.id);
+                done();
+            });
+        });
     });
 });
