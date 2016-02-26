@@ -420,3 +420,7 @@
 - Allow more apps to be installed in bigger sized cloudrons
 - Allow user to override memory limit warning and install anyway
 
+[0.9.3]
+- Admin flag is handled outside of groups
+- User interface fixes for groups
+
