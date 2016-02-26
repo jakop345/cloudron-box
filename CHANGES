@@ -423,4 +423,4 @@
 [0.9.3]
 - Admin flag is handled outside of groups
 - User interface fixes for groups
-
+- Allow to set access restrictions on app installation
