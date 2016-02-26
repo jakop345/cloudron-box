@@ -83,6 +83,14 @@ $table-border-color:                        transparent !default;
     border-color: $brand-danger !important;
 }
 
+.elide-table-cell {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 300px;
+    width: 300px;
+}
+
 // ----------------------------
 // Main classes
 // ----------------------------
@@ -106,6 +114,11 @@ html {
 
 .content {
     max-width: 800px;
+    margin: 0 auto;
+}
+
+.content-large {
+    max-width: 970px;
     margin: 0 auto;
 }
 
@@ -360,7 +373,7 @@ html {
 }
 
 .card-large {
-    max-width: 800px;
+    max-width: 970px;
 }
 
 .text-success {
@@ -908,4 +921,17 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
     &:hover {
         opacity: 1;
     }
+}
+
+// ----------------------------
+// Users view
+// ----------------------------
+
+.group-badge {
+    margin-right: 10px;
+}
+
+.no-wrap {
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
