@@ -24,7 +24,6 @@ readonly app_count=$((${physical_memory} / 200)) # estimated app count
 readonly disk_size_gb=$(fdisk -l ${disk_device} | grep "Disk ${disk_device}" | awk '{ print $3 }')
 readonly disk_size=$((disk_size_gb * 1024))
 readonly backup_swap_size=1024
-# readonly system_size=5120 # 5 gigs for system libs, installer, box code and tmp
 readonly system_size=10240 # 10 gigs for system libs, apps images, installer, box code and tmp
 readonly ext4_reserved=$((disk_size * 5 / 100)) # this can be changes using tune2fs -m percent /dev/vda1
 
@@ -60,6 +59,7 @@ home_data_size=$((disk_size - system_size - swap_size - backup_swap_size - ext4_
 echo "Resizing up btrfs user data to size ${home_data_size}M"
 umount "${USER_DATA_DIR}"
 fallocate -l "${home_data_size}m" "${USER_DATA_FILE}" # does not overwrite existing data
+truncate -s "${home_data_size}m" "${USER_DATA_FILE}" # this will shrink it if the file had existed. this is useful when running this script on a live system
 mount "${USER_DATA_FILE}"
 btrfs filesystem resize max "${USER_DATA_DIR}"
 
