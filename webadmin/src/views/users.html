@@ -209,7 +209,7 @@
     </div>
 </div>
 
-<div class="content">
+<div class="content-large">
 
     <br/>
 
@@ -233,8 +233,8 @@
                             <tr>
                                 <th style="width: 1px;"></th>
                                 <th style="">User</th>
-                                <th style="width: 1px" class="text-center">Groups</th>
-                                <th style="width: 150px" class="text-right">Actions</th>
+                                <th style="" class="text-left">Groups</th>
+                                <th style="width: 100px" class="text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -242,14 +242,14 @@
                                 <td>
                                     <i class="fa fa-briefcase" ng-show="user.admin" data-toggle="tooltip" title="Superuser" ng-init="initTooltip()"></i>
                                 </td>
-                                <td style="text-overflow: ellipsis; white-space: nowrap;" class="hand" ng-click="showUserEdit(user)">
+                                <td class="hand elide-table-cell" ng-click="showUserEdit(user)">
                                     {{ user.username }}
                                     <span class="text-muted">{{ user.email }}</span>
                                 </td>
-                                <td class="text-center hand" ng-click="showUserEdit(user)">
-                                    {{ user.groupIds.length - (user.groupIds.indexOf('admin') !== -1 ? 1 : 0) }}
+                                <td class="text-left hand elide-table-cell" ng-click="showUserEdit(user)">
+                                    <span class="group-badge" ng-repeat="groupId in user.groupIds | ignoreAdminGroup">{{ groupId }}</span>
                                 </td>
-                                <td class="text-right" style="vertical-align: bottom">
+                                <td class="text-right no-wrap" style="vertical-align: bottom">
                                     <button ng-show="!isMe(user)" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>
                                     <button class="btn btn-xs btn-default" ng-click="showUserEdit(user)" title="Edit User Profile"><i class="fa fa-pencil"></i></button>
                                     <button ng-show="!isMe(user)" class="btn btn-xs btn-danger" ng-click="showUserRemove(user)" title="Remove User"><i class="fa fa-trash-o"></i></button>
