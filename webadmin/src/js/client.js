@@ -764,7 +764,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.enoughResourcesAvailable = function (app) {
         var needed = app.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT;
         var used = this.getInstalledApps().reduce(function (prev, cur) { return prev + (cur.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT); }, 0);
-        var available = (this.getConfig().memory || 0) - used;
+        var roundedMemory = Math.round(this.getConfig().memory / (1024 * 1024 * 1024)) * 1024 * 1024 * 1024; // round to nearest GB
+        var available = (roundedMemory || 0) - used;
 
         return (available - needed) >= 0;
     };
