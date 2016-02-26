@@ -6,8 +6,8 @@
 angular.module('Application').service('Client', ['$http', 'md5', 'Notification', function ($http, md5, Notification) {
     var client = null;
 
-    // Keep this in sync with docs and docker.js
-    var DEFAULT_MEMORY_LIMIT = 1024 * 1024 * 200;
+    // Keep this in sync with docs and constants.js, docker.js
+    var DEFAULT_MEMORY_LIMIT = 1024 * 1024 * 256;
 
     function ClientError(statusCode, messageOrObject) {
         Error.call(this);
@@ -762,10 +762,11 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.enoughResourcesAvailable = function (app) {
-        var needed = app.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT;
+        var needed = app.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT; // RAM+Swap
         var used = this.getInstalledApps().reduce(function (prev, cur) { return prev + (cur.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT); }, 0);
         var roundedMemory = Math.round(this.getConfig().memory / (1024 * 1024 * 1024)) * 1024 * 1024 * 1024; // round to nearest GB
-        var available = (roundedMemory || 0) - used;
+        var totalMemory = roundedMemory * 1.2; // box-setup.sh creates equal amount of swap. 1.2 factor is arbitrary
+        var available = (totalMemory || 0) - used;
 
         return (available - needed) >= 0;
     };
