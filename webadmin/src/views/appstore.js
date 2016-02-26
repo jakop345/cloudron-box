@@ -38,6 +38,133 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             if (pos === -1) groups.push(group.id);
             else groups.splice(pos, 1);
+        },
+
+        reset: function () {
+            $scope.appInstall.app = {};
+            $scope.appInstall.error = {};
+            $scope.appInstall.location = '';
+            $scope.appInstall.portBindings = {};
+            $scope.appInstall.installFormVisible = false;
+            $scope.appInstall.resourceConstraintVisible = false;
+            $scope.appInstall.mediaLinks = [];
+            $scope.appInstall.certificateFile = null;
+            $scope.appInstall.certificateFileName = '';
+            $scope.appInstall.keyFile = null;
+            $scope.appInstall.keyFileName = '';
+            $scope.appInstall.accessRestrictionOption = '';
+            $scope.appInstall.accessRestriction = { users: [], groups: [] };
+            $scope.appInstall.accessRestrictionSingleUser = null;
+
+            $('#collapseInstallForm').collapse('hide');
+            $('#collapseResourceConstraint').collapse('hide');
+            $('#collapseMediaLinksCarousel').collapse('show');
+
+            $scope.appInstallForm.$setPristine();
+            $scope.appInstallForm.$setUntouched();
+        },
+
+        showForm: function (force) {
+            if (Client.enoughResourcesAvailable($scope.appInstall.app) || force) {
+                $scope.appInstall.installFormVisible = true;
+                $scope.appInstall.resourceConstraintVisible = false;
+                $('#collapseMediaLinksCarousel').collapse('hide');
+                $('#collapseResourceConstraint').collapse('hide');
+                $('#collapseInstallForm').collapse('show');
+                $('#appInstallLocationInput').focus();
+            } else {
+                $scope.appInstall.installFormVisible = false;
+                $scope.appInstall.resourceConstraintVisible = true;
+                $('#collapseMediaLinksCarousel').collapse('hide');
+                $('#collapseResourceConstraint').collapse('show');
+            }
+        },
+
+        show: function (app) {
+            $scope.appInstall.reset();
+
+            // make a copy to work with in case the app object gets updated while polling
+            angular.copy(app, $scope.appInstall.app);
+
+            $scope.appInstall.mediaLinks = $scope.appInstall.app.manifest.mediaLinks || [];
+            $scope.appInstall.location = app.location;
+            $scope.appInstall.portBindingsInfo = $scope.appInstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
+            $scope.appInstall.portBindings = {};                            // This is the actual model holding the env:port pair
+            $scope.appInstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
+            $scope.appInstall.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
+            $scope.appInstall.accessRestriction = app.accessRestriction || { users: [], groups: [] };
+            $scope.appInstall.accessRestrictionSingleUser = null;
+
+            // set default ports
+            for (var env in $scope.appInstall.app.manifest.tcpPorts) {
+                $scope.appInstall.portBindings[env] = $scope.appInstall.app.manifest.tcpPorts[env].defaultValue || 0;
+                $scope.appInstall.portBindingsEnabled[env] = true;
+            }
+
+            $('#appInstallModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.appInstall.busy = true;
+            $scope.appInstall.error.other = null;
+            $scope.appInstall.error.location = null;
+            $scope.appInstall.error.port = null;
+
+            // only use enabled ports from portBindings
+            var finalPortBindings = {};
+            for (var env in $scope.appInstall.portBindings) {
+                if ($scope.appInstall.portBindingsEnabled[env]) {
+                    finalPortBindings[env] = $scope.appInstall.portBindings[env];
+                }
+            }
+
+            // translate to accessRestriction object
+            var accessRestriction = $scope.appInstall.app.manifest.singleUser ? {
+                users: [ $scope.appInstall.accessRestrictionSingleUser.id ]
+            } : (!$scope.appInstall.accessRestrictionOption ? null : $scope.appInstall.accessRestriction);
+
+            var data = {
+                location: $scope.appInstall.location || '',
+                portBindings: finalPortBindings,
+                accessRestriction: accessRestriction,
+                cert: $scope.appInstall.certificateFile,
+                key: $scope.appInstall.keyFile,
+            };
+
+            Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, data, function (error) {
+                if (error) {
+                    if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
+                        $scope.appInstall.error.port = error.message;
+                    } else if (error.statusCode === 409) {
+                        $scope.appInstall.error.location = 'This name is already taken.';
+                        $scope.appInstallForm.location.$setPristine();
+                        $('#appInstallLocationInput').focus();
+                    } else if (error.statusCode === 402) {
+                        $scope.appInstall.error.other = 'Unable to purchase this app<br/>Please make sure your payment is setup <a href="' + $scope.config.webServerOrigin + '/console.html#/userprofile" target="_blank">here</a>';
+                    } else if (error.statusCode === 400 && error.message.indexOf('cert') !== -1 ) {
+                        $scope.appInstall.error.cert = error.message;
+                        $scope.appInstall.certificateFileName = '';
+                        $scope.appInstall.certificateFile = null;
+                        $scope.appInstall.keyFileName = '';
+                        $scope.appInstall.keyFile = null;
+                    } else {
+                        $scope.appInstall.error.other = error.message;
+                    }
+
+                    $scope.appInstall.busy = false;
+                    return;
+                }
+
+                $scope.appInstall.busy = false;
+
+                // wait for dialog to be fully closed to avoid modal behavior breakage when moving to a different view already
+                $('#appInstallModal').on('hidden.bs.modal', function () {
+                    $scope.appInstall.reset();
+                    $location.path('/apps');
+                });
+
+                $('#appInstallModal').modal('hide');
+            });
         }
     };
 
@@ -48,39 +175,40 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.feedback = {
         error: null,
-        success: false,
         subject: 'App feedback',
         description: '',
-        type: 'app'
-    };
+        type: 'app_missing',
 
-    function resetFeedback() {
-        $scope.feedback.description = '';
-
-        $scope.feedbackForm.$setUntouched();
-        $scope.feedbackForm.$setPristine();
-    }
-
-    $scope.submitFeedback = function () {
-        $scope.feedback.busy = true;
-        $scope.feedback.success = false;
-        $scope.feedback.error = null;
-
-        Client.feedback($scope.feedback.type, $scope.feedback.subject, $scope.feedback.description, function (error) {
-            if (error) {
-                $scope.feedback.error = error;
-            } else {
-                $scope.feedback.success = true;
-                $('#feedbackModal').modal('hide');
-                resetFeedback();
-            }
-
+        reset: function () {
             $scope.feedback.busy = false;
-        });
-    };
+            $scope.feedback.error = null;
+            $scope.feedback.description = '';
 
-    $scope.showFeedbackModal = function () {
-        $('#feedbackModal').modal('show');
+            $scope.feedbackForm.$setUntouched();
+            $scope.feedbackForm.$setPristine();
+        },
+
+        show: function () {
+            $scope.feedback.reset();
+            $('#feedbackModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.feedback.busy = true;
+            $scope.feedback.error = null;
+
+            Client.feedback($scope.feedback.type, $scope.feedback.subject, $scope.feedback.description, function (error) {
+                $scope.feedback.busy = false;
+
+                if (error) {
+                    $scope.feedback.error = error;
+                    console.error(error);
+                    return;
+                }
+
+                $('#feedbackModal').modal('hide');
+            });
+        }
     };
 
     function getAppList(callback) {
@@ -151,46 +279,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         });
     };
 
-    $scope.reset = function () {
-        $scope.appInstall.app = {};
-        $scope.appInstall.error = {};
-        $scope.appInstall.location = '';
-        $scope.appInstall.portBindings = {};
-        $scope.appInstall.installFormVisible = false;
-        $scope.appInstall.resourceConstraintVisible = false;
-        $scope.appInstall.mediaLinks = [];
-        $scope.appInstall.certificateFile = null;
-        $scope.appInstall.certificateFileName = '';
-        $scope.appInstall.keyFile = null;
-        $scope.appInstall.keyFileName = '';
-        $scope.appInstall.accessRestrictionOption = '';
-        $scope.appInstall.accessRestriction = { users: [], groups: [] };
-        $scope.appInstall.accessRestrictionSingleUser = null;
-
-        $('#collapseInstallForm').collapse('hide');
-        $('#collapseResourceConstraint').collapse('hide');
-        $('#collapseMediaLinksCarousel').collapse('show');
-
-        $scope.appInstallForm.$setPristine();
-        $scope.appInstallForm.$setUntouched();
-    };
-
-    $scope.showInstallForm = function (force) {
-        if (Client.enoughResourcesAvailable($scope.appInstall.app) || force) {
-            $scope.appInstall.installFormVisible = true;
-            $scope.appInstall.resourceConstraintVisible = false;
-            $('#collapseMediaLinksCarousel').collapse('hide');
-            $('#collapseResourceConstraint').collapse('hide');
-            $('#collapseInstallForm').collapse('show');
-            $('#appInstallLocationInput').focus();
-        } else {
-            $scope.appInstall.installFormVisible = false;
-            $scope.appInstall.resourceConstraintVisible = true;
-            $('#collapseMediaLinksCarousel').collapse('hide');
-            $('#collapseResourceConstraint').collapse('show');
-        }
-    };
-
     document.getElementById('appInstallCertificateFileInput').onchange = function (event) {
         $scope.$apply(function () {
             $scope.appInstall.certificateFile = null;
@@ -219,97 +307,11 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         });
     };
 
-    $scope.showInstall = function (app) {
-        $scope.reset();
-
-        // make a copy to work with in case the app object gets updated while polling
-        angular.copy(app, $scope.appInstall.app);
-        $('#appInstallModal').modal('show');
-
-        $scope.appInstall.mediaLinks = $scope.appInstall.app.manifest.mediaLinks || [];
-        $scope.appInstall.location = app.location;
-        $scope.appInstall.portBindingsInfo = $scope.appInstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
-        $scope.appInstall.portBindings = {};                            // This is the actual model holding the env:port pair
-        $scope.appInstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
-        $scope.appInstall.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
-        $scope.appInstall.accessRestriction = app.accessRestriction || { users: [], groups: [] };
-        $scope.appInstall.accessRestrictionSingleUser = null;
-
-        // set default ports
-        for (var env in $scope.appInstall.app.manifest.tcpPorts) {
-            $scope.appInstall.portBindings[env] = $scope.appInstall.app.manifest.tcpPorts[env].defaultValue || 0;
-            $scope.appInstall.portBindingsEnabled[env] = true;
-        }
-    };
-
     $scope.showAppNotFound = function (appId, version) {
         $scope.appNotFound.appId = appId;
         $scope.appNotFound.version = version;
 
         $('#appNotFoundModal').modal('show');
-    };
-
-    $scope.doInstall = function () {
-        $scope.appInstall.busy = true;
-        $scope.appInstall.error.other = null;
-        $scope.appInstall.error.location = null;
-        $scope.appInstall.error.port = null;
-
-        // only use enabled ports from portBindings
-        var finalPortBindings = {};
-        for (var env in $scope.appInstall.portBindings) {
-            if ($scope.appInstall.portBindingsEnabled[env]) {
-                finalPortBindings[env] = $scope.appInstall.portBindings[env];
-            }
-        }
-
-        // translate to accessRestriction object
-        var accessRestriction = $scope.appInstall.app.manifest.singleUser ? {
-            users: [ $scope.appInstall.accessRestrictionSingleUser.id ]
-        } : (!$scope.appInstall.accessRestrictionOption ? null : $scope.appInstall.accessRestriction);
-
-        var data = {
-            location: $scope.appInstall.location || '',
-            portBindings: finalPortBindings,
-            accessRestriction: accessRestriction,
-            cert: $scope.appInstall.certificateFile,
-            key: $scope.appInstall.keyFile,
-        };
-
-        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, data, function (error) {
-            if (error) {
-                if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
-                    $scope.appInstall.error.port = error.message;
-                } else if (error.statusCode === 409) {
-                    $scope.appInstall.error.location = 'This name is already taken.';
-                    $scope.appInstallForm.location.$setPristine();
-                    $('#appInstallLocationInput').focus();
-                } else if (error.statusCode === 402) {
-                    $scope.appInstall.error.other = 'Unable to purchase this app<br/>Please make sure your payment is setup <a href="' + $scope.config.webServerOrigin + '/console.html#/userprofile" target="_blank">here</a>';
-                } else if (error.statusCode === 400 && error.message.indexOf('cert') !== -1 ) {
-                    $scope.appInstall.error.cert = error.message;
-                    $scope.appInstall.certificateFileName = '';
-                    $scope.appInstall.certificateFile = null;
-                    $scope.appInstall.keyFileName = '';
-                    $scope.appInstall.keyFile = null;
-                } else {
-                    $scope.appInstall.error.other = error.message;
-                }
-
-                $scope.appInstall.busy = false;
-                return;
-            }
-
-            $scope.appInstall.busy = false;
-
-            // wait for dialog to be fully closed to avoid modal behavior breakage when moving to a different view already
-            $('#appInstallModal').on('hidden.bs.modal', function () {
-                $scope.reset();
-                $location.path('/apps');
-            });
-
-            $('#appInstallModal').modal('hide');
-        });
     };
 
     $scope.gotoApp = function (app) {
@@ -329,7 +331,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                         return;
                     }
 
-                    $scope.showInstall(result);
+                    $scope.appInstall.show(result);
                 });
             } else {
                 var found = $scope.apps.filter(function (app) {
@@ -337,13 +339,13 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 });
 
                 if (found.length) {
-                    $scope.showInstall(found[0]);
+                    $scope.appInstall.show(found[0]);
                 } else {
                     $scope.showAppNotFound(appId, null);
                 }
             }
         } else {
-            $scope.reset();
+            $scope.appInstall.reset();
         }
     }
 

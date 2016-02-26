@@ -13,7 +13,7 @@
             </div>
             <div class="modal-body">
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
-                    <form role="form" name="appInstallForm" ng-submit="doInstall()" autocomplete="off">
+                    <form role="form" name="appInstallForm" ng-submit="appInstall.submit()" autocomplete="off">
                         <div class="has-error text-center" ng-show="appInstall.error.other" ng-bind-html="appInstall.error.other"></div>
                         <div class="form-group" ng-class="{ 'has-error': (appInstallForm.location.$dirty && appInstallForm.location.$invalid) || (!appInstallForm.location.$dirty && appInstall.error.location) }">
                             <label class="control-label" for="appInstallLocationInput">Location {{ appInstall.error.location }} </label>
@@ -108,9 +108,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" ng-show="!appInstall.installFormVisible && user.admin && appInstall.resourceConstraintVisible" ng-click="showInstallForm(true)">Install anyway</button>
-                <button type="button" class="btn btn-success" ng-show="!appInstall.installFormVisible && user.admin && !appInstall.resourceConstraintVisible" ng-click="showInstallForm()">Install</button>
-                <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible && user.admin && !appInstall.resourceConstraintVisible" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
+                <button type="button" class="btn btn-danger" ng-show="!appInstall.installFormVisible && user.admin && appInstall.resourceConstraintVisible" ng-click="appInstall.showForm(true)">Install anyway</button>
+                <button type="button" class="btn btn-success" ng-show="!appInstall.installFormVisible && user.admin && !appInstall.resourceConstraintVisible" ng-click="appInstall.showForm()">Install</button>
+                <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible && user.admin && !appInstall.resourceConstraintVisible" ng-click="appInstall.submit()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
             </div>
         </div>
     </div>
@@ -125,7 +125,7 @@
             </div>
             <div class="modal-body">
                 <fieldset>
-                    <form name="feedbackForm" ng-submit="submitFeedback()">
+                    <form name="feedbackForm" ng-submit="feedback.submit()">
                         <div ng-show="feedback.error" class="text-danger text-bold">{{feedback.error}}</div>
                         <textarea class="form-control" id="feedbackDescriptionTextarea" cols="3" ng-model="feedback.description" ng-minlength="1" required placeholder="Name, Category, Links ..." autofocus></textarea>
                         <input class="ng-hide" type="submit" ng-disabled="feedbackForm.$invalid || feedback.busy"/>
@@ -134,7 +134,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="submitFeedback()" ng-disabled="feedbackForm.$invalid || feedback.busy"><i class="fa fa-fw fa-paper-plane"></i> Submit</button>
+                <button type="button" class="btn btn-success" ng-click="feedback.submit()" ng-disabled="feedbackForm.$invalid || feedback.busy"><i class="fa fa-fw fa-paper-plane"></i> Submit</button>
             </div>
         </div>
     </div>
@@ -194,7 +194,7 @@
             <br/>
             <br/>
             <br/>
-            <a href="" ng-click="showFeedbackModal()">Missing an app? Let us know.</a>
+            <a href="" ng-click="feedback.show()">Missing an app? Let us know.</a>
         </div>
         <div class="col-md-10" ng-show="ready && apps.length">
             <div class="row-no-margin">
@@ -216,7 +216,7 @@
         </div>
         <div class="col-md-10 animateMeOpacity loading-banner" ng-show="ready && !apps.length">
             <h3 class="text-muted">No applications in this category.</h3>
-            <a href="" ng-click="showFeedbackModal()"><h3>Let us know if you miss something.</h3></a>
+            <a href="" ng-click="feedback.show()"><h3>Let us know if you miss something.</h3></a>
         </div>
         <div class="col-md-10 animateMeOpacity loading-banner" ng-show="!ready">
             <h2><i class="fa fa-spinner fa-pulse"></i> Loading</h2>
