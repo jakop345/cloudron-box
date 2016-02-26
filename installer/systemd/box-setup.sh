@@ -19,7 +19,7 @@ fi
 
 # all sizes are in mb
 readonly physical_memory=$(free -m | awk '/Mem:/ { print $2 }')
-readonly swap_size="${physical_memory}"
+readonly swap_size="${physical_memory}" # if you change this, fix enoughResourcesAvailable() in client.js
 readonly app_count=$((${physical_memory} / 200)) # estimated app count
 readonly disk_size_gb=$(fdisk -l ${disk_device} | grep "Disk ${disk_device}" | awk '{ print $3 }')
 readonly disk_size=$((disk_size_gb * 1024))
