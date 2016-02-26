@@ -233,7 +233,7 @@
                             <tr>
                                 <th style="width: 1px;"></th>
                                 <th style="">User</th>
-                                <th style="" class="text-left">Groups</th>
+                                <th style="" class="text-left hidden-xs hidden-sm">Groups</th>
                                 <th style="width: 100px" class="text-right">Actions</th>
                             </tr>
                         </thead>
@@ -246,7 +246,7 @@
                                     {{ user.username }}
                                     <span class="text-muted">{{ user.email }}</span>
                                 </td>
-                                <td class="text-left hand elide-table-cell" ng-click="showUserEdit(user)">
+                                <td class="text-left hand elide-table-cell hidden-xs hidden-sm" ng-click="showUserEdit(user)">
                                     <span class="group-badge" ng-repeat="groupId in user.groupIds | ignoreAdminGroup">{{ groupId }}</span>
                                 </td>
                                 <td class="text-right no-wrap" style="vertical-align: bottom">
