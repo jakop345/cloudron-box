@@ -6,6 +6,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.config = Client.getConfig();
     $scope.user = Client.getUserInfo();
     $scope.users = [];
+    $scope.groups = [];
     $scope.category = '';
     $scope.cachedCategory = ''; // used to cache the selected category while searching
     $scope.searchString = '';
@@ -338,6 +339,17 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         });
     }
 
+    function fetchGroups() {
+        Client.getGroups(function (error, groups) {
+            if (error) {
+                console.error(error);
+                return $timeout(fetchUsers, 5000);
+            }
+
+            $scope.groups = groups;
+        });
+    }
+
     (function refresh() {
         $scope.ready = false;
 
@@ -352,7 +364,10 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             // show install app dialog immediately if an app id was passed in the query
             hashChangeListener();
 
-            if ($scope.user.admin) fetchUsers();
+            if ($scope.user.admin) {
+                fetchUsers();
+                fetchGroups();
+            }
 
             $scope.ready = true;
         });
