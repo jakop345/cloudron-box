@@ -271,8 +271,11 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 return console.error('Unable to update user:', error);
             }
 
-            if ($scope.useredit.superuser) $scope.useredit.groupIds.push('admin');
-            else $scope.useredit.groupIds = $scope.useredit.groupIds.filter(function (groupId) { return groupId !== 'admin'; });
+            if ($scope.useredit.superuser) {
+                if ($scope.useredit.groupIds.indexOf('admin') === -1) $scope.useredit.groupIds.push('admin');
+            } else {
+                $scope.useredit.groupIds = $scope.useredit.groupIds.filter(function (groupId) { return groupId !== 'admin'; });
+            }
 
             Client.setGroups(data.id, $scope.useredit.groupIds, function (error) {
                 $scope.useredit.busy = false;
