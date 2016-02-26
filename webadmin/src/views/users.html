@@ -246,8 +246,8 @@
                                     {{ user.username }}
                                     <span class="text-muted">{{ user.email }}</span>
                                 </td>
-                                <td class="text-right" style="vertical-align: bottom">
-                                    <span ng-repeat="groupId in user.groupIds.splice(user.groupIds.indexOf('admin'), 1)" class="label label-default">{{ groupId }}</span>
+                                <td class="text-center hand" ng-click="showUserEdit(user)">
+                                    {{ user.groupIds.length - (user.groupIds.indexOf('admin') !== -1 ? 1 : 0) }}
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
                                     <button ng-show="!isMe(user)" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>
