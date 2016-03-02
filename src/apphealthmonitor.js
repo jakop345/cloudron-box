@@ -26,9 +26,10 @@ function debugApp(app) {
     assert(!app || typeof app === 'object');
 
     var prefix = app ? (app.location || 'naked_domain') : '(no app)';
+    var manifestAppId = app ? app.manifest.id : '';
     var id = app ? app.id : '';
 
-    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)) + ' - ' + id);
+    debug(prefix + ' ' + manifestAppId + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)) + ' - ' + id);
 }
 
 function setHealth(app, health, callback) {
