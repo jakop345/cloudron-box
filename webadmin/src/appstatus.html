@@ -35,7 +35,7 @@
     (function () {
         'use strict';
 
-        var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+        var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (i) { var b = i.indexOf('='); return [i.slice(0, b), i.slice(b+1)]; }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
 
         document.getElementById('appLink').href = search.referrer;
     })();
