@@ -341,7 +341,7 @@ describe('Cloudron', function () {
 
         it('succeeds with app type', function (done) {
             superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
-                   .send({ type: 'app', subject: 'some subject', description: 'some description' })
+                   .send({ type: 'app_missing', subject: 'some subject', description: 'some description' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(201);
