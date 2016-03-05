@@ -45,7 +45,7 @@ function start(callback) {
     gServer = ldap.createServer({ log: gLogger });
 
     gServer.search('ou=users,dc=cloudron', function (req, res, next) {
-        debug('ldap user search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
+        debug('user search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
 
         user.list(function (error, result) {
             if (error) return next(new ldap.OperationsError(error.toString()));
@@ -82,7 +82,7 @@ function start(callback) {
     });
 
     gServer.search('ou=groups,dc=cloudron', function (req, res, next) {
-        debug('ldap group search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
+        debug('group search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
 
         user.list(function (error, result){
             if (error) return next(new ldap.OperationsError(error.toString()));
@@ -119,12 +119,12 @@ function start(callback) {
 
     gServer.bind('ou=apps,dc=cloudron', function(req, res, next) {
         // TODO: validate password
-        debug('ldap application bind: %s', req.dn.toString());
+        debug('application bind: %s', req.dn.toString());
         res.end();
     });
 
     gServer.bind('ou=users,dc=cloudron', function(req, res, next) {
-        debug('ldap user bind: %s', req.dn.toString());
+        debug('user bind: %s', req.dn.toString());
 
         // extract the common name which might have different attribute names
         var commonName = req.dn.rdns[0][Object.keys(req.dn.rdns[0])[0]];
