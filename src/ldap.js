@@ -139,9 +139,10 @@ function start(callback) {
             getAppByRequest(req, function (error, app) {
                 if (error) return next(error);
 
-                if (!app) return res.end();
-
-                debug('no app found for this container, allow access');
+                if (!app) {
+                    debug('no app found for this container, allow access');
+                    return res.end();
+                }
 
                 apps.hasAccessTo(app, userObject, function (error, result) {
                     if (error) return next(new ldap.OperationsError(error.toString()));
