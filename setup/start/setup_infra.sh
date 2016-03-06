@@ -63,8 +63,8 @@ readonly MYSQL_ROOT_PASSWORD='${mysql_addon_root_password}'
 readonly MYSQL_ROOT_HOST='${docker0_ip}'
 EOF
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
-    -m 100m \
-    --memory-swap 200m \
+    -m 256m \
+    --memory-swap 512m \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
     -v "${DATA_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:ro" \
