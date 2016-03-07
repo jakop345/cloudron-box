@@ -98,3 +98,12 @@ CREATE TABLE IF NOT EXISTS appAddonConfigs(
     value VARCHAR(512) NOT NULL,
     FOREIGN KEY(appId) REFERENCES apps(id));
 
+CREATE TABLE IF NOT EXISTS backups(
+    filename VARCHAR(128) NOT NULL, /* s3 url */
+    creationTime TIMESTAMP,
+    version VARCHAR(128) NOT NULL, /* app version or box version */
+    type VARCHAR(16) NOT NULL, /* 'box' or 'app' */
+    dependsOn VARCHAR(4096), /* comma separate list of objects this backup depends on */
+    state VARCHAR(16) NOT NULL,
+
+    PRIMARY KEY (filename));
