@@ -6,7 +6,7 @@ exports = module.exports = {
     getAllPaged: getAllPaged,
 
     getBackupUrl: getBackupUrl,
-    getAppBackupConfigUrl: getAppBackupConfigUrl,
+    getAppBackupUrl: getAppBackupUrl,
     getRestoreUrl: getRestoreUrl,
 
     copyLastBackup: copyLastBackup
@@ -68,16 +68,10 @@ function getAllPaged(page, perPage, callback) {
     });
 }
 
-function getBackupUrl(app, callback) {
-    assert(!app || typeof app === 'object');
+function getBackupUrl(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var filename = '';
-    if (app) {
-        filename = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, (new Date()).toISOString(), app.manifest.version);
-    } else {
-        filename = util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version());
-    }
+    var filename = util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version());
 
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
@@ -99,27 +93,35 @@ function getBackupUrl(app, callback) {
     });
 }
 
-function getAppBackupConfigUrl(app, callback) {
+function getAppBackupUrl(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var filename = util.format('appbackup_%s_%s-v%s.json', app.id, (new Date()).toISOString(), app.manifest.version);
-
+    var timestamp = (new Date()).toISOString();
+    var configFilename = util.format('appbackup_%s_%s-v%s.json', app.id, timestamp, app.manifest.version),
+        dataFilename = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, timestamp, app.manifest.version);
+ 
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getSignedUploadUrl(backupConfig, filename, function (error, result) {
+        api(backupConfig.provider).getSignedUploadUrl(backupConfig, configFilename, function (error, configResult) {
             if (error) return callback(error);
 
-            var obj = {
-                id: filename,
-                url: result.url,
-                sessionToken: result.sessionToken
-            };
+            api(backupConfig.provider).getSignedUploadUrl(backupConfig, dataFilename, function (error, dataResult) {
+                if (error) return callback(error);
 
-            debug('getAppBackupConfigUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+                var obj = {
+                    id: dataFilename,
+                    url: dataResult.url,
+                    configUrl: configResult.url,
+                    sessionToken: dataResult.sessionToken, // this token can be used for both config and data upload
+                    backupKey: backupConfig.key // only data is encrypted
+                };
 
-            callback(null, obj);
+                debug('getAppBackupUrl: %j', obj);
+
+                callback(null, obj);
+            });
         });
     });
 }

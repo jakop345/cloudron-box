@@ -644,7 +644,7 @@ function ensureBackup(callback) {
 function backupBoxWithAppBackupIds(appBackupIds, callback) {
     assert(util.isArray(appBackupIds));
 
-    backups.getBackupUrl(null /* app */, function (error, result) {
+    backups.getBackupUrl(function (error, result) {
         if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error.message));
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 

@@ -879,26 +879,21 @@ function createNewBackup(app, addonsToBackup, callback) {
     assert(!addonsToBackup || typeof addonsToBackup, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    backups.getBackupUrl(app, function (error, backupArchive) {
+    backups.getAppBackupUrl(app, function (error, result) {
         if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        backups.getAppBackupConfigUrl(app, function (error, backupConfig) {
-            if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
+        debugApp(app, 'backupApp: backup url:%s backup config url:%s', result.url, result.configUrl);
+
+        async.series([
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
+            addons.backupAddons.bind(null, app, addonsToBackup),
+            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.configUrl, result.backupKey, result.sessionToken ]),
+            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
+        ], function (error) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            debugApp(app, 'backupApp: backup url:%s backup config url:%s', backupArchive.url, backupConfig.url);
-
-            async.series([
-                ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-                addons.backupAddons.bind(null, app, addonsToBackup),
-                shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, backupArchive.url, backupConfig.url, backupArchive.backupKey, backupArchive.sessionToken ]),
-                ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
-            ], function (error) {
-                if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-                callback(null, backupArchive.id);
-            });
+            callback(null, result.id);
         });
     });
 }
