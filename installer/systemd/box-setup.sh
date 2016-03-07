@@ -61,6 +61,6 @@ umount "${USER_DATA_DIR}" || true
 # Do not preallocate (non-sparse). Doing so overallocates for data too much in advance and causes problems when using many apps with smaller data
 # fallocate -l "${home_data_size}m" "${USER_DATA_FILE}" # does not overwrite existing data
 truncate -s "${home_data_size}m" "${USER_DATA_FILE}" # this will shrink it if the file had existed. this is useful when running this script on a live system
-mount "${USER_DATA_FILE}"
+mount -t btrfs -o loop,nosuid "${USER_DATA_FILE}" ${USER_DATA_DIR}
 btrfs filesystem resize max "${USER_DATA_DIR}"
 
