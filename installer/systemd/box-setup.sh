@@ -57,7 +57,7 @@ fi
 echo "Resizing data volume"
 home_data_size=$((disk_size - system_size - swap_size - backup_swap_size - ext4_reserved))
 echo "Resizing up btrfs user data to size ${home_data_size}M"
-umount "${USER_DATA_DIR}"
+umount "${USER_DATA_DIR}" || true
 # Do not preallocate (non-sparse). Doing so overallocates for data too much in advance and causes problems when using many apps with smaller data
 # fallocate -l "${home_data_size}m" "${USER_DATA_FILE}" # does not overwrite existing data
 truncate -s "${home_data_size}m" "${USER_DATA_FILE}" # this will shrink it if the file had existed. this is useful when running this script on a live system
