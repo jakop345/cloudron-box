@@ -130,7 +130,7 @@ WantedBy=multi-user.target
 EOF
 
 echo "=== Setup btrfs data ==="
-fallocate -l "8192m" "${USER_DATA_FILE}" # 8gb start (this will get resized dynamically by box-setup.service)
+truncate -s "8192m" "${USER_DATA_FILE}" # 8gb start (this will get resized dynamically by box-setup.service)
 mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
 echo "${USER_DATA_FILE} ${USER_DATA_DIR} btrfs loop,nosuid 0 0" >> /etc/fstab
 mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
