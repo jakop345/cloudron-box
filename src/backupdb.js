@@ -14,6 +14,7 @@ exports = module.exports = {
     getPaged: getPaged,
     get: get,
     del: del,
+    getByAppIdPaged: getByAppIdPaged,
 
     _clear: clear,
 
