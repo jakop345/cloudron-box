@@ -17,6 +17,7 @@ var acme = require('./cert/acme.js'),
     safe = require('safetydance'),
     settings = require('./settings.js'),
     sysinfo = require('./sysinfo.js'),
+    tld = require('tldjs'),
     user = require('./user.js'),
     util = require('util'),
     waitForDns = require('./waitfordns.js'),
@@ -88,7 +89,8 @@ function installAdminCertificate(callback) {
         sysinfo.getIp(function (error, ip) {
             if (error) return callback(error);
 
-            waitForDns(config.adminFqdn(), ip, config.fqdn(), function (error) {
+            var zoneName = tld.getDomain(config.fqdn());
+            waitForDns(config.adminFqdn(), ip, zoneName, function (error) {
                 if (error) return callback(error); // this cannot happen because we retry forever
 
                 ensureCertificate(config.adminFqdn(), function (error, certFilePath, keyFilePath) {

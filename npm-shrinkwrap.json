@@ -2471,6 +2471,11 @@
       "from": "https://registry.npmjs.org/tail-stream/-/tail-stream-0.2.1.tgz",
       "resolved": "https://registry.npmjs.org/tail-stream/-/tail-stream-0.2.1.tgz"
     },
+    "tldjs": {
+      "version": "1.6.2",
+      "from": "tldjs@*",
+      "resolved": "https://registry.npmjs.org/tldjs/-/tldjs-1.6.2.tgz"
+    },
     "underscore": {
       "version": "1.8.3",
       "from": "underscore@>=1.7.0 <2.0.0",
