@@ -13,6 +13,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    backupdb = require('./backupdb.js'),
     caas = require('./storage/caas.js'),
     config = require('./config.js'),
     debug = require('debug')('box:backups'),
@@ -68,10 +69,13 @@ function getAllPaged(page, perPage, callback) {
     });
 }
 
-function getBackupUrl(callback) {
+function getBackupUrl(appBackupIds, callback) {
+    assert(util.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
-    var filename = util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version());
+    var now = new Date();
+    var filebase = util.format('backup_%s-v%s', now.toISOString(), config.version());
+    var filename = filebase + '.tar.gz';
 
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
@@ -88,7 +92,11 @@ function getBackupUrl(callback) {
 
             debug('getBackupUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
 
-            callback(null, obj);
+            backupdb.add({ filename: filebase, creationTime: now, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
+                if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+                callback(null, obj);
+            });
         });
     });
 }
@@ -97,9 +105,9 @@ function getAppBackupUrl(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var timestamp = (new Date()).toISOString();
-    var configFilename = util.format('appbackup_%s_%s-v%s.json', app.id, timestamp, app.manifest.version),
-        dataFilename = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, timestamp, app.manifest.version);
+    var now = new Date();
+    var filebase = util.format('appbackup_%s_%s-v%s', app.id, now.toISOString(), app.manifest.version);
+    var configFilename = filebase + '.json', dataFilename = filebase + '.tar.gz';
  
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
@@ -120,7 +128,11 @@ function getAppBackupUrl(app, callback) {
 
                 debug('getAppBackupUrl: %j', obj);
 
-                callback(null, obj);
+                backupdb.add({ filename: filebase, creationTime: now, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+                    if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+                    callback(null, obj);
+                });
             });
         });
     });
