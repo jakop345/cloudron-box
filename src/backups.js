@@ -3,7 +3,8 @@
 exports = module.exports = {
     BackupsError: BackupsError,
 
-    getAllPaged: getAllPaged,
+    getPaged: getPaged,
+    getByAppIdPaged: getByAppIdPaged,
 
     getBackupUrl: getBackupUrl,
     getAppBackupUrl: getAppBackupUrl,
@@ -53,19 +54,28 @@ function api(provider) {
     }
 }
 
-function getAllPaged(page, perPage, callback) {
-    assert.strictEqual(typeof page, 'number');
-    assert.strictEqual(typeof perPage, 'number');
+function getPaged(page, perPage, callback) {
+    assert(typeof page === 'number' && page > 0);
+    assert(typeof perPage === 'number' && perPage > 0);
     assert.strictEqual(typeof callback, 'function');
 
-    settings.getBackupConfig(function (error, backupConfig) {
+    backupdb.getPaged(page, perPage, function (error, results) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getAllPaged(backupConfig, page, perPage, function (error, backups) {
-            if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
+        callback(null, results);
+    });
+}
 
-            return callback(null, backups); // [ { creationTime, restoreKey } ] sorted by time (latest first
-        });
+function getByAppIdPaged(page, perPage, appId, callback) {
+    assert(typeof page === 'number' && page > 0);
+    assert(typeof perPage === 'number' && perPage > 0);
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    backupdb.getByAppIdPaged(page, perPage, appId, function (error, results) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        callback(null, results);
     });
 }
 

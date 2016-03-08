@@ -11,12 +11,17 @@ var backups = require('../backups.js'),
     BackupsError = require('../backups.js').BackupsError,
     cloudron = require('../cloudron.js'),
     CloudronError = require('../cloudron.js').CloudronError,
-    debug = require('debug')('box:routes/backups'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
 function get(req, res, next) {
-    backups.getAllPaged(1, 5, function (error, result) {
+    var page = typeof req.query.page !== 'undefined' ? parseInt(req.query.page) : 1;
+    if (!page || page < 0) return next(new HttpError(400, 'page query param has to be a postive number'));
+
+    var perPage = typeof req.query.per_page !== 'undefined'? parseInt(req.query.per_page) : 25;
+    if (!perPage || perPage < 0) return next(new HttpError(400, 'per_page query param has to be a postive number'));
+
+    backups.getPaged(page, perPage, function (error, result) {
         if (error && error.reason === BackupsError.EXTERNAL_ERROR) return next(new HttpError(503, error.message));
         if (error) return next(new HttpError(500, error));
 
