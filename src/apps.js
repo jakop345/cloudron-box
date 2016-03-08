@@ -981,7 +981,10 @@ function restoreApp(app, addonsToRestore, backupId, callback) {
     });
 }
 
-function listBackups(appId, callback) {
+function listBackups(page, perPage, appId, callback) {
+    assert(typeof page === 'number' && page > 0);
+    assert(typeof perPage === 'number' && perPage > 0);
+
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -989,22 +992,10 @@ function listBackups(appId, callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
         if (!exists) return callback(new AppsError(AppsError.NOT_FOUND));
 
-        // TODO pagination is not implemented in the backend yet
-        backups.getAllPaged(0, 1000, function (error, result) {
+        backups.getByAppIdPaged(page, perPage, appId, function (error, results) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            var appBackups = [];
-
-            result.forEach(function (backup) {
-                appBackups = appBackups.concat(backup.dependsOn.filter(function (d) {
-                    return d.indexOf('appbackup_' + appId) === 0;
-                }));
-            });
-
-            // alphabetic should be sufficient
-            appBackups.sort();
-
-            callback(null, appBackups);
+            callback(null, results);
         });
     });
 }

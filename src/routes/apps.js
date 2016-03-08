@@ -381,7 +381,13 @@ function exec(req, res, next) {
 function listBackups(req, res, next) {
     assert.strictEqual(typeof req.params.id, 'string');
 
-    apps.listBackups(req.params.id, function (error, result) {
+    var page = typeof req.query.page !== 'undefined' ? parseInt(req.query.page) : 1;
+    if (!page || page < 0) return next(new HttpError(400, 'page query param has to be a postive number'));
+
+    var perPage = typeof req.query.per_page !== 'undefined'? parseInt(req.query.per_page) : 25;
+    if (!perPage || perPage < 0) return next(new HttpError(400, 'per_page query param has to be a postive number'));
+
+    apps.listBackups(page, perPage, req.params.id, function (error, result) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error) return next(new HttpError(500, error));
 
