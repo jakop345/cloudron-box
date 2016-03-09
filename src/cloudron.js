@@ -626,7 +626,7 @@ function backup(callback) {
 function ensureBackup(callback) {
     callback = callback || NOOP_CALLBACK;
 
-    backups.getAllPaged(1, 1, function (error, backups) {
+    backups.getPaged(1, 1, function (error, backups) {
         if (error) {
             debug('Unable to list backups', error);
             return callback(error); // no point trying to backup if appstore is down
