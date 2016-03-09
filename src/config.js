@@ -33,6 +33,7 @@ exports = module.exports = {
     adminFqdn: adminFqdn,
     appFqdn: appFqdn,
     zoneName: zoneName,
+    adminEmail: adminEmail,
 
     isDev: isDev,
 
@@ -146,6 +147,10 @@ function get(key) {
     assert.strictEqual(typeof key, 'string');
 
     return safe.query(data, key);
+}
+
+function adminEmail() {
+    return '"Cloudron" ' + get('adminEmail');
 }
 
 function apiServerOrigin() {
