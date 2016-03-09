@@ -296,6 +296,14 @@ function setGroups(userId, groupIds, callback) {
         if (error && error.reason === GroupError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, 'One or more groups not found'));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
+        if (groupIds.some(function (g) { return g === groups.ADMIN_GROUP_ID; })) {
+            getUser(userId, function (error, result) {
+                if (error) return console.error('Failed to send admin change mail.', error);
+
+                mailer.adminChanged(result, true);
+            });
+        }
+
         callback();
     });
 }
