@@ -712,9 +712,10 @@ function backupBoxAndApps(callback) {
 
             backupIds = backupIds.filter(function (id) { return id !== null; }); // remove apps in bad state that were never backed up
 
-            backupBoxWithAppBackupIds(backupIds, function (error, restoreKey) {
+            backupBoxWithAppBackupIds(backupIds, function (error, filename) {
                 progress.set(progress.BACKUP, 100, error ? error.message : '');
-                callback(error, restoreKey);
+
+                callback(error, filename);
             });
         });
     });
