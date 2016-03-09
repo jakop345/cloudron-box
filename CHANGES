@@ -424,3 +424,9 @@
 - Admin flag is handled outside of groups
 - User interface fixes for groups
 - Allow to set access restrictions on app installation
+
+[0.10.0]
+- Upgrade to docker 1.10.2
+- Fix MySQL addon to handle heavier loads
+- Allow listing and download of backups (using the CLI tool)
+
