@@ -72,35 +72,6 @@ describe('Backups API', function () {
     before(setup);
     after(cleanup);
 
-    describe('get', function () {
-        it('cannot get backups with appstore superagent failing', function (done) {
-            var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=BACKUP_TOKEN').reply(401, {});
-
-            superagent.get(SERVER_URL + '/api/v1/backups')
-                   .query({ access_token: token })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(503);
-                expect(req.isDone()).to.be.ok();
-                done();
-            });
-        });
-
-        it('can get backups', function (done) {
-            var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=BACKUP_TOKEN').reply(200, { backups: ['foo', 'bar']});
-
-            superagent.get(SERVER_URL + '/api/v1/backups')
-                   .query({ access_token: token })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(200);
-                expect(req.isDone()).to.be.ok();
-                expect(res.body.backups).to.be.an(Array);
-                expect(res.body.backups[0]).to.eql('foo');
-                expect(res.body.backups[1]).to.eql('bar');
-                done();
-            });
-        });
-    });
-
     describe('create', function () {
         it('fails due to mising token', function (done) {
             superagent.post(SERVER_URL + '/api/v1/backups')
