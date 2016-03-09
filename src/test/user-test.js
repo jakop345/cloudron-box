@@ -376,7 +376,7 @@ describe('User', function () {
         });
     });
 
-    xdescribe('admin change triggers mail', function () {
+    describe('admin change triggers mail', function () {
         before(createOwner);
         after(cleanupUsers);
 
@@ -401,7 +401,7 @@ describe('User', function () {
             });
         });
 
-        it('succeeds to remove admin flag of first user', function (done) {
+        xit('succeeds to remove admin flag of first user', function (done) {
             groups.setGroups(USERNAME, [], function (error) {
                 expect(error).to.eql(null);
                 checkMails(1, done);
