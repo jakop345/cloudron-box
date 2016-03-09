@@ -4,7 +4,8 @@
 
 exports = module.exports = {
     get: get,
-    create: create
+    create: create,
+    download: download
 };
 
 var backups = require('../backups.js'),
@@ -39,3 +40,14 @@ function create(req, res, next) {
         next(new HttpSuccess(202, {}));
     });
 }
+
+function download(req, res, next) {
+    assert.strictEqual(typeof req.params.backupId, 'string');
+
+    backups.getRestoreUrl(req.params.backupId, function (error, result) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, result));
+    });
+}
+
