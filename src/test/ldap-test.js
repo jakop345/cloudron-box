@@ -119,7 +119,9 @@ function setup(done) {
 }
 
 function cleanup(done) {
-    database._clear(done);
+    dockerProxy.close(function () {
+        database._clear(done);
+    });
 }
 
 describe('Ldap', function () {
