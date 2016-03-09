@@ -8,7 +8,8 @@ exports = module.exports = {
     download: download
 };
 
-var backups = require('../backups.js'),
+var assert = require('assert'),
+    backups = require('../backups.js'),
     BackupsError = require('../backups.js').BackupsError,
     cloudron = require('../cloudron.js'),
     CloudronError = require('../cloudron.js').CloudronError,
