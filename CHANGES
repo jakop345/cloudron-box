@@ -429,4 +429,5 @@
 - Upgrade to docker 1.10.2
 - Fix MySQL addon to handle heavier loads
 - Allow listing and download of backups (using the CLI tool)
+- Ubuntu security updates till 8th March 2016 (http://www.ubuntu.com/usn)
 
