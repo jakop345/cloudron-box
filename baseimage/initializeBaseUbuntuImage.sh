@@ -49,7 +49,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 echo "=== Upgrade ==="
 apt-get update
-apt-get upgrade -y
+apt-get dist-upgrade -y
 apt-get install -y curl
 
 # Setup firewall before everything. docker creates it's own chain and the -X below will remove it
