@@ -355,7 +355,7 @@ Acme.prototype.downloadCertificate = function (domain, certUrl, callback) {
         var execSync = safe.child_process.execSync;
 
         safe.fs.writeFileSync(path.join(outdir, domain + '.der'), certificateDer);
-        debug('downloadCertificate: cert der file saved');
+        debug('downloadCertificate: cert der file for %s saved', domain);
 
         var certificatePem = execSync('openssl x509 -inform DER -outform PEM', { input: certificateDer }); // this is really just base64 encoding with header
         if (!certificatePem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
@@ -364,7 +364,7 @@ Acme.prototype.downloadCertificate = function (domain, certUrl, callback) {
         var fullChainPem = Buffer.concat([certificatePem, that.chainPem]);
         if (!safe.fs.writeFileSync(certificateFile, fullChainPem)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
-        debug('downloadCertificate: cert file saved at %s', certificateFile);
+        debug('downloadCertificate: cert file for %s saved at %s', domain, certificateFile);
 
         callback();
     });
