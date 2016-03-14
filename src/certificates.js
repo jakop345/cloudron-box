@@ -139,6 +139,7 @@ function autoRenew(callback) {
 
             api.getCertificate(domain, apiOptions, function (error) {
                 if (error) debug('autoRenew: could not renew cert for %s', domain, error);
+                else debug('autoRenew: certificate for %s renewed', domain);
 
                 iteratorCallback(); // move on to next cert
             });
