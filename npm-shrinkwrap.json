@@ -2291,9 +2291,9 @@
       "resolved": "https://registry.npmjs.org/proxy-middleware/-/proxy-middleware-0.13.1.tgz"
     },
     "safetydance": {
-      "version": "0.1.0",
-      "from": "safetydance@>=0.1.0 <0.2.0",
-      "resolved": "https://registry.npmjs.org/safetydance/-/safetydance-0.1.0.tgz"
+      "version": "0.1.1",
+      "from": "safetydance@0.1.1",
+      "resolved": "https://registry.npmjs.org/safetydance/-/safetydance-0.1.1.tgz"
     },
     "semver": {
       "version": "4.3.6",
