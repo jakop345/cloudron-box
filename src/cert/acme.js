@@ -415,7 +415,9 @@ Acme.prototype.getCertificate = function (domain, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var outdir = paths.APP_CERTS_DIR;
-    var certUrl = safe.fs.readFileSync(path.join(outdir, domain + '.url'), 'utf8');
+    // ignore renewal url for now since LE does not seem to support it
+    // https://github.com/ericchiang/letsencrypt/blob/1edc428eec60a418dcc4045a2350fe9a9ad74b71/certificate.go#L52
+    var certUrl = null; // safe.fs.readFileSync(path.join(outdir, domain + '.url'), 'utf8');
     var certificateGetter;
 
     if (certUrl) {
