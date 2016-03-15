@@ -107,9 +107,11 @@ function installAdminCertificate(callback) {
 }
 
 function needsRenewalSync(certFilePath) {
-    var result = safe.child_process.execSync('openssl x509 -checkend %s -in %s', 60 * 60 * 24 * 30, certFilePath);
+    var result = safe.child_process.spawnSync('/usr/bin/openssl', [ 'x509', '-checkend', new String(60 * 60 * 24 * 30), '-in', certFilePath ]);
 
-    return result === null; // command errored
+    debug('needsRenewalSync: %s %s %s', certFilePath, result.stdout.toString('utf8'), result.status);
+
+    return result.status === 1; // 1 - expired 0 - not expired
 }
 
 function autoRenew(callback) {
