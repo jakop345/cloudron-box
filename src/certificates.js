@@ -3,6 +3,7 @@
 'use strict';
 
 var acme = require('./cert/acme.js'),
+    apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
     caas = require('./cert/caas.js'),
@@ -118,32 +119,49 @@ function autoRenew(callback) {
     debug('autoRenew: Checking certificates for renewal');
     callback = callback || NOOP_CALLBACK;
 
-    var filenames = safe.fs.readdirSync(paths.APP_CERTS_DIR);
-    if (!filenames) {
-        debug('autoRenew: Error getting filenames: %s', safe.error.message);
-        return;
-    }
-
-    var certs = filenames.filter(function (f) {
-        return f.match(/\.cert$/) !== null && needsRenewalSync(path.join(paths.APP_CERTS_DIR, f));
-    });
-
-    debug('autoRenew: %j needs to be renewed', certs);
-
-    getApi(function (error, api, apiOptions) {
+    apps.getAll(function (error, allApps) {
         if (error) return callback(error);
 
-        async.eachSeries(certs, function iterator(cert, iteratorCallback) {
-            var domain = cert.match(/^(.*)\.cert$/)[1];
-            if (domain === 'host') return iteratorCallback(); // cannot renew fallback cert
+        var expiringApps = [ ];
+        for (var i = 0; i < allApps.length; i++) {
+            var appDomain = config.appFqdn(allApps[i].location);
+            var certFile = path.join(paths.APP_CERTS_DIR, appDomain + '.cert');
+            if (!safe.fs.existsSync(certFile)) {
+                debug('autoRenew: no existing certificate for %s. skipping', appDomain);
+                continue;
+            }
 
-            debug('autoRenew: renewing cert for %s with options %j', domain, apiOptions);
+            if (!needsRenewalSync(certFile)) {
+                debug('autoRenew: %s does not need renewal', appDomain);
+                continue;
+            }
 
-            api.getCertificate(domain, apiOptions, function (error) {
-                if (error) debug('autoRenew: could not renew cert for %s', domain, error);
-                else debug('autoRenew: certificate for %s renewed', domain);
+            expiringApps.push(allApps[i]);
+        }
 
-                iteratorCallback(); // move on to next cert
+        debug('autoRenew: %j needs to be renewed', expiringApps.map(function (a) { return config.appFqdn(a.location); }));
+
+        getApi(function (error, api, apiOptions) {
+            if (error) return callback(error);
+
+            async.eachSeries(expiringApps, function iterator(app, iteratorCallback) {
+                var domain = config.appFqdn(app.location);
+                debug('autoRenew: renewing cert for %s with options %j', domain, apiOptions);
+
+                api.getCertificate(domain, apiOptions, function (error) {
+                    if (!error) {
+                        debug('autoRenew: certificate for %s renewed', domain);
+                        return iteratorCallback();
+                    }
+
+                    debug('autoRenew: could not renew cert for %s because %s. using fallback certs', domain, error);
+
+                    nginx.configureApp(app, 'cert/host.cert', 'cert/host.key', function (ignoredError) {
+                        if (ignoredError) debug('autoRenew: error reconfiguring app', ignoredError);
+
+                        iteratorCallback(); // move to next app
+                    });
+                });
             });
         });
     });
