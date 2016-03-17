@@ -101,12 +101,11 @@ function configureNginx(app, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var vhost = config.appFqdn(app.location);
-    var oauthProxy = apps.requiresOAuthProxy(app);
 
     certificates.ensureCertificate(vhost, function (error, certFilePath, keyFilePath) {
         if (error) return callback(error);
 
-        nginx.configureApp(app, oauthProxy, certFilePath, keyFilePath, callback);
+        nginx.configureApp(app, certFilePath, keyFilePath, callback);
     });
 }
 
@@ -163,7 +162,7 @@ function allocateOAuthProxyCredentials(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!apps.requiresOAuthProxy(app)) return callback(null);
+    if (!nginx.requiresOAuthProxy(app)) return callback(null);
 
     var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);

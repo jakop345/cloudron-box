@@ -13,6 +13,7 @@ var assert = require('assert'),
     shell = require('./shell.js');
 
 exports = module.exports = {
+    requiresOAuthProxy: requiresOAuthProxy,
     configureAdmin: configureAdmin,
     configureApp: configureApp,
     unconfigureApp: unconfigureApp,
@@ -21,6 +22,19 @@ exports = module.exports = {
 
 var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
+
+function requiresOAuthProxy(app) {
+    assert.strictEqual(typeof app, 'object');
+
+    var tmp = app.accessRestriction;
+
+    // if no accessRestriction set, or the app uses one of the auth modules, we do not need the oauth proxy
+    if (tmp === null) return false;
+    if (app.manifest.addons['ldap'] || app.manifest.addons['oauth'] || app.manifest.addons['simpleauth']) return false;
+
+    // check if any restrictions are set
+    return !!((tmp.users && tmp.users.length) || (tmp.groups && tmp.groups.length));
+}
 
 function configureAdmin(certFilePath, keyFilePath, callback) {
     assert.strictEqual(typeof certFilePath, 'string');
@@ -43,14 +57,14 @@ function configureAdmin(certFilePath, keyFilePath, callback) {
     reload(callback);
 }
 
-function configureApp(app, oauthProxy, certFilePath, keyFilePath, callback) {
+function configureApp(app, certFilePath, keyFilePath, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof oauthProxy, 'boolean');
     assert.strictEqual(typeof certFilePath, 'string');
     assert.strictEqual(typeof keyFilePath, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var sourceDir = path.resolve(__dirname, '..');
+    var oauthProxy = requiresOAuthProxy(app);
     var endpoint = oauthProxy ? 'oauthproxy' : 'app';
     var vhost = config.appFqdn(app.location);
 
