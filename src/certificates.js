@@ -31,7 +31,8 @@ exports = module.exports = {
     setAdminCertificate: setAdminCertificate,
     CertificatesError: CertificatesError,
     validateCertificate: validateCertificate,
-    ensureCertificate: ensureCertificate
+    ensureCertificate: ensureCertificate,
+    fallbackExpiredCertsJob: fallbackExpiredCertsJob
 };
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
@@ -152,19 +153,54 @@ function autoRenew(callback) {
                 debug('autoRenew: renewing cert for %s with options %j', domain, apiOptions);
 
                 api.getCertificate(domain, apiOptions, function (error) {
-                    if (!error) {
+                    if (error) {
+                        debug('autoRenew: could not renew cert for %s because %s. using fallback certs', domain, error);
+                    } else {
                         debug('autoRenew: certificate for %s renewed', domain);
-                        return iteratorCallback();
                     }
 
-                    debug('autoRenew: could not renew cert for %s because %s. using fallback certs', domain, error);
-
-                    nginx.configureApp(app, 'cert/host.cert', 'cert/host.key', function (ignoredError) {
-                        if (ignoredError) debug('autoRenew: error reconfiguring app', ignoredError);
-
-                        iteratorCallback(); // move to next app
-                    });
+                    iteratorCallback(); // move to next app
                 });
+            });
+        });
+    });
+}
+
+// switch certs to fallback to keep nginx happy
+function fallbackExpiredCertsJob(callback) {
+    callback = callback || NOOP_CALLBACK;
+    debug('fallbackExpiredCerts: Checking certificates for renewal');
+
+    apps.getAll(function (error, allApps) {
+        if (error) return callback(error);
+
+        var expiringApps = [ ];
+        for (var i = 0; i < allApps.length; i++) {
+            var appDomain = config.appFqdn(allApps[i].location);
+            var certFile = path.join(paths.APP_CERTS_DIR, appDomain + '.cert');
+            if (!safe.fs.existsSync(certFile)) {
+                debug('fallbackExpiredCerts: no existing certificate for %s. skipping', appDomain);
+                continue;
+            }
+
+            if (!isExpiringSync(1, certFile)) { // expiring in the next hour
+                debug('fallbackExpiredCerts: %s has expired. will switch certs', appDomain);
+                continue;
+            }
+
+            expiringApps.push(allApps[i]);
+        }
+
+        debug('fallbackExpiredCerts: %j needs to be switched', expiringApps.map(function (a) { return config.appFqdn(a.location); }));
+
+        async.eachSeries(expiringApps, function iterator(app, iteratorCallback) {
+            var domain = config.appFqdn(app.location);
+            debug('fallbackExpiredCerts: replacing cert for %s', domain);
+
+            nginx.configureApp(app, 'cert/host.cert', 'cert/host.key', function (ignoredError) {
+                if (ignoredError) debug('fallbackExpiredCerts: error reconfiguring app', ignoredError);
+
+                iteratorCallback(); // move to next app
             });
         });
     });
