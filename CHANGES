@@ -431,3 +431,6 @@
 - Allow listing and download of backups (using the CLI tool)
 - Ubuntu security updates till 8th March 2016 (http://www.ubuntu.com/usn)
 
+[0.10.1]
+- Fix Let's Encrypt certificate renewal
+
