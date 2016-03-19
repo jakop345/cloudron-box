@@ -169,9 +169,9 @@ function autoRenew(callback) {
 }
 
 // switch certs to fallback to keep nginx happy
-function fallbackExpiredCerts(callback) {
+function fallbackExpiredCertificates(callback) {
     callback = callback || NOOP_CALLBACK;
-    debug('fallbackExpiredCerts: Checking certificates for renewal');
+    debug('fallbackExpiredCertificates: Checking for expired certs');
 
     apps.getAll(function (error, allApps) {
         if (error) return callback(error);
@@ -183,26 +183,26 @@ function fallbackExpiredCerts(callback) {
             var appDomain = config.appFqdn(allApps[i].location);
             var certFile = path.join(paths.APP_CERTS_DIR, appDomain + '.cert');
             if (!safe.fs.existsSync(certFile)) {
-                debug('fallbackExpiredCerts: no existing certificate for %s. skipping', appDomain);
+                debug('fallbackExpiredCertificates: no existing certificate for %s. skipping', appDomain);
                 continue;
             }
 
             if (!isExpiringSync(1, certFile)) { // expiring in the next hour
-                debug('fallbackExpiredCerts: %s has expired. will switch certs', appDomain);
+                debug('fallbackExpiredCertificates: %s has expired. will switch certs', appDomain);
                 continue;
             }
 
             expiringApps.push(allApps[i]);
         }
 
-        debug('fallbackExpiredCerts: %j needs to be switched', expiringApps.map(function (a) { return config.appFqdn(a.location); }));
+        debug('fallbackExpiredCertificates: %j needs to be switched', expiringApps.map(function (a) { return config.appFqdn(a.location); }));
 
         async.eachSeries(expiringApps, function iterator(app, iteratorCallback) {
             var domain = config.appFqdn(app.location);
-            debug('fallbackExpiredCerts: replacing cert for %s', domain);
+            debug('fallbackExpiredCertificates: replacing cert for %s', domain);
 
             nginx.configureApp(app, 'cert/host.cert', 'cert/host.key', function (ignoredError) {
-                if (ignoredError) debug('fallbackExpiredCerts: error reconfiguring app', ignoredError);
+                if (ignoredError) debug('fallbackExpiredCertificates: error reconfiguring app', ignoredError);
 
                 iteratorCallback(); // move to next app
             });
