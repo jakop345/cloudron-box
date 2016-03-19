@@ -1,5 +1,5 @@
 [Unit]
-Description=Cloudron Smart Cloud
+Description=Cloudron Smartserver
 Documentation=https://cloudron.io/documentation.html
 StopWhenUnneeded=true
 Requires=box.service
