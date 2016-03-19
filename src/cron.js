@@ -130,7 +130,7 @@ function recreateJobs(unusedTimeZone, callback) {
         if (gFallbackExpiredCertsJob) gFallbackExpiredCertsJob.stop();
         gFallbackExpiredCertsJob = new CronJob({
             cronTime: '00 */30 * * * *', // every 30 minutes
-            onTick: certificates.fallbackExpiredCertsJob,
+            onTick: certificates.fallbackExpiredCerts,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });

@@ -32,7 +32,7 @@ exports = module.exports = {
     CertificatesError: CertificatesError,
     validateCertificate: validateCertificate,
     ensureCertificate: ensureCertificate,
-    fallbackExpiredCertsJob: fallbackExpiredCertsJob
+    fallbackExpiredCerts: fallbackExpiredCerts
 };
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
@@ -169,7 +169,7 @@ function autoRenew(callback) {
 }
 
 // switch certs to fallback to keep nginx happy
-function fallbackExpiredCertsJob(callback) {
+function fallbackExpiredCerts(callback) {
     callback = callback || NOOP_CALLBACK;
     debug('fallbackExpiredCerts: Checking certificates for renewal');
 
