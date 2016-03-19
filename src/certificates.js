@@ -188,7 +188,7 @@ function fallbackExpiredCertificates(callback) {
             }
 
             if (!isExpiringSync(1, certFile)) { // expiring in the next hour
-                debug('fallbackExpiredCertificates: %s has expired. will switch certs', appDomain);
+                debug('fallbackExpiredCertificates: %s does not need to be switched', appDomain);
                 continue;
             }
 
