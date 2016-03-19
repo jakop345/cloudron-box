@@ -333,7 +333,7 @@ Acme.prototype.createKeyAndCsr = function (domain, callback) {
 
     var csrDer = execSync(util.format('openssl req -new -key %s -outform DER -subj /CN=%s', privateKeyFile, domain));
     if (!csrDer) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
-    if (!safe.fs.writeFileSync(csrFile, csrFile)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+    if (!safe.fs.writeFileSync(csrFile, csrDer)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
     debug('createKeyAndCsr: csr file (DER) saved at %s', csrFile);
 
