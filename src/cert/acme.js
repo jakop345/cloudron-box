@@ -304,7 +304,7 @@ Acme.prototype.signCertificate = function (domain, csrDer, callback) {
 
         if (!certUrl) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Missing location in downloadCertificate'));
 
-        safe.fs.writeFileSync(path.join(outdir, domain + '.url'), certUrl, 'utf8'); // for renewal
+        safe.fs.writeFileSync(path.join(outdir, domain + '.url'), certUrl, 'utf8'); // maybe use for renewal
 
         return callback(null, result.headers.location);
     });
@@ -315,6 +315,13 @@ Acme.prototype.createKeyAndCsr = function (domain, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var outdir = paths.APP_CERTS_DIR;
+    var csrFile = path.join(outdir, domain + '.csr');
+
+    if (safe.fs.existsSync(csrFile)) {
+        debug('createKeyAndCsr: reuse the csr for renewal');
+        return callback(null, safe.fs.readFileSync(csrFile));
+    }
+
     var execSync = safe.child_process.execSync;
 
     var privateKeyFile = path.join(outdir, domain + '.key');
@@ -326,7 +333,6 @@ Acme.prototype.createKeyAndCsr = function (domain, callback) {
 
     var csrDer = execSync(util.format('openssl req -new -key %s -outform DER -subj /CN=%s', privateKeyFile, domain));
     if (!csrDer) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
-    var csrFile = path.join(outdir, domain + '.csr');
     if (!safe.fs.writeFileSync(csrFile, csrFile)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
     debug('createKeyAndCsr: csr file (DER) saved at %s', csrFile);
@@ -414,23 +420,11 @@ Acme.prototype.getCertificate = function (domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var outdir = paths.APP_CERTS_DIR;
-    // ignore renewal url for now since LE does not seem to support it
-    // https://github.com/ericchiang/letsencrypt/blob/1edc428eec60a418dcc4045a2350fe9a9ad74b71/certificate.go#L52
-    var certUrl = null; // safe.fs.readFileSync(path.join(outdir, domain + '.url'), 'utf8');
-    var certificateGetter;
-
-    if (certUrl) {
-        debug('getCertificate: renewing existing cert for %s from %s', domain, certUrl);
-        certificateGetter = this.downloadCertificate.bind(this, domain, certUrl);
-    } else {
-        debug('getCertificate: start acme flow for %s from %s', domain, this.caOrigin);
-        certificateGetter = this.acmeFlow.bind(this, domain);
-    }
-
-    certificateGetter(function (error) {
+    debug('getCertificate: start acme flow for %s from %s', domain, this.caOrigin);
+    this.acmeFlow(domain, function (error) {
         if (error) return callback(error);
 
+        var outdir = paths.APP_CERTS_DIR;
         callback(null, path.join(outdir, domain + '.cert'), path.join(outdir, domain + '.key'));
     });
 };
