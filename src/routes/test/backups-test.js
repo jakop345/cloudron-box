@@ -24,6 +24,8 @@ var token = null;
 
 var server;
 function setup(done) {
+    config.setVersion('1.2.3');
+
     async.series([
         server.start.bind(server),
 
