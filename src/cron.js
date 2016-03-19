@@ -26,7 +26,6 @@ var gAutoupdaterJob = null,
     gDockerVolumeCleanerJob = null,
     gSchedulerSyncJob = null,
     gCertificateRenewJob = null,
-    gFallbackExpiredCertsJob = null,
     gCheckDiskSpaceJob = null;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
@@ -121,16 +120,8 @@ function recreateJobs(unusedTimeZone, callback) {
 
         if (gCertificateRenewJob) gCertificateRenewJob.stop();
         gCertificateRenewJob = new CronJob({
-            cronTime: '00 00 */12 * * *', // every 12 hours
+            cronTime: '00 00 */1 * * *', // every hour
             onTick: certificates.autoRenew,
-            start: true,
-            timeZone: allSettings[settings.TIME_ZONE_KEY]
-        });
-
-        if (gFallbackExpiredCertsJob) gFallbackExpiredCertsJob.stop();
-        gFallbackExpiredCertsJob = new CronJob({
-            cronTime: config.TEST ? '00 */1 * * * *' : '00 */30 * * * *', // every minute
-            onTick: certificates.fallbackExpiredCertificates,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
@@ -209,9 +200,6 @@ function uninitialize(callback) {
 
     if (gCertificateRenewJob) gCertificateRenewJob.stop();
     gCertificateRenewJob = null;
-
-    if (gFallbackExpiredCertsJob) gFallbackExpiredCertsJob.stop();
-    gFallbackExpiredCertsJob = null;
 
     callback();
 }

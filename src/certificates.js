@@ -29,8 +29,7 @@ exports = module.exports = {
     setAdminCertificate: setAdminCertificate,
     CertificatesError: CertificatesError,
     validateCertificate: validateCertificate,
-    ensureCertificate: ensureCertificate,
-    fallbackExpiredCertificates: fallbackExpiredCertificates
+    ensureCertificate: ensureCertificate
 };
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
@@ -129,7 +128,7 @@ function autoRenew(callback) {
     apps.getAll(function (error, allApps) {
         if (error) return callback(error);
 
-        allApps.push({ location: 'my', id: 'admin', accessRestriction: null }); // inject fake webadmin app
+        allApps.push({ location: 'my' }); // inject fake webadmin app
 
         var expiringApps = [ ];
         for (var i = 0; i < allApps.length; i++) {
@@ -149,51 +148,33 @@ function autoRenew(callback) {
                 debug('autoRenew: renewing cert for %s with options %j', domain, apiOptions);
 
                 api.getCertificate(domain, apiOptions, function (error) {
+                    var certFilePath, keyFilePath;
+
                     if (error) {
                         debug('autoRenew: could not renew cert for %s because %s. using fallback certs', domain, error);
+
+                        // check if we should fallback
+                        if (!isExpiringSync(appDomain, 1)) return iteratorCallback();
+                        certFilePath = 'cert/host.cert';
+                        keyFilePath = 'cert/host.key';
                     } else {
                         debug('autoRenew: certificate for %s renewed', domain);
+
+                        certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+                        keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
                     }
 
-                    iteratorCallback(); // move to next app
+                    // reconfigure and reload nginx. this is required for the case where we got a renewed cert after fallback
+                    var configureFunc = app.location === constants.ADMIN_LOCATION ?
+                        nginx.configureAdmin.bind(null, certFilePath, keyFilePath)
+                        : nginx.configureApp.bind(null, app, certFilePath, keyFilePath);
+
+                    configureFunc(function (ignoredError) {
+                        if (ignoredError) debug('fallbackExpiredCertificates: error reconfiguring app', ignoredError);
+
+                        iteratorCallback(); // move to next app
+                    });
                 });
-            });
-        });
-    });
-}
-
-// switch certs to fallback to keep nginx happy
-function fallbackExpiredCertificates(callback) {
-    callback = callback || NOOP_CALLBACK;
-    debug('fallbackExpiredCertificates: Checking for expired certs');
-
-    apps.getAll(function (error, allApps) {
-        if (error) return callback(error);
-
-        allApps.push({ location: constants.ADMIN_LOCATION }); // inject fake webadmin app
-
-        var expiringApps = [ ];
-        for (var i = 0; i < allApps.length; i++) {
-            var appDomain = config.appFqdn(allApps[i].location);
-            if (isExpiringSync(appDomain, 1)) { // expiring in next hour
-                expiringApps.push(allApps[i]);
-            }
-        }
-
-        debug('fallbackExpiredCertificates: %j needs to be switched', expiringApps.map(function (a) { return config.appFqdn(a.location); }));
-
-        async.eachSeries(expiringApps, function iterator(app, iteratorCallback) {
-            var domain = config.appFqdn(app.location);
-            debug('fallbackExpiredCertificates: replacing cert for %s', domain);
-
-            var configureFunc = app.location === constants.ADMIN_LOCATION
-                    ? nginx.configureAdmin.bind(null, 'cert/host.cert', 'cert/host.key')
-                    : nginx.configureApp.bind(null, app, 'cert/host.cert', 'cert/host.key');
-
-            configureFunc(function (ignoredError) {
-                if (ignoredError) debug('fallbackExpiredCertificates: error reconfiguring app', ignoredError);
-
-                iteratorCallback(); // move to next app
             });
         });
     });
