@@ -126,6 +126,8 @@ function autoRenew(callback) {
     apps.getAll(function (error, allApps) {
         if (error) return callback(error);
 
+        allApps.push({ location: 'my', id: 'admin', accessRestriction: null }); // inject fake webadmin app
+
         var expiringApps = [ ];
         for (var i = 0; i < allApps.length; i++) {
             var appDomain = config.appFqdn(allApps[i].location);
@@ -173,6 +175,8 @@ function fallbackExpiredCertsJob(callback) {
 
     apps.getAll(function (error, allApps) {
         if (error) return callback(error);
+
+        allApps.push({ location: 'my', id: 'admin', accessRestriction: null }); // inject fake webadmin app
 
         var expiringApps = [ ];
         for (var i = 0; i < allApps.length; i++) {
