@@ -107,10 +107,13 @@ function installAdminCertificate(callback) {
     });
 }
 
-function needsRenewalSync(certFilePath) {
-    var result = safe.child_process.spawnSync('/usr/bin/openssl', [ 'x509', '-checkend', new String(60 * 60 * 24 * 30), '-in', certFilePath ]);
+function isExpiringSync(hours, certFilePath) {
+    assert.strictEqual(typeof hours, 'number');
+    assert.strictEqual(typeof certFilePath, 'string');
 
-    debug('needsRenewalSync: %s %s %s', certFilePath, result.stdout.toString('utf8'), result.status);
+    var result = safe.child_process.spawnSync('/usr/bin/openssl', [ 'x509', '-checkend', new String(60 * 60 * hours), '-in', certFilePath ]);
+
+    debug('isExpiringSync: %s %s %s', certFilePath, result.stdout.toString('utf8'), result.status);
 
     return result.status === 1; // 1 - expired 0 - not expired
 }
@@ -131,7 +134,7 @@ function autoRenew(callback) {
                 continue;
             }
 
-            if (!needsRenewalSync(certFile)) {
+            if (!isExpiringSync(24 * 30, certFile)) {
                 debug('autoRenew: %s does not need renewal', appDomain);
                 continue;
             }
@@ -260,7 +263,7 @@ function ensureCertificate(domain, callback) {
     if (fs.existsSync(userCertFilePath) && fs.existsSync(userKeyFilePath)) {
         debug('ensureCertificate: %s. certificate already exists at %s', domain, userKeyFilePath);
 
-        if (!needsRenewalSync(userCertFilePath)) return callback(null, userCertFilePath, userKeyFilePath);
+        if (!isExpiringSync(userCertFilePath)) return callback(null, userCertFilePath, userKeyFilePath);
 
         debug('ensureCertificate: %s cert require renewal', domain);
     }
