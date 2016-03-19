@@ -32,7 +32,7 @@ exports = module.exports = {
     CertificatesError: CertificatesError,
     validateCertificate: validateCertificate,
     ensureCertificate: ensureCertificate,
-    fallbackExpiredCerts: fallbackExpiredCerts
+    fallbackExpiredCertificates: fallbackExpiredCertificates
 };
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
