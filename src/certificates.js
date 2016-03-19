@@ -1,5 +1,3 @@
-/* jslint node:true */
-
 'use strict';
 
 var acme = require('./cert/acme.js'),
@@ -115,9 +113,9 @@ function isExpiringSync(domain, hours) {
     var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
     var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
 
-    if (!fs.existsSync(userCertFilePath) || !fs.existsSync(userKeyFilePath)) return 2; // not found
+    if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) return 2; // not found
 
-    var result = safe.child_process.spawnSync('/usr/bin/openssl', [ 'x509', '-checkend', new String(60 * 60 * hours), '-in', certFilePath ]);
+    var result = safe.child_process.spawnSync('/usr/bin/openssl', [ 'x509', '-checkend', String(60 * 60 * hours), '-in', certFilePath ]);
 
     debug('isExpiringSync: %s %s %s', certFilePath, result.stdout.toString('utf8'), result.status);
 
@@ -289,7 +287,10 @@ function ensureCertificate(domain, callback) {
 
     // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
     if (!isExpiringSync(domain, 24 * 5)) {
-        return callback(null, userCertFilePath, userKeyFilePath);
+        var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+        var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
+
+        return callback(null, certFilePath, keyFilePath);
     }
 
     debug('ensureCertificate: %s cert require renewal', domain);
