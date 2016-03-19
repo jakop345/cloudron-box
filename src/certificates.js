@@ -108,9 +108,14 @@ function installAdminCertificate(callback) {
     });
 }
 
-function isExpiringSync(hours, certFilePath) {
+function isExpiringSync(domain, hours) {
+    assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof hours, 'number');
-    assert.strictEqual(typeof certFilePath, 'string');
+
+    var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+    var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
+
+    if (!fs.existsSync(userCertFilePath) || !fs.existsSync(userKeyFilePath)) return 2; // not found
 
     var result = safe.child_process.spawnSync('/usr/bin/openssl', [ 'x509', '-checkend', new String(60 * 60 * hours), '-in', certFilePath ]);
 
@@ -131,18 +136,9 @@ function autoRenew(callback) {
         var expiringApps = [ ];
         for (var i = 0; i < allApps.length; i++) {
             var appDomain = config.appFqdn(allApps[i].location);
-            var certFile = path.join(paths.APP_CERTS_DIR, appDomain + '.cert');
-            if (!safe.fs.existsSync(certFile)) {
-                debug('autoRenew: no existing certificate for %s. skipping', appDomain);
-                continue;
+            if (isExpiringSync(appDomain, 24 * 30)) { // expired or not found
+                expiringApps.push(allApps[i]);
             }
-
-            if (!isExpiringSync(24 * 30, certFile)) {
-                debug('autoRenew: %s does not need renewal', appDomain);
-                continue;
-            }
-
-            expiringApps.push(allApps[i]);
         }
 
         debug('autoRenew: %j needs to be renewed', expiringApps.map(function (a) { return config.appFqdn(a.location); }));
@@ -181,18 +177,9 @@ function fallbackExpiredCertificates(callback) {
         var expiringApps = [ ];
         for (var i = 0; i < allApps.length; i++) {
             var appDomain = config.appFqdn(allApps[i].location);
-            var certFile = path.join(paths.APP_CERTS_DIR, appDomain + '.cert');
-            if (!safe.fs.existsSync(certFile)) {
-                debug('fallbackExpiredCertificates: no existing certificate for %s. skipping', appDomain);
-                continue;
+            if (isExpiringSync(appDomain, 1)) { // expiring in next hour
+                expiringApps.push(allApps[i]);
             }
-
-            if (!isExpiringSync(1, certFile)) { // expiring in the next hour
-                debug('fallbackExpiredCertificates: %s does not need to be switched', appDomain);
-                continue;
-            }
-
-            expiringApps.push(allApps[i]);
         }
 
         debug('fallbackExpiredCertificates: %j needs to be switched', expiringApps.map(function (a) { return config.appFqdn(a.location); }));
@@ -297,17 +284,11 @@ function ensureCertificate(domain, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
-    var userCertFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
-    var userKeyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
-
-    if (fs.existsSync(userCertFilePath) && fs.existsSync(userKeyFilePath)) {
-        debug('ensureCertificate: %s. certificate already exists at %s', domain, userKeyFilePath);
-
-        // if expiring in coming 5 days, try to renew it now
-        if (!isExpiringSync(24 * 5, userCertFilePath)) return callback(null, userCertFilePath, userKeyFilePath);
-
-        debug('ensureCertificate: %s cert require renewal', domain);
+    if (!isExpiringSync(domain, 24 * 5)) {
+        return callback(null, userCertFilePath, userKeyFilePath);
     }
+
+    debug('ensureCertificate: %s cert require renewal', domain);
 
     getApi(function (error, api, apiOptions) {
         if (error) return callback(error);
