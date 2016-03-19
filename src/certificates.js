@@ -303,7 +303,8 @@ function ensureCertificate(domain, callback) {
     if (fs.existsSync(userCertFilePath) && fs.existsSync(userKeyFilePath)) {
         debug('ensureCertificate: %s. certificate already exists at %s', domain, userKeyFilePath);
 
-        if (!isExpiringSync(userCertFilePath)) return callback(null, userCertFilePath, userKeyFilePath);
+        // if expiring in coming 5 days, try to renew it now
+        if (!isExpiringSync(24 * 5, userCertFilePath)) return callback(null, userCertFilePath, userKeyFilePath);
 
         debug('ensureCertificate: %s cert require renewal', domain);
     }
