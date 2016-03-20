@@ -1,21 +1,15 @@
 <%if (format === 'text') { %>
 
 Dear Cloudron Team,
-
 <% if (message) { %>
+<%= domain %> was not renewed.
 
-    <%= domain %> was not renewed.
-    <%- message %>
-
+<%- message %>
 <% } else { %>
-
-    <%= domain %> was renewed.
-
+<%= domain %> was renewed.
 <% } %>
-
 Thank you,
 Your Cloudron
-
 <% } else { %>
 
 <% } %>
