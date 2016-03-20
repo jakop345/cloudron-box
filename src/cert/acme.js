@@ -316,24 +316,23 @@ Acme.prototype.createKeyAndCsr = function (domain, callback) {
 
     var outdir = paths.APP_CERTS_DIR;
     var csrFile = path.join(outdir, domain + '.csr');
-
-    if (safe.fs.existsSync(csrFile)) {
-        debug('createKeyAndCsr: reuse the csr for renewal');
-        return callback(null, safe.fs.readFileSync(csrFile));
-    }
-
+    var privateKeyFile = path.join(outdir, domain + '.key');
     var execSync = safe.child_process.execSync;
 
-    var privateKeyFile = path.join(outdir, domain + '.key');
-    var key = execSync('openssl genrsa 4096');
-    if (!key) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
-    if (!safe.fs.writeFileSync(privateKeyFile, key)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+    if (safe.fs.existsSync(privateKeyFile)) {
+        // in some old releases, csr file was corrupt. so always regenerate it
+        debug('createKeyAndCsr: reuse the key for renewal at %s', privateKeyFile);
+    } else {
+        var key = execSync('openssl genrsa 4096');
+        if (!key) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+        if (!safe.fs.writeFileSync(privateKeyFile, key)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
-    debug('createKeyAndCsr: key file saved at %s', privateKeyFile);
+        debug('createKeyAndCsr: key file saved at %s', privateKeyFile);
+    }
 
     var csrDer = execSync(util.format('openssl req -new -key %s -outform DER -subj /CN=%s', privateKeyFile, domain));
     if (!csrDer) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
-    if (!safe.fs.writeFileSync(csrFile, csrDer)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+    if (!safe.fs.writeFileSync(csrFile, csrDer)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error)); // bookkeeping
 
     debug('createKeyAndCsr: csr file (DER) saved at %s', csrFile);
 
