@@ -20,6 +20,8 @@ exports = module.exports = {
 
     outOfDiskSpace: outOfDiskSpace,
 
+    certificateRenewed: certificateRenewed,
+
     FEEDBACK_TYPE_FEEDBACK: 'feedback',
     FEEDBACK_TYPE_TICKET: 'ticket',
     FEEDBACK_TYPE_APP_MISSING: 'app_missing',
@@ -370,6 +372,20 @@ function outOfDiskSpace(message) {
         to: 'admin@cloudron.io',
         subject: util.format('[%s] Out of disk space alert', config.fqdn()),
         text: render('out_of_disk_space.ejs', { fqdn: config.fqdn(), message: message, format: 'text' })
+    };
+
+    sendMails([ mailOptions ]);
+}
+
+function certificateRenewed(domain, message) {
+    assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof message, 'string');
+
+    var mailOptions = {
+        from: config.adminEmail(),
+        to: 'admin@cloudron.io',
+        subject: util.format('[%s] Certificate was %s renewed', domain, message ? 'not' : ''),
+        text: render('certificate_renewed.ejs', { domain: domain, message: message, format: 'text' })
     };
 
     sendMails([ mailOptions ]);

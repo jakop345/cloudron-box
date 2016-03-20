@@ -10,6 +10,7 @@ var acme = require('./cert/acme.js'),
     constants = require('./constants.js'),
     debug = require('debug')('box:src/certificates'),
     fs = require('fs'),
+    mailer = require('./mailer.js'),
     nginx = require('./nginx.js'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -149,6 +150,8 @@ function autoRenew(callback) {
 
                 api.getCertificate(domain, apiOptions, function (error) {
                     var certFilePath, keyFilePath;
+
+                    mailer.certificateRenewed(domain, error ? error.message : '');
 
                     if (error) {
                         debug('autoRenew: could not renew cert for %s because %s', domain, error);
