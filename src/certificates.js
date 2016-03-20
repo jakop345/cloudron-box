@@ -153,8 +153,8 @@ function autoRenew(callback) {
                     if (error) {
                         debug('autoRenew: could not renew cert for %s because %s', domain, error);
 
-                        // check if we should fallback
-                        if (!isExpiringSync(appDomain, 1)) return iteratorCallback();
+                        // check if we should fallback if we expire in the coming day
+                        if (!isExpiringSync(appDomain, 24 * 1)) return iteratorCallback();
 
                         debug('autoRenew: using fallback certs for %s since it expires soon', domain, error);
 
