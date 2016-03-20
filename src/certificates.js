@@ -151,10 +151,13 @@ function autoRenew(callback) {
                     var certFilePath, keyFilePath;
 
                     if (error) {
-                        debug('autoRenew: could not renew cert for %s because %s. using fallback certs', domain, error);
+                        debug('autoRenew: could not renew cert for %s because %s', domain, error);
 
                         // check if we should fallback
                         if (!isExpiringSync(appDomain, 1)) return iteratorCallback();
+
+                        debug('autoRenew: using fallback certs for %s since it expires soon', domain, error);
+
                         certFilePath = 'cert/host.cert';
                         keyFilePath = 'cert/host.key';
                     } else {
