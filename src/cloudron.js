@@ -408,7 +408,6 @@ function addDnsRecords() {
     sysinfo.getIp(function (error, ip) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        var nakedDomainRecord = { subdomain: '', type: 'A', values: [ ip ] };
         var webadminRecord = { subdomain: 'my', type: 'A', values: [ ip ] };
         // t=s limits the domainkey to this domain and not it's subdomains
         var dkimRecord = { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', values: [ '"v=DKIM1; t=s; p=' + dkimKey + '"' ] };
@@ -420,6 +419,9 @@ function addDnsRecords() {
             records.push(webadminRecord);
             records.push(dkimRecord);
         } else {
+            // for custom domains, we show a nakeddomain.html page
+            var nakedDomainRecord = { subdomain: '', type: 'A', values: [ ip ] };
+
             records.push(nakedDomainRecord);
             records.push(webadminRecord);
             records.push(dkimRecord);
