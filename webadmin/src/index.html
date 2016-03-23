@@ -70,11 +70,11 @@
                 <div class="modal-body">
                     <div ng-hide="installedApps | readyToUpdate" class="text-danger">
                         <b>
-                            The below apps are blocking the update, because they are in a wrong state:
+                            The apps below are blocking the update, because they have pending actions:
                             <ul>
                                 <li ng-repeat="app in installedApps | inProgressApps">{{app.location}}</li>
                             </ul>
-                            Please wait for the apps actions to have finished.
+                            Please wait for the app actions to finish.
                         </b>
                         <br/>
                         <br/>
