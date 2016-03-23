@@ -106,14 +106,11 @@ function installAdminCertificate(callback) {
     });
 }
 
-function isExpiringSync(domain, hours) {
-    assert.strictEqual(typeof domain, 'string');
+function isExpiringSync(certFilePath, hours) {
+    assert.strictEqual(typeof certFilePath, 'string');
     assert.strictEqual(typeof hours, 'number');
 
-    var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
-    var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
-
-    if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) return 2; // not found
+    if (!fs.existsSync(certFilePath)) return 2; // not found
 
     var result = safe.child_process.spawnSync('/usr/bin/openssl', [ 'x509', '-checkend', String(60 * 60 * hours), '-in', certFilePath ]);
 
@@ -134,7 +131,15 @@ function autoRenew(callback) {
         var expiringApps = [ ];
         for (var i = 0; i < allApps.length; i++) {
             var appDomain = config.appFqdn(allApps[i].location);
-            if (isExpiringSync(appDomain, 24 * 30)) { // expired or not found
+            var certFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.cert');
+            var keyFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.key');
+
+            if (!safe.fs.existsSync(keyFilePath)) {
+                debug('autoRenew: no existing key file for %s. skipping', appDomain);
+                continue;
+            }
+
+            if (isExpiringSync(certFilePath, 24 * 30)) { // expired or not found
                 expiringApps.push(allApps[i]);
             }
         }
@@ -149,7 +154,8 @@ function autoRenew(callback) {
                 debug('autoRenew: renewing cert for %s with options %j', domain, apiOptions);
 
                 api.getCertificate(domain, apiOptions, function (error) {
-                    var certFilePath, keyFilePath;
+                    var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+                    var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
 
                     mailer.certificateRenewed(domain, error ? error.message : '');
 
@@ -157,7 +163,7 @@ function autoRenew(callback) {
                         debug('autoRenew: could not renew cert for %s because %s', domain, error);
 
                         // check if we should fallback if we expire in the coming day
-                        if (!isExpiringSync(appDomain, 24 * 1)) return iteratorCallback();
+                        if (!isExpiringSync(certFilePath, 24 * 1)) return iteratorCallback();
 
                         debug('autoRenew: using fallback certs for %s since it expires soon', domain, error);
 
@@ -165,9 +171,6 @@ function autoRenew(callback) {
                         keyFilePath = 'cert/host.key';
                     } else {
                         debug('autoRenew: certificate for %s renewed', domain);
-
-                        certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
-                        keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
                     }
 
                     // reconfigure and reload nginx. this is required for the case where we got a renewed cert after fallback
@@ -273,11 +276,13 @@ function ensureCertificate(domain, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
-    if (!isExpiringSync(domain, 24 * 5)) {
-        var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
-        var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
+    var userCertFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+    var userKeyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
 
-        return callback(null, certFilePath, keyFilePath);
+    if (fs.existsSync(userCertFilePath) && fs.existsSync(userKeyFilePath)) {
+        debug('ensureCertificate: %s. certificate already exists at %s', domain, userKeyFilePath);
+
+        if (!isExpiringSync(userCertFilePath, 24 * 1)) return callback(null, userCertFilePath, userKeyFilePath);
     }
 
     debug('ensureCertificate: %s cert require renewal', domain);
