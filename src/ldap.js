@@ -127,11 +127,15 @@ function start(callback) {
         debug('user bind: %s', req.dn.toString());
 
         // extract the common name which might have different attribute names
-        var commonName = req.dn.rdns[0][Object.keys(req.dn.rdns[0])[0]];
+        var attributeName = Object.keys(req.dn.rdns[0])[0];
+        var commonName = req.dn.rdns[0][attributeName];
         if (!commonName) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
+        // if mail is specified, enforce mail check, otherwise allow both
+        var api = (commonName.indexOf('@') === -1) && (attributeName !== 'mail')  ? user.verify : user.verifyWithEmail;
+
         // TODO this should be done after we verified the app has access to avoid leakage of user existence
-        user.verify(commonName, req.credentials || '', function (error, userObject) {
+        api(commonName, req.credentials || '', function (error, userObject) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
             if (error && error.reason === UserError.WRONG_PASSWORD) return next(new ldap.InvalidCredentialsError(req.dn.toString()));
             if (error) return next(new ldap.OperationsError(error));

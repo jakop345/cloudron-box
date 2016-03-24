@@ -156,6 +156,24 @@ describe('Ldap', function () {
             });
         });
 
+        it('succeeds with email and without accessRestriction', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            client.bind('cn=' + USER_0.email + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('fails with username for mail attribute and without accessRestriction', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            client.bind('mail=' + USER_0.username + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                expect(error).to.be.a(ldap.NoSuchObjectError);
+                done();
+            });
+        });
+
         it('fails with accessRestriction denied', function (done) {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
