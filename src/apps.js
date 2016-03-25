@@ -549,10 +549,21 @@ function update(appId, force, manifest, portBindings, icon, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
+        var appStoreId = app.appStoreId;
+
+        // prevent user from installing a app with different manifest id over an existing app
+        // this allows cloudron install -f --app <appid> for an app installed from the appStore
+        if (app.manifest.id !== manifest.id) {
+            if (!force) return callback(new AppsError(AppsError.BAD_FIELD, 'manifest id does not match. force to override'));
+            // clear appStoreId so that this app does not get updates anymore. this will mark is a dev app
+            appStoreId = '';
+        }
+
         // Ensure we update the memory limit in case the new app requires more memory as a minimum
         var memoryLimit = manifest.memoryLimit ? (app.memoryLimit < manifest.memoryLimit ? manifest.memoryLimit : app.memoryLimit) : app.memoryLimit;
 
         var values = {
+            appStoreId: appStoreId,
             manifest: manifest,
             portBindings: portBindings,
             memoryLimit: memoryLimit,
