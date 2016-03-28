@@ -434,3 +434,8 @@
 [0.10.1]
 - Fix Let's Encrypt certificate renewal
 
+[0.10.2]
+- Apps can now bind with username or email with LDAP
+- Disallow updating an app with mismatching manifest id
+- Use admin domain instead of naked domain in the SPF record
+
