@@ -372,16 +372,16 @@ function txtRecordsWithSpf(callback) {
         for (i = 0; i < txtRecords.length; i++) {
             if (txtRecords[i].indexOf('"v=spf1 ') !== 0) continue; // not SPF
 
-            validSpf = txtRecords[i].indexOf(' a:' + config.fqdn() + ' ') !== -1;
+            validSpf = txtRecords[i].indexOf(' a:' + config.adminFqdn() + ' ') !== -1;
             break;
         }
 
         if (validSpf) return callback(null, null);
 
         if (i == txtRecords.length) {
-            txtRecords[i] = '"v=spf1 a:' + config.fqdn() + ' ~all"';
+            txtRecords[i] = '"v=spf1 a:' + config.adminFqdn() + ' ~all"';
         } else {
-            txtRecords[i] = '"v=spf1 a:' + config.fqdn() + ' ' + txtRecords[i].slice('"v=spf1 '.length);
+            txtRecords[i] = '"v=spf1 a:' + config.adminFqdn() + ' ' + txtRecords[i].slice('"v=spf1 '.length);
         }
 
         return callback(null, txtRecords);
