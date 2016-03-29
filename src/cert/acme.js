@@ -344,9 +344,9 @@ Acme.prototype.downloadChain = function (linkHeader, callback) {
     var linkInfo = parseLinks(linkHeader);
     if (!linkInfo || !linkInfo.up) return new AcmeError(AcmeError.EXTERNAL_ERROR, 'Failed to parse link header when downloading certificate chain'); 
 
-    debug('downloadChain: downloading from %s', linkInfo.up);
+    debug('downloadChain: downloading from %s', this.caOrigin + linkInfo.up);
 
-    superagent.get(linkInfo.up).buffer().parse(function (res, done) {
+    superagent.get(this.caOrigin + linkInfo.up).buffer().parse(function (res, done) {
         var data = [ ];
         res.on('data', function(chunk) { data.push(chunk); });
         res.on('end', function () { res.text = Buffer.concat(data); done(); });
