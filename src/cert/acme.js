@@ -1,5 +1,3 @@
-/* jslint node:true */
-
 'use strict';
 
 var assert = require('assert'),
@@ -7,6 +5,7 @@ var assert = require('assert'),
     crypto = require('crypto'),
     debug = require('debug')('box:cert/acme'),
     fs = require('fs'),
+    parseLinks = require('parse-links'),
     path = require('path'),
     paths = require('../paths.js'),
     safe = require('safetydance'),
@@ -58,7 +57,6 @@ function Acme(options) {
     this.caOrigin = options.prod ? CA_PROD : CA_STAGING;
     this.accountKeyPem = null; // Buffer
     this.email = options.email;
-    this.chainPem = options.prod ? safe.fs.readFileSync(__dirname + '/lets-encrypt-x1-cross-signed.pem.txt') : new Buffer('');
 }
 
 Acme.prototype.getNonce = function (callback) {
@@ -339,6 +337,33 @@ Acme.prototype.createKeyAndCsr = function (domain, callback) {
     callback(null, csrDer);
 };
 
+// TODO: download the chain in a loop following 'up' header
+Acme.prototype.downloadChain = function (linkHeader, callback) {
+    if (!linkHeader) return new AcmeError(AcmeError.EXTERNAL_ERROR, 'Empty link header when downloading certificate chain');
+
+    var linkInfo = parseLinks(linkHeader);
+    if (!linkInfo || !linkInfo.up) return new AcmeError(AcmeError.EXTERNAL_ERROR, 'Failed to parse link header when downloading certificate chain'); 
+
+    debug('downloadChain: downloading from %s', linkInfo.up);
+
+    superagent.get(linkInfo.up).buffer().parse(function (res, done) {
+        var data = [ ];
+        res.on('data', function(chunk) { data.push(chunk); });
+        res.on('end', function () { res.text = Buffer.concat(data); done(); });
+    }).end(function (error, result) {
+        if (error && !error.response) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when downloading certificate'));
+        if (result.statusCode !== 200) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to get cert. Expecting 200, got %s %s', result.statusCode, result.text)));
+
+        var chainDer = result.text;
+        var execSync = safe.child_process.execSync;
+
+        var chainPem = execSync('openssl x509 -inform DER -outform PEM', { input: chainDer }); // this is really just base64 encoding with header
+        if (!chainPem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+
+        callback(null, chainPem);
+    });
+};
+
 Acme.prototype.downloadCertificate = function (domain, certUrl, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof certUrl, 'string');
@@ -365,13 +390,17 @@ Acme.prototype.downloadCertificate = function (domain, certUrl, callback) {
         var certificatePem = execSync('openssl x509 -inform DER -outform PEM', { input: certificateDer }); // this is really just base64 encoding with header
         if (!certificatePem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
-        var certificateFile = path.join(outdir, domain + '.cert');
-        var fullChainPem = Buffer.concat([certificatePem, that.chainPem]);
-        if (!safe.fs.writeFileSync(certificateFile, fullChainPem)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+        that.downloadChain(result.header['link'], function (error, chainPem) {
+            if (error) return callback(error);
 
-        debug('downloadCertificate: cert file for %s saved at %s', domain, certificateFile);
+            var certificateFile = path.join(outdir, domain + '.cert');
+            var fullChainPem = Buffer.concat([certificatePem, chainPem]);
+            if (!safe.fs.writeFileSync(certificateFile, fullChainPem)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
-        callback();
+            debug('downloadCertificate: cert file for %s saved at %s', domain, certificateFile);
+
+            callback();
+        });
     });
 };
 
