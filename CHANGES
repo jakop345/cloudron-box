@@ -438,4 +438,4 @@
 - Apps can now bind with username or email with LDAP
 - Disallow updating an app with mismatching manifest id
 - Use admin domain instead of naked domain in the SPF record
-
+- Download Lets Encrypt intermediate cert
