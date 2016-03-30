@@ -439,3 +439,7 @@
 - Disallow updating an app with mismatching manifest id
 - Use admin domain instead of naked domain in the SPF record
 - Download Lets Encrypt intermediate cert
+
+[0.11.0]
+- Store backups in the same region as the Cloudron
+
