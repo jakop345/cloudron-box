@@ -102,7 +102,7 @@ function getBackupUrl(appBackupIds, callback) {
 
             debug('getBackupUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
 
-            backupdb.add({ filename: filename, creationTime: now, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
+            backupdb.add({ filename: filename, creationTime: now, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds, config: backupConfig }, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                 callback(null, obj);
@@ -138,7 +138,7 @@ function getAppBackupUrl(app, callback) {
 
                 debug('getAppBackupUrl: %j', obj);
 
-                backupdb.add({ filename: dataFilename, creationTime: now, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+                backupdb.add({ filename: dataFilename, creationTime: now, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ], config: backupConfig }, function (error) {
                     if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                     callback(null, obj);
