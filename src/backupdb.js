@@ -91,7 +91,7 @@ function add(backup, callback) {
     var creationTime = backup.creationTime || new Date(); // allow tests to set the time
 
     database.query('INSERT INTO backups (filename, version, type, creationTime, state, dependsOn, configJson) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [ backup.filename, backup.version, backup.type, creationTime, exports.BACKUP_STATE_NORMAL, backup.dependsOn.join(','), JSON.stringify(backup.configJson) ],
+        [ backup.filename, backup.version, backup.type, creationTime, exports.BACKUP_STATE_NORMAL, backup.dependsOn.join(','), JSON.stringify(backup.config) ],
         function (error) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
