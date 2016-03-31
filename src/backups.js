@@ -164,19 +164,23 @@ function getRestoreUrl(backupId, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getSignedDownloadUrl(backupConfig, backupId, function (error, result) {
-            if (error) return callback(error);
+        backupdb.get(backupId, function (error, backupInfo) {
+            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-            var obj = {
-                id: backupId,
-                url: result.url,
-                sessionToken: result.sessionToken,
-                backupKey: backupConfig.key
-            };
+            api(backupInfo.provider).getSignedDownloadUrl(backupConfig, backupInfo, function (error, result) {
+                if (error) return callback(error);
 
-            debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+                var obj = {
+                    id: backupId,
+                    url: result.url,
+                    sessionToken: result.sessionToken,
+                    backupKey: backupInfo.key
+                };
 
-            callback(null, obj);
+                debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+
+                callback(null, obj);
+            });
         });
     });
 }

@@ -1,5 +1,3 @@
-/* jslint node:true */
-
 'use strict';
 
 exports = module.exports = {
@@ -87,9 +85,9 @@ function getSignedUploadUrl(backupConfig, filename, callback) {
     });
 }
 
-function getSignedDownloadUrl(backupConfig, filename, callback) {
+function getSignedDownloadUrl(backupConfig, info, callback) {
     assert.strictEqual(typeof backupConfig, 'object');
-    assert.strictEqual(typeof filename, 'string');
+    assert.strictEqual(typeof info, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     getBackupCredentials(backupConfig, function (error, credentials) {
@@ -98,8 +96,8 @@ function getSignedDownloadUrl(backupConfig, filename, callback) {
         var s3 = new AWS.S3(credentials);
 
         var params = {
-            Bucket: backupConfig.bucket,
-            Key: backupConfig.prefix + '/' + filename,
+            Bucket: info.bucket,
+            Key: info.prefix + '/' + info.filename,
             Expires: 60 * 30 /* 30 minutes */
         };
 
