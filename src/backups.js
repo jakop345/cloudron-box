@@ -164,17 +164,17 @@ function getRestoreUrl(backupId, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        backupdb.get(backupId, function (error, backupInfo) {
+        backupdb.get(backupId, function (error, result) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-            api(backupInfo.provider).getSignedDownloadUrl(backupConfig, backupInfo, function (error, result) {
+            api(result.config.provider).getSignedDownloadUrl(backupConfig, result.config, function (error, result) {
                 if (error) return callback(error);
 
                 var obj = {
                     id: backupId,
                     url: result.url,
                     sessionToken: result.sessionToken,
-                    backupKey: backupInfo.key
+                    backupKey: result.config.key
                 };
 
                 debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
