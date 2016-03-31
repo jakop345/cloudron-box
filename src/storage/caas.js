@@ -30,7 +30,7 @@ function getBackupCredentials(apiConfig, callback) {
             accessKeyId: result.body.credentials.AccessKeyId,
             secretAccessKey: result.body.credentials.SecretAccessKey,
             sessionToken: result.body.credentials.SessionToken,
-            region: 'us-east-1'
+            region: apiConfig.region || 'us-east-1'
         };
 
         if (apiConfig.endpoint) credentials.endpoint = new AWS.Endpoint(apiConfig.endpoint);
