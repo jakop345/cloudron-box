@@ -15,13 +15,13 @@ var assert = require('assert'),
     superagent = require('superagent'),
     util = require('util');
 
-function getBackupCredentials(backupConfig, callback) {
-    assert.strictEqual(typeof backupConfig, 'object');
+function getBackupCredentials(apiConfig, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
-    assert(backupConfig.token);
+    assert(apiConfig.token);
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/awscredentials';
-    superagent.post(url).query({ token: backupConfig.token }).end(function (error, result) {
+    superagent.post(url).query({ token: apiConfig.token }).end(function (error, result) {
         if (error && !error.response) return callback(error);
         if (result.statusCode !== 201) return callback(new Error(result.text));
         if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
@@ -33,20 +33,20 @@ function getBackupCredentials(backupConfig, callback) {
             region: 'us-east-1'
         };
 
-        if (backupConfig.endpoint) credentials.endpoint = new AWS.Endpoint(backupConfig.endpoint);
+        if (apiConfig.endpoint) credentials.endpoint = new AWS.Endpoint(apiConfig.endpoint);
 
         callback(null, credentials);
     });
 }
 
-function getAllPaged(backupConfig, page, perPage, callback) {
-    assert.strictEqual(typeof backupConfig, 'object');
+function getAllPaged(apiConfig, page, perPage, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof page, 'number');
     assert.strictEqual(typeof perPage, 'number');
     assert.strictEqual(typeof callback, 'function');
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
-    superagent.get(url).query({ token: backupConfig.token }).end(function (error, result) {
+    superagent.get(url).query({ token: apiConfig.token }).end(function (error, result) {
         if (error && !error.response) return callback(error);
         if (result.statusCode !== 200) return callback(new Error(result.text));
         if (!result.body || !util.isArray(result.body.backups)) return callback(new Error('Unexpected response'));
@@ -55,21 +55,21 @@ function getAllPaged(backupConfig, page, perPage, callback) {
     });
 }
 
-function getSignedUploadUrl(backupConfig, filename, callback) {
-    assert.strictEqual(typeof backupConfig, 'object');
+function getSignedUploadUrl(apiConfig, filename, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!backupConfig.bucket || !backupConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
+    if (!apiConfig.bucket || !apiConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
 
-    getBackupCredentials(backupConfig, function (error, credentials) {
+    getBackupCredentials(apiConfig, function (error, credentials) {
         if (error) return callback(error);
 
         var s3 = new AWS.S3(credentials);
 
         var params = {
-            Bucket: backupConfig.bucket,
-            Key: backupConfig.prefix + '/' + filename,
+            Bucket: apiConfig.bucket,
+            Key: apiConfig.prefix + '/' + filename,
             Expires: 60 * 30 /* 30 minutes */
         };
 
@@ -79,14 +79,14 @@ function getSignedUploadUrl(backupConfig, filename, callback) {
     });
 }
 
-function getSignedDownloadUrl(backupConfig, info, callback) {
-    assert.strictEqual(typeof backupConfig, 'object');
+function getSignedDownloadUrl(apiConfig, info, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof info, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     if (!info.bucket || !info.prefix) return new Error('Invalid configuration'); // prevent error in s3
 
-    getBackupCredentials(backupConfig, function (error, credentials) {
+    getBackupCredentials(apiConfig, function (error, credentials) {
         if (error) return callback(error);
 
         var s3 = new AWS.S3(credentials);
@@ -103,21 +103,21 @@ function getSignedDownloadUrl(backupConfig, info, callback) {
     });
 }
 
-function copyObject(backupConfig, from, to, callback) {
-    assert.strictEqual(typeof backupConfig, 'object');
+function copyObject(apiConfig, from, to, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof from, 'string');
     assert.strictEqual(typeof to, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!backupConfig.bucket || !backupConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
+    if (!apiConfig.bucket || !apiConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
 
-    getBackupCredentials(backupConfig, function (error, credentials) {
+    getBackupCredentials(apiConfig, function (error, credentials) {
         if (error) return callback(error);
 
         var params = {
-            Bucket: backupConfig.bucket, // target bucket
-            Key: backupConfig.prefix + '/' + to, // target file
-            CopySource: backupConfig.bucket + '/' + backupConfig.prefix + '/' + from, // source
+            Bucket: apiConfig.bucket, // target bucket
+            Key: apiConfig.prefix + '/' + to, // target file
+            CopySource: apiConfig.bucket + '/' + apiConfig.prefix + '/' + from, // source
         };
 
         var s3 = new AWS.S3(credentials);
