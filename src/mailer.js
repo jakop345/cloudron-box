@@ -110,10 +110,11 @@ function getTxtRecords(callback) {
     });
 }
 
+// keep this in sync with the cloudron.js dns changes
 function checkDns() {
     getTxtRecords(function (error, records) {
         if (error || !records) {
-            debug('checkDns: DNS error or no records looking up TXT records for %s %s', config.fqdn(), error, records);
+            debug('checkDns: DNS error or no records looking up TXT records for %s %s', config.adminFqdn(), error, records);
             gCheckDnsTimerId = setTimeout(checkDns, 60000);
             return;
         }
@@ -123,7 +124,7 @@ function checkDns() {
         for (var i = 0; i < records.length; i++) {
             if (records[i].indexOf('v=spf1 ') !== 0) continue; // not SPF
 
-            allowedToSendMail = records[i].indexOf('a:' + config.fqdn()) !== -1;
+            allowedToSendMail = records[i].indexOf('a:' + config.adminFqdn()) !== -1;
             break; // only one SPF record can exist (https://support.google.com/a/answer/4568483?hl=en)
         }
 

@@ -359,6 +359,7 @@ function readDkimPublicKeySync() {
     return publicKey;
 }
 
+// NOTE: if you change the SPF record here, be sure the wait check in mailer.js
 function txtRecordsWithSpf(callback) {
     assert.strictEqual(typeof callback, 'function');
 
