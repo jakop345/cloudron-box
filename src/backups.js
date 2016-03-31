@@ -168,7 +168,7 @@ function getRestoreUrl(backupId, callback) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
             var backupConfig = result.config;
-            api(backupConfig.provider).getSignedDownloadUrl(apiConfig, backupConfig, function (error, result) {
+            api(backupConfig.provider).getSignedDownloadUrl(apiConfig, backupConfig, backupId, function (error, result) {
                 if (error) return callback(error);
 
                 var obj = {

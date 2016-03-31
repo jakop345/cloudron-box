@@ -85,9 +85,10 @@ function getSignedUploadUrl(apiConfig, filename, callback) {
     });
 }
 
-function getSignedDownloadUrl(apiConfig, info, callback) {
+function getSignedDownloadUrl(apiConfig, info, filename, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof info, 'object');
+    assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     getBackupCredentials(apiConfig, function (error, credentials) {
@@ -97,7 +98,7 @@ function getSignedDownloadUrl(apiConfig, info, callback) {
 
         var params = {
             Bucket: info.bucket,
-            Key: info.prefix + '/' + info.filename,
+            Key: info.prefix + '/' + filename,
             Expires: 60 * 30 /* 30 minutes */
         };
 
