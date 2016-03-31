@@ -318,12 +318,20 @@ function passwordReset(req, res, next) {
     user.getByResetToken(req.body.resetToken, function (error, userObject) {
         if (error) return next(new HttpError(401, 'Invalid resetToken'));
 
-        // setPassword clears the resetToken
-        user.setPassword(userObject.id, req.body.password, function (error, result) {
-            if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(406, 'Password does not meet the requirements'));
+        // update in case they are sent
+        userObject.username = req.body.username || userObject.username;
+        userObject.displayName = req.body.displayName || userObject.displayName;
+
+        user.updateUser(userObject.id, userObject.username, userObject.email, userObject.displayName, function (error) {
             if (error) return next(new HttpError(500, error));
 
-            res.redirect(util.format('%s?accessToken=%s&expiresAt=%s', config.adminOrigin(), result.token, result.expiresAt));
+            // setPassword clears the resetToken
+            user.setPassword(userObject.id, req.body.password, function (error, result) {
+                if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(406, 'Password does not meet the requirements'));
+                if (error) return next(new HttpError(500, error));
+
+                res.redirect(util.format('%s?accessToken=%s&expiresAt=%s', config.adminOrigin(), result.token, result.expiresAt));
+            });
         });
     });
 }
