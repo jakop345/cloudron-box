@@ -441,7 +441,7 @@
 - Download Lets Encrypt intermediate cert
 
 [0.10.3]
-- Store the backup config for each backup. This will allow using multiple buckets/providers for backups simulataneously.
+- Store the backup config for each backup. This will allow using multiple buckets/providers for backups simultaneously.
 
 [0.11.0]
 - Store backups in the same region as the Cloudron
