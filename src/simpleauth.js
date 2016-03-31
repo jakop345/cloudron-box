@@ -99,7 +99,8 @@ function login(req, res, next) {
                 id: result.user.id,
                 username: result.user.username,
                 email: result.user.email,
-                admin: !!result.user.admin
+                admin: !!result.user.admin,
+                displayName: result.user.displayName
             }
         };
 
