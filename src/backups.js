@@ -20,7 +20,8 @@ var assert = require('assert'),
     debug = require('debug')('box:backups'),
     s3 = require('./storage/s3.js'),
     settings = require('./settings.js'),
-    util = require('util');
+    util = require('util'),
+    _ = require('underscore');
 
 function BackupsError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -66,6 +67,11 @@ function getPaged(page, perPage, callback) {
     });
 }
 
+// this should probably be provider specific
+function cleanBackupConfig(backupConfig) {
+    return _.pick(backupConfig, 'provider', 'key', 'bucket', 'prefix');
+}
+
 function getByAppIdPaged(page, perPage, appId, callback) {
     assert(typeof page === 'number' && page > 0);
     assert(typeof perPage === 'number' && perPage > 0);
@@ -102,7 +108,8 @@ function getBackupUrl(appBackupIds, callback) {
 
             debug('getBackupUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
 
-            backupdb.add({ filename: filename, creationTime: now, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds, config: backupConfig }, function (error) {
+            backupdb.add({ filename: filename, creationTime: now, version: config.version(), type: backupdb.BACKUP_TYPE_BOX,
+                           dependsOn: appBackupIds, config: cleanBackupConfig(backupConfig) }, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                 callback(null, obj);
@@ -138,7 +145,8 @@ function getAppBackupUrl(app, callback) {
 
                 debug('getAppBackupUrl: %j', obj);
 
-                backupdb.add({ filename: dataFilename, creationTime: now, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ], config: backupConfig }, function (error) {
+                backupdb.add({ filename: dataFilename, creationTime: now, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP,
+                               dependsOn: [ ], config: cleanBackupConfig(backupConfig) }, function (error) {
                     if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                     callback(null, obj);
