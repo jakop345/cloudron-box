@@ -66,8 +66,8 @@ function get(filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + BACKUPS_FIELDS + ' FROM backups WHERE filename = ? AND type = ? AND state = ? ORDER BY creationTime DESC',
-        [ filename, exports.BACKUP_TYPE_BOX, exports.BACKUP_STATE_NORMAL ], function (error, result) {
+    database.query('SELECT ' + BACKUPS_FIELDS + ' FROM backups WHERE filename = ? ORDER BY creationTime DESC',
+        [ filename ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
