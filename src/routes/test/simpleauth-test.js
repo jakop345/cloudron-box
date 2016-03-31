@@ -324,6 +324,38 @@ describe('SimpleAuth API', function () {
             });
         });
 
+        it('succeeds for allowed app with email', function (done) {
+            var body = {
+                clientId: CLIENT_2.id,
+                username: EMAIL,
+                password: PASSWORD
+            };
+
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            .send(body)
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.accessToken).to.be.a('string');
+                expect(result.body.user).to.be.an('object');
+                expect(result.body.user.id).to.be.a('string');
+                expect(result.body.user.username).to.be.a('string');
+                expect(result.body.user.email).to.be.a('string');
+                expect(result.body.user.displayName).to.be.a('string');
+                expect(result.body.user.admin).to.be.a('boolean');
+
+                superagent.get(SERVER_URL + '/api/v1/profile')
+                .query({ access_token: result.body.accessToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result.body).to.be.an('object');
+                    expect(result.body.username).to.eql(USERNAME);
+
+                    done();
+                });
+            });
+        });
+
         it('succeeds for app without accessRestriction', function (done) {
             var body = {
                 clientId: CLIENT_3.id,
