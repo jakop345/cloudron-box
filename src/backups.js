@@ -161,20 +161,21 @@ function getRestoreUrl(backupId, callback) {
     assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    settings.getBackupConfig(function (error, backupConfig) {
+    settings.getBackupConfig(function (error, apiConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
         backupdb.get(backupId, function (error, result) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-            api(result.config.provider).getSignedDownloadUrl(backupConfig, result.config, function (error, result) {
+            var backupConfig = result.config;
+            api(backupConfig.provider).getSignedDownloadUrl(apiConfig, backupConfig, function (error, result) {
                 if (error) return callback(error);
 
                 var obj = {
                     id: backupId,
                     url: result.url,
                     sessionToken: result.sessionToken,
-                    backupKey: result.config.key
+                    backupKey: backupConfig.key
                 };
 
                 debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
