@@ -309,6 +309,7 @@ describe('SimpleAuth API', function () {
                 expect(result.body.user.id).to.be.a('string');
                 expect(result.body.user.username).to.be.a('string');
                 expect(result.body.user.email).to.be.a('string');
+                expect(result.body.user.displayName).to.be.a('string');
                 expect(result.body.user.admin).to.be.a('boolean');
 
                 superagent.get(SERVER_URL + '/api/v1/profile')
@@ -340,6 +341,7 @@ describe('SimpleAuth API', function () {
                 expect(result.body.user.id).to.be.a('string');
                 expect(result.body.user.username).to.be.a('string');
                 expect(result.body.user.email).to.be.a('string');
+                expect(result.body.user.displayName).to.be.a('string');
                 expect(result.body.user.admin).to.be.a('boolean');
 
                 superagent.get(SERVER_URL + '/api/v1/profile')
@@ -371,6 +373,7 @@ describe('SimpleAuth API', function () {
                 expect(result.body.user.id).to.be.a('string');
                 expect(result.body.user.username).to.be.a('string');
                 expect(result.body.user.email).to.be.a('string');
+                expect(result.body.user.displayName).to.be.a('string');
                 expect(result.body.user.admin).to.be.a('boolean');
 
                 superagent.get(SERVER_URL + '/api/v1/profile')
