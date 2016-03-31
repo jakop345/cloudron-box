@@ -69,7 +69,7 @@ function getPaged(page, perPage, callback) {
 
 // this should probably be provider specific
 function cleanBackupConfig(backupConfig) {
-    return _.pick(backupConfig, 'provider', 'key', 'bucket', 'prefix');
+    return _.pick(backupConfig, 'provider', 'key', 'bucket', 'prefix', 'region');
 }
 
 function getByAppIdPaged(page, perPage, appId, callback) {
