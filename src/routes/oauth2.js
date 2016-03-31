@@ -309,6 +309,10 @@ function passwordReset(req, res, next) {
     if (typeof req.body.resetToken !== 'string') return next(new HttpError(400, 'Missing resetToken'));
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'Missing password'));
 
+    // optionally support settin the username and displayName
+    if ('username' in req.body && typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be a string'));
+    if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be a string'));
+
     debug('passwordReset: with token %s.', req.body.resetToken);
 
     user.getByResetToken(req.body.resetToken, function (error, userObject) {
