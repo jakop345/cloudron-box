@@ -268,8 +268,8 @@ function passwordSentSite(req, res) {
     renderTemplate(res, 'password_reset_sent', { adminOrigin: config.adminOrigin(), title: 'Cloudron Password Reset' });
 }
 
-// -> GET /api/v1/session/password/setup.html
-function passwordSetupSite(req, res, next) {
+// -> GET /api/v1/session/account/setup.html
+function accountSetupSite(req, res, next) {
     if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
 
     user.getByResetToken(req.query.reset_token, function (error, user) {
@@ -472,7 +472,7 @@ exports = module.exports = {
     passwordResetRequest: passwordResetRequest,
     passwordSentSite: passwordSentSite,
     passwordResetSite: passwordResetSite,
-    passwordSetupSite: passwordSetupSite,
+    accountSetupSite: accountSetupSite,
     passwordReset: passwordReset,
     authorization: authorization,
     token: token,

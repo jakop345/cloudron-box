@@ -126,9 +126,9 @@ function initializeExpressSync() {
     router.get ('/api/v1/session/password/resetRequest.html', csrf, routes.oauth2.passwordResetRequestSite);
     router.post('/api/v1/session/password/resetRequest', csrf, routes.oauth2.passwordResetRequest);
     router.get ('/api/v1/session/password/sent.html', routes.oauth2.passwordSentSite);
-    router.get ('/api/v1/session/password/setup.html', csrf, routes.oauth2.passwordSetupSite);
     router.get ('/api/v1/session/password/reset.html', csrf, routes.oauth2.passwordResetSite);
     router.post('/api/v1/session/password/reset', csrf, routes.oauth2.passwordReset);
+    router.get ('/api/v1/session/account/setup.html', csrf, routes.oauth2.accountSetupSite);
 
     // oauth2 routes
     router.get ('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);

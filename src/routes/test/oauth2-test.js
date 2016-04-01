@@ -1325,7 +1325,7 @@ describe('Password', function () {
         });
 
         it('setup fails due to missing reset_token', function (done) {
-            superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
+            superagent.get(SERVER_URL + '/api/v1/session/account/setup.html')
             .end(function (error, result) {
                 expect(result.statusCode).to.equal(400);
                 done();
@@ -1333,7 +1333,7 @@ describe('Password', function () {
         });
 
         it('setup fails due to invalid reset_token', function (done) {
-            superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
+            superagent.get(SERVER_URL + '/api/v1/session/account/setup.html')
             .query({ reset_token: hat(256) })
             .end(function (error, result) {
                 expect(result.statusCode).to.equal(401);
@@ -1342,7 +1342,7 @@ describe('Password', function () {
         });
 
         it('setup succeeds', function (done) {
-            superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
+            superagent.get(SERVER_URL + '/api/v1/session/account/setup.html')
             .query({ reset_token: USER_0.resetToken })
             .end(function (error, result) {
                 expect(result.statusCode).to.equal(200);

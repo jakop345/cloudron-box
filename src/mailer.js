@@ -236,7 +236,7 @@ function sendInvite(user, invitor) {
     var templateData = {
         user: user,
         webadminUrl: config.adminOrigin(),
-        setupLink: config.adminOrigin() + '/api/v1/session/password/setup.html?reset_token=' + user.resetToken,
+        setupLink: config.adminOrigin() + '/api/v1/session/account/setup.html?reset_token=' + user.resetToken,
         format: 'text',
         fqdn: config.fqdn(),
         invitor: invitor
@@ -263,7 +263,7 @@ function userAdded(user, inviteSent) {
 
         adminEmails = _.difference(adminEmails, [ user.email ]);
 
-        var inviteLink = inviteSent ? null : config.adminOrigin() + '/api/v1/session/password/setup.html?reset_token=' + user.resetToken;
+        var inviteLink = inviteSent ? null : config.adminOrigin() + '/api/v1/session/account/setup.html?reset_token=' + user.resetToken;
 
         var mailOptions = {
             from: config.adminEmail(),
