@@ -285,6 +285,37 @@ function accountSetupSite(req, res, next) {
     });
 }
 
+// -> POST /api/v1/session/account/setup
+function accountSetup(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (typeof req.body.resetToken !== 'string') return next(new HttpError(400, 'Missing resetToken'));
+    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'Missing password'));
+    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'Missing username'));
+    if (typeof req.body.displayName !== 'string') return next(new HttpError(400, 'Missing displayName'));
+
+    debug('acountSetup: with token %s.', req.body.resetToken);
+
+    user.getByResetToken(req.body.resetToken, function (error, userObject) {
+        if (error) return next(new HttpError(401, 'Invalid resetToken'));
+
+        userObject.username = req.body.username;
+        userObject.displayName = req.body.displayName;
+
+        user.updateUser(userObject.id, userObject.username, userObject.email, userObject.displayName, function (error) {
+            if (error) return next(new HttpError(500, error));
+
+            // setPassword clears the resetToken
+            user.setPassword(userObject.id, req.body.password, function (error, result) {
+                if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(406, 'Password does not meet the requirements'));
+                if (error) return next(new HttpError(500, error));
+
+                res.redirect(util.format('%s?accessToken=%s&expiresAt=%s', config.adminOrigin(), result.token, result.expiresAt));
+            });
+        });
+    });
+}
+
 // -> GET /api/v1/session/password/reset.html
 function passwordResetSite(req, res, next) {
     if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
@@ -309,29 +340,17 @@ function passwordReset(req, res, next) {
     if (typeof req.body.resetToken !== 'string') return next(new HttpError(400, 'Missing resetToken'));
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'Missing password'));
 
-    // optionally support settin the username and displayName
-    if ('username' in req.body && typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be a string'));
-    if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be a string'));
-
     debug('passwordReset: with token %s.', req.body.resetToken);
 
     user.getByResetToken(req.body.resetToken, function (error, userObject) {
         if (error) return next(new HttpError(401, 'Invalid resetToken'));
 
-        // update in case they are sent
-        userObject.username = req.body.username || userObject.username;
-        userObject.displayName = req.body.displayName || userObject.displayName;
-
-        user.updateUser(userObject.id, userObject.username, userObject.email, userObject.displayName, function (error) {
+        // setPassword clears the resetToken
+        user.setPassword(userObject.id, req.body.password, function (error, result) {
+            if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(406, 'Password does not meet the requirements'));
             if (error) return next(new HttpError(500, error));
 
-            // setPassword clears the resetToken
-            user.setPassword(userObject.id, req.body.password, function (error, result) {
-                if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(406, 'Password does not meet the requirements'));
-                if (error) return next(new HttpError(500, error));
-
-                res.redirect(util.format('%s?accessToken=%s&expiresAt=%s', config.adminOrigin(), result.token, result.expiresAt));
-            });
+            res.redirect(util.format('%s?accessToken=%s&expiresAt=%s', config.adminOrigin(), result.token, result.expiresAt));
         });
     });
 }
@@ -472,8 +491,9 @@ exports = module.exports = {
     passwordResetRequest: passwordResetRequest,
     passwordSentSite: passwordSentSite,
     passwordResetSite: passwordResetSite,
-    accountSetupSite: accountSetupSite,
     passwordReset: passwordReset,
+    accountSetupSite: accountSetupSite,
+    accountSetup: accountSetup,
     authorization: authorization,
     token: token,
     scope: scope,
