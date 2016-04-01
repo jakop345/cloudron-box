@@ -302,7 +302,7 @@ function accountSetup(req, res, next) {
         userObject.username = req.body.username;
         userObject.displayName = req.body.displayName;
 
-        user.updateUser(userObject.id, userObject.username, userObject.email, userObject.displayName, function (error) {
+        user.update(userObject.id, userObject.username, userObject.email, userObject.displayName, function (error) {
             if (error) return next(new HttpError(500, error));
 
             // setPassword clears the resetToken
