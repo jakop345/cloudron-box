@@ -37,7 +37,7 @@
 
                         <div class="form-group" ng-show="appInstall.app.manifest.singleUser">
                             <label class="control-label">User</label>
-                            <select class="form-control" ng-model="appInstall.accessRestrictionSingleUser" ng-options="user as user.username for user in users track by user.id" ng-required="appInstall.app.manifest.singleUser"></select>
+                            <select class="form-control" ng-model="appInstall.accessRestrictionSingleUser" ng-options="user as (user.username + ' ' + user.email) for user in users track by user.id" ng-required="appInstall.app.manifest.singleUser"></select>
                         </div>
                         <div class="form-group" ng-hide="appInstall.app.manifest.singleUser">
                             <label class="control-label">Access control</label>
