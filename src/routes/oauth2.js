@@ -275,7 +275,7 @@ function passwordSetupSite(req, res, next) {
     user.getByResetToken(req.query.reset_token, function (error, user) {
         if (error) return next(new HttpError(401, 'Invalid reset_token'));
 
-        renderTemplate(res, 'password_setup', {
+        renderTemplate(res, 'account_setup', {
             adminOrigin: config.adminOrigin(),
             user: user,
             csrf: req.csrfToken(),
