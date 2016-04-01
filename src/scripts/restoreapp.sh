@@ -23,7 +23,7 @@ readonly curl="curl --fail --connect-timeout 20 --retry 10 --retry-delay 2 --max
 app_id="$1"
 restore_url="$2"
 restore_key="$3"
-session_token="$4"
+session_token="$4" # unused since it seems to be part of the url query param in v4 signature
 
 echo "Downloading backup: ${restore_url} and key: ${restore_key}"
 
@@ -32,11 +32,6 @@ for try in `seq 1 5`; do
     error_log=$(mktemp)
 
     headers=("") # empty element required (http://stackoverflow.com/questions/7577052/bash-empty-array-expansion-with-set-u)
-
-    # federated tokens in CaaS case need session token
-    if [[ ! -z "${session_token}" ]]; then
-        headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
-    fi
 
     if $curl -L "${headers[@]}" "${restore_url}" \
         | openssl aes-256-cbc -d -pass "pass:${restore_key}" \

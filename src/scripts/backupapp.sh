@@ -23,7 +23,7 @@ app_id="$1"
 backup_url="$2"
 backup_config_url="$3"
 backup_key="$4"
-session_token="$5"
+session_token="$5" # unused since it seems to be part of the url query param in v4 signature
 readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
 readonly app_data_dir="${DATA_DIR}/${app_id}"
 readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
@@ -35,11 +35,6 @@ for try in `seq 1 5`; do
     error_log=$(mktemp)
 
     headers=("-H" "Content-Type:")
-
-    # federated tokens in CaaS case need session token
-    if [ ! -z "$session_token" ]; then
-        headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
-    fi
 
     if tar -cvzf - -C "${app_data_snapshot}" . \
            | openssl aes-256-cbc -e -pass "pass:${backup_key}" \
@@ -59,11 +54,6 @@ for try in `seq 1 5`; do
     error_log=$(mktemp)
 
     headers=("-H" "Content-Type:")
-
-    # federated tokens in CaaS case need session token
-    if [ ! -z "$session_token" ]; then
-        headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
-    fi
 
     if cat "${app_data_snapshot}/config.json" \
            | curl --fail -X PUT ${headers[@]} --data @- "${backup_config_url}" 2>"${error_log}"; then
