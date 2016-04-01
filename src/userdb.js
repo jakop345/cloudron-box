@@ -41,8 +41,12 @@ function getByUsername(username, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    // currently username is also our id
-    get(username, callback);
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE username = ?', [ username ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null, result[0]);
+    });
 }
 
 function getByEmail(email, callback) {
