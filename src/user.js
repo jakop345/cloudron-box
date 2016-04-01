@@ -34,6 +34,7 @@ var assert = require('assert'),
     tokendb = require('./tokendb.js'),
     userdb = require('./userdb.js'),
     util = require('util'),
+    uuid = require('node-uuid'),
     validatePassword = require('./password.js').validate,
     validator = require('validator'),
     _ = require('underscore');
@@ -75,6 +76,9 @@ UserError.BAD_TOKEN = 'Bad token';
 
 function validateUsername(username) {
     assert.strictEqual(typeof username, 'string');
+
+    // allow empty usernames
+    if (username === '') return null;
 
     if (username.length <= 2) return new UserError(UserError.BAD_USERNAME, 'Username must be atleast 3 chars');
     if (username.length > 256) return new UserError(UserError.BAD_USERNAME, 'Username too long');
@@ -139,7 +143,7 @@ function createUser(username, password, email, displayName, options, callback) {
 
             var now = (new Date()).toISOString();
             var user = {
-                id: username,
+                id: 'uid-' + uuid.v4(),
                 username: username,
                 email: email,
                 password: new Buffer(derivedKey, 'binary').toString('hex'),
