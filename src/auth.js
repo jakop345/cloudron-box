@@ -28,11 +28,11 @@ function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     passport.serializeUser(function (user, callback) {
-        callback(null, user.username);
+        callback(null, user.id);
     });
 
-    passport.deserializeUser(function(username, callback) {
-        userdb.get(username, function (error, result) {
+    passport.deserializeUser(function(userId, callback) {
+        userdb.get(userId, function (error, result) {
             if (error) return callback(error);
 
             var md5 = crypto.createHash('md5').update(result.email.toLowerCase()).digest('hex');
