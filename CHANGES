@@ -444,6 +444,9 @@
 - Store the backup config for each backup. This will allow using multiple buckets/providers for backups simultaneously.
 - Fix SPF record check
 
+[0.10.4]
+- Fix restore for droplets in EU region
+
 [0.11.0]
 - Store backups in the same region as the Cloudron
 
