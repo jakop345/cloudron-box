@@ -172,7 +172,7 @@ function verify(username, password, callback) {
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.get(username, function (error, user) {
+    userdb.getByUsername(username, function (error, user) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 

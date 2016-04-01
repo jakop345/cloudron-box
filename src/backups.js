@@ -117,7 +117,7 @@ function getAppBackupUrl(app, callback) {
     var now = new Date();
     var filebase = util.format('appbackup_%s_%s-v%s', app.id, now.toISOString(), app.manifest.version);
     var configFilename = filebase + '.json', dataFilename = filebase + '.tar.gz';
- 
+
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
