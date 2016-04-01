@@ -52,15 +52,15 @@ function profile(req, res, next) {
 function createUser(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
-    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
     if (typeof req.body.invite !== 'boolean') return next(new HttpError(400, 'invite must be boolean'));
+    if ('username' in req.body && typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be string'));
 
-    var username = req.body.username;
     var password = generatePassword();
     var email = req.body.email;
     var sendInvite = req.body.invite;
+    var username = req.body.username || '';
     var displayName = req.body.displayName || '';
 
     user.create(username, password, email, displayName, { invitor: req.user, sendInvite: sendInvite }, function (error, user) {
@@ -74,6 +74,7 @@ function createUser(req, res, next) {
         var userInfo = {
             id: user.id,
             username: user.username,
+            displayName: user.displayName,
             email: user.email,
             admin: user.admin,
             resetToken: user.resetToken
