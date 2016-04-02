@@ -268,8 +268,8 @@ function userAdded(user, inviteSent) {
         var mailOptions = {
             from: config.adminEmail(),
             to: adminEmails.join(', '),
-            subject: util.format('%s added in Cloudron %s', user.username, config.fqdn()),
-            text: render('user_added.ejs', { fqdn: config.fqdn(), username: user.username, email: user.email, inviteLink: inviteLink, format: 'text' }),
+            subject: util.format('%s added in Cloudron %s', user.email, config.fqdn()),
+            text: render('user_added.ejs', { fqdn: config.fqdn(), user: user, inviteLink: inviteLink, format: 'text' }),
         };
 
         enqueue(mailOptions);

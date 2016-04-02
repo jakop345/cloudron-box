@@ -1,13 +1,11 @@
 <%if (format === 'text') { %>
 
-Dear <%= user.username %>,
+Dear <%= user.email %>,
 
 Welcome to our Cloudron <%= fqdn %>!
 
 The Cloudron is our own Smart Server. You can read more about it
 at https://www.cloudron.io.
-
-           You username is '<%= user.username %>'
 
 To get started, create your account by visiting the following page:
 <%= setupLink %>
