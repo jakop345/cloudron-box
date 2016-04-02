@@ -213,7 +213,7 @@ function removeUser(user, callback) {
     assert.strictEqual(typeof user, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.del(user, function (error) {
+    userdb.del(user.id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
