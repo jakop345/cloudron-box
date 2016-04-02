@@ -85,7 +85,7 @@ function getSignedDownloadUrl(apiConfig, info, filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!info.bucket || !info.prefix) return new Error('Invalid configuration'); // prevent error in s3
+    if (!info.bucket || !info.prefix || !info.region) return new Error('Invalid configuration'); // prevent error in s3
 
     getBackupCredentials(apiConfig, function (error, credentials) {
         if (error) return callback(error);
