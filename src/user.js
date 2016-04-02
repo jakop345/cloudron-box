@@ -209,17 +209,17 @@ function verifyWithEmail(email, password, callback) {
     });
 }
 
-function removeUser(userId, callback) {
-    assert.strictEqual(typeof userId, 'string');
+function removeUser(user, callback) {
+    assert.strictEqual(typeof user, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.del(userId, function (error) {
+    userdb.del(user, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         callback(null);
 
-        mailer.userRemoved(userId);
+        mailer.userRemoved(user);
     });
 }
 

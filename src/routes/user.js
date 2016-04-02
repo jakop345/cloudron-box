@@ -169,11 +169,16 @@ function removeUser(req, res, next) {
 
     if (req.user.id === req.params.userId) return next(new HttpError(403, 'Not allowed to remove yourself.'));
 
-    user.remove(req.params.userId, function (error) {
-        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
+    user.get(req.params.userId, function (error, userObject) {
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(204));
+        user.remove(userObject, function (error) {
+            if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
+            if (error) return next(new HttpError(500, error));
+
+            next(new HttpSuccess(204));
+        });
     });
 }
 

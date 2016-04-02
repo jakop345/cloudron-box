@@ -219,8 +219,8 @@ function mailUserEventToAdmins(user, event) {
         var mailOptions = {
             from: config.adminEmail(),
             to: adminEmails.join(', '),
-            subject: util.format('%s %s in Cloudron %s', user.username, event, config.fqdn()),
-            text: render('user_event.ejs', { fqdn: config.fqdn(), username: user.username, email: user.email, event: event, format: 'text' }),
+            subject: util.format('%s %s in Cloudron %s', user.username || user.email, event, config.fqdn()),
+            text: render('user_event.ejs', { fqdn: config.fqdn(), user: user, event: event, format: 'text' }),
         };
 
         enqueue(mailOptions);
@@ -276,12 +276,12 @@ function userAdded(user, inviteSent) {
     });
 }
 
-function userRemoved(username) {
-    assert.strictEqual(typeof username, 'string');
+function userRemoved(user) {
+    assert.strictEqual(typeof user, 'object');
 
-    debug('Sending mail for userRemoved');
+    debug('Sending mail for userRemoved.', user.id, user.email);
 
-    mailUserEventToAdmins({ username: username }, 'was removed');
+    mailUserEventToAdmins(user, 'was removed');
 }
 
 function adminChanged(user, admin) {
@@ -296,7 +296,7 @@ function adminChanged(user, admin) {
 function passwordReset(user) {
     assert.strictEqual(typeof user, 'object');
 
-    debug('Sending mail for password reset for user %s.', user.username);
+    debug('Sending mail for password reset for user %s.', user.email, user.id);
 
     var resetLink = config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token=' + user.resetToken;
 
@@ -304,7 +304,7 @@ function passwordReset(user) {
         from: config.adminEmail(),
         to: user.email,
         subject: 'Password Reset Request',
-        text: render('password_reset.ejs', { fqdn: config.fqdn(), username: user.username, resetLink: resetLink, format: 'text' })
+        text: render('password_reset.ejs', { fqdn: config.fqdn(), user: user, resetLink: resetLink, format: 'text' })
     };
 
     enqueue(mailOptions);
