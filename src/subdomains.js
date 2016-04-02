@@ -98,10 +98,10 @@ function update(subdomain, type, values, callback) {
     settings.getDnsConfig(function (error, dnsConfig) {
         if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        api(dnsConfig.provider).update(dnsConfig, config.zoneName(), subdomain, type, values, function (error) {
+        api(dnsConfig.provider).update(dnsConfig, config.zoneName(), subdomain, type, values, function (error, changeId) {
             if (error) return callback(error);
 
-            callback(null);
+            callback(null, changeId);
         });
     });
 }
