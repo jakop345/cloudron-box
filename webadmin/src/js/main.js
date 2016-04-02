@@ -92,7 +92,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                     if (error) return $scope.error(error);
 
                     // kick off installed apps and config polling
-                    var refreshAppsTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
+                    var refreshAppsTimer = $interval(Client.refreshInstalledApps.bind(Client), 5000);
                     var refreshConfigTimer = $interval(Client.refreshConfig.bind(Client), 5000);
                     var refreshUserInfoTimer = $interval(Client.refreshUserInfo.bind(Client), 5000);
 
