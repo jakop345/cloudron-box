@@ -326,9 +326,10 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.userremove.error.username = null;
         $scope.userremove.error.password = null;
 
-        if ($scope.userremove.username !== $scope.userremove.userInfo.username) {
-            $scope.userremove.error.username = 'Username does not match';
+        if ($scope.userremove.username !== $scope.userremove.userInfo.username && $scope.userremove.username !== $scope.userremove.userInfo.email) {
+            $scope.userremove.error.username = true;
             $scope.userremove.username = '';
+            $scope.userremove_form.username.$setPristine();
             $('#inputUserRemoveUsername').focus();
             return;
         }
