@@ -408,6 +408,15 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         });
     };
 
+    $scope.renderAccessRestrictionUser = function (userId) {
+        var user = $scope.users.filter(function (u) { return u.id === userId; })[0];
+
+        // user not found
+        if (!user) return userId;
+
+        return user.username ? user.username : user.email;
+    };
+
     $scope.cancel = function () {
         window.history.back();
     };
@@ -434,10 +443,14 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         });
     }
 
-    if ($scope.user.admin) {
-        fetchUsers();
-        fetchGroups();
-    }
+    Client.refreshUserInfo(function (error) {
+        if (error) return console.error(error);
+
+        if ($scope.user.admin) {
+            fetchUsers();
+            fetchGroups();
+        }
+    });
 
     // setup all the dialog focus handling
     ['appConfigureModal', 'appUninstallModal', 'appUpdateModal', 'appRestoreModal'].forEach(function (id) {

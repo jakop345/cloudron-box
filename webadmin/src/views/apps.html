@@ -49,7 +49,7 @@
                             <label class="control-label">User</label>
                             <p>
                                 This is a single user application.<br/><br/>
-                                Access is granted to <b>{{appConfigure.app.accessRestriction.users[0]}}</b>.
+                                Access is granted to <b>{{ renderAccessRestrictionUser(appConfigure.app.accessRestriction.users[0]) }}</b>.
                             </p>
                         </div>
                         <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser">
