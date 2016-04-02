@@ -161,7 +161,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.inviteSent.email = user.email;
         $scope.inviteSent.setupLink = '';
 
-        Client.sendInvite(user.username, function (error, resetToken) {
+        Client.sendInvite(user, function (error, resetToken) {
             if (error) return console.error(error);
 
             // Client.notify('', 'Invitation was successfully sent to ' + user.email + '.', false, 'success');

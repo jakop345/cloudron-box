@@ -471,8 +471,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         };
     };
 
-    Client.prototype.sendInvite = function (username, callback) {
-        $http.post(client.apiOrigin + '/api/v1/users/' + username + '/invite', {}).success(function (data, status) {
+    Client.prototype.sendInvite = function (user, callback) {
+        $http.post(client.apiOrigin + '/api/v1/users/' + user.id + '/invite', {}).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.resetToken);
         }).error(defaultErrorHandler(callback));
