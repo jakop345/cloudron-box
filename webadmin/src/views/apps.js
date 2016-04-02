@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Application').controller('AppsController', ['$scope', '$location', 'Client', 'AppStore', function ($scope, $location, Client, AppStore) {
+angular.module('Application').controller('AppsController', ['$scope', '$location', '$timeout', 'Client', 'AppStore', function ($scope, $location, $timeout, Client, AppStore) {
     $scope.HOST_PORT_MIN = 1024;
     $scope.HOST_PORT_MAX = 65535;
 
@@ -8,6 +8,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.config = Client.getConfig();
     $scope.user = Client.getUserInfo();
     $scope.groups = [];
+    $scope.users = [];
 
     $scope.memoryTicks = [
         256 * 1024 * 1024,
@@ -411,10 +412,32 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         window.history.back();
     };
 
-    Client.getGroups(function (error, result) {
-        if (error) return console.error('Unable to get group listing.', error);
-        $scope.groups = result;
-    });
+    function fetchUsers() {
+        Client.getUsers(function (error, users) {
+            if (error) {
+                console.error(error);
+                return $timeout(fetchUsers, 5000);
+            }
+
+            $scope.users = users;
+        });
+    }
+
+    function fetchGroups() {
+        Client.getGroups(function (error, groups) {
+            if (error) {
+                console.error(error);
+                return $timeout(fetchUsers, 5000);
+            }
+
+            $scope.groups = groups;
+        });
+    }
+
+    if ($scope.user.admin) {
+        fetchUsers();
+        fetchGroups();
+    }
 
     // setup all the dialog focus handling
     ['appConfigureModal', 'appUninstallModal', 'appUpdateModal', 'appRestoreModal'].forEach(function (id) {
