@@ -8,6 +8,7 @@
 
 var async = require('async'),
     config = require('../../config.js'),
+    clientdb = require('../../clientdb.js'),
     database = require('../../database.js'),
     oauth2 = require('../oauth2.js'),
     expect = require('expect.js'),
@@ -173,6 +174,8 @@ describe('OAuth Clients API', function () {
                     expect(result.body.redirectURI).to.be.a('string');
                     expect(result.body.clientSecret).to.be.a('string');
                     expect(result.body.scope).to.be.a('string');
+                    expect(result.body.type).to.equal(clientdb.TYPE_EXTERNAL);
+
                     done();
                 });
             });
@@ -412,7 +415,7 @@ describe('Clients', function () {
             server.start.bind(server),
             database._clear.bind(null),
             function (callback) {
-            var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+                var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                 var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
                 superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
@@ -427,7 +430,16 @@ describe('Clients', function () {
                     // stash for further use
                     token = result.body.token;
 
-                    callback();
+                    superagent.get(SERVER_URL + '/api/v1/profile')
+                            .query({ access_token: token })
+                            .end(function (error, result) {
+                        expect(result).to.be.ok();
+                        expect(result.statusCode).to.eql(200);
+
+                        USER_0.id = result.body.id;
+
+                        callback();
+                    });
                 });
             }
         ], done);
@@ -531,7 +543,7 @@ describe('Clients', function () {
                 expect(result.statusCode).to.equal(200);
 
                 expect(result.body.tokens.length).to.eql(1);
-                expect(result.body.tokens[0].identifier).to.eql('user-' + USER_0.username);
+                expect(result.body.tokens[0].identifier).to.eql('user-' + USER_0.id);
 
                 done();
             });
@@ -584,7 +596,7 @@ describe('Clients', function () {
                 expect(result.statusCode).to.equal(200);
 
                 expect(result.body.tokens.length).to.eql(1);
-                expect(result.body.tokens[0].identifier).to.eql('user-' + USER_0.username);
+                expect(result.body.tokens[0].identifier).to.eql('user-' + USER_0.id);
 
                 superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
                 .query({ access_token: token })
