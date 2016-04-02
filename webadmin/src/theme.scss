@@ -46,6 +46,11 @@ $table-border-color:                        transparent !default;
 
 @import "bootstrap";
 
+@font-face {
+    font-family: Roboto;
+    src: url(3rdparty/Roboto-Light.ttf);
+}
+
 // ----------------------------
 // Bootstrap extension
 // ----------------------------
