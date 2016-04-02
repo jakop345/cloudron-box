@@ -669,6 +669,21 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         });
     };
 
+    Client.prototype.appPostProcess = function (app) {
+        // calculate the icon paths
+        var icons = this.getAppIconUrls(app);
+        app.iconUrl = icons.cloudron;
+        app.iconUrlStore = icons.store;
+
+        // extract progress percentage
+        var installationProgress = app.installationProgress || '';
+        var progress = parseInt(installationProgress.split(',')[0]);
+        if (isNaN(progress)) progress = 0;
+        app.progress = progress;
+
+        return app;
+    };
+
     Client.prototype.refreshInstalledApps = function (callback) {
         var that = this;
 
@@ -691,16 +706,9 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
                 var tmp = {};
                 angular.copy(app, tmp);
 
-                var icons = that.getAppIconUrls(tmp);
-                tmp.iconUrl = icons.cloudron;
-                tmp.iconUrlStore = icons.store;
+                that.appPostProcess(tmp);
 
-                // extract progress percentage
-                var installationProgress = tmp.installationProgress || '';
-                var progress = parseInt(installationProgress.split(',')[0]);
-                if (isNaN(progress)) progress = 0;
-                tmp.progress = progress;
-
+                // only replace if the app is already known
                 if (found !== false) {
                     angular.copy(tmp, that._installedApps[found]);
                 } else {
