@@ -90,6 +90,7 @@ function getSignedDownloadUrl(apiConfig, info, filename, callback) {
     getBackupCredentials(apiConfig, function (error, credentials) {
         if (error) return callback(error);
 
+        credentials.region = info.region; // use same region as where we uploaded
         var s3 = new AWS.S3(credentials);
 
         var params = {
