@@ -22,6 +22,7 @@ gulp.task('3rdparty', function () {
         'webadmin/src/3rdparty/**/*.otf',
         'webadmin/src/3rdparty/**/*.eot',
         'webadmin/src/3rdparty/**/*.svg',
+        'webadmin/src/3rdparty/**/*.gif',
         'webadmin/src/3rdparty/**/*.ttf',
         'webadmin/src/3rdparty/**/*.woff',
         'webadmin/src/3rdparty/**/*.woff2'
