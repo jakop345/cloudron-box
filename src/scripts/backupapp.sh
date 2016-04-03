@@ -30,6 +30,7 @@ readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
 
 btrfs subvolume snapshot -r "${app_data_dir}" "${app_data_snapshot}"
 
+# Upload config.json first because uploading tarball might take a lot of time, leading to token expiry
 for try in `seq 1 5`; do
     echo "Uploading config.json to ${backup_config_url} (try ${try})"
     error_log=$(mktemp)
