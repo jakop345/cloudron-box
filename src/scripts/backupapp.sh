@@ -31,6 +31,25 @@ readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
 btrfs subvolume snapshot -r "${app_data_dir}" "${app_data_snapshot}"
 
 for try in `seq 1 5`; do
+    echo "Uploading config.json to ${backup_config_url} (try ${try})"
+    error_log=$(mktemp)
+
+    headers=("-H" "Content-Type:")
+
+    if cat "${app_data_snapshot}/config.json" \
+           | curl --fail -X PUT ${headers[@]} --data-binary @- "${backup_config_url}" 2>"${error_log}"; then
+        break
+    fi
+    cat "${error_log}" && rm "${error_log}"
+done
+
+if [[ ${try} -eq 5 ]]; then
+    echo "Backup failed uploading config.json"
+    btrfs subvolume delete "${app_data_snapshot}"
+    exit 1
+fi
+
+for try in `seq 1 5`; do
     echo "Uploading backup to ${backup_url} (try ${try})"
     error_log=$(mktemp)
 
@@ -44,29 +63,10 @@ for try in `seq 1 5`; do
     cat "${error_log}" && rm "${error_log}"
 done
 
-if [[ ${try} -eq 5 ]]; then
-    echo "Backup failed uploading backup tarball"
-    btrfs subvolume delete "${app_data_snapshot}"
-    exit 1
-fi
-
-for try in `seq 1 5`; do
-    echo "Uploading config.json to ${backup_config_url} (try ${try})"
-    error_log=$(mktemp)
-
-    headers=("-H" "Content-Type:")
-
-    if cat "${app_data_snapshot}/config.json" \
-           | curl --fail -X PUT ${headers[@]} --data-binary @- "${backup_config_url}" 2>"${error_log}"; then
-        break
-    fi
-    cat "${error_log}" && rm "${error_log}"
-done
-
 btrfs subvolume delete "${app_data_snapshot}"
 
 if [[ ${try} -eq 5 ]]; then
-    echo "Backup failed uploading config.json"
+    echo "Backup failed uploading backup tarball"
     exit 1
 else
     echo "Backup successful"
