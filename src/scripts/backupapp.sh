@@ -57,7 +57,7 @@ for try in `seq 1 5`; do
     headers=("-H" "Content-Type:")
 
     if cat "${app_data_snapshot}/config.json" \
-           | curl --fail -X PUT ${headers[@]} --data @- "${backup_config_url}" 2>"${error_log}"; then
+           | curl --fail -X PUT ${headers[@]} --data-binary @- "${backup_config_url}" 2>"${error_log}"; then
         break
     fi
     cat "${error_log}" && rm "${error_log}"
