@@ -46,6 +46,7 @@ done
 
 if [[ ${try} -eq 5 ]]; then
     echo "Backup failed uploading backup tarball"
+    btrfs subvolume delete "${app_data_snapshot}"
     exit 1
 fi
 
