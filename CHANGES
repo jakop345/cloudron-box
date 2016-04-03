@@ -451,3 +451,6 @@
 - Store backups in the same region as the Cloudron
 - Fix PCRE security issue (http://www.ubuntu.com/usn/usn-2943-1/)
 
+[0.11.1]
+- Improve the backup logic
+
