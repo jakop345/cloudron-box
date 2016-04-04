@@ -273,7 +273,7 @@ function renderAccountSetupSite(res, req, userObject, error) {
         user: userObject,
         error: error,
         csrf: req.csrfToken(),
-        resetToken: req.query.reset_token,
+        resetToken: req.query.reset_token || req.body.resetToken,
         title: 'Cloudron Password Setup'
     });
 }
