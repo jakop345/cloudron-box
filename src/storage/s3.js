@@ -85,9 +85,8 @@ function getSignedUploadUrl(apiConfig, filename, callback) {
     });
 }
 
-function getRestoreUrl(apiConfig, info, filename, callback) {
+function getRestoreUrl(apiConfig, filename, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof info, 'object');
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -97,8 +96,8 @@ function getRestoreUrl(apiConfig, info, filename, callback) {
         var s3 = new AWS.S3(credentials);
 
         var params = {
-            Bucket: info.bucket,
-            Key: info.prefix + '/' + filename,
+            Bucket: apiConfig.bucket,
+            Key: apiConfig.prefix + '/' + filename,
             Expires: 60 * 30 /* 30 minutes */
         };
 
