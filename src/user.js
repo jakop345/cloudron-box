@@ -406,6 +406,12 @@ function changePassword(username, oldPassword, newPassword, callback) {
 }
 
 function createOwner(username, password, email, displayName, callback) {
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof password, 'string');
+    assert.strictEqual(typeof email, 'string');
+    assert.strictEqual(typeof displayName, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     userdb.count(function (error, count) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS));
