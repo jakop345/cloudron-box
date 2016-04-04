@@ -280,10 +280,10 @@ function renderAccountSetupSite(res, req, userObject, error) {
 
 // -> GET /api/v1/session/account/setup.html
 function accountSetupSite(req, res) {
-    if (!req.query.reset_token) return renderAccountSetupSite(res, req, {}, 'Missing Reset Token');
+    if (!req.query.reset_token) return sendError(res, req, 'Missing Reset Token');
 
     user.getByResetToken(req.query.reset_token, function (error, userObject) {
-        if (error) return renderAccountSetupSite(res, req, {}, 'Invalid Reset Token');
+        if (error) return sendError(res, req, 'Invalid Reset Token');
 
         renderAccountSetupSite(res, req, userObject, '');
     });
@@ -301,7 +301,7 @@ function accountSetup(req, res, next) {
     debug('acountSetup: with token %s.', req.body.resetToken);
 
     user.getByResetToken(req.body.resetToken, function (error, userObject) {
-        if (error) return renderAccountSetupSite(res, req, {}, 'Invalid Reset Token');
+        if (error) return sendError(res, req, 'Invalid Reset Token');
 
         userObject.username = req.body.username;
         userObject.displayName = req.body.displayName;
