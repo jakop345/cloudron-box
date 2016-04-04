@@ -1,7 +1,7 @@
 'use strict';
 
 exports = module.exports = {
-    getSignedUploadUrl: getSignedUploadUrl,
+    getBackupUrl: getBackupUrl,
     getRestoreUrl: getRestoreUrl,
 
     copyObject: copyObject,
@@ -63,7 +63,7 @@ function getAllPaged(apiConfig, page, perPage, callback) {
     });
 }
 
-function getSignedUploadUrl(apiConfig, filename, callback) {
+function getBackupUrl(apiConfig, filename, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');

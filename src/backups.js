@@ -90,7 +90,7 @@ function getBackupUrl(appBackupIds, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getSignedUploadUrl(backupConfig, filename, function (error, result) {
+        api(backupConfig.provider).getBackupUrl(backupConfig, filename, function (error, result) {
             if (error) return callback(error);
 
             var obj = {
@@ -122,10 +122,10 @@ function getAppBackupUrl(app, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getSignedUploadUrl(backupConfig, configFilename, function (error, configResult) {
+        api(backupConfig.provider).getBackupUrl(backupConfig, configFilename, function (error, configResult) {
             if (error) return callback(error);
 
-            api(backupConfig.provider).getSignedUploadUrl(backupConfig, dataFilename, function (error, dataResult) {
+            api(backupConfig.provider).getBackupUrl(backupConfig, dataFilename, function (error, dataResult) {
                 if (error) return callback(error);
 
                 var obj = {
