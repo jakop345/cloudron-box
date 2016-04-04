@@ -209,6 +209,25 @@
     </div>
 </div>
 
+<!-- Modal invite sent -->
+<div class="modal fade" id="inviteSentModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Invite Sent</h4>
+            </div>
+            <div class="modal-body">
+                <p>An email has been sent to {{ inviteSent.email }}.</p>
+                <p>You can also share this invite link directly.</p>
+                <pre>{{ inviteSent.setupLink }}</pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="content-large">
 
     <br/>

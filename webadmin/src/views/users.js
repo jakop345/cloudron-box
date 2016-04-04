@@ -87,6 +87,11 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         }
     };
 
+    $scope.inviteSent = {
+        email: '',
+        setupLink: ''
+    };
+
     $scope.groupRemove = {
         busy: false,
         error: {},
@@ -153,12 +158,16 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     };
 
     $scope.sendInvite = function (user) {
+        $scope.inviteSent.email = user.email;
+        $scope.inviteSent.setupLink = '';
+
         Client.sendInvite(user.username, function (error, resetToken) {
             if (error) return console.error(error);
 
-            Client.notify('', 'Invitation was successfully sent to ' + user.email + '.', false, 'success');
+            // Client.notify('', 'Invitation was successfully sent to ' + user.email + '.', false, 'success');
 
-            console.log('----', resetToken)
+            $scope.inviteSent.setupLink = location.origin + '/api/v1/session/password/setup.html?reset_token=' + resetToken;
+            $('#inviteSentModal').modal('show');
         });
     };
 
