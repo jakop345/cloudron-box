@@ -24,6 +24,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='silly@me.com';
 var USERNAME_1 = 'user', PASSWORD_1 = 'Foobar?1337', EMAIL_1 ='happy@me.com';
 var token, token_1 = null;
+var userId, userId_1 = null;
 
 var server;
 function setup(done) {
@@ -48,7 +49,16 @@ function setup(done) {
                 // stash token for further use
                 token = result.body.token;
 
-                callback();
+                superagent.get(SERVER_URL + '/api/v1/profile')
+                      .query({ access_token: token })
+                      .end(function (error, result) {
+                    expect(result).to.be.ok();
+                    expect(result.statusCode).to.eql(200);
+
+                    userId = result.body.id;
+
+                    callback();
+                });
             });
         },
         function (callback) {
@@ -60,9 +70,10 @@ function setup(done) {
                 expect(result.statusCode).to.eql(201);
 
                 token_1 = tokendb.generateToken();
+                userId_1 = result.body.userInfo.id;
 
                 // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-                tokendb.add(token_1, tokendb.PREFIX_USER + USERNAME_1, 'test-client-id',  Date.now() + 100000, '*', callback);
+                tokendb.add(token_1, userId_1, 'test-client-id',  Date.now() + 100000, '*', callback);
             });
         }
   ], done);
@@ -168,7 +179,7 @@ describe('Groups API', function () {
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.name).to.be('admin');
                 expect(result.body.userIds.length).to.be(1);
-                expect(result.body.userIds[0]).to.be(USERNAME);
+                expect(result.body.userIds[0]).to.be(userId);
                 done();
             });
         });
@@ -213,7 +224,7 @@ describe('Groups API', function () {
         });
 
         it('cannot add user to invalid group', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME + '/set_groups')
+            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/set_groups')
                   .query({ access_token: token })
                   .send({ groupIds: [ 'admin', 'something' ]})
                   .end(function (error, result) {
@@ -223,7 +234,7 @@ describe('Groups API', function () {
         });
 
         it('can add user to valid group', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME + '/set_groups')
+            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/set_groups')
                   .query({ access_token: token })
                   .send({ groupIds: [ 'admin', 'group0', 'group1' ]})
                   .end(function (error, result) {
@@ -233,7 +244,7 @@ describe('Groups API', function () {
         });
 
         it('can remove last user from admin', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME + '/set_groups')
+            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/set_groups')
                   .query({ access_token: token })
                   .send({ groupIds: [ 'group0', 'group1' ]})
                   .end(function (error, result) {
