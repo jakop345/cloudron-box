@@ -3,7 +3,6 @@
 var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
-    safe = require('safetydance'),
     util = require('util');
 
 var BACKUPS_FIELDS = [ 'filename', 'creationTime', 'version', 'type', 'dependsOn', 'state', ];
