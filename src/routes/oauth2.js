@@ -284,6 +284,7 @@ function accountSetupSite(req, res) {
 
     user.getByResetToken(req.query.reset_token, function (error, userObject) {
         if (error) return renderAccountSetupSite(res, req, {}, 'Invalid Reset Token');
+
         renderAccountSetupSite(res, req, userObject, '');
     });
 }
