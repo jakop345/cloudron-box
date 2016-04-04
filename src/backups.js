@@ -20,8 +20,7 @@ var assert = require('assert'),
     debug = require('debug')('box:backups'),
     s3 = require('./storage/s3.js'),
     settings = require('./settings.js'),
-    util = require('util'),
-    _ = require('underscore');
+    util = require('util');
 
 function BackupsError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -67,11 +66,6 @@ function getPaged(page, perPage, callback) {
     });
 }
 
-// this should probably be provider specific
-function cleanBackupConfig(backupConfig) {
-    return _.pick(backupConfig, 'provider', 'key', 'bucket', 'prefix', 'region');
-}
-
 function getByAppIdPaged(page, perPage, appId, callback) {
     assert(typeof page === 'number' && page > 0);
     assert(typeof perPage === 'number' && perPage > 0);
@@ -109,7 +103,7 @@ function getBackupUrl(appBackupIds, callback) {
             debug('getBackupUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
 
             backupdb.add({ filename: filename, creationTime: now, version: config.version(), type: backupdb.BACKUP_TYPE_BOX,
-                           dependsOn: appBackupIds, config: cleanBackupConfig(backupConfig) }, function (error) {
+                           dependsOn: appBackupIds }, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                 callback(null, obj);
@@ -146,7 +140,7 @@ function getAppBackupUrl(app, callback) {
                 debug('getAppBackupUrl: %j', obj);
 
                 backupdb.add({ filename: dataFilename, creationTime: now, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP,
-                               dependsOn: [ ], config: cleanBackupConfig(backupConfig) }, function (error) {
+                               dependsOn: [ ] }, function (error) {
                     if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                     callback(null, obj);
@@ -161,27 +155,22 @@ function getRestoreUrl(backupId, callback) {
     assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    settings.getBackupConfig(function (error, apiConfig) {
+    settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        backupdb.get(backupId, function (error, result) {
-            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+        api(backupConfig.provider).getSignedDownloadUrl(backupConfig, backupId, function (error, result) {
+            if (error) return callback(error);
 
-            var backupConfig = result.config;
-            api(backupConfig.provider).getSignedDownloadUrl(apiConfig, backupConfig, backupId, function (error, result) {
-                if (error) return callback(error);
+            var obj = {
+                id: backupId,
+                url: result.url,
+                sessionToken: result.sessionToken,
+                backupKey: backupConfig.key
+            };
 
-                var obj = {
-                    id: backupId,
-                    url: result.url,
-                    sessionToken: result.sessionToken,
-                    backupKey: backupConfig.key
-                };
+            debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
 
-                debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
-
-                callback(null, obj);
-            });
+            callback(null, obj);
         });
     });
 }

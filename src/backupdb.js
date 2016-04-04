@@ -6,7 +6,7 @@ var assert = require('assert'),
     safe = require('safetydance'),
     util = require('util');
 
-var BACKUPS_FIELDS = [ 'filename', 'creationTime', 'version', 'type', 'dependsOn', 'state', 'configJson' ];
+var BACKUPS_FIELDS = [ 'filename', 'creationTime', 'version', 'type', 'dependsOn', 'state', ];
 
 exports = module.exports = {
     add: add,
@@ -27,8 +27,6 @@ function postProcess(result) {
     assert.strictEqual(typeof result, 'object');
 
     result.dependsOn = result.dependsOn ? result.dependsOn.split(',') : [ ];
-    result.config = safe.JSON.parse(result.configJson);
-    delete result.configJson;
 }
 
 function getPaged(page, perPage, callback) {
@@ -83,13 +81,12 @@ function add(backup, callback) {
     assert.strictEqual(typeof backup.version, 'string');
     assert(backup.type === exports.BACKUP_TYPE_APP || backup.type === exports.BACKUP_TYPE_BOX);
     assert(util.isArray(backup.dependsOn));
-    assert(backup.config && typeof backup.config === 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var creationTime = backup.creationTime || new Date(); // allow tests to set the time
 
-    database.query('INSERT INTO backups (filename, version, type, creationTime, state, dependsOn, configJson) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [ backup.filename, backup.version, backup.type, creationTime, exports.BACKUP_STATE_NORMAL, backup.dependsOn.join(','), JSON.stringify(backup.config) ],
+    database.query('INSERT INTO backups (filename, version, type, creationTime, state, dependsOn) VALUES (?, ?, ?, ?, ?, ?)',
+        [ backup.filename, backup.version, backup.type, creationTime, exports.BACKUP_STATE_NORMAL, backup.dependsOn.join(',') ],
         function (error) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));

@@ -79,23 +79,22 @@ function getSignedUploadUrl(apiConfig, filename, callback) {
     });
 }
 
-function getSignedDownloadUrl(apiConfig, info, filename, callback) {
+function getSignedDownloadUrl(apiConfig, filename, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof info, 'object');
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!info.bucket || !info.prefix || !info.region) return new Error('Invalid configuration'); // prevent error in s3
+    if (!apiConfig.bucket || !apiConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
 
     getBackupCredentials(apiConfig, function (error, credentials) {
         if (error) return callback(error);
 
-        credentials.region = info.region; // use same region as where we uploaded
+        credentials.region = apiConfig.region; // use same region as where we uploaded
         var s3 = new AWS.S3(credentials);
 
         var params = {
-            Bucket: info.bucket,
-            Key: info.prefix + '/' + filename,
+            Bucket: apiConfig.bucket,
+            Key: apiConfig.prefix + '/' + filename,
             Expires: 60 * 30 /* 30 minutes */
         };
 

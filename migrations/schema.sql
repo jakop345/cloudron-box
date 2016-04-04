@@ -105,6 +105,5 @@ CREATE TABLE IF NOT EXISTS backups(
     type VARCHAR(16) NOT NULL, /* 'box' or 'app' */
     dependsOn VARCHAR(4096), /* comma separate list of objects this backup depends on */
     state VARCHAR(16) NOT NULL,
-    configJson TEXT, /* configuration - bucket, prefix, key, provider */
 
     PRIMARY KEY (filename));
