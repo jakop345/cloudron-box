@@ -29,6 +29,7 @@ function getBackupCredentials(apiConfig, callback) {
         var credentials = {
             accessKeyId: result.body.credentials.AccessKeyId,
             secretAccessKey: result.body.credentials.SecretAccessKey,
+            sessionToken: result.body.credentials.SessionToken,
             region: apiConfig.region || 'us-east-1'
         };
 
