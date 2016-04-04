@@ -217,9 +217,9 @@
                 <h4 class="modal-title">Invite Sent</h4>
             </div>
             <div class="modal-body">
-                <p>An email has been sent to {{ inviteSent.email }}.</p>
+                <p>An email has been sent to <b>{{ inviteSent.email }}</b>.</p>
                 <p>You can also share this invite link directly.</p>
-                <pre>{{ inviteSent.setupLink }}</pre>
+                <p ng-click-select>{{ inviteSent.setupLink }}</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>

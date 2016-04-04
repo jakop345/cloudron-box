@@ -242,3 +242,18 @@ app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $loc
         return original.apply($location, [path]);
     };
 }]);
+
+app.directive('ngClickSelect', function () {
+    return {
+        restrict: 'AC',
+        link: function (scope, element, attrs) {
+            element.bind('click', function () {
+                var selection = window.getSelection();
+                var range = document.createRange();
+                range.selectNodeContents(this);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
+        }
+    };
+});
