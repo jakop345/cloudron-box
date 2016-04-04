@@ -8,6 +8,7 @@
 
 var appdb = require('../appdb.js'),
     authcodedb = require('../authcodedb.js'),
+    backupdb = require('../backupdb.js'),
     clientdb = require('../clientdb.js'),
     hat = require('hat'),
     database = require('../database'),
@@ -927,6 +928,125 @@ describe('database', function () {
                 expect(error).to.be(null);
                 expect(value).to.be('someothervalue');
                 done();
+            });
+        });
+
+    });
+
+    describe('backup', function () {
+
+        it('add succeeds', function (done) {
+            var backup = {
+                id: 'backup-box',
+                version: '1.0.0',
+                type: backupdb.BACKUP_TYPE_BOX,
+                dependsOn: [ 'dep1' ]
+            };
+
+            backupdb.add(backup, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            backupdb.get('backup-box', function (error, result) {
+                expect(error).to.be(null);
+                expect(result.version).to.be('1.0.0');
+                expect(result.type).to.be(backupdb.BACKUP_TYPE_BOX);
+                expect(result.creationTime).to.be.a(Date);
+                expect(result.dependsOn).to.eql(['dep1']);
+                done();
+            });
+        });
+
+        it('get of unknown id fails', function (done) {
+            backupdb.get('somerandom', function (error, result) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('getPaged succeeds', function (done) {
+            backupdb.getPaged(1, 5, function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.be.an(Array);
+                expect(results.length).to.be(1);
+
+                expect(results[0].id).to.be('backup-box');
+                expect(results[0].version).to.be('1.0.0');
+                expect(results[0].dependsOn).to.eql(['dep1']);
+
+                done();
+            });
+        });
+
+        it('delete succeeds', function (done) {
+            backupdb.del('backup-box', function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.not.be.ok();
+
+                backupdb.get('backup-box', function (error, result) {
+                    expect(error).to.be.a(DatabaseError);
+                    expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
+                    expect(result).to.not.be.ok();
+                    done();
+                });
+            });
+        });
+
+        it('add app succeeds', function (done) {
+            var backup = {
+                id: 'appbackup_appid_123',
+                version: '1.0.0',
+                type: backupdb.BACKUP_TYPE_APP,
+                dependsOn: [ ]
+            };
+
+            backupdb.add(backup, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            backupdb.get('appbackup_appid_123', function (error, result) {
+                expect(error).to.be(null);
+                expect(result.version).to.be('1.0.0');
+                expect(result.type).to.be(backupdb.BACKUP_TYPE_APP);
+                expect(result.creationTime).to.be.a(Date);
+                expect(result.dependsOn).to.eql([]);
+                done();
+            });
+        });
+
+        it('getByAppIdPaged succeeds', function (done) {
+            backupdb.getByAppIdPaged(1, 5, 'appid', function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.be.an(Array);
+                expect(results.length).to.be(1);
+
+                expect(results[0].id).to.be('appbackup_appid_123');
+                expect(results[0].version).to.be('1.0.0');
+                expect(results[0].dependsOn).to.eql([]);
+
+                done();
+            });
+        });
+
+        it('delete succeeds', function (done) {
+            backupdb.del('appbackup_appid_123', function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.not.be.ok();
+
+                backupdb.get('appbackup_appid_123', function (error, result) {
+                    expect(error).to.be.a(DatabaseError);
+                    expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
+                    expect(result).to.not.be.ok();
+                    done();
+                });
             });
         });
 

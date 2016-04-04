@@ -116,6 +116,7 @@ function clear(callback) {
     async.series([
         require('./appdb.js')._clear,
         require('./authcodedb.js')._clear,
+        require('./backupdb.js')._clear,
         require('./clientdb.js')._clear,
         require('./tokendb.js')._clear,
         require('./groupdb.js')._clear,
