@@ -2,7 +2,7 @@
 
 exports = module.exports = {
     getSignedUploadUrl: getSignedUploadUrl,
-    getSignedDownloadUrl: getSignedDownloadUrl,
+    getRestoreUrl: getRestoreUrl,
 
     copyObject: copyObject,
 
@@ -79,7 +79,7 @@ function getSignedUploadUrl(apiConfig, filename, callback) {
     });
 }
 
-function getSignedDownloadUrl(apiConfig, filename, callback) {
+function getRestoreUrl(apiConfig, filename, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');

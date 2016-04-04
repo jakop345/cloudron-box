@@ -156,7 +156,7 @@ function getRestoreUrl(backupId, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getSignedDownloadUrl(backupConfig, backupId, function (error, result) {
+        api(backupConfig.provider).getRestoreUrl(backupConfig, backupId, function (error, result) {
             if (error) return callback(error);
 
             var obj = {
