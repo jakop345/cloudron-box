@@ -81,7 +81,7 @@ function getBackupUrl(apiConfig, filename, callback) {
 
         var url = s3.getSignedUrl('putObject', params);
 
-        callback(null, { url : url });
+        callback(null, { url : url, id: filename });
     });
 }
 

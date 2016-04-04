@@ -94,14 +94,14 @@ function getBackupUrl(appBackupIds, callback) {
             if (error) return callback(error);
 
             var obj = {
-                id: filename,
+                id: result.id,
                 url: result.url,
                 backupKey: backupConfig.key
             };
 
             debug('getBackupUrl: id:%s url:%s backupKey:%s', obj.id, obj.url, obj.backupKey);
 
-            backupdb.add({ id: filename, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
+            backupdb.add({ id: result.id, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                 callback(null, obj);
@@ -128,7 +128,7 @@ function getAppBackupUrl(app, callback) {
                 if (error) return callback(error);
 
                 var obj = {
-                    id: dataFilename,
+                    id: dataResult.id,
                     url: dataResult.url,
                     configUrl: configResult.url,
                     backupKey: backupConfig.key // only data is encrypted
@@ -136,7 +136,7 @@ function getAppBackupUrl(app, callback) {
 
                 debug('getAppBackupUrl: %j', obj);
 
-                backupdb.add({ id: dataFilename, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+                backupdb.add({ id: obj.id, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
                     if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                     callback(null, obj);
