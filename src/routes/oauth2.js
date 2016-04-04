@@ -267,20 +267,24 @@ function passwordSentSite(req, res) {
     renderTemplate(res, 'password_reset_sent', { adminOrigin: config.adminOrigin(), title: 'Cloudron Password Reset' });
 }
 
+function renderAccountSetupSite(res, req, userObject, error) {
+    renderTemplate(res, 'account_setup', {
+        adminOrigin: config.adminOrigin(),
+        user: userObject,
+        error: error,
+        csrf: req.csrfToken(),
+        resetToken: req.query.reset_token,
+        title: 'Cloudron Password Setup'
+    });
+}
+
 // -> GET /api/v1/session/account/setup.html
-function accountSetupSite(req, res, next) {
-    if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
+function accountSetupSite(req, res) {
+    if (!req.query.reset_token) return renderAccountSetupSite(res, req, {}, 'Missing Reset Token');
 
-    user.getByResetToken(req.query.reset_token, function (error, user) {
-        if (error) return next(new HttpError(401, 'Invalid reset_token'));
-
-        renderTemplate(res, 'account_setup', {
-            adminOrigin: config.adminOrigin(),
-            user: user,
-            csrf: req.csrfToken(),
-            resetToken: req.query.reset_token,
-            title: 'Cloudron Password Setup'
-        });
+    user.getByResetToken(req.query.reset_token, function (error, userObject) {
+        if (error) return renderAccountSetupSite(res, req, {}, 'Invalid Reset Token');
+        renderAccountSetupSite(res, req, userObject, '');
     });
 }
 
@@ -296,18 +300,18 @@ function accountSetup(req, res, next) {
     debug('acountSetup: with token %s.', req.body.resetToken);
 
     user.getByResetToken(req.body.resetToken, function (error, userObject) {
-        if (error) return res.redirect('/api/v1/session/account/setup?error=INVALID_TOKEN');
+        if (error) return renderAccountSetupSite(res, req, {}, 'Invalid Reset Token');
 
         userObject.username = req.body.username;
         userObject.displayName = req.body.displayName;
 
         user.update(userObject.id, userObject.username, userObject.email, userObject.displayName, function (error) {
-            if (error && error.reason === UserError.ALREADY_EXISTS) return res.redirect('/api/v1/session/account/setup?error=ALREADY_EXISTS');
+            if (error && error.reason === UserError.ALREADY_EXISTS) return renderAccountSetupSite(res, req, userObject, 'Username already exists');
             if (error) return next(new HttpError(500, error));
 
             // setPassword clears the resetToken
             user.setPassword(userObject.id, req.body.password, function (error, result) {
-                if (error && error.reason === UserError.BAD_PASSWORD)  return res.redirect('/api/v1/session/account/setup?error=INVALID_PASSWORD');
+                if (error && error.reason === UserError.BAD_PASSWORD) return renderAccountSetupSite(res, req, userObject, 'Password invalid');
                 if (error) return next(new HttpError(500, error));
 
                 res.redirect(util.format('%s?accessToken=%s&expiresAt=%s', config.adminOrigin(), result.token, result.expiresAt));

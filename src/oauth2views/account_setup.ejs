@@ -13,7 +13,7 @@ app.controller('Controller', [function () {}]);
 </script>
 
 <center>
-    <h1>Hello <%= user.username %>, welcome to your Cloudron.</h1>
+    <h1>Hello <%= (user && user.email) ? user.email : '' %>, welcome to your Cloudron.</h1>
     <h4>Setup your account and password.</h4>
 </center>
 
@@ -23,6 +23,8 @@ app.controller('Controller', [function () {}]);
             <form action="/api/v1/session/account/setup" method="post" name="setupForm" autocomplete="off" role="form" novalidate>
                 <input type="hidden" name="_csrf" value="<%= csrf %>"/>
                 <input type="hidden" name="resetToken" value="<%= resetToken %>"/>
+
+                <p class="has-error">{{ error }}</p>
 
                 <div class="form-group" ng-class="{ 'has-error': (setupForm.username.$dirty && setupForm.username.$invalid) }">
                     <label class="control-label">Username</label>
