@@ -70,8 +70,24 @@ function setup(done) {
         ldapServer.start.bind(null),
         appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit),
         appdb.update.bind(null, APP_0.id, { containerId: APP_0.containerId }),
-        user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName),
-        user.create.bind(null, USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, { invitor: USER_0 })
+        function (callback) {
+            user.createOwner(USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, function (error, result) {
+                if (error) return callback(error);
+
+                USER_0.id = result.id;
+
+                callback(null);
+            });
+        },
+        function (callback) {
+            user.create(USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, { invitor: USER_0 }, function (error, result) {
+                if (error) return callback(error);
+
+                USER_1.id = result.id;
+
+                callback(null);
+            });
+        }
     ], function (error) {
         if (error) return done(error);
 
@@ -177,7 +193,7 @@ describe('Ldap', function () {
         it('fails with accessRestriction denied', function (done) {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
-            appdb.update(APP_0.id, { accessRestriction: { users: [ USER_1.username ], groups: [] }}, function (error) {
+            appdb.update(APP_0.id, { accessRestriction: { users: [ USER_1.id ], groups: [] }}, function (error) {
                 expect(error).to.eql(null);
 
                 client.bind('cn=' + USER_0.username + ',ou=users,dc=cloudron', USER_0.password, function (error) {
@@ -190,7 +206,7 @@ describe('Ldap', function () {
         it('succeeds with accessRestriction allowed', function (done) {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
-            appdb.update(APP_0.id, { accessRestriction: { users: [ USER_1.username, USER_0.username ], groups: [] }}, function (error) {
+            appdb.update(APP_0.id, { accessRestriction: { users: [ USER_1.id, USER_0.id ], groups: [] }}, function (error) {
                 expect(error).to.eql(null);
 
                 client.bind('cn=' + USER_0.username + ',ou=users,dc=cloudron', USER_0.password, function (error) {
@@ -241,6 +257,7 @@ describe('Ldap', function () {
                 result.on('end', function (result) {
                     expect(result.status).to.equal(0);
                     expect(entries.length).to.equal(2);
+                    entries.sort(function (a, b) { return a.username > b.username; });
                     expect(entries[0].username).to.equal(USER_0.username);
                     expect(entries[1].username).to.equal(USER_1.username);
                     done();
@@ -266,6 +283,7 @@ describe('Ldap', function () {
                 result.on('end', function (result) {
                     expect(result.status).to.equal(0);
                     expect(entries.length).to.equal(2);
+                    entries.sort(function (a, b) { return a.username > b.username; });
                     expect(entries[0].username).to.equal(USER_0.username);
                     expect(entries[1].username).to.equal(USER_1.username);
                     done();
@@ -320,11 +338,11 @@ describe('Ldap', function () {
                     expect(entries.length).to.equal(2);
                     expect(entries[0].cn).to.equal('users');
                     expect(entries[0].memberuid.length).to.equal(2);
-                    expect(entries[0].memberuid[0]).to.equal(USER_0.username);
-                    expect(entries[0].memberuid[1]).to.equal(USER_1.username);
+                    expect(entries[0].memberuid[0]).to.equal(USER_0.id);
+                    expect(entries[0].memberuid[1]).to.equal(USER_1.id);
                     expect(entries[1].cn).to.equal('admins');
                     // if only one entry, the array becomes a string :-/
-                    expect(entries[1].memberuid).to.equal(USER_0.username);
+                    expect(entries[1].memberuid).to.equal(USER_0.id);
                     done();
                 });
             });
@@ -350,11 +368,11 @@ describe('Ldap', function () {
                     expect(entries.length).to.equal(2);
                     expect(entries[0].cn).to.equal('users');
                     expect(entries[0].memberuid.length).to.equal(2);
-                    expect(entries[0].memberuid[0]).to.equal(USER_0.username);
-                    expect(entries[0].memberuid[1]).to.equal(USER_1.username);
+                    expect(entries[0].memberuid[0]).to.equal(USER_0.id);
+                    expect(entries[0].memberuid[1]).to.equal(USER_1.id);
                     expect(entries[1].cn).to.equal('admins');
                     // if only one entry, the array becomes a string :-/
-                    expect(entries[1].memberuid).to.equal(USER_0.username);
+                    expect(entries[1].memberuid).to.equal(USER_0.id);
                     done();
                 });
             });
@@ -364,7 +382,7 @@ describe('Ldap', function () {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
             var opts = {
-                filter: '&(objectclass=group)(memberuid=' + USER_1.username + ')'
+                filter: '&(objectclass=group)(memberuid=' + USER_1.id + ')'
             };
 
             client.search('ou=groups,dc=cloudron', opts, function (error, result) {
