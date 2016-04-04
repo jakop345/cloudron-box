@@ -61,7 +61,7 @@ function checkMails(number, done) {
 describe('User API', function () {
     this.timeout(5000);
 
-    var user_0 = null;
+    var user_0, user_1, user_2, user_3 = null;
     var token = null;
     var token_1 = tokendb.generateToken();
     var token_2 = tokendb.generateToken();
@@ -107,6 +107,7 @@ describe('User API', function () {
                .query({ setupToken: 'somesetuptoken' })
                .send({ username: USERNAME_0, password: PASSWORD, email: EMAIL_0 })
                .end(function (err, res) {
+            expect(err).to.eql(null);
             expect(res.statusCode).to.equal(201);
 
             // stash for later use
@@ -114,7 +115,16 @@ describe('User API', function () {
 
             expect(scope1.isDone()).to.be.ok();
             expect(scope2.isDone()).to.be.ok();
-            done(err);
+
+            superagent.get(SERVER_URL + '/api/v1/profile').query({ access_token: token }).end(function (error, result) {
+                expect(error).to.eql(null);
+                expect(result.status).to.equal(200);
+
+                // stash for further use
+                user_0 = result.body;
+
+                done();
+            });
         });
     });
 
@@ -127,17 +137,24 @@ describe('User API', function () {
         });
     });
 
-    it('can get userInfo with token', function (done) {
+    it('canno get userInfo by username', function (done) {
         superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        .query({ access_token: token })
+        .end(function (err, res) {
+            expect(res.statusCode).to.equal(404);
+
+            done();
+        });
+    });
+
+    it('can get userInfo with token', function (done) {
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id)
         .query({ access_token: token })
         .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME_0);
             expect(res.body.email).to.equal(EMAIL_0);
             expect(res.body.admin).to.be.ok();
-
-            // stash for further use
-            user_0 = res.body;
 
             done();
         });
@@ -162,7 +179,7 @@ describe('User API', function () {
     });
 
     it('can get userInfo with token', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -174,7 +191,7 @@ describe('User API', function () {
     });
 
     it('cannot get userInfo only with basic auth', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id)
                .auth(USERNAME_0, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
@@ -183,7 +200,7 @@ describe('User API', function () {
     });
 
     it('cannot get userInfo with invalid token (token length)', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: 'x' + token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
@@ -192,7 +209,7 @@ describe('User API', function () {
     });
 
     it('cannot get userInfo with invalid token (wrong token)', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token.toUpperCase() })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
@@ -201,7 +218,7 @@ describe('User API', function () {
     });
 
     it('can get userInfo with token in auth header', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id)
                .set('Authorization', 'Bearer ' + token)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -216,7 +233,7 @@ describe('User API', function () {
     });
 
     it('cannot get userInfo with invalid token in auth header', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id)
                .set('Authorization', 'Bearer ' + 'x' + token)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
@@ -225,7 +242,7 @@ describe('User API', function () {
     });
 
     it('cannot get userInfo with invalid token (wrong token)', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id)
                .set('Authorization', 'Bearer ' + 'x' + token.toUpperCase())
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
@@ -239,13 +256,15 @@ describe('User API', function () {
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
                .send({ username: USERNAME_1, email: EMAIL_1, invite: true })
-               .end(function (err, res) {
-            expect(err).to.not.be.ok();
-            expect(res.statusCode).to.equal(201);
+               .end(function (error, result) {
+            expect(error).to.not.be.ok();
+            expect(result.statusCode).to.equal(201);
+
+            user_1 = result.body.userInfo;
 
             checkMails(2, function () {
               // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-              tokendb.add(token_1, tokendb.PREFIX_USER + USERNAME_1, 'test-client-id',  Date.now() + 10000, '*', done);
+              tokendb.add(token_1, tokendb.PREFIX_USER + user_1.id, 'test-client-id',  Date.now() + 10000, '*', done);
             });
         });
     });
@@ -266,7 +285,7 @@ describe('User API', function () {
     it('reinvite second user succeeds', function (done) {
         mailer._clearMailQueue();
 
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/invite')
+        superagent.post(SERVER_URL + '/api/v1/users/' + user_1.id + '/invite')
                .query({ access_token: token })
                .send({})
                .end(function (err, res) {
@@ -277,13 +296,13 @@ describe('User API', function () {
     });
 
     it('set second user as admin succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/set_groups')
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_1.id + '/set_groups')
                .query({ access_token: token })
                .send({ groupIds: [ groups.ADMIN_GROUP_ID ] })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(204);
 
-            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+            superagent.get(SERVER_URL + '/api/v1/users/' + user_1.id)
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -295,7 +314,7 @@ describe('User API', function () {
     });
 
     it('remove itself from admins fails', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/set_groups')
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id + '/set_groups')
                .query({ access_token: token })
                .send({ groupIds: [ 'somegroupid' ] })
                .end(function (err, res) {
@@ -305,13 +324,13 @@ describe('User API', function () {
     });
 
     it('remove second user from admins succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/set_groups')
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_1.id + '/set_groups')
                .query({ access_token: token })
                .send({ groupIds: [ 'somegroupid' ] })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(204);
 
-            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+            superagent.get(SERVER_URL + '/api/v1/users/' + user_1.id)
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -358,26 +377,30 @@ describe('User API', function () {
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
                .send({ username: USERNAME_2, email: EMAIL_2, invite: false })
-               .end(function (error, res) {
-            expect(res.statusCode).to.equal(201);
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(201);
+
+            user_2 = result.body.userInfo;
 
             superagent.post(SERVER_URL + '/api/v1/users')
                    .query({ access_token: token })
                    .send({ username: USERNAME_3, email: EMAIL_3, invite: true })
-                   .end(function (error, res) {
-                expect(res.statusCode).to.equal(201);
+                   .end(function (error, result) {
+                expect(result.statusCode).to.equal(201);
+
+                user_3 = result.body.userInfo;
 
                 // one mail for first user creation, two mails for second user creation (see 'invite' flag)
                 checkMails(3, function () {
                     // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-                    tokendb.add(token_2, tokendb.PREFIX_USER + USERNAME_2, 'test-client-id',  Date.now() + 10000, '*', done);
+                    tokendb.add(token_2, tokendb.PREFIX_USER + user_2.id, 'test-client-id',  Date.now() + 10000, '*', done);
                 });
             });
         });
     });
 
     it('second user userInfo fails for first user', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_2.id)
                .query({ access_token: token_1 })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(403);
@@ -386,7 +409,7 @@ describe('User API', function () {
     });
 
     it('second user userInfo succeeds for second user', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_2.id)
                .query({ access_token: token_2 })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(200);
@@ -440,7 +463,7 @@ describe('User API', function () {
     });
 
     it('user removes himself is not allowed', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.del(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
                .send({ password: PASSWORD })
                .end(function (err, res) {
@@ -450,7 +473,7 @@ describe('User API', function () {
     });
 
     it('admin cannot remove normal user without giving a password', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+        superagent.del(SERVER_URL + '/api/v1/users/' + user_1.id)
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
@@ -459,7 +482,7 @@ describe('User API', function () {
     });
 
     it('admin cannot remove normal user with empty password', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+        superagent.del(SERVER_URL + '/api/v1/users/' + user_1.id)
                .query({ access_token: token })
                .send({ password: '' })
                .end(function (err, res) {
@@ -469,7 +492,7 @@ describe('User API', function () {
     });
 
     it('admin cannot remove normal user with giving wrong password', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+        superagent.del(SERVER_URL + '/api/v1/users/' + user_1.id)
                .query({ access_token: token })
                .send({ password: PASSWORD + PASSWORD })
                .end(function (err, res) {
@@ -479,7 +502,7 @@ describe('User API', function () {
     });
 
     it('admin removes normal user', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+        superagent.del(SERVER_URL + '/api/v1/users/' + user_1.id)
                .query({ access_token: token })
                .send({ password: PASSWORD })
                .end(function (err, res) {
@@ -489,7 +512,7 @@ describe('User API', function () {
     });
 
     it('admin removes himself should not be allowed', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.del(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
                .send({ password: PASSWORD })
                .end(function (err, res) {
@@ -500,7 +523,7 @@ describe('User API', function () {
 
     // Change email
     it('change email fails due to missing token', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
                .send({ email: EMAIL_0_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(401);
@@ -509,7 +532,7 @@ describe('User API', function () {
     });
 
     it('change email fails due to invalid email', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
                .send({ email: 'foo@bar' })
                .end(function (error, result) {
@@ -519,7 +542,7 @@ describe('User API', function () {
     });
 
     it('change email for other user fails', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token_2 })
                .send({ email: 'foobar@bar.baz' })
                .end(function (error, result) {
@@ -529,7 +552,7 @@ describe('User API', function () {
     });
 
     it('change user succeeds without email nor displayName', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
                .send({})
                .end(function (error, result) {
@@ -539,13 +562,13 @@ describe('User API', function () {
     });
 
     it('change email for own user succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_2.id)
                .query({ access_token: token_2 })
                .send({ email: EMAIL_2_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(204);
 
-            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+            superagent.get(SERVER_URL + '/api/v1/users/' + user_2.id)
                   .query({ access_token: token_2 })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -560,13 +583,13 @@ describe('User API', function () {
     });
 
     it('change email as admin for other user succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_2.id)
                .query({ access_token: token })
                .send({ email: EMAIL_2 })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(204);
 
-            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+            superagent.get(SERVER_URL + '/api/v1/users/' + user_2.id)
                   .query({ access_token: token })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -581,13 +604,13 @@ describe('User API', function () {
     });
 
     it('change displayName succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
                .send({ displayName: DISPLAY_NAME_0_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(204);
 
-            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+            superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id)
                   .query({ access_token: token })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
