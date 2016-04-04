@@ -350,6 +350,8 @@ function passwordReset(req, res, next) {
     user.getByResetToken(req.body.resetToken, function (error, userObject) {
         if (error) return next(new HttpError(401, 'Invalid resetToken'));
 
+        if (!userObject.username) return next(new HttpError(401, 'No username set'));
+
         // setPassword clears the resetToken
         user.setPassword(userObject.id, req.body.password, function (error, result) {
             if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(406, 'Password does not meet the requirements'));
