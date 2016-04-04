@@ -214,11 +214,11 @@ function requireAdmin(req, res, next) {
 function sendInvite(req, res, next) {
     assert.strictEqual(typeof req.params.userId, 'string');
 
-    user.sendInvite(req.params.userId, function (error) {
+    user.sendInvite(req.params.userId, function (error, result) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200, {}));
+        next(new HttpSuccess(200, { resetToken: result }));
     });
 }
 

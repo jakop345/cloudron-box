@@ -442,7 +442,7 @@ function sendInvite(userId, callback) {
 
             mailer.sendInvite(userObject, null);
 
-            callback(null);
+            callback(null, userObject.resetToken);
         });
     });
 }
