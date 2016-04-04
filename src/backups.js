@@ -96,11 +96,10 @@ function getBackupUrl(appBackupIds, callback) {
             var obj = {
                 id: filename,
                 url: result.url,
-                sessionToken: result.sessionToken,
                 backupKey: backupConfig.key
             };
 
-            debug('getBackupUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+            debug('getBackupUrl: id:%s url:%s backupKey:%s', obj.id, obj.url, obj.backupKey);
 
             backupdb.add({ filename: filename, creationTime: now, version: config.version(), type: backupdb.BACKUP_TYPE_BOX,
                            dependsOn: appBackupIds }, function (error) {
@@ -133,7 +132,6 @@ function getAppBackupUrl(app, callback) {
                     id: dataFilename,
                     url: dataResult.url,
                     configUrl: configResult.url,
-                    sessionToken: dataResult.sessionToken, // this token can be used for both config and data upload
                     backupKey: backupConfig.key // only data is encrypted
                 };
 
@@ -164,11 +162,10 @@ function getRestoreUrl(backupId, callback) {
             var obj = {
                 id: backupId,
                 url: result.url,
-                sessionToken: result.sessionToken,
                 backupKey: backupConfig.key
             };
 
-            debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+            debug('getRestoreUrl: id:%s url:%s backupKey:%s', obj.id, obj.url, obj.backupKey);
 
             callback(null, obj);
         });

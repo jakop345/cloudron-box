@@ -13,13 +13,12 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
 fi
 
 if [ $# -lt 2 ]; then
-    echo "Usage: backupbox.sh <url> <key> [aws session token]"
+    echo "Usage: backupbox.sh <url> <key>"
     exit 1
 fi
 
 backup_url="$1"
 backup_key="$2"
-session_token="$3"
 now=$(date "+%Y-%m-%dT%H:%M:%S")
 BOX_DATA_DIR="${HOME}/data/box"
 box_snapshot_dir="${HOME}/data/snapshots/box-${now}"
@@ -35,11 +34,6 @@ for try in `seq 1 5`; do
     error_log=$(mktemp)
 
     headers=("-H" "Content-Type:")
-
-    # federated tokens in CaaS case need session token
-    if [ ! -z "$session_token" ]; then
-        headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
-    fi
 
     if tar -cvzf - -C "${box_snapshot_dir}" . \
            | openssl aes-256-cbc -e -pass "pass:${backup_key}" \

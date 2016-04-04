@@ -885,7 +885,7 @@ function createNewBackup(app, addonsToBackup, callback) {
         async.series([
             ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
             addons.backupAddons.bind(null, app, addonsToBackup),
-            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.configUrl, result.backupKey, result.sessionToken ]),
+            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.configUrl, result.backupKey ]),
             ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
         ], function (error) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));

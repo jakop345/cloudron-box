@@ -81,7 +81,7 @@ function getSignedUploadUrl(apiConfig, filename, callback) {
 
         var url = s3.getSignedUrl('putObject', params);
 
-        callback(null, { url : url, sessionToken: credentials.sessionToken });
+        callback(null, { url : url });
     });
 }
 
@@ -104,7 +104,7 @@ function getSignedDownloadUrl(apiConfig, info, filename, callback) {
 
         var url = s3.getSignedUrl('getObject', params);
 
-        callback(null, { url: url, sessionToken: credentials.sessionToken });
+        callback(null, { url: url });
     });
 }
 

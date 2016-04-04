@@ -29,7 +29,6 @@ function getBackupCredentials(apiConfig, callback) {
         var credentials = {
             accessKeyId: result.body.credentials.AccessKeyId,
             secretAccessKey: result.body.credentials.SecretAccessKey,
-            sessionToken: result.body.credentials.SessionToken,
             region: apiConfig.region || 'us-east-1'
         };
 
@@ -75,7 +74,7 @@ function getSignedUploadUrl(apiConfig, filename, callback) {
 
         var url = s3.getSignedUrl('putObject', params);
 
-        callback(null, { url: url, sessionToken: credentials.sessionToken });
+        callback(null, { url: url });
     });
 }
 
@@ -100,7 +99,7 @@ function getSignedDownloadUrl(apiConfig, filename, callback) {
 
         var url = s3.getSignedUrl('getObject', params);
 
-        callback(null, { url: url, sessionToken: credentials.sessionToken });
+        callback(null, { url: url });
     });
 }
 
