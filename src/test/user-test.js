@@ -300,9 +300,10 @@ describe('User', function () {
         });
 
         it('succeeds', function (done) {
-            user.get(USERNAME, function (error, result) {
+            user.get(userObject.id, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
+                expect(result.id).to.equal(userObject.id);
                 expect(result.email).to.equal(EMAIL);
                 expect(result.username).to.equal(USERNAME);
                 expect(result.displayName).to.equal(DISPLAY_NAME);
@@ -317,7 +318,7 @@ describe('User', function () {
         after(cleanupUsers);
 
         it('fails due to unknown userid', function (done) {
-            user.update(USERNAME+USERNAME, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
+            user.update(USERNAME, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
                 expect(error).to.be.a(UserError);
                 expect(error.reason).to.equal(UserError.NOT_FOUND);
 
@@ -325,17 +326,8 @@ describe('User', function () {
             });
         });
 
-        it('fails due to invalid username', function (done) {
-            user.update(USERNAME, '', EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
-                expect(error).to.be.a(UserError);
-                expect(error.reason).to.equal(UserError.BAD_USERNAME);
-
-                done();
-            });
-        });
-
         it('fails due to invalid email', function (done) {
-            user.update(USERNAME, USERNAME_NEW, 'brokenemailaddress', DISPLAY_NAME_NEW, function (error) {
+            user.update(userObject.id, USERNAME_NEW, 'brokenemailaddress', DISPLAY_NAME_NEW, function (error) {
                 expect(error).to.be.a(UserError);
                 expect(error.reason).to.equal(UserError.BAD_EMAIL);
 
@@ -344,10 +336,10 @@ describe('User', function () {
         });
 
         it('succeeds', function (done) {
-            user.update(USERNAME, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
+            user.update(userObject.id, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
                 expect(error).to.not.be.ok();
 
-                user.get(USERNAME, function (error, result) {
+                user.get(userObject.id, function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
                     expect(result.email).to.equal(EMAIL_NEW);
@@ -360,10 +352,10 @@ describe('User', function () {
         });
 
         it('succeeds with same data', function (done) {
-            user.update(USERNAME, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
+            user.update(userObject.id, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
                 expect(error).to.not.be.ok();
 
-                user.get(USERNAME, function (error, result) {
+                user.get(userObject.id, function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
                     expect(result.email).to.equal(EMAIL_NEW);
@@ -392,7 +384,9 @@ describe('User', function () {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
-                groups.setGroups(user1.username, [ groups.ADMIN_GROUP_ID ], function (error) {
+                user1.id = result.id;
+
+                groups.setGroups(user1.id, [ groups.ADMIN_GROUP_ID ], function (error) {
                     expect(error).to.not.be.ok();
 
                     // one mail for user creation, one mail for admin change
@@ -434,7 +428,9 @@ describe('User', function () {
                 expect(error).to.eql(null);
                 expect(result).to.be.ok();
 
-                groups.setGroups(user1.username, [ groups.ADMIN_GROUP_ID ], function (error) {
+                user1.id = result.id;
+
+                groups.setGroups(user1.id, [ groups.ADMIN_GROUP_ID ], function (error) {
                     expect(error).to.eql(null);
 
                     user.getAllAdmins(function (error, admins) {
