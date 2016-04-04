@@ -90,8 +90,6 @@ function getRestoreUrl(apiConfig, filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!apiConfig.bucket || !apiConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
-
     getBackupCredentials(apiConfig, function (error, credentials) {
         if (error) return callback(error);
 
