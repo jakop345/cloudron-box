@@ -101,7 +101,7 @@ function getBackupUrl(appBackupIds, callback) {
 
             debug('getBackupUrl: id:%s url:%s backupKey:%s', obj.id, obj.url, obj.backupKey);
 
-            backupdb.add({ filename: filename, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
+            backupdb.add({ id: filename, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                 callback(null, obj);
@@ -136,7 +136,7 @@ function getAppBackupUrl(app, callback) {
 
                 debug('getAppBackupUrl: %j', obj);
 
-                backupdb.add({ filename: dataFilename, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+                backupdb.add({ id: dataFilename, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
                     if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                     callback(null, obj);
