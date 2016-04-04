@@ -31,7 +31,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         error: {},
         userInfo: {},
         email: '',
-        displayName: '',
         superuser: false
     };
 
@@ -242,9 +241,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     };
 
     $scope.showUserEdit = function (userInfo) {
-        $scope.useredit.error.displayName = null;
         $scope.useredit.error.email = null;
-        $scope.useredit.displayName = userInfo.displayName;
         $scope.useredit.email = userInfo.email;
         $scope.useredit.userInfo = userInfo;
         $scope.useredit.groupIds = angular.copy(userInfo.groupIds);
@@ -266,14 +263,12 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     };
 
     $scope.doUserEdit = function () {
-        $scope.useredit.error.displayName = null;
         $scope.useredit.error.email = null;
         $scope.useredit.busy = true;
 
         var data = {
             id: $scope.useredit.userInfo.id,
-            email: $scope.useredit.email,
-            displayName: $scope.useredit.displayName
+            email: $scope.useredit.email
         };
 
         Client.updateUser(data, function (error) {
@@ -295,7 +290,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
                 $scope.useredit.userInfo = {};
                 $scope.useredit.email = '';
-                $scope.useredit.displayName = '';
                 $scope.useredit.superuser = false;
                 $scope.useredit.groupIds = [];
 

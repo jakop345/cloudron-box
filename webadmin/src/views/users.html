@@ -102,13 +102,6 @@
             <div class="modal-body">
                 <form name="useredit_form" role="form" ng-submit="doUserEdit()" autocomplete="off">
                     <input type="password" style="display: none;">
-                    <div class="form-group" ng-class="{ 'has-error': (useredit_form.displayName.$dirty && useredit_form.displayName.$invalid) || (!useredit_form.displayName.$dirty && useredit.error.displayName) }">
-                        <label class="control-label">Full Name</label>
-                        <div class="control-label" ng-show="(!useredit_form.displayName.$dirty && useredit.error.displayName) || (useredit_form.displayName.$dirty && useredit_form.displayName.$invalid)">
-                            <small ng-show="useredit_form.error.displayName">Invalid name</small>
-                        </div>
-                        <input type="text" class="form-control" ng-model="useredit.displayName" name="displayName" placeholder="Full Name" autofocus>
-                    </div>
                     <div class="form-group" ng-class="{ 'has-error': (useredit_form.email.$dirty && useredit_form.email.$invalid) || (!useredit_form.email.$dirty && useredit.error.email) }">
                         <label class="control-label">Email</label>
                         <div class="control-label" ng-show="(!useredit_form.email.$dirty && useredit.error.email) || (useredit_form.email.$dirty && useredit_form.email.$invalid) || (!useredit_form.email.$dirty && useredit.error.email)">
