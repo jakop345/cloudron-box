@@ -412,7 +412,7 @@ function createOwner(username, password, email, displayName, callback) {
     assert.strictEqual(typeof displayName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (username === '') return new UserError(UserError.BAD_USERNAME, 'Username cannot be empty');
+    if (username === '') return callback(new UserError(UserError.BAD_USERNAME, 'Username cannot be empty'));
 
     userdb.count(function (error, count) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
