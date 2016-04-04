@@ -79,28 +79,19 @@ function getSignedUploadUrl(apiConfig, filename, callback) {
     });
 }
 
-function getRestoreUrl(apiConfig, filename, callback) {
+function getRestoreUrl(apiConfig, backupId, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof filename, 'string');
+    assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!apiConfig.bucket || !apiConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/restoreurl';
 
-    getBackupCredentials(apiConfig, function (error, credentials) {
-        if (error) return callback(error);
+    superagent.put(url).query({ token: config.token(), backupId: backupId }).end(function (error, result) {
+        if (error && !error.response) return callback(error);
+        if (result.statusCode !== 201) return callback(new Error(result.text));
+        if (!result.body || !result.body.url) return callback(new Error('Unexpected response'));
 
-        credentials.region = apiConfig.region; // use same region as where we uploaded
-        var s3 = new AWS.S3(credentials);
-
-        var params = {
-            Bucket: apiConfig.bucket,
-            Key: apiConfig.prefix + '/' + filename,
-            Expires: 60 * 30 /* 30 minutes */
-        };
-
-        var url = s3.getSignedUrl('getObject', params);
-
-        callback(null, { url: url });
+        return callback(null, { url: result.body.url });
     });
 }
 
