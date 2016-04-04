@@ -478,18 +478,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.setAdmin = function (username, admin, callback) {
-        var payload = {
-            username: username,
-            admin: admin
-        };
-
-        $http.post(client.apiOrigin + '/api/v1/users/' + username + '/admin', payload).success(function (data, status) {
-            if (status !== 204) return callback(new ClientError(status, data));
-            callback(null);
-        }).error(defaultErrorHandler(callback));
-    };
-
     Client.prototype.createAdmin = function (username, password, email, displayName, setupToken, callback) {
         var payload = {
             username: username,

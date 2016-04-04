@@ -148,14 +148,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         return !!user.admin;
     };
 
-    $scope.toggleAdmin = function (user) {
-        Client.setAdmin(user.username, !user.admin, function (error) {
-            if (error) return console.error(error);
-
-            user.admin = !user.admin;
-        });
-    };
-
     $scope.sendInvite = function (user) {
         $scope.inviteSent.email = user.email;
         $scope.inviteSent.setupLink = '';
