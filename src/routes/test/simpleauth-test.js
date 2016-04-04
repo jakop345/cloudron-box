@@ -39,7 +39,7 @@ describe('SimpleAuth API', function () {
         manifest: { version: '0.1.0', addons: { } },
         location: 'test1',
         portBindings: {},
-        accessRestriction: { users: [ 'foobar', USERNAME, 'someone' ] },
+        accessRestriction: { users: [ 'foobar', 'someone' ] },
         memoryLimit: 0
     };
 
@@ -138,7 +138,14 @@ describe('SimpleAuth API', function () {
                     expect(scope1.isDone()).to.be.ok();
                     expect(scope2.isDone()).to.be.ok();
 
-                    callback();
+                    superagent.get(SERVER_URL + '/api/v1/profile').query({ access_token: result.body.token}).end(function (error, result) {
+                        expect(error).to.not.be.ok();
+                        expect(result.statusCode).to.eql(200);
+
+                        APP_1.accessRestriction.users.push(result.body.id);
+
+                        callback();
+                    });
                 });
             },
 
