@@ -285,6 +285,7 @@ function updateUser(userId, username, email, displayName, callback) {
     if (error) return callback(error);
 
     userdb.update(userId, { username: username, email: email, displayName: displayName }, function (error) {
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error));
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         callback(null);

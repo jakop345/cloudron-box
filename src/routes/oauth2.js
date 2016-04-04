@@ -296,17 +296,18 @@ function accountSetup(req, res, next) {
     debug('acountSetup: with token %s.', req.body.resetToken);
 
     user.getByResetToken(req.body.resetToken, function (error, userObject) {
-        if (error) return next(new HttpError(401, 'Invalid resetToken'));
+        if (error) return res.redirect('/api/v1/session/account/setup?error=INVALID_TOKEN');
 
         userObject.username = req.body.username;
         userObject.displayName = req.body.displayName;
 
         user.update(userObject.id, userObject.username, userObject.email, userObject.displayName, function (error) {
+            if (error && error.reason === UserError.ALREADY_EXISTS) return res.redirect('/api/v1/session/account/setup?error=ALREADY_EXISTS');
             if (error) return next(new HttpError(500, error));
 
             // setPassword clears the resetToken
             user.setPassword(userObject.id, req.body.password, function (error, result) {
-                if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(406, 'Password does not meet the requirements'));
+                if (error && error.reason === UserError.BAD_PASSWORD)  return res.redirect('/api/v1/session/account/setup?error=INVALID_PASSWORD');
                 if (error) return next(new HttpError(500, error));
 
                 res.redirect(util.format('%s?accessToken=%s&expiresAt=%s', config.adminOrigin(), result.token, result.expiresAt));
