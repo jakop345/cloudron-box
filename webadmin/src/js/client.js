@@ -625,7 +625,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             newPassword: newPassword
         };
 
-        $http.post(client.apiOrigin + '/api/v1/users/' + this._userInfo.username + '/password', data).success(function(data, status) {
+        $http.post(client.apiOrigin + '/api/v1/users/' + this._userInfo.id + '/password', data).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
