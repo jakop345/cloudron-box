@@ -1,5 +1,3 @@
-/* jslint node: true */
-
 'use strict';
 
 exports = module.exports = {
@@ -199,6 +197,8 @@ function render(templateFile, params) {
 function getAdminEmails(callback) {
     users.getAllAdmins(function (error, admins) {
         if (error) return callback(error);
+
+        if (admins.length === 0) return callback(new Error('No admins on this cloudron')); // box not activated yet
 
         var adminEmails = [ ];
         admins.forEach(function (admin) { adminEmails.push(admin.email); });
