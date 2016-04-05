@@ -126,13 +126,21 @@ function initialize(callback) {
     exports.events.on(exports.EVENT_CONFIGURED, addDnsRecords);
     exports.events.on(exports.EVENT_FIRST_RUN, installAppBundle);
 
-    if (!fs.existsSync(paths.FIRST_RUN_FILE)) {
-        // EE API is sync. do not keep the server waiting
-        process.nextTick(function () { exports.events.emit(exports.EVENT_FIRST_RUN); });
-        fs.writeFileSync(paths.FIRST_RUN_FILE, 'been there, done that', 'utf8');
-    }
+    // check activation state for existing cloudrons that do not have first run file
+    // can be removed once cloudrons have been updated
+    isActivated(function (error, activated) {
+        if (error) return callback(error);
 
-    syncConfigState(callback);
+        if (activated) fs.writeFileSync(paths.FIRST_RUN_FILE, 'been there, done that', 'utf8');
+
+        if (!fs.existsSync(paths.FIRST_RUN_FILE)) {
+            // EE API is sync. do not keep the server waiting
+            process.nextTick(function () { exports.events.emit(exports.EVENT_FIRST_RUN); });
+            fs.writeFileSync(paths.FIRST_RUN_FILE, 'been there, done that', 'utf8');
+        }
+
+        syncConfigState(callback);
+    });
 }
 
 function uninitialize(callback) {
@@ -146,6 +154,15 @@ function uninitialize(callback) {
 
 function isConfiguredSync() {
     return gIsConfigured === true;
+}
+
+function isActivated(callback) {
+    user.getOwner(function (error) {
+        if (error && error.reason === UserError.NOT_FOUND) return callback(null, false);
+        if (error) return callback(error);
+
+        callback(null, true);
+    });
 }
 
 function isConfigured(callback) {
