@@ -44,7 +44,7 @@ function initialize(callback) {
 
     passport.use(new LocalStrategy(function (username, password, callback) {
         if (username.indexOf('@') === -1) {
-            user.verify(username, password, function (error, result) {
+            user.verifyWithUsername(username, password, function (error, result) {
                 if (error && error.reason === UserError.NOT_FOUND) return callback(null, false);
                 if (error && error.reason === UserError.WRONG_PASSWORD) return callback(null, false);
                 if (error) return callback(error);
@@ -74,7 +74,7 @@ function initialize(callback) {
                 return callback(null, client);
             });
         } else {
-            user.verify(username, password, function (error, result) {
+            user.verifyWithUsername(username, password, function (error, result) {
                 if (error && error.reason === UserError.NOT_FOUND) return callback(null, false);
                 if (error && error.reason === UserError.WRONG_PASSWORD) return callback(null, false);
                 if (error) return callback(error);

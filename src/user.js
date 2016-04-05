@@ -8,6 +8,7 @@ exports = module.exports = {
     list: listUsers,
     create: createUser,
     verify: verify,
+    verifyWithUsername: verifyWithUsername,
     verifyWithEmail: verifyWithEmail,
     remove: removeUser,
     get: getUser,
@@ -167,7 +168,28 @@ function createUser(username, password, email, displayName, options, callback) {
     });
 }
 
-function verify(username, password, callback) {
+function verify(userId, password, callback) {
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof password, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    userdb.get(userId, function (error, user) {
+        if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        var saltBinary = new Buffer(user.salt, 'hex');
+        crypto.pbkdf2(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
+            if (derivedKeyHex !== user.password) return callback(new UserError(UserError.WRONG_PASSWORD));
+
+            callback(null, user);
+        });
+    });
+}
+
+function verifyWithUsername(username, password, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -398,7 +420,7 @@ function changePassword(username, oldPassword, newPassword, callback) {
     var error = validatePassword(newPassword);
     if (error) return callback(new UserError(UserError.BAD_PASSWORD, error.message));
 
-    verify(username, oldPassword, function (error, user) {
+    verifyWithUsername(username, oldPassword, function (error, user) {
         if (error) return callback(error);
 
         setPassword(user.id, newPassword, callback);

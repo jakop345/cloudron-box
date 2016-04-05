@@ -196,7 +196,7 @@ function verifyPassword(req, res, next) {
         // Only allow admins or users, operating on themselves
         if (req.params.userId && !(req.user.id === req.params.userId || isAdmin)) return next(new HttpError(403, 'Not allowed'));
 
-        user.verify(req.user.username, req.body.password, function (error) {
+        user.verifyWithUsername(req.user.username, req.body.password, function (error) {
             if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Password incorrect'));
             if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Password incorrect'));
             if (error) return next(new HttpError(500, error));

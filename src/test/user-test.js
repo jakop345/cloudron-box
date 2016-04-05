@@ -202,8 +202,8 @@ describe('User', function () {
         before(createOwner);
         after(cleanupUsers);
 
-        it('fails due to non existing username', function (done) {
-            user.verify(USERNAME+USERNAME, PASSWORD, function (error, result) {
+        it('fails due to non existing user', function (done) {
+            user.verify('somerandomid', PASSWORD, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.NOT_FOUND);
@@ -213,7 +213,7 @@ describe('User', function () {
         });
 
         it('fails due to empty password', function (done) {
-            user.verify(USERNAME, '', function (error, result) {
+            user.verify(userObject.id, '', function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
@@ -223,7 +223,7 @@ describe('User', function () {
         });
 
         it('fails due to wrong password', function (done) {
-            user.verify(USERNAME, PASSWORD+PASSWORD, function (error, result) {
+            user.verify(userObject.id, PASSWORD+PASSWORD, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
@@ -233,7 +233,51 @@ describe('User', function () {
         });
 
         it('succeeds', function (done) {
-            user.verify(USERNAME, PASSWORD, function (error, result) {
+            user.verify(userObject.id, PASSWORD, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+
+                done();
+            });
+        });
+    });
+
+    describe('verifyWithUsername', function () {
+        before(createOwner);
+        after(cleanupUsers);
+
+        it('fails due to non existing username', function (done) {
+            user.verifyWithUsername(USERNAME+USERNAME, PASSWORD, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.NOT_FOUND);
+
+                done();
+            });
+        });
+
+        it('fails due to empty password', function (done) {
+            user.verifyWithUsername(USERNAME, '', function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
+
+                done();
+            });
+        });
+
+        it('fails due to wrong password', function (done) {
+            user.verifyWithUsername(USERNAME, PASSWORD+PASSWORD, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
+
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            user.verifyWithUsername(USERNAME, PASSWORD, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
@@ -493,7 +537,7 @@ describe('User', function () {
         });
 
         it('actually changed the password (unable to login with old pasword)', function (done) {
-            user.verify(USERNAME, PASSWORD, function (error, result) {
+            user.verifyWithUsername(USERNAME, PASSWORD, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
@@ -502,7 +546,7 @@ describe('User', function () {
         });
 
         it('actually changed the password (login with new password)', function (done) {
-            user.verify(USERNAME, NEW_PASSWORD, function (error, result) {
+            user.verifyWithUsername(USERNAME, NEW_PASSWORD, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 done();
