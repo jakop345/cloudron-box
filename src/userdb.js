@@ -201,7 +201,7 @@ function update(userId, user, callback) {
         if (k === 'username') {
             assert.strictEqual(typeof user.username, 'string');
             args.push(user.username || null);
-        } if (k === 'email') {
+        } else if (k === 'email') {
             assert.strictEqual(typeof user.email, 'string');
             args.push(user.email.toLowerCase());
         } else {
