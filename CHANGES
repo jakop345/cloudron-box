@@ -454,3 +454,6 @@
 [0.11.1]
 - Improve the backup logic
 
+[0.11.2]
+- Allow users to choose a username on first sign up
+
