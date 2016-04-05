@@ -17,29 +17,16 @@ var config = null;
 
 describe('config', function () {
     before(function () {
-        safe.fs.unlinkSync(paths.DNS_IN_SYNC_FILE);
         delete require.cache[require.resolve('../config.js')];
         config = require('../config.js');
     });
 
     after(function () {
-        safe.fs.unlinkSync(paths.DNS_IN_SYNC_FILE);
         delete require.cache[require.resolve('../config.js')];
     });
 
     it('baseDir() is set', function (done) {
         expect(config.baseDir()).to.be.ok();
-        done();
-    });
-
-    it('dnsInSync() is unset', function (done) {
-        expect(config.dnsInSync()).to.not.be.ok();
-        done();
-    });
-
-    it('dnsInSync() is set', function (done) {
-        config.setDnsInSync();
-        expect(config.dnsInSync()).to.be.ok();
         done();
     });
 

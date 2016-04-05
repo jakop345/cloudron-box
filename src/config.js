@@ -4,8 +4,6 @@
 
 exports = module.exports = {
     baseDir: baseDir,
-    dnsInSync: dnsInSync,
-    setDnsInSync: setDnsInSync,
 
     // values set here will be lost after a upgrade/update. use the sqlite database
     // for persistent values that need to be backed up
@@ -58,14 +56,6 @@ function baseDir() {
 }
 
 var cloudronConfigFileName = path.join(baseDir(), 'configs/cloudron.conf');
-
-function dnsInSync() {
-    return !!safe.fs.statSync(require('./paths.js').DNS_IN_SYNC_FILE);
-}
-
-function setDnsInSync(content) {
-    safe.fs.writeFileSync(require('./paths.js').DNS_IN_SYNC_FILE, content || 'if this file exists, dns is in sync');
-}
 
 function saveSync() {
     fs.writeFileSync(cloudronConfigFileName, JSON.stringify(data, null, 4)); // functions are ignored by JSON.stringify
