@@ -39,6 +39,8 @@ while true; do
 EOF
         # read possibly empty parameters here
         arg_app_bundle=$(echo "$2" | $json appBundle)
+        [[ "${arg_app_bundle}" === "null" ]] && arg_app_bundle="[]"
+
         arg_tls_cert=$(echo "$2" | $json tlsCert)
         arg_tls_key=$(echo "$2" | $json tlsKey)
         arg_token=$(echo "$2" | $json token)
