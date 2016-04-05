@@ -47,7 +47,7 @@ describe('database', function () {
 
         var USER_1 = {
             id: 'uuid456',
-            username: 'uuid456',
+            username: '',
             password: 'secret',
             email: 'safe2@me.com',
             salt: 'tata',
@@ -57,18 +57,28 @@ describe('database', function () {
             displayName: 'Herbert Heidelberg'
         };
 
+        var USER_2 = {
+            id: 'uuid457',
+            username: '',
+            password: 'secret',
+            email: 'safe3@me.com',
+            salt: 'tata',
+            createdAt: 'sometime back',
+            modifiedAt: 'now',
+            resetToken: '',
+            displayName: 'Herbert Heidelberg'
+        };
+
         it('can add user', function (done) {
-            userdb.add(USER_0.id, USER_0, function (error) {
-                expect(!error).to.be.ok();
-                done();
-            });
+            userdb.add(USER_0.id, USER_0, done);
         });
 
         it('can add another user', function (done) {
-            userdb.add(USER_1.id, USER_1, function (error) {
-                expect(!error).to.be.ok();
-                done();
-            });
+            userdb.add(USER_1.id, USER_1, done);
+        });
+
+        it('can add another user with empty username', function (done) {
+            userdb.add(USER_2.id, USER_2, done);
         });
 
         it('cannot add same user again', function (done) {
@@ -123,13 +133,22 @@ describe('database', function () {
         it('can get all with group ids', function (done) {
             userdb.getAllWithGroupIds(function (error, all) {
                 expect(error).to.not.be.ok();
-                expect(all.length).to.equal(2);
-                var user0Copy = _.extend({}, USER_0);
-                user0Copy.groupIds = [ ];
-                expect(all[0]).to.eql(user0Copy);
-                var user1Copy = _.extend({}, USER_1);
-                user1Copy.groupIds = [ ];
-                expect(all[1]).to.eql(user1Copy);
+                expect(all.length).to.equal(3);
+
+                var userCopy;
+
+                userCopy = _.extend({}, USER_0);
+                userCopy.groupIds = [ ];
+                expect(all[0]).to.eql(userCopy);
+
+                userCopy = _.extend({}, USER_1);
+                userCopy.groupIds = [ ];
+                expect(all[1]).to.eql(userCopy);
+
+                userCopy = _.extend({}, USER_2);
+                userCopy.groupIds = [ ];
+                expect(all[2]).to.eql(userCopy);
+
                 done();
             });
         });
@@ -145,7 +164,7 @@ describe('database', function () {
         it('counts the users', function (done) {
             userdb.count(function (error, count) {
                 expect(error).to.not.be.ok();
-                expect(count).to.equal(2);
+                expect(count).to.equal(3);
                 done();
             });
         });
@@ -185,7 +204,7 @@ describe('database', function () {
 
         it('did remove the user', function (done) {
             userdb.count(function (error, count) {
-                expect(count).to.equal(1);
+                expect(count).to.equal(2);
                 done();
             });
         });

@@ -25,6 +25,15 @@ var assert = require('assert'),
 
 var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'resetToken', 'displayName' ].join(',');
 
+function postProcess(result) {
+    assert.strictEqual(typeof result, 'object');
+
+    // The username may be null or undefined in the db, let's ensure it is a string
+    result.username = result.username || '';
+
+    return result;
+}
+
 function get(userId, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -33,7 +42,7 @@ function get(userId, callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        callback(null, result[0]);
+        callback(null, postProcess(result[0]));
     });
 }
 
@@ -45,7 +54,7 @@ function getByUsername(username, callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        callback(null, result[0]);
+        callback(null, postProcess(result[0]));
     });
 }
 
@@ -57,7 +66,7 @@ function getByEmail(email, callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        callback(null, result[0]);
+        callback(null, postProcess(result[0]));
     });
 }
 
@@ -70,7 +79,7 @@ function getOwner(callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        callback(null, result[0]);
+        callback(null, postProcess(result[0]));
     });
 }
 
@@ -84,7 +93,7 @@ function getByResetToken(resetToken, callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        callback(null, result[0]);
+        callback(null, postProcess(result[0]));
     });
 }
 
@@ -100,6 +109,8 @@ function getAllWithGroupIds(callback) {
             result.groupIds = result.groupIds ? result.groupIds.split(',') : [ ];
         });
 
+        results.forEach(postProcess);
+
         callback(null, results);
     });
 }
@@ -107,9 +118,10 @@ function getAllWithGroupIds(callback) {
 function getAllAdmins(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + USERS_FIELDS + ' FROM users, groupMembers WHERE groupMembers.groupId = ? AND users.id = groupMembers.userId',
-            [ groups.ADMIN_GROUP_ID ], function (error, results) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users, groupMembers WHERE groupMembers.groupId = ? AND users.id = groupMembers.userId', [ groups.ADMIN_GROUP_ID ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        results.forEach(postProcess);
 
         callback(null, results);
     });
@@ -127,9 +139,8 @@ function add(userId, user, callback) {
     assert.strictEqual(typeof user.displayName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var data = [ userId, user.username, user.password, user.email, user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName ];
-    database.query('INSERT INTO users (id, username, password, email, salt, createdAt, modifiedAt, resetToken, displayName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-           data, function (error, result) {
+    var data = [ userId, user.username || null, user.password, user.email, user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName ];
+    database.query('INSERT INTO users (id, username, password, email, salt, createdAt, modifiedAt, resetToken, displayName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', data, function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -165,7 +176,7 @@ function getByAccessToken(accessToken, callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        callback(null, result[0]);
+        callback(null, postProcess(result[0]));
     });
 }
 
@@ -186,7 +197,12 @@ function update(userId, user, callback) {
     var fields = [ ];
     for (var k in user) {
         fields.push(k + ' = ?');
-        args.push(user[k]);
+
+        if (k === 'username') {
+            args.push(user.username || null);
+        } else {
+            args.push(user[k]);
+        }
     }
     args.push(userId);
 
