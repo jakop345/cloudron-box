@@ -1,5 +1,3 @@
-/* jslint node: true */
-
 'use strict';
 
 exports = module.exports = {
@@ -84,6 +82,7 @@ function initConfig() {
     data.oauthProxyPort = 3003;
     data.simpleAuthPort = 3004;
     data.provider = 'caas';
+    data.appBundle = [ ];
 
     if (exports.CLOUDRON) {
         data.port = 3000;

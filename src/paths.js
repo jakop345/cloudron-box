@@ -1,5 +1,3 @@
-/* jslint node:true */
-
 'use strict';
 
 var config = require('./config.js'),
@@ -24,6 +22,7 @@ exports = module.exports = {
 
     CLOUDRON_AVATAR_FILE: path.join(config.baseDir(), 'data/box/avatar.png'),
     CLOUDRON_DEFAULT_AVATAR_FILE: path.join(__dirname + '/../assets/avatar.png'),
+    FIRST_RUN_FILE: path.join(config.baseDir(), 'data/box/first_run'),
 
     UPDATE_CHECKER_FILE: path.join(config.baseDir(), 'data/box/updatechecker.json'),
 

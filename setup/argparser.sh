@@ -21,6 +21,7 @@ arg_backup_config=""
 arg_dns_config=""
 arg_update_config=""
 arg_provider=""
+arg_app_bundle=""
 
 args=$(getopt -o "" -l "data:,retire" -n "$0" -- "$@")
 eval set -- "${args}"
@@ -37,6 +38,7 @@ while true; do
         $(echo "$2" | $json apiServerOrigin webServerOrigin fqdn isCustomDomain boxVersionsUrl version | tr '\n' ' ')
 EOF
         # read possibly empty parameters here
+        arg_app_bundle=$(echo "$2" | $json appBundle)
         arg_tls_cert=$(echo "$2" | $json tlsCert)
         arg_tls_key=$(echo "$2" | $json tlsKey)
         arg_token=$(echo "$2" | $json token)

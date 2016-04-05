@@ -1,5 +1,3 @@
-/* jslint node: true */
-
 'use strict';
 
 exports = module.exports = {
@@ -27,7 +25,8 @@ exports = module.exports = {
     events: new (require('events').EventEmitter)(),
 
     EVENT_ACTIVATED: 'activated',
-    EVENT_CONFIGURED: 'configured'
+    EVENT_CONFIGURED: 'configured',
+    EVENT_FIRST_RUN: 'firstrun'
 };
 
 var apps = require('./apps.js'),
@@ -59,6 +58,7 @@ var apps = require('./apps.js'),
     UserError = user.UserError,
     userdb = require('./userdb.js'),
     util = require('util'),
+    uuid = require('node-uuid'),
     webhooks = require('./webhooks.js');
 
 var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
@@ -124,6 +124,13 @@ function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     exports.events.on(exports.EVENT_CONFIGURED, addDnsRecords);
+    exports.events.on(exports.EVENT_FIRST_RUN, installAppBundle);
+
+    if (!fs.existsSync(paths.FIRST_RUN_FILE)) {
+        // EE API is sync. do not keep the server waiting
+        process.nextTick(function () { exports.events.emit(exports.EVENT_FIRST_RUN); });
+        fs.writeFileSync(paths.FIRST_RUN_FILE, 'been there, done that', 'utf8');
+    }
 
     syncConfigState(callback);
 }
@@ -132,6 +139,7 @@ function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     exports.events.removeListener(exports.EVENT_CONFIGURED, addDnsRecords);
+    exports.events.removeListener(exports.EVENT_FIRST_RUN, installAppBundle);
 
     callback(null);
 }
@@ -721,6 +729,41 @@ function backupBoxAndApps(callback) {
                 callback(error, filename);
             });
         });
+    });
+}
+
+function installAppBundle(callback) {
+    callback = callback || NOOP_CALLBACK;
+
+    var bundle = config.get('appBundle');
+
+    if (!bundle || bundle.length === 0) {
+        debug('installAppBundle: no bundle set');
+        return callback();
+    }
+
+    async.eachSeries(bundle, function (appInfo, iteratorCallback) {
+        var appstoreId = appInfo.appstoreId;
+        var parts = appstoreId.split('@');
+
+        var url = config.apiServerOrigin() + '/api/v1/apps/' + parts[0] + (parts[1] ? '/versions/' + parts[1] : '');
+
+        superagent.get(url).end(function (error, result) {
+            if (error && !error.response) return iteratorCallback(new Error('Network error: ' + error.message));
+
+            if (result.statusCode !== 200) return iteratorCallback(util.format('Failed to get app info from store.', result.statusCode, result.text));
+
+            debug('autoInstall: installing %s at %s', appstoreId, appInfo.location);
+
+            apps.install(uuid.v4(), appstoreId, result.body.manifest, appInfo.location,
+                appInfo.portBindings || null, appInfo.accessRestriction || null,
+                null /* icon */, null /* cert */, null /* key */, 0 /* default mem limit */,
+                iteratorCallback);
+        });
+    }, function (error) {
+        if (error) debug('autoInstallApps: ', error);
+
+        callback();
     });
 }
 
