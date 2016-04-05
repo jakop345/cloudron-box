@@ -69,6 +69,18 @@ describe('database', function () {
             displayName: 'Herbert Heidelberg'
         };
 
+        var USER_3 = {
+            id: 'uuid458',
+            username: '',
+            password: 'secret',
+            email: 'SAFE3@me.com',
+            salt: 'tata',
+            createdAt: 'sometime back',
+            modifiedAt: 'now',
+            resetToken: '',
+            displayName: 'Herbert Heidelberg'
+        };
+
         it('can add user', function (done) {
             userdb.add(USER_0.id, USER_0, done);
         });
@@ -83,6 +95,14 @@ describe('database', function () {
 
         it('cannot add same user again', function (done) {
             userdb.add(USER_0.id, USER_0, function (error) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
+                done();
+            });
+        });
+
+        it('cannot add user with same but uppercase email again', function (done) {
+            userdb.add(USER_3.id, USER_3, function (error) {
                 expect(error).to.be.ok();
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -180,11 +200,10 @@ describe('database', function () {
             });
         });
 
-        it('cannot update with null field', function (done) {
-            userdb.update(USER_0.id, { email: null }, function (error) {
-                expect(error).to.be.ok();
-                done();
-            });
+        it('cannot update with null field', function () {
+            expect(function () {
+                userdb.update(USER_0.id, { email: null }, function () {});
+            }).to.throwError();
         });
 
         it('cannot del non-existing user', function (done) {
