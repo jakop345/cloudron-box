@@ -157,13 +157,22 @@ describe('Ldap', function () {
         it('fails with wrong password', function (done) {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
-            client.bind('cn=' + USER_0.username + ',ou=users,dc=cloudron', 'wrongpassword', function (error) {
+            client.bind('cn=' + USER_0.id + ',ou=users,dc=cloudron', 'wrongpassword', function (error) {
                 expect(error).to.be.a(ldap.InvalidCredentialsError);
                 done();
             });
         });
 
         it('succeeds without accessRestriction', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            client.bind('cn=' + USER_0.id + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('succeeds with username and without accessRestriction', function (done) {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
             client.bind('cn=' + USER_0.username + ',ou=users,dc=cloudron', USER_0.password, function (error) {
@@ -196,7 +205,7 @@ describe('Ldap', function () {
             appdb.update(APP_0.id, { accessRestriction: { users: [ USER_1.id ], groups: [] }}, function (error) {
                 expect(error).to.eql(null);
 
-                client.bind('cn=' + USER_0.username + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                client.bind('cn=' + USER_0.id + ',ou=users,dc=cloudron', USER_0.password, function (error) {
                     expect(error).to.be.a(ldap.NoSuchObjectError);
                     done();
                 });
@@ -209,7 +218,7 @@ describe('Ldap', function () {
             appdb.update(APP_0.id, { accessRestriction: { users: [ USER_1.id, USER_0.id ], groups: [] }}, function (error) {
                 expect(error).to.eql(null);
 
-                client.bind('cn=' + USER_0.username + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                client.bind('cn=' + USER_0.id + ',ou=users,dc=cloudron', USER_0.password, function (error) {
                     expect(error).to.be(null);
                     done();
                 });
@@ -336,6 +345,10 @@ describe('Ldap', function () {
                 result.on('end', function (result) {
                     expect(result.status).to.equal(0);
                     expect(entries.length).to.equal(2);
+
+                    // ensure order for testability
+                    entries.sort(function (a, b) { return a.username < b.username; });
+
                     expect(entries[0].cn).to.equal('users');
                     expect(entries[0].memberuid.length).to.equal(2);
                     expect(entries[0].memberuid[0]).to.equal(USER_0.id);

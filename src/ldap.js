@@ -131,8 +131,15 @@ function start(callback) {
         var commonName = req.dn.rdns[0][attributeName];
         if (!commonName) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
-        // if mail is specified, enforce mail check, otherwise allow both
-        var api = (commonName.indexOf('@') === -1) && (attributeName !== 'mail')  ? user.verify : user.verifyWithEmail;
+        var api;
+        // if mail is specified, enforce mail check
+        if (commonName.indexOf('@') !== -1 || attributeName === 'mail') {
+            api = user.verifyWithEmail;
+        } else if (commonName.indexOf('uid-') === 0) {
+            api = user.verify;
+        } else {
+            api = user.verifyWithUsername;
+        }
 
         // TODO this should be done after we verified the app has access to avoid leakage of user existence
         api(commonName, req.credentials || '', function (error, userObject) {
