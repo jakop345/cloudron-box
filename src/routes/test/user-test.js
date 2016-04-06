@@ -260,7 +260,7 @@ describe('User API', function () {
             expect(error).to.not.be.ok();
             expect(result.statusCode).to.equal(201);
 
-            user_1 = result.body.userInfo;
+            user_1 = result.body;
 
             checkMails(2, function () {
               // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
@@ -380,7 +380,7 @@ describe('User API', function () {
                .end(function (error, result) {
             expect(result.statusCode).to.equal(201);
 
-            user_2 = result.body.userInfo;
+            user_2 = result.body;
 
             superagent.post(SERVER_URL + '/api/v1/users')
                    .query({ access_token: token })
@@ -388,7 +388,7 @@ describe('User API', function () {
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(201);
 
-                user_3 = result.body.userInfo;
+                user_3 = result.body;
 
                 // one mail for first user creation, two mails for second user creation (see 'invite' flag)
                 checkMails(3, function () {

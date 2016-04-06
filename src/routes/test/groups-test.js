@@ -70,7 +70,7 @@ function setup(done) {
                 expect(result.statusCode).to.eql(201);
 
                 token_1 = tokendb.generateToken();
-                userId_1 = result.body.userInfo.id;
+                userId_1 = result.body.id;
 
                 // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
                 tokendb.add(token_1, userId_1, 'test-client-id',  Date.now() + 100000, '*', callback);

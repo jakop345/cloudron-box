@@ -80,7 +80,7 @@ function createUser(req, res, next) {
             resetToken: user.resetToken
         };
 
-        next(new HttpSuccess(201, { userInfo: userInfo }));
+        next(new HttpSuccess(201, userInfo ));
     });
 }
 

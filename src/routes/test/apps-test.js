@@ -182,7 +182,7 @@ describe('Apps', function () {
                        .end(function (err, res) {
                     expect(res.statusCode).to.equal(201);
 
-                    USER_1_ID = res.body.userInfo.id;
+                    USER_1_ID = res.body.id;
 
                     callback(null);
                 });
