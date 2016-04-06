@@ -102,7 +102,7 @@ function getAllWithGroupIds(callback) {
 
     database.query('SELECT ' + USERS_FIELDS + ',GROUP_CONCAT(groupMembers.groupId) AS groupIds ' +
                     ' FROM users LEFT OUTER JOIN groupMembers ON users.id = groupMembers.userId ' +
-                    ' GROUP BY users.id', function (error, results) {
+                    ' GROUP BY users.id ORDER BY users.username', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         results.forEach(function (result) {
