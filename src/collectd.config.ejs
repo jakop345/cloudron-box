@@ -1,6 +1,6 @@
 LoadPlugin "table"
 <Plugin table>
-  <Table "/sys/fs/cgroup/memory/system.slice/docker.service/docker/<%= containerId %>/memory.stat">
+  <Table "/sys/fs/cgroup/memory/docker/<%= containerId %>/memory.stat">
     Instance "<%= appId %>-memory"
     Separator " \\n"
     <Result>
