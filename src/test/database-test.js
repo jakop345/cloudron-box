@@ -34,8 +34,8 @@ describe('database', function () {
 
     describe('userdb', function () {
         var USER_0 = {
-            id: 'uuid213',
-            username: 'uuid213',
+            id: 'uuid0',
+            username: 'uuid0',
             password: 'secret',
             email: 'safe@me.com',
             salt: 'morton',
@@ -46,39 +46,39 @@ describe('database', function () {
         };
 
         var USER_1 = {
-            id: 'uuid456',
-            username: '',
+            id: 'uuid1',
+            username: 'uuid1',
             password: 'secret',
             email: 'safe2@me.com',
             salt: 'tata',
             createdAt: 'sometime back',
             modifiedAt: 'now',
             resetToken: '',
-            displayName: 'Herbert Heidelberg'
+            displayName: 'Herbert 1'
         };
 
         var USER_2 = {
-            id: 'uuid457',
-            username: '',
+            id: 'uuid2',
+            username: 'uuid2',
             password: 'secret',
             email: 'safe3@me.com',
             salt: 'tata',
             createdAt: 'sometime back',
             modifiedAt: 'now',
             resetToken: '',
-            displayName: 'Herbert Heidelberg'
+            displayName: 'Herbert 2'
         };
 
         var USER_3 = {
-            id: 'uuid458',
-            username: '',
+            id: 'uuid3',
+            username: 'uuid3',
             password: 'secret',
             email: 'SAFE3@me.com',
             salt: 'tata',
             createdAt: 'sometime back',
             modifiedAt: 'now',
             resetToken: '',
-            displayName: 'Herbert Heidelberg'
+            displayName: 'Herbert 3'
         };
 
         it('can add user', function (done) {
