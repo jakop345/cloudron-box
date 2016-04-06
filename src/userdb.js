@@ -118,7 +118,7 @@ function getAllWithGroupIds(callback) {
 function getAllAdmins(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + USERS_FIELDS + ' FROM users, groupMembers WHERE groupMembers.groupId = ? AND users.id = groupMembers.userId', [ groups.ADMIN_GROUP_ID ], function (error, results) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users, groupMembers WHERE groupMembers.groupId = ? AND users.id = groupMembers.userId ORDER BY username', [ groups.ADMIN_GROUP_ID ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         results.forEach(postProcess);
