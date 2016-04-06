@@ -59,7 +59,7 @@ APP_MANIFEST_1.dockerImage = TEST_IMAGE;
 APP_MANIFEST_1.singleUser = true;
 
 var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='admin@me.com';
-var USERNAME_1 = 'user', PASSWORD_1 = 'Foobar?1338', EMAIL_1 ='user@me.com';
+var USER_1_ID = null, USERNAME_1 = 'user', PASSWORD_1 = 'Foobar?1338', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
 var token_1 = null;
 
@@ -182,6 +182,8 @@ describe('Apps', function () {
                        .end(function (err, res) {
                     expect(res.statusCode).to.equal(201);
 
+                    USER_1_ID = res.body.userInfo.id;
+
                     callback(null);
                 });
             },
@@ -190,7 +192,7 @@ describe('Apps', function () {
                 token_1 = tokendb.generateToken();
 
                 // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-                tokendb.add(token_1, tokendb.PREFIX_USER + USERNAME_1, 'test-client-id',  Date.now() + 100000, '*', callback);
+                tokendb.add(token_1, tokendb.PREFIX_USER + USER_1_ID, 'test-client-id',  Date.now() + 100000, '*', callback);
             },
 
             settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
