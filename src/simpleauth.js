@@ -39,7 +39,7 @@ function loginLogic(clientId, username, password, callback) {
         // only allow simple auth clients
         if (clientObject.type !== clientdb.TYPE_SIMPLE_AUTH) return callback(new ClientsError(ClientsError.INVALID_CLIENT));
 
-        var authFunction = (username.indexOf('@') === -1) ? user.verify : user.verifyWithEmail;
+        var authFunction = (username.indexOf('@') === -1) ? user.verifyWithUsername : user.verifyWithEmail;
         authFunction(username, password, function (error, userObject) {
             if (error) return callback(error);
 
