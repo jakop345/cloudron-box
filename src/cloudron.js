@@ -71,6 +71,7 @@ var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 var gUpdatingDns = false,                // flag for dns update reentrancy
     gCloudronDetails = null,             // cached cloudron details like region,size...
+    gAppstoreUserDetails = {},
     gIsConfigured = null;                // cached configured state so that return value is synchronous. null means we are not initialized yet
 
 function debugApp(app, args) {
@@ -310,6 +311,7 @@ function getCloudronDetails(callback) {
             if (result.statusCode !== 200) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
             gCloudronDetails = result.body.box;
+            gAppstoreUserDetails = result.body.user;
 
             return callback(null, gCloudronDetails);
         });
@@ -351,6 +353,7 @@ function getConfig(callback) {
                         developerMode: developerMode,
                         region: result.region,
                         size: result.size,
+                        billing: !!gAppstoreUserDetails.billing,
                         memory: os.totalmem(),
                         provider: config.provider(),
                         cloudronName: cloudronName
