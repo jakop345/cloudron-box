@@ -134,6 +134,16 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         }
     });
 
+    $('.upgrade .trigger').hover(function () {
+        $('.upgrade .content')[0].classList.add('active');
+        $('.upgrade .trigger')[0].classList.add('active');
+    });
+
+    $('.upgrade').hover(function () {}, function () {
+        $('.upgrade .content')[0].classList.remove('active');
+        $('.upgrade .trigger')[0].classList.remove('active');
+    });
+
     // setup all the dialog focus handling
     ['updateModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {

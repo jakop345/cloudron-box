@@ -582,7 +582,7 @@ footer {
     color: #555;
     font-size: 14px;
     padding: 5px;
-    z-index: 10000;
+    z-index: 1000;
     opacity: 0.5;
     transition: all 250ms;
 }
@@ -939,4 +939,61 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
 .no-wrap {
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+
+// ----------------------------
+// Upgrade
+// ----------------------------
+
+.upgrade {
+    position: fixed;
+    right: 10px;
+    bottom: 30px;
+    color: white;
+    z-index: 1200;
+    text-align: right;
+
+    .content {
+        height: 0;
+        overflow: hidden;
+        transition: height 250ms;
+        background-color: #00A500;
+        text-align: left;
+        border-radius: 0;
+        transition: all 250ms;
+        box-shadow: 0 3px 5px rgba(0,0,0,.5);
+
+        a {
+            color: white;
+            text-decoration: underline;
+
+            &:hover {
+                font-weight: bold;
+            }
+        }
+
+        &.active {
+            padding: 10px;
+            border-radius: 5px;
+            border-bottom-right-radius: 0;
+            height: auto;
+        }
+    }
+
+    .trigger {
+        cursor: pointer;
+        padding: 4px 10px;
+        display: inline-block;
+        font-size: 18px;
+        background-color: #00A500;
+        border-radius: 5px;
+        transition: all 250ms;
+        box-shadow: 0 3px 5px rgba(0,0,0,.5);
+
+        &.active {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+    }
 }
