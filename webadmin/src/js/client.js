@@ -147,7 +147,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
     Client.prototype.onConfig = function (callback) {
         this._configListener.push(callback);
-        callback(this._config);
+        if (this._config && this._config.apiServerOrigin) callback(this._config);
     };
 
     Client.prototype.resetAvatar = function () {
@@ -653,6 +653,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             if (error) return callback(error);
 
             that.setConfig(result);
+
             callback(null);
         });
     };
