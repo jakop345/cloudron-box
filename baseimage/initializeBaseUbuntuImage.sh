@@ -194,8 +194,8 @@ debconf-set-selections <<< 'mysql-server mysql-server/root_password_again passwo
 apt-get -y install mysql-server
 [[ "$(mysqld --version 2>&1)" == *"5.6."* ]] || die "Expecting nginx version to be 5.6.x"
 
-echo "==== Install pwgen and swaks ===="
-apt-get -y install pwgen swaks
+echo "==== Install pwgen and swaks awscli ===="
+apt-get -y install pwgen swaks awscli
 
 echo "==== Install collectd ==="
 if ! apt-get install -y collectd collectd-utils; then
