@@ -458,3 +458,8 @@
 - Allow users to choose a username on first sign up
 - Fix app graphs
 
+[0.12.0]
+- Use aws tool to upload large backups
+- Postgres addon whitelists pg_trgm and hstore extensions
+- Suppress boring update emails
+
