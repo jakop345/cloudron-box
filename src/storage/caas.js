@@ -6,6 +6,8 @@ exports = module.exports = {
 
     copyObject: copyObject,
 
+    getBackupCredentials: getBackupCredentials,
+
     getAllPaged: getAllPaged
 };
 

@@ -5,7 +5,9 @@ exports = module.exports = {
     getRestoreUrl: getRestoreUrl,
 
     copyObject: copyObject,
-    getAllPaged: getAllPaged
+    getAllPaged: getAllPaged,
+
+    getBackupCredentials: getBackupCredentials
 };
 
 var assert = require('assert'),
