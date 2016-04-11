@@ -289,7 +289,7 @@ function createNewAppBackup(app, addonsToBackup, callback) {
 
         async.series([
             addons.backupAddons.bind(null, app, addonsToBackup),
-            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD ].concat(args)),
+            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD ].concat(args))
         ], function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
