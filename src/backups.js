@@ -53,15 +53,6 @@ function debugApp(app, args) {
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
 }
 
-function ignoreError(func) {
-    return function (callback) {
-        func(function (error) {
-            if (error) console.error('Ignored error:', error);
-            callback();
-        });
-    };
-}
-
 function BackupsError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
