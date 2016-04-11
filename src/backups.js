@@ -14,8 +14,6 @@ exports = module.exports = {
     backupApp: backupApp,
     restoreApp: restoreApp,
 
-    getBackupCredentials: getBackupCredentials,
-
     backupBoxAndApps: backupBoxAndApps
 };
 
@@ -108,20 +106,6 @@ function getByAppIdPaged(page, perPage, appId, callback) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
         callback(null, results);
-    });
-}
-
-function getBackupCredentials(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    settings.getBackupConfig(function (error, backupConfig) {
-        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
-
-        api(backupConfig.provider).getBackupCredentials(backupConfig, function (error, credentials) {
-            if (error) return callback(error);
-
-            return callback(null, credentials);
-        });
     });
 }
 
