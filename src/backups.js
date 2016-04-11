@@ -397,9 +397,12 @@ function createNewBackup(app, addonsToBackup, callback) {
 
         debugApp(app, 'backupApp: backup url:%s backup config url:%s', result.s3DataUrl, result.s3ConfigUrl);
 
+        var args = [ app.id, result.s3ConfigUrl, result.s3DataUrl, result.accessKeyId, result.secretAccessKey,
+                     result.sessionToken, result.region, result.backupKey ];
+
         async.series([
             addons.backupAddons.bind(null, app, addonsToBackup),
-            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD, result.s3ConfigUrl, result.s3DataUrl, result.accessKeyId, result.secretAccessKey, result.sessionToken, result.region, result.backupKey ]),
+            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD ].concat(args)),
         ], function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
