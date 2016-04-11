@@ -67,17 +67,7 @@ function getBackupUrl(apiConfig, filename, callback) {
     getBackupCredentials(apiConfig, function (error, credentials) {
         if (error) return callback(error);
 
-        var s3 = new AWS.S3(credentials);
-
-        var params = {
-            Bucket: apiConfig.bucket,
-            Key: apiConfig.prefix + '/' + filename,
-            Expires: 60 * 60 /* 60 minutes */
-        };
-
-        var url = s3.getSignedUrl('putObject', params);
-
-        callback(null, { url: url, id: filename });
+        callback(null, credentials);
     });
 }
 

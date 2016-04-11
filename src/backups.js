@@ -109,18 +109,16 @@ function getBackupUrl(appBackupIds, callback) {
         api(backupConfig.provider).getBackupUrl(backupConfig, filename, function (error, result) {
             if (error) return callback(error);
 
-            var obj = {
-                id: result.id,
-                url: result.url,
-                backupKey: backupConfig.key
-            };
+            result.id = filename;
+            result.s3Url = 's3://' + backupConfig.bucket + '/' + backupConfig.prefix + '/' + filename;
+            result.backupKey = backupConfig.key;
 
-            debug('getBackupUrl: id:%s url:%s backupKey:%s', obj.id, obj.url, obj.backupKey);
+            debug('getBackupUrl: %j', result);
 
             backupdb.add({ id: result.id, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-                callback(null, obj);
+                callback(null, result);
             });
         });
     });

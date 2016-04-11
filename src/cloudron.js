@@ -682,16 +682,16 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
         if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error.message));
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        debug('backup: url %s', result.url);
+        debug('backupBoxWithAppBackupIds:  %j', result);
 
         async.series([
             ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-            shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey ]),
+            shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.s3Url, result.accessKeyId, result.secretAccessKey, result.sessionToken, result.region, result.backupKey ]),
             ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
         ], function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-            debug('backup: successful');
+            debug('backupBoxWithAppBackupIds: success');
 
             webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
                 if (error) return callback(error);

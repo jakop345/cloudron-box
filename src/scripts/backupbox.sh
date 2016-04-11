@@ -12,13 +12,18 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [ $# -lt 2 ]; then
-    echo "Usage: backupbox.sh <url> <key>"
+if [ $# -lt 6 ]; then
+    echo "Usage: backupbox.sh <s3 url> <access key id> <access key> <session token> <region> <password>"
     exit 1
 fi
 
-backup_url="$1"
-backup_key="$2"
+# env vars used by the awscli
+s3_url="$1"
+export AWS_ACCESS_KEY_ID="$2"
+export AWS_SECRET_ACCESS_KEY="$3"
+export AWS_SESSION_TOKEN="$4"
+export AWS_DEFAULT_REGION="$5"
+password="$6"
 now=$(date "+%Y-%m-%dT%H:%M:%S")
 BOX_DATA_DIR="${HOME}/data/box"
 box_snapshot_dir="${HOME}/data/snapshots/box-${now}"
@@ -30,14 +35,14 @@ echo "Snapshoting backup as backup-${now}"
 btrfs subvolume snapshot -r "${BOX_DATA_DIR}" "${box_snapshot_dir}"
 
 for try in `seq 1 5`; do
-    echo "Uploading backup to ${backup_url} (try ${try})"
+    echo "Uploading backup to ${s3_url} (try ${try})"
     error_log=$(mktemp)
 
-    headers=("-H" "Content-Type:")
-
+    # use aws instead of curl because curl will always read entire stream memory to set Content-Length
+    # aws will do multipart upload
     if tar -cvzf - -C "${box_snapshot_dir}" . \
-           | openssl aes-256-cbc -e -pass "pass:${backup_key}" \
-           | curl --fail -X PUT ${headers[@]} --data-binary @- "${backup_url}" 2>"${error_log}"; then
+           | openssl aes-256-cbc -e -pass "pass:${password}" \
+           | aws s3 cp - "${s3_url}" 2>"${error_log}"; then
         break
     fi
     cat "${error_log}" && rm "${error_log}"
