@@ -120,7 +120,7 @@ function getBackupUrl(appBackupIds, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getBackupUrl(backupConfig, filename, function (error, result) {
+        api(backupConfig.provider).getBackupCredentials(backupConfig, filename, function (error, result) {
             if (error) return callback(error);
 
             result.id = filename;
@@ -145,7 +145,7 @@ function getAppBackupUrl(app, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getBackupUrl(backupConfig, configFilename, function (error, result) {
+        api(backupConfig.provider).getBackupCredentials(backupConfig, configFilename, function (error, result) {
             if (error) return callback(error);
 
             result.id = dataFilename;

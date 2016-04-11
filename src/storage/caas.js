@@ -1,7 +1,6 @@
 'use strict';
 
 exports = module.exports = {
-    getBackupUrl: getBackupUrl,
     getRestoreUrl: getRestoreUrl,
 
     copyObject: copyObject,
@@ -54,20 +53,6 @@ function getAllPaged(apiConfig, page, perPage, callback) {
         if (!result.body || !util.isArray(result.body.backups)) return callback(new Error('Unexpected response'));
 
         return callback(null, result.body.backups);
-    });
-}
-
-function getBackupUrl(apiConfig, filename, callback) {
-    assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof filename, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    if (!apiConfig.bucket || !apiConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
-
-    getBackupCredentials(apiConfig, function (error, credentials) {
-        if (error) return callback(error);
-
-        callback(null, credentials);
     });
 }
 

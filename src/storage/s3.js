@@ -1,7 +1,6 @@
 'use strict';
 
 exports = module.exports = {
-    getBackupUrl: getBackupUrl,
     getRestoreUrl: getRestoreUrl,
 
     copyObject: copyObject,
@@ -62,28 +61,6 @@ function getAllPaged(apiConfig, page, perPage, callback) {
 
             return callback(null, results);
         });
-    });
-}
-
-function getBackupUrl(apiConfig, filename, callback) {
-    assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof filename, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    getBackupCredentials(apiConfig, function (error, credentials) {
-        if (error) return callback(error);
-
-        var s3 = new AWS.S3(credentials);
-
-        var params = {
-            Bucket: apiConfig.bucket,
-            Key: apiConfig.prefix + '/' + filename,
-            Expires: 60 * 30 /* 30 minutes */
-        };
-
-        var url = s3.getSignedUrl('putObject', params);
-
-        callback(null, { url : url, id: filename });
     });
 }
 
