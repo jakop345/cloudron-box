@@ -35,6 +35,7 @@ var addons = require('./addons.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
+    backups = require('./backups.js'),
     certificates = require('./certificates.js'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
@@ -436,7 +437,7 @@ function backup(app, callback) {
 
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Backing up' }),
-        apps.backupApp.bind(null, app, app.manifest.addons),
+        backups.backupApp.bind(null, app, app.manifest.addons),
 
         // done!
         function (callback) {
@@ -501,7 +502,7 @@ function restore(app, callback) {
         createVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Download backup and restore addons' }),
-        apps.restoreApp.bind(null, app, app.manifest.addons, backupId),
+        backups.restoreApp.bind(null, app, app.manifest.addons, backupId),
 
         updateApp.bind(null, app, { installationProgress: '75, Creating container' }),
         createContainer.bind(null, app),

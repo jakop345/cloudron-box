@@ -7,6 +7,7 @@ exports = module.exports = {
 
 var apps = require('./apps.js'),
     assert = require('assert'),
+    backups = require('./backups.js'),
     certificates = require('./certificates.js'),
     cloudron = require('./cloudron.js'),
     config = require('./config.js'),
@@ -65,7 +66,7 @@ function recreateJobs(unusedTimeZone, callback) {
         if (gBackupJob) gBackupJob.stop();
         gBackupJob = new CronJob({
             cronTime: '00 00 */4 * * *', // every 4 hours
-            onTick: cloudron.ensureBackup,
+            onTick: backups.ensureBackup,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });

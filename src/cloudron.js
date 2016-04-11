@@ -14,9 +14,7 @@ exports = module.exports = {
     updateToLatest: updateToLatest,
     update: update,
     reboot: reboot,
-    backup: backup,
     retire: retire,
-    ensureBackup: ensureBackup,
 
     isConfiguredSync: isConfiguredSync,
 
@@ -30,11 +28,9 @@ exports = module.exports = {
 };
 
 var apps = require('./apps.js'),
-    AppsError = require('./apps.js').AppsError,
     assert = require('assert'),
     async = require('async'),
     backups = require('./backups.js'),
-    BackupsError = require('./backups.js').BackupsError,
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
     debug = require('debug')('box:cloudron'),
@@ -58,12 +54,9 @@ var apps = require('./apps.js'),
     UserError = user.UserError,
     userdb = require('./userdb.js'),
     util = require('util'),
-    uuid = require('node-uuid'),
-    webhooks = require('./webhooks.js');
+    uuid = require('node-uuid');
 
 var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
-    BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
-    BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update',
     RETIRE_CMD = path.join(__dirname, 'scripts/retire.sh');
 
@@ -73,22 +66,6 @@ var gUpdatingDns = false,                // flag for dns update reentrancy
     gCloudronDetails = null,             // cached cloudron details like region,size...
     gAppstoreUserDetails = {},
     gIsConfigured = null;                // cached configured state so that return value is synchronous. null means we are not initialized yet
-
-function debugApp(app, args) {
-    assert(!app || typeof app === 'object');
-
-    var prefix = app ? app.location : '(no app)';
-    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
-}
-
-function ignoreError(func) {
-    return function (callback) {
-        func(function (error) {
-            if (error) console.error('Ignored error:', error);
-            callback();
-        });
-    };
-}
 
 function CloudronError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -562,7 +539,7 @@ function doUpgrade(boxUpdateInfo, callback) {
 
     progress.set(progress.UPDATE, 5, 'Backing up for upgrade');
 
-    backupBoxAndApps(function (error) {
+    backups.backupBoxAndApps(function (error) {
         if (error) return upgradeError(error);
 
         superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
@@ -591,7 +568,7 @@ function doUpdate(boxUpdateInfo, callback) {
 
     progress.set(progress.UPDATE, 5, 'Backing up for update');
 
-    backupBoxAndApps(function (error) {
+    backups.backupBoxAndApps(function (error) {
         if (error) return updateError(error);
 
         // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
@@ -635,123 +612,6 @@ function doUpdate(boxUpdateInfo, callback) {
         });
 
         // Do not add any code here. The installer script will stop the box code any instant
-    });
-}
-
-function backup(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    var error = locker.lock(locker.OP_FULL_BACKUP);
-    if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
-
-    // ensure tools can 'wait' on progress
-    progress.set(progress.BACKUP, 0, 'Starting');
-
-    // start the backup operation in the background
-    backupBoxAndApps(function (error) {
-        if (error) console.error('backup failed.', error);
-
-        locker.unlock(locker.OP_FULL_BACKUP);
-    });
-
-    callback(null);
-}
-
-function ensureBackup(callback) {
-    callback = callback || NOOP_CALLBACK;
-
-    backups.getPaged(1, 1, function (error, backups) {
-        if (error) {
-            debug('Unable to list backups', error);
-            return callback(error); // no point trying to backup if appstore is down
-        }
-
-        if (backups.length !== 0 && (new Date() - new Date(backups[0].creationTime) < 23 * 60 * 60 * 1000)) { // ~1 day ago
-            debug('Previous backup was %j, no need to backup now', backups[0]);
-            return callback(null);
-        }
-
-        backup(callback);
-    });
-}
-
-function backupBoxWithAppBackupIds(appBackupIds, callback) {
-    assert(util.isArray(appBackupIds));
-
-    backups.getBackupUrl(appBackupIds, function (error, result) {
-        if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error.message));
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-        debug('backupBoxWithAppBackupIds:  %j', result);
-
-        async.series([
-            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-            shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.s3Url, result.accessKeyId, result.secretAccessKey, result.sessionToken, result.region, result.backupKey ]),
-            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
-        ], function (error) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-            debug('backupBoxWithAppBackupIds: success');
-
-            webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
-                if (error) return callback(error);
-                callback(null, result.id);
-            });
-        });
-    });
-}
-
-// this function expects you to have a lock
-function backupBox(callback) {
-    apps.getAll(function (error, allApps) {
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-        var appBackupIds = allApps.map(function (app) { return app.lastBackupId; });
-        appBackupIds = appBackupIds.filter(function (id) { return id !== null; }); // remove apps that were never backed up
-
-        backupBoxWithAppBackupIds(appBackupIds, callback);
-    });
-}
-
-// this function expects you to have a lock
-function backupBoxAndApps(callback) {
-    callback = callback || NOOP_CALLBACK;
-
-    apps.getAll(function (error, allApps) {
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-        var processed = 0;
-        var step = 100/(allApps.length+1);
-
-        progress.set(progress.BACKUP, processed, '');
-
-        async.mapSeries(allApps, function iterator(app, iteratorCallback) {
-            ++processed;
-
-            apps.backupApp(app, app.manifest.addons, function (error, backupId) {
-                if (error && error.reason !== AppsError.BAD_STATE) {
-                    debugApp(app, 'Unable to backup', error);
-                    return iteratorCallback(error);
-                }
-
-                progress.set(progress.BACKUP, step * processed, 'Backed up app at ' + app.location);
-
-                iteratorCallback(null, backupId || null); // clear backupId if is in BAD_STATE and never backed up
-            });
-        }, function appsBackedUp(error, backupIds) {
-            if (error) {
-                progress.set(progress.BACKUP, 100, error.message);
-                return callback(error);
-            }
-
-            backupIds = backupIds.filter(function (id) { return id !== null; }); // remove apps in bad state that were never backed up
-
-            backupBoxWithAppBackupIds(backupIds, function (error, filename) {
-                progress.set(progress.BACKUP, 100, error ? error.message : '');
-
-                callback(error, filename);
-            });
-        });
     });
 }
 
