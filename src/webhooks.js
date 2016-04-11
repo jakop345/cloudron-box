@@ -18,7 +18,7 @@ function backupDone(filename, app, appBackupIds, callback) {
     assert(!appBackupIds || util.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
-    debug('backupDone():', filename);
+    debug('backupDone %s', filename);
 
     // CaaS
     if (config.token()) {
@@ -35,8 +35,6 @@ function backupDone(filename, app, appBackupIds, callback) {
             if (error && !error.response) return callback(error);
             if (result.statusCode !== 200) return callback(new Error(result.text));
             if (!result.body) return callback(new Error('Unexpected response'));
-
-            debug('backupDone()', filename);
 
             return callback(null);
         });
