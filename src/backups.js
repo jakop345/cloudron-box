@@ -395,7 +395,7 @@ function createNewBackup(app, addonsToBackup, callback) {
     getAppBackupUrl(app, function (error, result) {
         if (error) return callback(error);
 
-        debugApp(app, 'backupApp: backup url:%s backup config url:%s', result.url, result.configUrl);
+        debugApp(app, 'backupApp: backup url:%s backup config url:%s', result.s3DataUrl, result.s3ConfigUrl);
 
         async.series([
             addons.backupAddons.bind(null, app, addonsToBackup),
