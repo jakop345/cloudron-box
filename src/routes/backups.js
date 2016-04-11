@@ -47,4 +47,3 @@ function download(req, res, next) {
         next(new HttpSuccess(200, result));
     });
 }
-

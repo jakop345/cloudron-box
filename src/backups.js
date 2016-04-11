@@ -6,11 +6,7 @@ exports = module.exports = {
     getPaged: getPaged,
     getByAppIdPaged: getByAppIdPaged,
 
-    getBackupUrl: getBackupUrl,
-    getAppBackupUrl: getAppBackupUrl,
     getRestoreUrl: getRestoreUrl,
-
-    copyLastBackup: copyLastBackup,
 
     ensureBackup: ensureBackup,
 
