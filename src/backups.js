@@ -154,11 +154,7 @@ function getBackupUrl(appBackupIds, callback) {
 
             debug('getBackupUrl: %j', result);
 
-            backupdb.add({ id: result.id, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
-                if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
-
-                callback(null, result);
-            });
+            callback(null, result);
         });
     });
 }
@@ -184,11 +180,7 @@ function getAppBackupUrl(app, callback) {
 
             debug('getAppBackupUrl: %j', result);
 
-            backupdb.add({ id: result.id, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
-                if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
-
-                callback(null, result);
-            });
+            callback(null, result);
         });
     });
 }
@@ -259,9 +251,13 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 
             debug('backupBoxWithAppBackupIds: success');
 
-            webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
-                if (error) return callback(error);
-                callback(null, result.id);
+            backupdb.add({ id: result.id, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
+                if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+                webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
+                    if (error) return callback(error);
+                    callback(null, result.id);
+                });
             });
         });
     });
@@ -402,7 +398,11 @@ function createNewBackup(app, addonsToBackup, callback) {
         ], function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-            callback(null, result.id);
+            backupdb.add({ id: result.id, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+                if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+                callback(null, result.id);
+            });
         });
     });
 }
