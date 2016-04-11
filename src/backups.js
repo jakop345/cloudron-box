@@ -282,7 +282,7 @@ function createNewAppBackup(app, addonsToBackup, callback) {
     getAppBackupCredentials(app, function (error, result) {
         if (error) return callback(error);
 
-        debugApp(app, 'backupApp: backup url:%s backup config url:%s', result.s3DataUrl, result.s3ConfigUrl);
+        debugApp(app, 'createNewAppBackup: backup url:%s backup config url:%s', result.s3DataUrl, result.s3ConfigUrl);
 
         var args = [ app.id, result.s3ConfigUrl, result.s3DataUrl, result.accessKeyId, result.secretAccessKey,
                      result.sessionToken, result.region, result.backupKey ];
@@ -292,6 +292,8 @@ function createNewAppBackup(app, addonsToBackup, callback) {
             shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD ].concat(args))
         ], function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+            debugApp(app, 'createNewAppBackup: %s done', result.id);
 
             backupdb.add({ id: result.id, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
