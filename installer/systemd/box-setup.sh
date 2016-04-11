@@ -4,7 +4,6 @@ set -eu -o pipefail
 
 readonly USER_HOME="/home/yellowtent"
 readonly APPS_SWAP_FILE="/apps.swap"
-readonly BACKUP_SWAP_FILE="/backup.swap" # used when doing app backups
 readonly USER_DATA_FILE="/root/user_data.img"
 readonly USER_DATA_DIR="/home/yellowtent/data"
 
@@ -23,7 +22,6 @@ readonly swap_size="${physical_memory}" # if you change this, fix enoughResource
 readonly app_count=$((${physical_memory} / 200)) # estimated app count
 readonly disk_size_gb=$(fdisk -l ${disk_device} | grep "Disk ${disk_device}" | awk '{ print $3 }')
 readonly disk_size=$((disk_size_gb * 1024))
-readonly backup_swap_size=1024
 readonly system_size=10240 # 10 gigs for system libs, apps images, installer, box code and tmp
 readonly ext4_reserved=$((disk_size * 5 / 100)) # this can be changes using tune2fs -m percent /dev/vda1
 
@@ -32,8 +30,7 @@ echo "Physical memory: ${physical_memory}"
 echo "Estimated app count: ${app_count}"
 echo "Disk size: ${disk_size}"
 
-# Allocate two sets of swap files - one for general app usage and another for backup
-# The backup swap is setup for swap on the fly by the backup scripts
+# Allocate swap for general app usage
 if [[ ! -f "${APPS_SWAP_FILE}" ]]; then
     echo "Creating Apps swap file of size ${swap_size}M"
     fallocate -l "${swap_size}m" "${APPS_SWAP_FILE}"
@@ -45,17 +42,8 @@ else
     echo "Apps Swap file already exists"
 fi
 
-if [[ ! -f "${BACKUP_SWAP_FILE}" ]]; then
-    echo "Creating Backup swap file of size ${backup_swap_size}M"
-    fallocate -l "${backup_swap_size}m" "${BACKUP_SWAP_FILE}"
-    chmod 600 "${BACKUP_SWAP_FILE}"
-    mkswap "${BACKUP_SWAP_FILE}"
-else
-    echo "Backups Swap file already exists"
-fi
-
 echo "Resizing data volume"
-home_data_size=$((disk_size - system_size - swap_size - backup_swap_size - ext4_reserved))
+home_data_size=$((disk_size - system_size - swap_size - ext4_reserved))
 echo "Resizing up btrfs user data to size ${home_data_size}M"
 umount "${USER_DATA_DIR}" || true
 # Do not preallocate (non-sparse). Doing so overallocates for data too much in advance and causes problems when using many apps with smaller data

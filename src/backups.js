@@ -45,10 +45,8 @@ var addons = require('./addons.js'),
     webhooks = require('./webhooks.js');
 
 var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
-    BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh'),
     BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
-    RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
-    BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
+    RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh');
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
@@ -258,11 +256,9 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 
         debug('backupBoxWithAppBackupIds:  %j', result);
 
-        async.series([
-            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-            shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.s3Url, result.accessKeyId, result.secretAccessKey, result.sessionToken, result.region, result.backupKey ]),
-            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
-        ], function (error) {
+        var args = [ result.s3Url, result.accessKeyId, result.secretAccessKey, result.sessionToken, result.region, result.backupKey ];
+
+        shell.sudo('backupBox', [ BACKUP_BOX_CMD ].concat(args), function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
             debug('backupBoxWithAppBackupIds: success');
@@ -402,10 +398,8 @@ function createNewBackup(app, addonsToBackup, callback) {
         debugApp(app, 'backupApp: backup url:%s backup config url:%s', result.url, result.configUrl);
 
         async.series([
-            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
             addons.backupAddons.bind(null, app, addonsToBackup),
             shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD, result.s3ConfigUrl, result.s3DataUrl, result.accessKeyId, result.secretAccessKey, result.sessionToken, result.region, result.backupKey ]),
-            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
         ], function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
