@@ -135,26 +135,20 @@ function getAppBackupUrl(app, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getBackupUrl(backupConfig, configFilename, function (error, configResult) {
+        api(backupConfig.provider).getBackupUrl(backupConfig, configFilename, function (error, result) {
             if (error) return callback(error);
 
-            api(backupConfig.provider).getBackupUrl(backupConfig, dataFilename, function (error, dataResult) {
-                if (error) return callback(error);
+            result.id = dataFilename;
+            result.s3ConfigUrl = 's3://' + backupConfig.bucket + '/' + backupConfig.prefix + '/' + configFilename;
+            result.s3DataUrl = 's3://' + backupConfig.bucket + '/' + backupConfig.prefix + '/' + dataFilename;
+            result.backupKey = backupConfig.key;
 
-                var obj = {
-                    id: dataResult.id,
-                    url: dataResult.url,
-                    configUrl: configResult.url,
-                    backupKey: backupConfig.key // only data is encrypted
-                };
+            debug('getAppBackupUrl: %j', result);
 
-                debug('getAppBackupUrl: %j', obj);
+            backupdb.add({ id: result.id, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+                if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-                backupdb.add({ id: obj.id, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
-                    if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
-
-                    callback(null, obj);
-                });
+                callback(null, result);
             });
         });
     });
