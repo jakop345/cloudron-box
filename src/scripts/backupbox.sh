@@ -40,7 +40,7 @@ for try in `seq 1 5`; do
 
     # use aws instead of curl because curl will always read entire stream memory to set Content-Length
     # aws will do multipart upload
-    if tar -cvzf - -C "${box_snapshot_dir}" . \
+    if tar -czf - -C "${box_snapshot_dir}" . \
            | openssl aes-256-cbc -e -pass "pass:${password}" \
            | aws s3 cp - "${s3_url}" 2>"${error_log}"; then
         break

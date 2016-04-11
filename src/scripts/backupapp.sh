@@ -59,7 +59,7 @@ for try in `seq 1 5`; do
     echo "Uploading backup to ${s3_data_url} (try ${try})"
     error_log=$(mktemp)
 
-    if tar -cvzf - -C "${app_data_snapshot}" . \
+    if tar -czf - -C "${app_data_snapshot}" . \
            | openssl aes-256-cbc -e -pass "pass:${password}" \
            |  aws s3 cp - "${s3_data_url}" 2>"${error_log}"; then
         break
