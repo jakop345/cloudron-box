@@ -233,7 +233,9 @@ describe('Cloudron', function () {
         });
 
         it('succeeds', function (done) {
-            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/localhost?token=' + config.token()).reply(200, { box: { region: 'sfo', size: '1gb' }});
+            var scope = nock(config.apiServerOrigin())
+                  .get('/api/v1/boxes/localhost?token=' + config.token())
+                  .reply(200, { box: { region: 'sfo', size: '1gb' }, user: { }});
 
             superagent.get(SERVER_URL + '/api/v1/cloudron/config')
                    .query({ access_token: token })
