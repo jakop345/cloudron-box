@@ -66,6 +66,15 @@ var USER_0 = {
     displayName: 'User 0'
 };
 
+function checkMails(number, done) {
+    // mails are enqueued async
+    setTimeout(function () {
+        expect(mailer._getMailQueue().length).to.equal(number);
+        mailer._clearMailQueue();
+        done();
+    }, 500);
+}
+
 describe('updatechecker - checkBoxUpdates', function () {
     before(function (done) {
         config.set('version', '1.0.0');
@@ -96,7 +105,8 @@ describe('updatechecker - checkBoxUpdates', function () {
         updatechecker.checkBoxUpdates(function (error) {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().box).to.be(null);
-            done();
+
+            checkMails(0, done);
         });
     });
 
@@ -114,7 +124,8 @@ describe('updatechecker - checkBoxUpdates', function () {
         updatechecker.checkBoxUpdates(function (error) {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().box.version).to.be('2.0.0');
-            done();
+
+            checkMails(1, done);
         });
     });
 
@@ -131,6 +142,7 @@ describe('updatechecker - checkBoxUpdates', function () {
         updatechecker.checkBoxUpdates(function (error) {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().box.version).to.be('2.0.0');
+
             done();
         });
     });
