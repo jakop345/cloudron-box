@@ -54,6 +54,7 @@ var RELEASE_2 = {
 
 var RELEASES = {
     "1.0.0": RELEASE_1,
+    "1.0.1": RELEASE_1,
     "2.0.0-pre0": RELEASE_2_PRERELEASE,
     "2.0.0": RELEASE_2
 };
@@ -181,6 +182,21 @@ describe('updatechecker - checkBoxUpdates', function () {
                 checkMails(1, done);
             });
         });
+    });
+
+    it('does not send mail for patch releases', function (done) {
+        var releaseCopy = deepExtend({}, RELEASES);
+        releaseCopy['1.0.0'].next = '1.0.1';
+
+        var scope = nock('http://localhost:4444')
+            .get('/release.json')
+            .reply(200, releaseCopy);
+
+            updatechecker.checkBoxUpdates(function (error) {
+                expect(!error).to.be.ok();
+                expect(updatechecker.getUpdateInfo().box.version).to.be('1.0.1'); // got the update
+                checkMails(0, done); // but no email sent since patch release
+            });
     });
 
     it('bad response offers nothing', function (done) {
