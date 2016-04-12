@@ -219,7 +219,9 @@ describe('updatechecker - checkAppUpdates', function () {
         async.series([
             database.initialize,
             database._clear,
-            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit)
+            mailer._clearMailQueue,
+            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit),
+            user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName)
         ], done);
     });
 
