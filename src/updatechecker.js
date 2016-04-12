@@ -173,7 +173,7 @@ function checkAppUpdates(callback) {
                         return iteratorDone();
                     }
 
-                    if (semver.satisfies(newState[id].version, '~' + app.manifest.version)) {
+                    if (semver.satisfies(newState[id], '~' + app.manifest.version)) {
                         debug('Skipping notification of box update as this is a patch release');
                     } else {
                         mailer.appUpdateAvailable(app, updateInfo[id]);

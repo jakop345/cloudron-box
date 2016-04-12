@@ -313,6 +313,20 @@ describe('updatechecker - checkAppUpdates', function () {
         });
     });
 
+    it('does not send mail for patch releases', function (done) {
+        nock.cleanAll();
+
+        var scope = nock('http://localhost:4444')
+            .post('/api/v1/appupdates')
+            .reply(200, { appVersions: { 'io.cloudron.app': { manifest: { version: '1.0.1' } } } });
+
+        updatechecker.checkAppUpdates(function (error) {
+            expect(!error).to.be.ok();
+            expect(updatechecker.getUpdateInfo().apps).to.eql({ 'appid-0': { manifest: { version: '1.0.1' } } }); // got the update
+            checkMails(0, done); // but no email sent since patch release
+        });
+    });
+
     it('does not offer old version', function (done) {
         nock.cleanAll();
 
