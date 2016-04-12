@@ -25,7 +25,7 @@ var RELEASE_1 = {
     "changelog": [ ],
     "date": "2016-01-23T23:53:01.566Z",
     "author": "Girish Ramakrishnan <girish@cloudron.io>",
-    "next": "2.0.0-1"
+    "next": "2.0.0-pre0"
 };
 
 var RELEASE_2_PRERELEASE = {
@@ -52,7 +52,7 @@ var RELEASE_2 = {
 
 var RELEASES = {
     "1.0.0": RELEASE_1,
-    "2.0.0-1": RELEASE_2_PRERELEASE,
+    "2.0.0-pre0": RELEASE_2_PRERELEASE,
     "2.0.0": RELEASE_2
 };
 
@@ -90,7 +90,7 @@ describe('updatechecker - checkBoxUpdates', function () {
         nock.cleanAll();
 
         var releaseCopy = deepExtend({}, RELEASES);
-        delete releaseCopy['2.0.0-1'];
+        delete releaseCopy['2.0.0-pre0'];
         releaseCopy['1.0.0'].next = '2.0.0';
 
         var scope = nock('http://localhost:4444')
@@ -151,7 +151,7 @@ describe('updatechecker - checkBoxUpdates', function () {
 
             updatechecker.checkBoxUpdates(function (error) {
                 expect(!error).to.be.ok();
-                expect(updatechecker.getUpdateInfo().box.version).to.be('2.0.0-1');
+                expect(updatechecker.getUpdateInfo().box.version).to.be('2.0.0-pre0');
                 done();
             });
         });
