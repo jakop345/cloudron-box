@@ -13,9 +13,11 @@ var appdb = require('../appdb.js'),
     deepExtend = require('deep-extend'),
     expect = require('expect.js'),
     fs = require('fs'),
+    mailer = require('../mailer.js'),
     nock = require('nock'),
     settings = require('../settings.js'),
     updatechecker = require('../updatechecker.js'),
+    user = require('../user.js'),
     _ = require('underscore');
 
 var RELEASE_1 = {
@@ -56,18 +58,30 @@ var RELEASES = {
     "2.0.0": RELEASE_2
 };
 
+// owner
+var USER_0 = {
+    username: 'username0',
+    password: 'Username0pass?1234',
+    email: 'user0@email.com',
+    displayName: 'User 0'
+};
+
 describe('updatechecker - checkBoxUpdates', function () {
     before(function (done) {
         config.set('version', '1.0.0');
-        config.set('boxVersionsUrl', 'http://localhost:4444/release.json')
+        config.set('boxVersionsUrl', 'http://localhost:4444/release.json');
         async.series([
-            database.initialize
+            database.initialize,
+            mailer._clearMailQueue,
+            user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName)
         ], done);
     });
 
-    after(function (done) {
+    function after(done) {
+        mailer._clearMailQueue();
+
         database._clear(done);
-    });
+    }
 
     it('no updates', function (done) {
         nock.cleanAll();
