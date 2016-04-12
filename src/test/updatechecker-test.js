@@ -143,7 +143,7 @@ describe('updatechecker - checkBoxUpdates', function () {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().box.version).to.be('2.0.0');
 
-            done();
+            checkMails(0, done); // already notified for 2.0.0
         });
     });
 
@@ -159,7 +159,7 @@ describe('updatechecker - checkBoxUpdates', function () {
         updatechecker.checkBoxUpdates(function (error) {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().box).to.be(null);
-            done();
+            checkMails(0, done);
         });
     });
 
@@ -178,7 +178,7 @@ describe('updatechecker - checkBoxUpdates', function () {
             updatechecker.checkBoxUpdates(function (error) {
                 expect(!error).to.be.ok();
                 expect(updatechecker.getUpdateInfo().box.version).to.be('2.0.0-pre0');
-                done();
+                checkMails(1, done);
             });
         });
     });
@@ -195,7 +195,7 @@ describe('updatechecker - checkBoxUpdates', function () {
         updatechecker.checkBoxUpdates(function (error) {
             expect(error).to.be.ok();
             expect(updatechecker.getUpdateInfo().box).to.be(null);
-            done();
+            checkMails(0, done);
         });
     });
 });
@@ -251,7 +251,7 @@ describe('updatechecker - checkAppUpdates', function () {
         updatechecker.checkAppUpdates(function (error) {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().apps).to.eql({});
-            done();
+            checkMails(0, done);
         });
     });
 
@@ -265,7 +265,7 @@ describe('updatechecker - checkAppUpdates', function () {
         updatechecker.checkAppUpdates(function (error) {
             expect(error).to.be.ok();
             expect(updatechecker.getUpdateInfo().apps).to.eql({});
-            done();
+            checkMails(0, done);
         });
     });
 
@@ -279,7 +279,7 @@ describe('updatechecker - checkAppUpdates', function () {
         updatechecker.checkAppUpdates(function (error) {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().apps).to.eql({});
-            done();
+            checkMails(0, done);
         });
     });
 
@@ -293,7 +293,7 @@ describe('updatechecker - checkAppUpdates', function () {
         updatechecker.checkAppUpdates(function (error) {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().apps).to.eql({ 'appid-0': { manifest: { version: '2.0.0' } } });
-            done();
+            checkMails(1, done);
         });
     });
 
@@ -307,7 +307,7 @@ describe('updatechecker - checkAppUpdates', function () {
         updatechecker.checkAppUpdates(function (error) {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().apps).to.eql({ });
-            done();
+            checkMails(0, done);
         });
     });
 });
