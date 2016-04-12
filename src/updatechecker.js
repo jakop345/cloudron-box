@@ -1,5 +1,3 @@
-/* jslint node:true */
-
 'use strict';
 
 exports = module.exports = {
@@ -175,7 +173,12 @@ function checkAppUpdates(callback) {
                         return iteratorDone();
                     }
 
-                    mailer.appUpdateAvailable(app, updateInfo[id]);
+                    if (semver.satisfies(newState[id].version, '~' + app.manifest.version)) {
+                        debug('Skipping notification of box update as this is a patch release');
+                    } else {
+                        mailer.appUpdateAvailable(app, updateInfo[id]);
+                    }
+
                     iteratorDone();
                 });
             }, function () {
@@ -216,7 +219,12 @@ function checkBoxUpdates(callback) {
                 return callback();
             }
 
-            mailer.boxUpdateAvailable(updateInfo.version, updateInfo.changelog);
+            if (semver.satisfies(gBoxUpdateInfo.version, '~' + config.version())) {
+                debug('Skipping notification of box update as this is a patch release');
+            } else {
+                mailer.boxUpdateAvailable(updateInfo.version, updateInfo.changelog);
+            }
+
             state.box = updateInfo.version;
 
             saveState(state);
