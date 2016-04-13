@@ -21,7 +21,7 @@ describe('SimpleAuth API', function () {
     var SERVER_URL = 'http://localhost:' + config.get('port');
     var SIMPLE_AUTH_ORIGIN = 'http://localhost:' + config.get('simpleAuthPort');
 
-    var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='silly@me.com';
+    var USERNAME = 'aDMin', PASSWORD = 'Foobar?1337', EMAIL ='silly@ME.com';
 
     var APP_0 = {
         id: 'app0',
@@ -324,7 +324,8 @@ describe('SimpleAuth API', function () {
                 .end(function (error, result) {
                     expect(error).to.be(null);
                     expect(result.body).to.be.an('object');
-                    expect(result.body.username).to.eql(USERNAME);
+                    expect(result.body.username).to.eql(USERNAME.toLowerCase());
+                    expect(result.body.email).to.eql(EMAIL.toLowerCase());
 
                     done();
                 });
@@ -356,7 +357,8 @@ describe('SimpleAuth API', function () {
                 .end(function (error, result) {
                     expect(error).to.be(null);
                     expect(result.body).to.be.an('object');
-                    expect(result.body.username).to.eql(USERNAME);
+                    expect(result.body.username).to.eql(USERNAME.toLowerCase());
+                    expect(result.body.email).to.eql(EMAIL.toLowerCase());
 
                     done();
                 });
@@ -388,7 +390,8 @@ describe('SimpleAuth API', function () {
                 .end(function (error, result) {
                     expect(error).to.be(null);
                     expect(result.body).to.be.an('object');
-                    expect(result.body.username).to.eql(USERNAME);
+                    expect(result.body.username).to.eql(USERNAME.toLowerCase());
+                    expect(result.body.email).to.eql(EMAIL.toLowerCase());
 
                     done();
                 });
@@ -420,7 +423,8 @@ describe('SimpleAuth API', function () {
                 .end(function (error, result) {
                     expect(error).to.be(null);
                     expect(result.body).to.be.an('object');
-                    expect(result.body.username).to.eql(USERNAME);
+                    expect(result.body.username).to.eql(USERNAME.toLowerCase());
+                    expect(result.body.email).to.eql(EMAIL.toLowerCase());
 
                     done();
                 });
