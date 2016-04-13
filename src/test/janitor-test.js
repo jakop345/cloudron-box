@@ -32,18 +32,22 @@ describe('janitor', function () {
         accessToken: tokendb.generateToken(),
         identifier: tokendb.PREFIX_USER + '0',
         clientId: 'clientid-0',
-        expires: Date.now() + 60 * 60000,
+        expires: Date.now(),
         scope: '*'
     };
     var TOKEN_1 = {
         accessToken: tokendb.generateToken(),
         identifier: tokendb.PREFIX_USER + '1',
         clientId: 'clientid-1',
-        expires: Date.now() - 1000,
+        expires: Date.now(),
         scope: '*',
     };
 
     before(function (done) {
+        // Only now calculate the expiration, otherwise it happens when the test code gets loaded, not when this is executed
+        TOKEN_0.expires = Date.now() + 60 * 60 * 1000;
+        TOKEN_1.expires = Date.now() - 1000;
+
         async.series([
             database.initialize,
             database._clear,
