@@ -57,7 +57,7 @@ gServer.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, 
     var code = hat(256);
     var expiresAt = Date.now() + 60 * 60000; // 1 hour
 
-    authcodedb.add(code, client.id, user.username, expiresAt, function (error) {
+    authcodedb.add(code, client.id, user.id, expiresAt, function (error) {
         if (error) return callback(error);
 
         debug('grant code: new auth code for client %s code %s', client.id, code);
