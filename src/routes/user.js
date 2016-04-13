@@ -100,7 +100,9 @@ function update(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         user.update(req.params.userId, result.username, req.body.email || result.email, req.body.displayName || result.displayName, function (error) {
+            if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, error.message));
             if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, error.message));
+            if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
             if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
             if (error) return next(new HttpError(500, error));
 
