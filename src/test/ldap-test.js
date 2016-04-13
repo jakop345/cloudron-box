@@ -20,17 +20,17 @@ var appdb = require('../appdb.js'),
 
 // owner
 var USER_0 = {
-    username: 'username0',
+    username: 'userName0',
     password: 'Username0pass?1234',
-    email: 'user0@email.com',
+    email: 'user0@EMAIL.com',
     displayName: 'User 0'
 };
 
 // normal user
 var USER_1 = {
-    username: 'username1',
+    username: 'Username1',
     password: 'Username1pass?12345',
-    email: 'user1@email.com',
+    email: 'USER1@email.com',
     displayName: 'User 1'
 };
 
@@ -267,8 +267,8 @@ describe('Ldap', function () {
                     expect(result.status).to.equal(0);
                     expect(entries.length).to.equal(2);
                     entries.sort(function (a, b) { return a.username > b.username; });
-                    expect(entries[0].username).to.equal(USER_0.username);
-                    expect(entries[1].username).to.equal(USER_1.username);
+                    expect(entries[0].username).to.equal(USER_0.username.toLowerCase());
+                    expect(entries[1].username).to.equal(USER_1.username.toLowerCase());
                     done();
                 });
             });
@@ -293,8 +293,8 @@ describe('Ldap', function () {
                     expect(result.status).to.equal(0);
                     expect(entries.length).to.equal(2);
                     entries.sort(function (a, b) { return a.username > b.username; });
-                    expect(entries[0].username).to.equal(USER_0.username);
-                    expect(entries[1].username).to.equal(USER_1.username);
+                    expect(entries[0].username).to.equal(USER_0.username.toLowerCase());
+                    expect(entries[1].username).to.equal(USER_1.username.toLowerCase());
                     done();
                 });
             });
@@ -318,7 +318,7 @@ describe('Ldap', function () {
                 result.on('end', function (result) {
                     expect(result.status).to.equal(0);
                     expect(entries.length).to.equal(1);
-                    expect(entries[0].username).to.equal(USER_0.username);
+                    expect(entries[0].username).to.equal(USER_0.username.toLowerCase());
                     expect(entries[0].memberof.length).to.equal(2);
                     done();
                 });

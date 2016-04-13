@@ -72,7 +72,10 @@ function start(callback) {
                     }
                 };
 
-                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
+                // ensure all filter values are also lowercase
+                var lowerCaseFilter = ldap.parseFilter(req.filter.toString().toLowerCase());
+
+                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(tmp.attributes)) {
                     res.send(tmp);
                 }
             });
@@ -108,7 +111,10 @@ function start(callback) {
                     }
                 };
 
-                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
+                // ensure all filter values are also lowercase
+                var lowerCaseFilter = ldap.parseFilter(req.filter.toString().toLowerCase());
+
+                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(tmp.attributes)) {
                     res.send(tmp);
                 }
             });
