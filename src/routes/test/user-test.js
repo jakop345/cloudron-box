@@ -137,7 +137,7 @@ describe('User API', function () {
         });
     });
 
-    it('canno get userInfo by username', function (done) {
+    it('cannot get userInfo by username', function (done) {
         superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
         .query({ access_token: token })
         .end(function (err, res) {
