@@ -883,7 +883,14 @@ describe('OAuth2', function () {
                         expect(foo.access_token).to.be.a('string');
                         expect(foo.token_type).to.eql('Bearer');
 
-                        done();
+                        // Ensure the token is also usable
+                        superagent.get(SERVER_URL + '/api/v1/profile?access_token=' + foo.access_token, function (error, result) {
+                            expect(error).to.not.be.ok();
+                            expect(result.status).to.eql(200);
+                            expect(result.body.username).to.equal(USER_0.username);
+
+                            done();
+                        });
                     });
                 });
             });
