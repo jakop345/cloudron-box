@@ -155,7 +155,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
             // Client.notify('', 'Invitation was successfully sent to ' + user.email + '.', false, 'success');
 
-            $scope.inviteSent.setupLink = location.origin + '/api/v1/session/password/setup.html?reset_token=' + resetToken;
+            $scope.inviteSent.setupLink = location.origin + '/api/v1/session/account/setup.html?reset_token=' + resetToken;
             $('#inviteSentModal').modal('show');
         });
     };
