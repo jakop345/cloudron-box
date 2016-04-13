@@ -103,6 +103,7 @@ function initializeExpressSync() {
     // user routes only for admins
     router.get ('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.list);
     router.post('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.create);
+    router.get ('/api/v1/users/:userId', usersScope, routes.users.requireAdmin, routes.user.profile);
     router.del ('/api/v1/users/:userId', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.user.remove);
     router.put ('/api/v1/users/:userId/set_groups', usersScope, routes.user.requireAdmin, routes.user.setGroups);
     router.post('/api/v1/users/:userId/invite', usersScope, routes.user.requireAdmin, routes.user.sendInvite);
