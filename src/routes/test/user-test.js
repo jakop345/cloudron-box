@@ -19,7 +19,7 @@ var config = require('../../config.js'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
-var USERNAME_0 = 'aDmIn', PASSWORD = 'Foobar?1337', EMAIL_0 = 'silLY@me.com', EMAIL_0_NEW = 'stupID@me.com', DISPLAY_NAME_0_NEW = 'New Name';
+var USERNAME_0 = 'superaDmIn', PASSWORD = 'Foobar?1337', EMAIL_0 = 'silLY@me.com', EMAIL_0_NEW = 'stupID@me.com', DISPLAY_NAME_0_NEW = 'New Name';
 var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'taO@zen.mac';
 var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'USER@foo.bar', EMAIL_2_NEW = 'happy@ME.com';
 var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@FOO.bar';

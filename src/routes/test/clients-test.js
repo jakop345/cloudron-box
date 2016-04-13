@@ -21,7 +21,7 @@ var async = require('async'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
-var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='silly@me.com';
+var USERNAME = 'superadmin', PASSWORD = 'Foobar?1337', EMAIL ='silly@me.com';
 var token = null; // authentication token
 
 function cleanup(done) {

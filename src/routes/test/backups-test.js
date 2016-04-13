@@ -19,7 +19,7 @@ var appdb = require('../../appdb.js'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
-var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='silly@me.com';
+var USERNAME = 'superadmin', PASSWORD = 'Foobar?1337', EMAIL ='silly@me.com';
 var token = null;
 
 var server;
