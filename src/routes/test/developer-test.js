@@ -297,7 +297,16 @@ describe('Developer API', function () {
 
         it('fails with unknown username', function (done) {
             superagent.post(SERVER_URL + '/api/v1/developer/login')
-                   .send({ username: USERNAME.toUpperCase(), password: PASSWORD })
+                   .send({ username: USERNAME + USERNAME, password: PASSWORD })
+                   .end(function (error, result) {
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails with unknown email', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
+                   .send({ username: USERNAME + EMAIL, password: PASSWORD })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(401);
                 done();
@@ -324,9 +333,31 @@ describe('Developer API', function () {
             });
         });
 
+        it('with uppercase username succeeds', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
+                   .send({ username: USERNAME.toUpperCase(), password: PASSWORD })
+                   .end(function (error, result) {
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.expiresAt).to.be.a('number');
+                expect(result.body.token).to.be.a('string');
+                done();
+            });
+        });
+
         it('with email succeeds', function (done) {
             superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: EMAIL, password: PASSWORD })
+                   .end(function (error, result) {
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.expiresAt).to.be.a('number');
+                expect(result.body.token).to.be.a('string');
+                done();
+            });
+        });
+
+        it('with uppercase email succeeds', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
+                   .send({ username: EMAIL.toUpperCase(), password: PASSWORD })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.expiresAt).to.be.a('number');
