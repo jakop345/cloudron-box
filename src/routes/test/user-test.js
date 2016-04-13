@@ -19,10 +19,10 @@ var config = require('../../config.js'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
-var USERNAME_0 = 'admin', PASSWORD = 'Foobar?1337', EMAIL_0 = 'silly@me.com', EMAIL_0_NEW = 'stupid@me.com', DISPLAY_NAME_0_NEW = 'New Name';
-var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'tao@zen.mac';
-var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'user@foo.bar', EMAIL_2_NEW = 'happy@me.com';
-var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@foo.bar';
+var USERNAME_0 = 'aDmIn', PASSWORD = 'Foobar?1337', EMAIL_0 = 'silLY@me.com', EMAIL_0_NEW = 'stupID@me.com', DISPLAY_NAME_0_NEW = 'New Name';
+var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'taO@zen.mac';
+var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'USER@foo.bar', EMAIL_2_NEW = 'happy@ME.com';
+var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@FOO.bar';
 
 var server;
 function setup(done) {
@@ -152,8 +152,8 @@ describe('User API', function () {
         .query({ access_token: token })
         .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.username).to.equal(USERNAME_0);
-            expect(res.body.email).to.equal(EMAIL_0);
+            expect(res.body.username).to.equal(USERNAME_0.toLowerCase());
+            expect(res.body.email).to.equal(EMAIL_0.toLowerCase());
             expect(res.body.admin).to.be.ok();
 
             done();
@@ -183,8 +183,8 @@ describe('User API', function () {
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.username).to.equal(USERNAME_0);
-            expect(res.body.email).to.equal(EMAIL_0);
+            expect(res.body.username).to.equal(USERNAME_0.toLowerCase());
+            expect(res.body.email).to.equal(EMAIL_0.toLowerCase());
             expect(res.body.admin).to.be.ok();
             done();
         });
@@ -222,8 +222,8 @@ describe('User API', function () {
                .set('Authorization', 'Bearer ' + token)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.username).to.equal(USERNAME_0);
-            expect(res.body.email).to.equal(EMAIL_0);
+            expect(res.body.username).to.equal(USERNAME_0.toLowerCase());
+            expect(res.body.email).to.equal(EMAIL_0.toLowerCase());
             expect(res.body.admin).to.be.ok();
             expect(res.body.displayName).to.be.a('string');
             expect(res.body.password).to.not.be.ok();
@@ -413,8 +413,8 @@ describe('User API', function () {
                .query({ access_token: token_2 })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(200);
-            expect(result.body.username).to.equal(USERNAME_2);
-            expect(result.body.email).to.equal(EMAIL_2);
+            expect(result.body.username).to.equal(USERNAME_2.toLowerCase());
+            expect(result.body.email).to.equal(EMAIL_2.toLowerCase());
             expect(result.body.admin).to.not.be.ok();
 
             done();
@@ -572,8 +572,8 @@ describe('User API', function () {
                   .query({ access_token: token_2 })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                expect(res.body.username).to.equal(USERNAME_2);
-                expect(res.body.email).to.equal(EMAIL_2_NEW);
+                expect(res.body.username).to.equal(USERNAME_2.toLowerCase());
+                expect(res.body.email).to.equal(EMAIL_2_NEW.toLowerCase());
                 expect(res.body.admin).to.equal(false);
                 expect(res.body.displayName).to.equal('');
 
@@ -593,8 +593,8 @@ describe('User API', function () {
                   .query({ access_token: token })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                expect(res.body.username).to.equal(USERNAME_2);
-                expect(res.body.email).to.equal(EMAIL_2);
+                expect(res.body.username).to.equal(USERNAME_2.toLowerCase());
+                expect(res.body.email).to.equal(EMAIL_2.toLowerCase());
                 expect(res.body.admin).to.equal(false);
                 expect(res.body.displayName).to.equal('');
 
@@ -614,8 +614,8 @@ describe('User API', function () {
                   .query({ access_token: token })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                expect(res.body.username).to.equal(USERNAME_0);
-                expect(res.body.email).to.equal(EMAIL_0);
+                expect(res.body.username).to.equal(USERNAME_0.toLowerCase());
+                expect(res.body.email).to.equal(EMAIL_0.toLowerCase());
                 expect(res.body.admin).to.be.ok();
                 expect(res.body.displayName).to.equal(DISPLAY_NAME_0_NEW);
 

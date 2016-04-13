@@ -50,7 +50,7 @@ function getByUsername(username, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE username = ?', [ username ], function (error, result) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE username = ?', [ username.toLowerCase() ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -62,7 +62,7 @@ function getByEmail(email, callback) {
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE email = ?', [ email ], function (error, result) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE email = ?', [ email.toLowerCase() ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -139,7 +139,7 @@ function add(userId, user, callback) {
     assert.strictEqual(typeof user.displayName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var data = [ userId, user.username || null, user.password, user.email.toLowerCase(), user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName ];
+    var data = [ userId, user.username ? user.username.toLowerCase() : null, user.password, user.email.toLowerCase(), user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName ];
     database.query('INSERT INTO users (id, username, password, email, salt, createdAt, modifiedAt, resetToken, displayName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', data, function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -200,7 +200,7 @@ function update(userId, user, callback) {
 
         if (k === 'username') {
             assert.strictEqual(typeof user.username, 'string');
-            args.push(user.username || null);
+            args.push(user.username ? user.username.toLowerCase() : null);
         } else if (k === 'email') {
             assert.strictEqual(typeof user.email, 'string');
             args.push(user.email.toLowerCase());

@@ -16,10 +16,10 @@ var async = require('async'),
     userdb = require('../userdb.js'),
     UserError = user.UserError;
 
-var USERNAME = 'nobody';
-var USERNAME_NEW = 'nobodynew';
-var EMAIL = 'nobody@no.body';
-var EMAIL_NEW = 'nobodynew@no.body';
+var USERNAME = 'noBody';
+var USERNAME_NEW = 'noBodyNew';
+var EMAIL = 'noBody@no.body';
+var EMAIL_NEW = 'noBodyNew@no.body';
 var PASSWORD = 'sTrOnG#$34134';
 var NEW_PASSWORD = 'oTHER@#$235';
 var DISPLAY_NAME = 'Nobody cares';
@@ -191,7 +191,7 @@ describe('User', function () {
 
                 user.getOwner(function (error, owner) {
                     expect(error).to.be(null);
-                    expect(owner.email).to.be(EMAIL);
+                    expect(owner.email).to.be(EMAIL.toLowerCase());
                     done();
                 });
             });
@@ -284,6 +284,15 @@ describe('User', function () {
                 done();
             });
         });
+
+        it('succeeds for different username case', function (done) {
+            user.verifyWithUsername(USERNAME.toUpperCase(), PASSWORD, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+
+                done();
+            });
+        });
     });
 
     describe('verifyWithEmail', function () {
@@ -328,6 +337,15 @@ describe('User', function () {
                 done();
             });
         });
+
+        it('succeeds for different email case', function (done) {
+            user.verifyWithEmail(EMAIL.toUpperCase(), PASSWORD, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+
+                done();
+            });
+        });
     });
 
     describe('retrieving', function () {
@@ -348,8 +366,8 @@ describe('User', function () {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result.id).to.equal(userObject.id);
-                expect(result.email).to.equal(EMAIL);
-                expect(result.username).to.equal(USERNAME);
+                expect(result.email).to.equal(EMAIL.toLowerCase());
+                expect(result.username).to.equal(USERNAME.toLowerCase());
                 expect(result.displayName).to.equal(DISPLAY_NAME);
 
                 done();
@@ -386,8 +404,8 @@ describe('User', function () {
                 user.get(userObject.id, function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
-                    expect(result.email).to.equal(EMAIL_NEW);
-                    expect(result.username).to.equal(USERNAME_NEW);
+                    expect(result.email).to.equal(EMAIL_NEW.toLowerCase());
+                    expect(result.username).to.equal(USERNAME_NEW.toLowerCase());
                     expect(result.displayName).to.equal(DISPLAY_NAME_NEW);
 
                     done();
@@ -402,8 +420,8 @@ describe('User', function () {
                 user.get(userObject.id, function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
-                    expect(result.email).to.equal(EMAIL_NEW);
-                    expect(result.username).to.equal(USERNAME_NEW);
+                    expect(result.email).to.equal(EMAIL_NEW.toLowerCase());
+                    expect(result.username).to.equal(USERNAME_NEW.toLowerCase());
                     expect(result.displayName).to.equal(DISPLAY_NAME_NEW);
 
                     done();
@@ -455,7 +473,7 @@ describe('User', function () {
             user.getAllAdmins(function (error, admins) {
                 expect(error).to.eql(null);
                 expect(admins.length).to.equal(1);
-                expect(admins[0].username).to.equal(USERNAME);
+                expect(admins[0].username).to.equal(USERNAME.toLowerCase());
                 done();
             });
         });
@@ -480,8 +498,8 @@ describe('User', function () {
                     user.getAllAdmins(function (error, admins) {
                         expect(error).to.eql(null);
                         expect(admins.length).to.equal(2);
-                        expect(admins[0].username).to.equal(USERNAME);
-                        expect(admins[1].username).to.equal(user1.username);
+                        expect(admins[0].username).to.equal(USERNAME.toLowerCase());
+                        expect(admins[1].username).to.equal(user1.username.toLowerCase());
 
                         // one mail for user creation one mail for admin change
                         checkMails(1, done);    // FIXME should be 2 for admin change
