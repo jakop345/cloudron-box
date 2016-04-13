@@ -57,6 +57,11 @@ function start(callback) {
                 var groups = [ GROUP_USERS_DN ];
                 if (entry.admin) groups.push(GROUP_ADMINS_DN);
 
+                var displayName = entry.displayName || entry.username;
+                var nameParts = displayName.split(' ');
+                var firstName = nameParts[0];
+                var lastName = nameParts.length > 1  ? nameParts[nameParts.length - 1] : ''; // choose last part, if it exists
+
                 var tmp = {
                     dn: dn.toString(),
                     attributes: {
@@ -65,7 +70,9 @@ function start(callback) {
                         cn: entry.id,
                         uid: entry.id,
                         mail: entry.email,
-                        displayname: entry.displayName || entry.username,
+                        displayname: displayName,
+                        givenName: firstName,
+                        sn: lastName,
                         username: entry.username,
                         samaccountname: entry.username,      // to support ActiveDirectory clients
                         memberof: groups
