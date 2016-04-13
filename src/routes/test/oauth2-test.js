@@ -138,9 +138,9 @@ describe('OAuth2', function () {
     describe('flow', function () {
         var USER_0 = {
             id: uuid.v4(),
-            username: 'someusername',
+            username: 'someUSERname',
             password: '@#45Strongpassword',
-            email: 'some@email.com',
+            email: 'some@EMAIL.com',
             salt: 'somesalt',
             createdAt: (new Date()).toUTCString(),
             modifiedAt: (new Date()).toUTCString(),
@@ -887,7 +887,7 @@ describe('OAuth2', function () {
                         superagent.get(SERVER_URL + '/api/v1/profile?access_token=' + foo.access_token, function (error, result) {
                             expect(error).to.not.be.ok();
                             expect(result.status).to.eql(200);
-                            expect(result.body.username).to.equal(USER_0.username);
+                            expect(result.body.username).to.equal(USER_0.username.toLowerCase());
 
                             done();
                         });
@@ -1274,7 +1274,7 @@ describe('OAuth2', function () {
                             superagent.get(SERVER_URL + '/api/v1/profile?access_token=' + body.access_token, function (error, result) {
                                 expect(error).to.not.be.ok();
                                 expect(result.status).to.eql(200);
-                                expect(result.body.username).to.equal(USER_0.username);
+                                expect(result.body.username).to.equal(USER_0.username.toLowerCase());
 
                                 done();
                             });
