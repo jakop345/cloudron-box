@@ -20,6 +20,7 @@ fi
 
 echo "Upgrading infrastructure from ${infra_version} to ${INFRA_VERSION}"
 
+# TODO: be nice and stop addons cleanly (example, shutdown commands)
 existing_containers=$(docker ps -qa)
 echo "Remove containers: ${existing_containers}"
 if [[ -n "${existing_containers}" ]]; then
