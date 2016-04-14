@@ -118,6 +118,26 @@ describe('User', function () {
             });
         });
 
+        it('fails due to reserved username', function (done) {
+            user.create('admin', PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+
+                done();
+            });
+        });
+
+        it('fails due to reserved username', function (done) {
+            user.create('AdMiN', PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+
+                done();
+            });
+        });
+
         it('succeeds and attempts to send invite', function (done) {
             user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
                 expect(error).not.to.be.ok();
