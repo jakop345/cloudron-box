@@ -122,8 +122,8 @@ describe('User', function () {
             user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
-                expect(result.username).to.equal(USERNAME);
-                expect(result.email).to.equal(EMAIL);
+                expect(result.username).to.equal(USERNAME.toLowerCase());
+                expect(result.email).to.equal(EMAIL.toLowerCase());
 
                 // first user is owner, do not send mail to admins
                 checkMails(0, done);

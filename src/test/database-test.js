@@ -69,18 +69,6 @@ describe('database', function () {
             displayName: 'Herbert 2'
         };
 
-        var USER_3 = {
-            id: 'uuid3',
-            username: 'uuid3',
-            password: 'secret',
-            email: 'SAFE3@me.com',
-            salt: 'tata',
-            createdAt: 'sometime back',
-            modifiedAt: 'now',
-            resetToken: '',
-            displayName: 'Herbert 3'
-        };
-
         it('can add user', function (done) {
             userdb.add(USER_0.id, USER_0, done);
         });
@@ -95,14 +83,6 @@ describe('database', function () {
 
         it('cannot add same user again', function (done) {
             userdb.add(USER_0.id, USER_0, function (error) {
-                expect(error).to.be.ok();
-                expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
-                done();
-            });
-        });
-
-        it('cannot add user with same but uppercase email again', function (done) {
-            userdb.add(USER_3.id, USER_3, function (error) {
                 expect(error).to.be.ok();
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();

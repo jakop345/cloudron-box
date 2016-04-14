@@ -126,6 +126,10 @@ function createUser(username, password, email, displayName, options, callback) {
         sendInvite = options && options.sendInvite ? true : false,
         owner = options && options.owner ? true : false;
 
+    // We store usernames and email in lowercase
+    username = username.toLowerCase();
+    email = email.toLowerCase();
+
     var error = validateUsername(username);
     if (error) return callback(error);
 
@@ -196,7 +200,7 @@ function verifyWithUsername(username, password, callback) {
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.getByUsername(username, function (error, user) {
+    userdb.getByUsername(username.toLowerCase(), function (error, user) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
@@ -217,7 +221,7 @@ function verifyWithEmail(email, password, callback) {
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.getByEmail(email, function (error, user) {
+    userdb.getByEmail(email.toLowerCase(), function (error, user) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
@@ -302,6 +306,9 @@ function updateUser(userId, username, email, displayName, callback) {
     assert.strictEqual(typeof displayName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    username = username.toLowerCase();
+    email = email.toLowerCase();
+
     var error = validateUsername(username);
     if (error) return callback(error);
 
@@ -354,7 +361,7 @@ function resetPasswordByIdentifier(identifier, callback) {
     if (identifier.indexOf('@') === -1) getter = userdb.getByUsername;
     else getter = userdb.getByEmail;
 
-    getter(identifier, function (error, result) {
+    getter(identifier.toLowerCase(), function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
@@ -422,7 +429,7 @@ function changePassword(username, oldPassword, newPassword, callback) {
     var error = validatePassword(newPassword);
     if (error) return callback(new UserError(UserError.BAD_PASSWORD, error.message));
 
-    verifyWithUsername(username, oldPassword, function (error, user) {
+    verifyWithUsername(username.toLowerCase(), oldPassword, function (error, user) {
         if (error) return callback(error);
 
         setPassword(user.id, newPassword, callback);
@@ -436,6 +443,7 @@ function createOwner(username, password, email, displayName, callback) {
     assert.strictEqual(typeof displayName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    // This is only not allowed for the owner
     if (username === '') return callback(new UserError(UserError.BAD_USERNAME, 'Username cannot be empty'));
 
     userdb.count(function (error, count) {
