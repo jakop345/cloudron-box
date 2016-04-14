@@ -76,6 +76,7 @@ UserError.BAD_TOKEN = 'Bad token';
 function validateUsername(username) {
     assert.strictEqual(typeof username, 'string');
     // https://github.com/gogits/gogs/blob/52c8f691630548fe091d30bcfe8164545a05d3d5/models/repo.go#L393
+    // admin@fqdn is also reservd for sending emails
     var RESERVED_USERNAMES = [ 'admin' ]; // apps like wordpress, gogs don't like these
 
     // allow empty usernames
