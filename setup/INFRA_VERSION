@@ -3,7 +3,7 @@
 # If you change the infra version, be sure to put a warning
 # in the change log
 
-INFRA_VERSION=26
+INFRA_VERSION=27
 
 # WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 # These constants are used in the installer script as well
@@ -12,7 +12,7 @@ MYSQL_IMAGE=cloudron/mysql:0.11.0
 POSTGRESQL_IMAGE=cloudron/postgresql:0.9.0
 MONGODB_IMAGE=cloudron/mongodb:0.9.0
 REDIS_IMAGE=cloudron/redis:0.8.0 # if you change this, fix src/addons.js as well
-MAIL_IMAGE=cloudron/mail:0.9.0
+MAIL_IMAGE=cloudron/mail:0.10.0
 GRAPHITE_IMAGE=cloudron/graphite:0.8.0
 
 MYSQL_REPO=cloudron/mysql
