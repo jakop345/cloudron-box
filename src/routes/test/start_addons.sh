@@ -68,7 +68,7 @@ start_mongodb() {
 start_mail() {
     docker rm -f mail 2>/dev/null 1>&2 || true
 
-    docker run -dP --name=mail -e DOMAIN_NAME="localhost" \
+    docker run -dP --name=mail -e MAIL_SERVER_NAME="server.local" -e MAIL_DOMAIN="server.local" \
         --read-only -v /tmp -v /run \
         -v /tmp/maildata:/app/data "${MAIL_IMAGE}" >/dev/null
 }
