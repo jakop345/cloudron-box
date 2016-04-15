@@ -10,7 +10,7 @@ var backups = require('../backups.js'),
     BackupsError = require('../backups.js').BackupsError,
     cloudron = require('../cloudron.js'),
     CloudronError = require('../cloudron.js').CloudronError,
-    debug = require('debug')('box:routes/internal'),
+    debug = require('debug')('box:routes/sysadmin'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 

@@ -26,6 +26,7 @@ exports = module.exports = {
     // these values are derived
     adminOrigin: adminOrigin,
     internalAdminOrigin: internalAdminOrigin,
+    sysadminOrigin: sysadminOrigin, // caas routes
     adminFqdn: adminFqdn,
     appFqdn: appFqdn,
     zoneName: zoneName,
@@ -77,7 +78,7 @@ function initConfig() {
     data.version = null;
     data.isCustomDomain = false;
     data.webServerOrigin = null;
-    data.internalPort = 3001;
+    data.sysadminPort = 3001;
     data.ldapPort = 3002;
     data.oauthProxyPort = 3003;
     data.simpleAuthPort = 3004;
@@ -172,6 +173,10 @@ function adminOrigin() {
 
 function internalAdminOrigin() {
     return 'http://127.0.0.1:' + get('port');
+}
+
+function sysadminOrigin() {
+    return 'http://127.0.0.1:' + get('sysadminPort');
 }
 
 function token() {

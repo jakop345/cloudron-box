@@ -23,7 +23,7 @@ var assert = require('assert'),
     taskmanager = require('./taskmanager.js');
 
 var gHttpServer = null;
-var gInternalHttpServer = null;
+var gSysadminHttpServer = null;
 
 function initializeExpressSync() {
     var app = express();
@@ -210,7 +210,7 @@ function initializeExpressSync() {
 }
 
 // provides hooks for the 'installer'
-function initializeInternalExpressSync() {
+function initializeSysadminExpressSync() {
     var app = express();
     var httpServer = http.createServer(app);
 
@@ -220,7 +220,7 @@ function initializeInternalExpressSync() {
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
-    if (process.env.BOX_ENV !== 'test') app.use(middleware.morgan('Box Internal :method :url :status :response-time ms - :res[content-length]', { immediate: false }));
+    if (process.env.BOX_ENV !== 'test') app.use(middleware.morgan('Box Sysadmin :method :url :status :response-time ms - :res[content-length]', { immediate: false }));
 
     var router = new express.Router();
     router.del = router.delete; // amend router.del for readability further on
@@ -232,10 +232,10 @@ function initializeInternalExpressSync() {
        .use(router)
        .use(middleware.lastMile());
 
-    // internal routes
-    router.post('/api/v1/backup', routes.internal.backup);
-    router.post('/api/v1/update', routes.internal.update);
-    router.post('/api/v1/retire', routes.internal.retire);
+    // Sysadmin routes
+    router.post('/api/v1/backup', routes.sysadmin.backup);
+    router.post('/api/v1/update', routes.sysadmin.update);
+    router.post('/api/v1/retire', routes.sysadmin.retire);
 
     return httpServer;
 }
@@ -245,7 +245,7 @@ function start(callback) {
     assert.strictEqual(gHttpServer, null, 'Server is already up and running.');
 
     gHttpServer = initializeExpressSync();
-    gInternalHttpServer = initializeInternalExpressSync();
+    gSysadminHttpServer = initializeSysadminExpressSync();
 
     async.series([
         auth.initialize,
@@ -256,7 +256,7 @@ function start(callback) {
         mailer.initialize,
         cron.initialize,
         gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1'),
-        gInternalHttpServer.listen.bind(gInternalHttpServer, config.get('internalPort'), '127.0.0.1')
+        gSysadminHttpServer.listen.bind(gSysadminHttpServer, config.get('sysadminPort'), '127.0.0.1')
     ], callback);
 }
 
@@ -273,12 +273,12 @@ function stop(callback) {
         mailer.uninitialize,
         database.uninitialize,
         gHttpServer.close.bind(gHttpServer),
-        gInternalHttpServer.close.bind(gInternalHttpServer)
+        gSysadminHttpServer.close.bind(gSysadminHttpServer)
     ], function (error) {
         if (error) console.error(error);
 
         gHttpServer = null;
-        gInternalHttpServer = null;
+        gSysadminHttpServer = null;
 
         callback(null);
     });
