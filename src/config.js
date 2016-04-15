@@ -139,7 +139,7 @@ function get(key) {
 }
 
 function adminEmail() {
-    return '"Cloudron" ' + get('adminEmail');
+    return get('adminEmail');
 }
 
 function apiServerOrigin() {
