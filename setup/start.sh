@@ -138,7 +138,7 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
     "fqdn": "${arg_fqdn}",
     "isCustomDomain": ${arg_is_custom_domain},
     "boxVersionsUrl": "${arg_box_versions_url}",
-    "adminEmail": "admin@${arg_fqdn}",
+    "adminEmail": "\"Cloudron\" <no-reply@${arg_fqdn}>",
     "provider": "${arg_provider}",
     "database": {
         "hostname": "localhost",
