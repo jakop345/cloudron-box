@@ -630,7 +630,7 @@ function update(app, callback) {
 
             async.series([
                 updateApp.bind(null, app, { installationProgress: '30, Backup app' }),
-                apps.backupApp.bind(null, app, app.oldConfig.manifest.addons)
+                backups.backupApp.bind(null, app, app.oldConfig.manifest.addons)
             ], next);
         },
 
