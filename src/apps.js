@@ -494,7 +494,7 @@ function update(appId, force, manifest, portBindings, icon, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof force, 'boolean');
     assert(manifest && typeof manifest === 'object');
-    assert(!portBindings || typeof portBindings === 'object');
+    assert(typeof portBindings === 'object'); // can be null
     assert(!icon || typeof icon === 'string');
     assert.strictEqual(typeof callback, 'function');
 
