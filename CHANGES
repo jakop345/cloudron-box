@@ -468,3 +468,6 @@
 - Fix crash when user attempts to set a duplicate email
 - Improved mongodb crash recovery
 
+[0.12.1]
+- Fix crash when backing up apps
+
