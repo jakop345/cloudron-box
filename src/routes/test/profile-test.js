@@ -39,7 +39,7 @@ describe('Profile API', function () {
 
             mailer._clearMailQueue();
 
-            userdb._clear(function (error) {
+            database._clear(function (error) {
                 expect(error).to.eql(null);
 
                 var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
@@ -236,14 +236,13 @@ describe('Profile API', function () {
         });
     });
 
-    xdescribe('password change', function () {
+    describe('password change', function () {
         before(setup);
-        after(after);
+        after(cleanup);
 
-        // Change password
         it('change password fails due to missing current password', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-                   .query({ access_token: token })
+            superagent.put(SERVER_URL + '/api/v1/profile/password')
+                   .query({ access_token: token_0 })
                    .send({ newPassword: 'some wrong password' })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
@@ -252,8 +251,8 @@ describe('Profile API', function () {
         });
 
         it('change password fails due to missing new password', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-                   .query({ access_token: token })
+            superagent.put(SERVER_URL + '/api/v1/profile/password')
+                   .query({ access_token: token_0 })
                    .send({ password: PASSWORD })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
@@ -262,8 +261,8 @@ describe('Profile API', function () {
         });
 
         it('change password fails due to wrong password', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-                   .query({ access_token: token })
+            superagent.put(SERVER_URL + '/api/v1/profile/password')
+                   .query({ access_token: token_0 })
                    .send({ password: 'some wrong password', newPassword: 'MOre#$%34' })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(403);
@@ -272,8 +271,8 @@ describe('Profile API', function () {
         });
 
         it('change password fails due to invalid password', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-                   .query({ access_token: token })
+            superagent.put(SERVER_URL + '/api/v1/profile/password')
+                   .query({ access_token: token_0 })
                    .send({ password: PASSWORD, newPassword: 'five' })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
@@ -282,8 +281,8 @@ describe('Profile API', function () {
         });
 
         it('change password succeeds', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-                   .query({ access_token: token })
+            superagent.put(SERVER_URL + '/api/v1/profile/password')
+                   .query({ access_token: token_0 })
                    .send({ password: PASSWORD, newPassword: 'MOre#$%34' })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(204);
