@@ -126,12 +126,12 @@ describe('Profile API', function () {
 
         it('fails with expired token', function (done) {
             var token = tokendb.generateToken();
-            var expires = Date.now() + 2000; // 1 sec
+            var expires = Date.now() - 2000; // 1 sec
 
             tokendb.add(token, tokendb.PREFIX_USER + user_0.id, null, expires, '*', function (error) {
                 expect(error).to.not.be.ok();
 
-                superagent.get(SERVER_URL + '/api/v1/profile/').query({ access_token: token }).end(function (error, result) {
+                superagent.get(SERVER_URL + '/api/v1/profile').query({ access_token: token }).end(function (error, result) {
                     expect(result.statusCode).to.equal(401);
 
                     done();
@@ -201,12 +201,12 @@ describe('Profile API', function () {
                 expect(result.statusCode).to.equal(204);
 
                 superagent.get(SERVER_URL + '/api/v1/profile')
-                      .query({ access_token: token_2 })
+                      .query({ access_token: token_0 })
                       .end(function (err, res) {
                     expect(res.statusCode).to.equal(200);
                     expect(res.body.username).to.equal(USERNAME_0.toLowerCase());
                     expect(res.body.email).to.equal(EMAIL_0_NEW.toLowerCase());
-                    expect(res.body.admin).to.equal(false);
+                    expect(res.body.admin).to.equal(true);
                     expect(res.body.displayName).to.equal('');
 
                     done();
@@ -226,7 +226,7 @@ describe('Profile API', function () {
                       .end(function (err, res) {
                     expect(res.statusCode).to.equal(200);
                     expect(res.body.username).to.equal(USERNAME_0.toLowerCase());
-                    expect(res.body.email).to.equal(EMAIL_0.toLowerCase());
+                    expect(res.body.email).to.equal(EMAIL_0_NEW.toLowerCase());
                     expect(res.body.admin).to.be.ok();
                     expect(res.body.displayName).to.equal(DISPLAY_NAME_0_NEW);
 

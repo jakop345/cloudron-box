@@ -41,7 +41,6 @@ function get(req, res, next) {
 }
 
 function update(req, res, next) {
-    assert.strictEqual(typeof req.params.userId, 'string');
     assert.strictEqual(typeof req.user, 'object');
     assert.strictEqual(typeof req.body, 'object');
 
