@@ -331,7 +331,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
             $scope.groups = result;
 
-            Client.listUsers(function (error, result) {
+            Client.getUsers(function (error, result) {
                 if (error) return console.error('Unable to get user listing.', error);
 
                 $scope.users = result.users;

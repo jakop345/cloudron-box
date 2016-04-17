@@ -498,13 +498,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.listUsers = function (callback) {
-        $http.get(client.apiOrigin + '/api/v1/users').success(function(data, status) {
-            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null, data);
-        }).error(defaultErrorHandler(callback));
-    };
-
     Client.prototype.getOAuthClients = function (callback) {
         $http.get(client.apiOrigin + '/api/v1/oauth/clients').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
