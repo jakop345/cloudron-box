@@ -96,7 +96,9 @@ function initializeExpressSync() {
     // feedback
     router.post('/api/v1/cloudron/feedback', usersScope, routes.cloudron.feedback);
 
-    router.get ('/api/v1/profile', profileScope, routes.user.profile);
+    router.get ('/api/v1/profile', profileScope, routes.profile.get);
+    router.put ('/api/v1/profile', profileScope, routes.profile.update);
+    router.put ('/api/v1/profile/password', profileScope, routes.profile.changePassword);
 
     // user routes only for admins
     router.get ('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.list);
