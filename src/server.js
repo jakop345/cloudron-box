@@ -99,7 +99,7 @@ function initializeExpressSync() {
     // profile api, working off the user behind the provided token
     router.get ('/api/v1/profile', profileScope, routes.profile.get);
     router.put ('/api/v1/profile', profileScope, routes.profile.update);
-    router.put ('/api/v1/profile/password', profileScope, routes.profile.changePassword);
+    router.put ('/api/v1/profile/password', profileScope, routes.user.verifyPassword, routes.profile.changePassword);
 
     // user routes only for admins
     router.get ('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.list);

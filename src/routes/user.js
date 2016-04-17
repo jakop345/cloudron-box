@@ -142,24 +142,17 @@ function remove(req, res, next) {
 function verifyPassword(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
-    // developers are allowed to through without password
+    // developers are allowed through without password
     if (req.user.tokenType === tokendb.TYPE_DEV) return next();
 
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires user password'));
 
-    groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
+    user.verifyWithUsername(req.user.username, req.body.password, function (error) {
+        if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Password incorrect'));
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Password incorrect'));
         if (error) return next(new HttpError(500, error));
 
-        // Only allow admins or users, operating on themselves
-        if (req.params.userId && !(req.user.id === req.params.userId || isAdmin)) return next(new HttpError(403, 'Not allowed'));
-
-        user.verifyWithUsername(req.user.username, req.body.password, function (error) {
-            if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Password incorrect'));
-            if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Password incorrect'));
-            if (error) return next(new HttpError(500, error));
-
-            next();
-        });
+        next();
     });
 }
 

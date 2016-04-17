@@ -14,7 +14,6 @@ exports = module.exports = {
     getAllAdmins: getAllAdmins,
     resetPasswordByIdentifier: resetPasswordByIdentifier,
     setPassword: setPassword,
-    changePassword: changePassword,
     update: updateUser,
     createOwner: createOwner,
     getOwner: getOwner,
@@ -418,22 +417,6 @@ function setPassword(userId, newPassword, callback) {
                 });
             });
         });
-    });
-}
-
-function changePassword(username, oldPassword, newPassword, callback) {
-    assert.strictEqual(typeof username, 'string');
-    assert.strictEqual(typeof oldPassword, 'string');
-    assert.strictEqual(typeof newPassword, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    var error = validatePassword(newPassword);
-    if (error) return callback(new UserError(UserError.BAD_PASSWORD, error.message));
-
-    verifyWithUsername(username.toLowerCase(), oldPassword, function (error, user) {
-        if (error) return callback(error);
-
-        setPassword(user.id, newPassword, callback);
     });
 }
 
