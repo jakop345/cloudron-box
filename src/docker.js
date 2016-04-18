@@ -3,12 +3,15 @@
 var addons = require('./addons.js'),
     async = require('async'),
     assert = require('assert'),
+    child_process = require('child_process'),
     config = require('./config.js'),
     constants = require('./constants.js'),
     debug = require('debug')('box:src/docker.js'),
     Docker = require('dockerode'),
+    once = require('once'),
     safe = require('safetydance'),
     semver = require('semver'),
+    spawn = child_process.spawn,
     util = require('util'),
     _ = require('underscore');
 
@@ -25,7 +28,8 @@ exports = module.exports = {
     deleteImage: deleteImage,
     deleteContainers: deleteContainers,
     createSubcontainer: createSubcontainer,
-    getContainerIdByIp: getContainerIdByIp
+    getContainerIdByIp: getContainerIdByIp,
+    execContainer: execContainer
 };
 
 function connectionInstance() {
@@ -388,4 +392,24 @@ function getContainerIdByIp(ip, callback) {
 
         callback(null, containerId);
     });
+}
+
+function execContainer(containerId, cmd, input, callback) {
+    assert.strictEqual(typeof containerId, 'string');
+    assert(util.isArray(cmd));
+    assert.strictEqual(typeof input, 'object'); // null or stream
+    assert.strictEqual(typeof callback, 'function');
+
+    callback = once(callback); // ChildProcess exit may or may not be called after error
+
+    var cp = spawn('/usr/bin/docker', [ 'exec', '-i', containerId  ].concat(cmd));
+    cp.on('error', callback);
+    cp.on('exit', function (code, signal) {
+        debug('execContainer code: %s signal: %s', code, signal);
+        if (!callback.called) callback(code ? 'Failed with status ' + code : null, process.stdout);
+    });
+
+    cp.stderr.pipe(process.stderr);
+
+    if (input) input.pipe(cp.stdin).on('error', callback);
 }
