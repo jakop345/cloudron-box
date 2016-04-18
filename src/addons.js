@@ -19,7 +19,6 @@ exports = module.exports = {
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
-    child_process = require('child_process'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -29,13 +28,11 @@ var appdb = require('./appdb.js'),
     fs = require('fs'),
     generatePassword = require('password-generator'),
     hat = require('hat'),
-    MemoryStream = require('memorystream'),
     once = require('once'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
-    spawn = child_process.spawn,
     util = require('util'),
     uuid = require('node-uuid');
 
@@ -456,15 +453,9 @@ function backupMySql(app, options, callback) {
     var output = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
     output.on('error', callback);
 
-    var cp = spawn('/usr/bin/docker', [ 'exec', 'mysql', '/addons/mysql/service.sh', options.multipleDatabases ? 'backup-prefix' : 'backup', app.id ]);
-    cp.on('error', callback);
-    cp.on('exit', function (code, signal) {
-        debugApp(app, 'backupMySql: done. code:%s signal:%s', code, signal);
-        if (!callback.called) callback(code ? 'backupMySql failed with status ' + code : null);
-    });
+    var cmd = [ '/addons/mysql/service.sh', options.multipleDatabases ? 'backup-prefix' : 'backup', app.id ];
 
-    cp.stdout.pipe(output);
-    cp.stderr.pipe(process.stderr);
+    docker.execContainer('mysql', cmd, { stdout: output }, callback);
 }
 
 function restoreMySql(app, options, callback) {
@@ -478,17 +469,8 @@ function restoreMySql(app, options, callback) {
         var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
         input.on('error', callback);
 
-        // cannot get this to work through dockerConnection.exec
-        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mysql', '/addons/mysql/service.sh', options.multipleDatabases ? 'restore-prefix' : 'restore', app.id ]);
-        cp.on('error', callback);
-        cp.on('exit', function (code, signal) {
-            debugApp(app, 'restoreMySql: done %s %s', code, signal);
-            if (!callback.called) callback(code ? 'restoreMySql failed with status ' + code : null);
-        });
-
-        cp.stdout.pipe(process.stdout);
-        cp.stderr.pipe(process.stderr);
-        input.pipe(cp.stdin).on('error', callback);
+        var cmd = [ '/addons/mysql/service.sh', options.multipleDatabases ? 'restore-prefix' : 'restore', app.id ];
+        docker.execContainer('mysql', cmd, { stdin: input }, callback);
     });
 }
 
@@ -534,19 +516,13 @@ function backupPostgreSql(app, options, callback) {
     var output = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
     output.on('error', callback);
 
-    var cp = spawn('/usr/bin/docker', [ 'exec', 'postgresql', '/addons/postgresql/service.sh', 'backup', app.id ]);
-    cp.on('error', callback);
-    cp.on('exit', function (code, signal) {
-        debugApp(app, 'backupPostgreSql: done %s %s', code, signal);
-        if (!callback.called) callback(code ? 'backupPostgreSql failed with status ' + code : null);
-    });
+    var cmd = [ '/addons/postgresql/service.sh', 'backup', app.id ];
 
-    cp.stdout.pipe(output);
-    cp.stderr.pipe(process.stderr);
+    docker.execContainer('postgresql', cmd, { stdout: output }, callback);
 }
 
 function restorePostgreSql(app, options, callback) {
-    callback = once(callback); // ChildProcess exit may or may not be called after error
+    callback = once(callback);
 
     setupPostgreSql(app, options, function (error) {
         if (error) return callback(error);
@@ -556,17 +532,9 @@ function restorePostgreSql(app, options, callback) {
         var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
         input.on('error', callback);
 
-        // cannot get this to work through dockerConnection.exec
-        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'postgresql', '/addons/postgresql/service.sh', 'restore', app.id ]);
-        cp.on('error', callback);
-        cp.on('exit', function (code, signal) {
-            debugApp(app, 'restorePostgreSql: done %s %s', code, signal);
-            if (!callback.called) callback(code ? 'restorePostgreSql failed with status ' + code : null);
-        });
+        var cmd = [ '/addons/postgresql/service.sh', 'restore', app.id ];
 
-        cp.stdout.pipe(process.stdout);
-        cp.stderr.pipe(process.stderr);
-        input.pipe(cp.stdin).on('error', callback);
+        docker.execContainer('postgresql', cmd, { stdin: input }, callback);
     });
 }
 
@@ -610,15 +578,9 @@ function backupMongoDb(app, options, callback) {
     var output = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'mongodbdump'));
     output.on('error', callback);
 
-    var cp = spawn('/usr/bin/docker', [ 'exec', 'mongodb', '/addons/mongodb/service.sh', 'backup', app.id ]);
-    cp.on('error', callback);
-    cp.on('exit', function (code, signal) {
-        debugApp(app, 'backupMongoDb: done %s %s', code, signal);
-        if (!callback.called) callback(code ? 'backupMongoDb failed with status ' + code : null);
-    });
+    var cmd = [ '/addons/mongodb/service.sh', 'backup', app.id ];
 
-    cp.stdout.pipe(output);
-    cp.stderr.pipe(process.stderr);
+    docker.execContainer('mongodb', cmd, { stdout: output }, callback);
 }
 
 function restoreMongoDb(app, options, callback) {
@@ -632,20 +594,10 @@ function restoreMongoDb(app, options, callback) {
         var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mongodbdump'));
         input.on('error', callback);
 
-        // cannot get this to work through dockerConnection.exec
-        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mongodb', '/addons/mongodb/service.sh', 'restore', app.id ]);
-        cp.on('error', callback);
-        cp.on('exit', function (code, signal) {
-            debugApp(app, 'restoreMongoDb: done %s %s', code, signal);
-            if (!callback.called) callback(code ? 'restoreMongoDb failed with status ' + code : null);
-        });
-
-        cp.stdout.pipe(process.stdout);
-        cp.stderr.pipe(process.stderr);
-        input.pipe(cp.stdin).on('error', callback);
+        var cmd = [ '/addons/mongodb/service.sh', 'restore', app.id ];
+        docker.execContainer('postgresql', cmd, { stdin: input }, callback);
     });
 }
-
 
 function forwardRedisPort(appId, callback) {
     assert.strictEqual(typeof appId, 'string');
@@ -777,15 +729,7 @@ function teardownRedis(app, options, callback) {
 function backupRedis(app, options, callback) {
     debugApp(app, 'Backing up redis');
 
-    callback = once(callback); // ChildProcess exit may or may not be called after error
+    var cmd = [ '/addons/redis/service.sh', 'backup' ]; // the redis dir is volume mounted
 
-    var cp = spawn('/usr/bin/docker', [ 'exec', 'redis-' + app.id, '/addons/redis/service.sh', 'backup' ]);
-    cp.on('error', callback);
-    cp.on('exit', function (code, signal) {
-        debugApp(app, 'backupRedis: done. code:%s signal:%s', code, signal);
-        if (!callback.called) callback(code ? 'backupRedis failed with status ' + code : null);
-    });
-
-    cp.stdout.pipe(process.stdout);
-    cp.stderr.pipe(process.stderr);
+    docker.execContainer('redis-' + app.id, cmd, callback);
 }
