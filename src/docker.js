@@ -409,8 +409,14 @@ function execContainer(containerId, cmd, options, callback) {
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
     var cp = spawn('/usr/bin/docker', [ 'exec', '-i', containerId  ].concat(cmd));
+
     var chunks = [ ];
-    cp.stdout.on('data', function (chunk) { chunks.push(chunk); });
+
+    if (options.stdout) {
+        cp.stdout.pipe(options.stdout);
+    } else {
+        cp.stdout.on('data', function (chunk) { chunks.push(chunk); });
+    }
 
     cp.on('error', callback);
     cp.on('exit', function (code, signal) {
