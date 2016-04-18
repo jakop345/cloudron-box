@@ -24,7 +24,8 @@ var appdb = require('./appdb.js'),
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:addons'),
-    docker = require('./docker.js').connection,
+    docker = require('./docker.js'),
+    dockerConnection = docker.connection,
     fs = require('fs'),
     generatePassword = require('password-generator'),
     hat = require('hat'),
@@ -420,7 +421,7 @@ function setupMySql(app, options, callback) {
 
     debugApp(app, 'Setting up mysql');
 
-    var container = docker.getContainer('mysql');
+    var container = dockerConnection.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', options.multipleDatabases ? 'add-prefix' : 'add', app.id ];
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
@@ -453,7 +454,7 @@ function teardownMySql(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var container = docker.getContainer('mysql');
+    var container = dockerConnection.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', options.multipleDatabases ? 'remove-prefix' : 'remove', app.id ];
 
     debugApp(app, 'Tearing down mysql');
@@ -504,7 +505,7 @@ function restoreMySql(app, options, callback) {
         var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
         input.on('error', callback);
 
-        // cannot get this to work through docker.exec
+        // cannot get this to work through dockerConnection.exec
         var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mysql', '/addons/mysql/service.sh', options.multipleDatabases ? 'restore-prefix' : 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
@@ -525,7 +526,7 @@ function setupPostgreSql(app, options, callback) {
 
     debugApp(app, 'Setting up postgresql');
 
-    var container = docker.getContainer('postgresql');
+    var container = dockerConnection.getContainer('postgresql');
     var cmd = [ '/addons/postgresql/service.sh', 'add', app.id ];
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
@@ -558,7 +559,7 @@ function teardownPostgreSql(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var container = docker.getContainer('postgresql');
+    var container = dockerConnection.getContainer('postgresql');
     var cmd = [ '/addons/postgresql/service.sh', 'remove', app.id ];
 
     debugApp(app, 'Tearing down postgresql');
@@ -609,7 +610,7 @@ function restorePostgreSql(app, options, callback) {
         var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
         input.on('error', callback);
 
-        // cannot get this to work through docker.exec
+        // cannot get this to work through dockerConnection.exec
         var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'postgresql', '/addons/postgresql/service.sh', 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
@@ -630,7 +631,7 @@ function setupMongoDb(app, options, callback) {
 
     debugApp(app, 'Setting up mongodb');
 
-    var container = docker.getContainer('mongodb');
+    var container = dockerConnection.getContainer('mongodb');
     var cmd = [ '/addons/mongodb/service.sh', 'add', app.id ];
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
@@ -663,7 +664,7 @@ function teardownMongoDb(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var container = docker.getContainer('mongodb');
+    var container = dockerConnection.getContainer('mongodb');
     var cmd = [ '/addons/mongodb/service.sh', 'remove', app.id ];
 
     debugApp(app, 'Tearing down mongodb');
@@ -714,7 +715,7 @@ function restoreMongoDb(app, options, callback) {
         var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mongodbdump'));
         input.on('error', callback);
 
-        // cannot get this to work through docker.exec
+        // cannot get this to work through dockerConnection.exec
         var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mongodb', '/addons/mongodb/service.sh', 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
@@ -733,7 +734,7 @@ function forwardRedisPort(appId, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    docker.getContainer('redis-' + appId).inspect(function (error, data) {
+    dockerConnection.getContainer('redis-' + appId).inspect(function (error, data) {
         if (error) return callback(new Error('Unable to inspect container:' + error));
 
         var redisPort = parseInt(safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort'), 10);
@@ -813,9 +814,9 @@ function setupRedis(app, options, callback) {
         'REDIS_PORT=6379'
     ];
 
-    var redisContainer = docker.getContainer(createOptions.name);
+    var redisContainer = dockerConnection.getContainer(createOptions.name);
     stopAndRemoveRedis(redisContainer, function () {
-        docker.createContainer(createOptions, function (error) {
+        dockerConnection.createContainer(createOptions, function (error) {
             if (error && error.statusCode !== 409) return callback(error); // if not already created
 
             redisContainer.start(function (error) {
@@ -836,7 +837,7 @@ function teardownRedis(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-   var container = docker.getContainer('redis-' + app.id);
+   var container = dockerConnection.getContainer('redis-' + app.id);
 
    var removeOptions = {
        force: true, // kill container if it's running
