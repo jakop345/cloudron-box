@@ -334,7 +334,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             Client.getUsers(function (error, result) {
                 if (error) return console.error('Unable to get user listing.', error);
 
-                $scope.users = result.users;
+                $scope.users = result;
                 $scope.ready = true;
             });
         });
