@@ -1,20 +1,5 @@
 'use strict';
 
-var addons = require('./addons.js'),
-    async = require('async'),
-    assert = require('assert'),
-    child_process = require('child_process'),
-    config = require('./config.js'),
-    constants = require('./constants.js'),
-    debug = require('debug')('box:src/docker.js'),
-    Docker = require('dockerode'),
-    once = require('once'),
-    safe = require('safetydance'),
-    semver = require('semver'),
-    spawn = child_process.spawn,
-    util = require('util'),
-    _ = require('underscore');
-
 exports = module.exports = {
     connection: connectionInstance(),
     downloadImage: downloadImage,
@@ -33,6 +18,7 @@ exports = module.exports = {
 };
 
 function connectionInstance() {
+    var Docker = require('dockerode');
     var docker;
 
     if (process.env.BOX_ENV === 'test') {
@@ -47,6 +33,20 @@ function connectionInstance() {
 
     return docker;
 }
+
+var addons = require('./addons.js'),
+    async = require('async'),
+    assert = require('assert'),
+    child_process = require('child_process'),
+    config = require('./config.js'),
+    constants = require('./constants.js'),
+    debug = require('debug')('box:src/docker.js'),
+    once = require('once'),
+    safe = require('safetydance'),
+    semver = require('semver'),
+    spawn = child_process.spawn,
+    util = require('util'),
+    _ = require('underscore');
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
