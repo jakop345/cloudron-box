@@ -394,11 +394,17 @@ function getContainerIdByIp(ip, callback) {
     });
 }
 
-function execContainer(containerId, cmd, input, callback) {
+function execContainer(containerId, cmd, options, callback) {
     assert.strictEqual(typeof containerId, 'string');
     assert(util.isArray(cmd));
-    assert.strictEqual(typeof input, 'object'); // null or stream
-    assert.strictEqual(typeof callback, 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    } else {
+        assert.strictEqual(typeof options, 'object');
+        assert.strictEqual(typeof callback, 'function');
+    }
 
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
@@ -406,13 +412,13 @@ function execContainer(containerId, cmd, input, callback) {
     var chunks = [ ];
     cp.stdout.on('data', function (chunk) { chunks.push(chunk); });
 
-    cp.on('error', function (error) { console.log(error); callback(error); });
+    cp.on('error', callback);
     cp.on('exit', function (code, signal) {
         debug('execContainer code: %s signal: %s', code, signal);
         if (!callback.called) callback(code ? 'Failed with status ' + code : null, Buffer.concat(chunks));
     });
 
-    cp.stderr.pipe(process.stderr);
+    cp.stderr.pipe(options.stderr || process.stderr);
 
-    if (input) input.pipe(cp.stdin).on('error', callback);
+    if (options.stdin) options.stdin.pipe(cp.stdin).on('error', callback);
 }
