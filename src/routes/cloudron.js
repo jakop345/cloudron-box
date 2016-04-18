@@ -134,7 +134,8 @@ function feedback(req, res, next) {
     if (req.body.type !== mailer.FEEDBACK_TYPE_FEEDBACK &&
         req.body.type !== mailer.FEEDBACK_TYPE_TICKET &&
         req.body.type !== mailer.FEEDBACK_TYPE_APP_MISSING &&
-        req.body.type !== mailer.FEEDBACK_TYPE_APP_ERROR) return next(new HttpError(400, 'type must be either "ticket", "feedback" or "app_missing" or "app_error"'));
+        req.body.type !== mailer.FEEDBACK_TYPE_UPGRADE_REQUEST &&
+        req.body.type !== mailer.FEEDBACK_TYPE_APP_ERROR) return next(new HttpError(400, 'type must be either "ticket", "feedback", "app_missing", "app_error" or "upgrade"'));
     if (typeof req.body.subject !== 'string' || !req.body.subject) return next(new HttpError(400, 'subject must be string'));
     if (typeof req.body.description !== 'string' || !req.body.description) return next(new HttpError(400, 'description must be string'));
 

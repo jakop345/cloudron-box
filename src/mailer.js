@@ -24,6 +24,7 @@ exports = module.exports = {
     FEEDBACK_TYPE_TICKET: 'ticket',
     FEEDBACK_TYPE_APP_MISSING: 'app_missing',
     FEEDBACK_TYPE_APP_ERROR: 'app_error',
+    FEEDBACK_TYPE_UPGRADE_REQUEST: 'upgrade_request',
     sendFeedback: sendFeedback,
 
     _getMailQueue: _getMailQueue,
@@ -417,6 +418,7 @@ function sendFeedback(user, type, subject, description) {
     assert(type === exports.FEEDBACK_TYPE_TICKET ||
         type === exports.FEEDBACK_TYPE_FEEDBACK ||
         type === exports.FEEDBACK_TYPE_APP_MISSING ||
+        type === exports.FEEDBACK_TYPE_UPGRADE_REQUEST ||
         type === exports.FEEDBACK_TYPE_APP_ERROR);
 
     var mailOptions = {
