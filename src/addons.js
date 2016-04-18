@@ -591,24 +591,14 @@ function teardownMongoDb(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var container = dockerConnection.getContainer('mongodb');
     var cmd = [ '/addons/mongodb/service.sh', 'remove', app.id ];
 
     debugApp(app, 'Tearing down mongodb');
 
-    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+    docker.execContainer('mongodb', cmd, null /* input */, function (error) {
         if (error) return callback(error);
 
-        execContainer.start(function (error, stream) {
-            if (error) return callback(error);
-
-            var data = '';
-            stream.on('error', callback);
-            stream.on('data', function (d) { data += d.toString('utf8'); });
-            stream.on('end', function () {
-                appdb.unsetAddonConfig(app.id, 'mongodb', callback);
-            });
-        });
+        appdb.unsetAddonConfig(app.id, 'mongodb', callback);
     });
 }
 
