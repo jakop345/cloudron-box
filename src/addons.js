@@ -421,31 +421,14 @@ function setupMySql(app, options, callback) {
 
     debugApp(app, 'Setting up mysql');
 
-    var container = dockerConnection.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', options.multipleDatabases ? 'add-prefix' : 'add', app.id ];
 
-    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+    docker.execContainer('mysql', cmd, null /* input */, function (error, stdout) {
         if (error) return callback(error);
 
-        execContainer.start(function (error, stream) {
-            if (error) return callback(error);
-
-            var stdout = new MemoryStream();
-            var stderr = new MemoryStream();
-
-            execContainer.modem.demuxStream(stream, stdout, stderr);
-            stderr.on('data', function (data) { debugApp(app, data.toString('utf8')); }); // set -e output
-
-            var chunks = [ ];
-            stdout.on('data', function (chunk) { chunks.push(chunk); });
-
-            stream.on('error', callback);
-            stream.on('end', function () {
-                var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-                debugApp(app, 'Setting mysql addon config to %j', env);
-                appdb.setAddonConfig(app.id, 'mysql', env, callback);
-            });
-        });
+        var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
+        debugApp(app, 'Setting mysql addon config to %j', env);
+        appdb.setAddonConfig(app.id, 'mysql', env, callback);
     });
 }
 
@@ -454,24 +437,14 @@ function teardownMySql(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var container = dockerConnection.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', options.multipleDatabases ? 'remove-prefix' : 'remove', app.id ];
 
     debugApp(app, 'Tearing down mysql');
 
-    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+    docker.execContainer('mysql', cmd, null /* input */, function (error) {
         if (error) return callback(error);
 
-        execContainer.start(function (error, stream) {
-            if (error) return callback(error);
-
-            var data = '';
-            stream.on('error', callback);
-            stream.on('data', function (d) { data += d.toString('utf8'); });
-            stream.on('end', function () {
-                appdb.unsetAddonConfig(app.id, 'mysql', callback);
-            });
-        });
+        appdb.unsetAddonConfig(app.id, 'mysql', callback);
     });
 }
 

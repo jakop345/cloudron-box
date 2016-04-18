@@ -403,10 +403,13 @@ function execContainer(containerId, cmd, input, callback) {
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
     var cp = spawn('/usr/bin/docker', [ 'exec', '-i', containerId  ].concat(cmd));
-    cp.on('error', callback);
+    var chunks = [ ];
+    cp.stdout.on('data', function (chunk) { chunks.push(chunk); });
+
+    cp.on('error', function (error) { console.log(error); callback(error); });
     cp.on('exit', function (code, signal) {
         debug('execContainer code: %s signal: %s', code, signal);
-        if (!callback.called) callback(code ? 'Failed with status ' + code : null, process.stdout);
+        if (!callback.called) callback(code ? 'Failed with status ' + code : null, Buffer.concat(chunks));
     });
 
     cp.stderr.pipe(process.stderr);
