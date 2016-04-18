@@ -420,7 +420,7 @@ function setupMySql(app, options, callback) {
 
     var cmd = [ '/addons/mysql/service.sh', options.multipleDatabases ? 'add-prefix' : 'add', app.id ];
 
-    docker.execContainer('mysql', cmd, function (error, stdout) {
+    docker.execContainer('mysql', cmd, { bufferStdout: true }, function (error, stdout) {
         if (error) return callback(error);
 
         var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
@@ -438,7 +438,7 @@ function teardownMySql(app, options, callback) {
 
     debugApp(app, 'Tearing down mysql');
 
-    docker.execContainer('mysql', cmd, function (error) {
+    docker.execContainer('mysql', cmd, { }, function (error) {
         if (error) return callback(error);
 
         appdb.unsetAddonConfig(app.id, 'mysql', callback);
@@ -483,7 +483,7 @@ function setupPostgreSql(app, options, callback) {
 
     var cmd = [ '/addons/postgresql/service.sh', 'add', app.id ];
 
-    docker.execContainer('postgresql', cmd, function (error, stdout) {
+    docker.execContainer('postgresql', cmd, { bufferStdout: true }, function (error, stdout) {
         if (error) return callback(error);
 
         var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
@@ -501,7 +501,7 @@ function teardownPostgreSql(app, options, callback) {
 
     debugApp(app, 'Tearing down postgresql');
 
-    docker.execContainer('postgresql', cmd, function (error) {
+    docker.execContainer('postgresql', cmd, { }, function (error) {
         if (error) return callback(error);
 
         appdb.unsetAddonConfig(app.id, 'postgresql', callback);
@@ -547,7 +547,7 @@ function setupMongoDb(app, options, callback) {
 
     var cmd = [ '/addons/mongodb/service.sh', 'add', app.id ];
 
-    docker.execContainer('mongodb', cmd, function (error) {
+    docker.execContainer('mongodb', cmd, { bufferStdout: true }, function (error) {
         if (error) return callback(error);
 
         appdb.unsetAddonConfig(app.id, 'mongodb', callback);
@@ -563,7 +563,7 @@ function teardownMongoDb(app, options, callback) {
 
     debugApp(app, 'Tearing down mongodb');
 
-    docker.execContainer('mongodb', cmd, function (error) {
+    docker.execContainer('mongodb', cmd, { }, function (error) {
         if (error) return callback(error);
 
         appdb.unsetAddonConfig(app.id, 'mongodb', callback);
@@ -731,5 +731,5 @@ function backupRedis(app, options, callback) {
 
     var cmd = [ '/addons/redis/service.sh', 'backup' ]; // the redis dir is volume mounted
 
-    docker.execContainer('redis-' + app.id, cmd, callback);
+    docker.execContainer('redis-' + app.id, cmd, { }, callback);
 }

@@ -397,14 +397,8 @@ function getContainerIdByIp(ip, callback) {
 function execContainer(containerId, cmd, options, callback) {
     assert.strictEqual(typeof containerId, 'string');
     assert(util.isArray(cmd));
-
-    if (typeof options === 'function') {
-        callback = options;
-        options = { };
-    } else {
-        assert.strictEqual(typeof options, 'object');
-        assert.strictEqual(typeof callback, 'function');
-    }
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
@@ -414,8 +408,10 @@ function execContainer(containerId, cmd, options, callback) {
 
     if (options.stdout) {
         cp.stdout.pipe(options.stdout);
-    } else {
+    } else if (options.bufferStdout) {
         cp.stdout.on('data', function (chunk) { chunks.push(chunk); });
+    } else {
+        cp.stdout.pipe(process.stdout);
     }
 
     cp.on('error', callback);
