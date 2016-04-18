@@ -515,24 +515,14 @@ function teardownPostgreSql(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var container = dockerConnection.getContainer('postgresql');
     var cmd = [ '/addons/postgresql/service.sh', 'remove', app.id ];
 
     debugApp(app, 'Tearing down postgresql');
 
-    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+    docker.execContainer('postgresql', cmd, null /* input */, function (error) {
         if (error) return callback(error);
 
-        execContainer.start(function (error, stream) {
-            if (error) return callback(error);
-
-            var data = '';
-            stream.on('error', callback);
-            stream.on('data', function (d) { data += d.toString('utf8'); });
-            stream.on('end', function () {
-                appdb.unsetAddonConfig(app.id, 'postgresql', callback);
-            });
-        });
+        appdb.unsetAddonConfig(app.id, 'postgresql', callback);
     });
 }
 
@@ -589,12 +579,10 @@ function setupMongoDb(app, options, callback) {
 
     var cmd = [ '/addons/mongodb/service.sh', 'add', app.id ];
 
-    docker.execContainer('mongodb', cmd, null /* input */, function (error, stdout) {
+    docker.execContainer('mongodb', cmd, null /* input */, function (error) {
         if (error) return callback(error);
 
-        var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-        debugApp(app, 'Setting mongodb addon config to %j', env);
-        appdb.setAddonConfig(app.id, 'mongodb', env, callback);
+        appdb.unsetAddonConfig(app.id, 'mongodb', callback);
     });
 }
 
