@@ -471,3 +471,6 @@
 [0.12.1]
 - Fix crash when backing up apps
 
+[0.12.2]
+- Improved error handling for addons
+
