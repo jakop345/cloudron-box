@@ -499,31 +499,14 @@ function setupPostgreSql(app, options, callback) {
 
     debugApp(app, 'Setting up postgresql');
 
-    var container = dockerConnection.getContainer('postgresql');
     var cmd = [ '/addons/postgresql/service.sh', 'add', app.id ];
 
-    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+    docker.execContainer('postgresql', cmd, null /* input */, function (error, stdout) {
         if (error) return callback(error);
 
-        execContainer.start(function (error, stream) {
-            if (error) return callback(error);
-
-            var stdout = new MemoryStream();
-            var stderr = new MemoryStream();
-
-            execContainer.modem.demuxStream(stream, stdout, stderr);
-            stderr.on('data', function (data) { debugApp(app, data.toString('utf8')); }); // set -e output
-
-            var chunks = [ ];
-            stdout.on('data', function (chunk) { chunks.push(chunk); });
-
-            stream.on('error', callback);
-            stream.on('end', function () {
-                var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-                debugApp(app, 'Setting postgresql addon config to %j', env);
-                appdb.setAddonConfig(app.id, 'postgresql', env, callback);
-            });
-        });
+        var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
+        debugApp(app, 'Setting postgresql addon config to %j', env);
+        appdb.setAddonConfig(app.id, 'postgresql', env, callback);
     });
 }
 
@@ -604,31 +587,14 @@ function setupMongoDb(app, options, callback) {
 
     debugApp(app, 'Setting up mongodb');
 
-    var container = dockerConnection.getContainer('mongodb');
     var cmd = [ '/addons/mongodb/service.sh', 'add', app.id ];
 
-    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+    docker.execContainer('mongodb', cmd, null /* input */, function (error, stdout) {
         if (error) return callback(error);
 
-        execContainer.start(function (error, stream) {
-            if (error) return callback(error);
-
-            var stdout = new MemoryStream();
-            var stderr = new MemoryStream();
-
-            execContainer.modem.demuxStream(stream, stdout, stderr);
-            stderr.on('data', function (data) { debugApp(app, data.toString('utf8')); }); // set -e output
-
-            var chunks = [ ];
-            stdout.on('data', function (chunk) { chunks.push(chunk); });
-
-            stream.on('error', callback);
-            stream.on('end', function () {
-                var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-                debugApp(app, 'Setting mongodb addon config to %j', env);
-                appdb.setAddonConfig(app.id, 'mongodb', env, callback);
-            });
-        });
+        var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
+        debugApp(app, 'Setting mongodb addon config to %j', env);
+        appdb.setAddonConfig(app.id, 'mongodb', env, callback);
     });
 }
 
