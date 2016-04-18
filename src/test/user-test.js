@@ -529,53 +529,40 @@ describe('User', function () {
         });
     });
 
-    describe('password change', function () {
+    describe('set password', function () {
         before(createOwner);
         after(cleanupUsers);
 
-        it('fails due to wrong arumgent count', function () {
-            expect(function () { user.changePassword(); }).to.throwError();
-            expect(function () { user.changePassword(USERNAME); }).to.throwError();
-            expect(function () { user.changePassword(USERNAME, PASSWORD, NEW_PASSWORD); }).to.throwError();
-        });
-
-        it('fails due to wrong arumgents', function () {
-            expect(function () { user.changePassword(USERNAME, {}, NEW_PASSWORD, function () {}); }).to.throwError();
-            expect(function () { user.changePassword(1337, PASSWORD, NEW_PASSWORD, function () {}); }).to.throwError();
-            expect(function () { user.changePassword(USERNAME, PASSWORD, 1337, function () {}); }).to.throwError();
-            expect(function () { user.changePassword(USERNAME, PASSWORD, NEW_PASSWORD, 'some string'); }).to.throwError();
-        });
-
-        it('fails due to wrong password', function (done) {
-            user.changePassword(USERNAME, 'wrongpassword', NEW_PASSWORD, function (error) {
-                expect(error).to.be.ok();
-                done();
-            });
-        });
-
-        it('fails due to empty new password', function (done) {
-            user.changePassword(USERNAME, PASSWORD, '', function (error) {
-                expect(error).to.be.ok();
-                done();
-            });
-        });
-
         it('fails due to unknown user', function (done) {
-            user.changePassword('somerandomuser', PASSWORD, NEW_PASSWORD, function (error) {
+            user.setPassword('doesnotexist', NEW_PASSWORD, function (error) {
+                expect(error).to.be.ok();
+                done();
+            });
+        });
+
+        it('fails due to empty password', function (done) {
+            user.setPassword(userObject.id, '', function (error) {
+                expect(error).to.be.ok();
+                done();
+            });
+        });
+
+        it('fails due to invalid password', function (done) {
+            user.setPassword(userObject.id, 'foobar', function (error) {
                 expect(error).to.be.ok();
                 done();
             });
         });
 
         it('succeeds', function (done) {
-            user.changePassword(USERNAME, PASSWORD, NEW_PASSWORD, function (error) {
+            user.setPassword(userObject.id, NEW_PASSWORD, function (error) {
                 expect(error).to.not.be.ok();
                 done();
             });
         });
 
         it('actually changed the password (unable to login with old pasword)', function (done) {
-            user.verifyWithUsername(USERNAME, PASSWORD, function (error, result) {
+            user.verify(userObject.id, PASSWORD, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
@@ -584,7 +571,7 @@ describe('User', function () {
         });
 
         it('actually changed the password (login with new password)', function (done) {
-            user.verifyWithUsername(USERNAME, NEW_PASSWORD, function (error, result) {
+            user.verify(userObject.id, NEW_PASSWORD, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 done();

@@ -3,13 +3,11 @@
 'use strict';
 
 exports = module.exports = {
-    profile: profile,
-    info: info,
+    get: get,
     update: update,
-    list: listUser,
-    create: createUser,
-    changePassword: changePassword,
-    remove: removeUser,
+    list: list,
+    create: create,
+    remove: remove,
     verifyPassword: verifyPassword,
     requireAdmin: requireAdmin,
     sendInvite: sendInvite,
@@ -25,31 +23,7 @@ var assert = require('assert'),
     tokendb = require('../tokendb.js'),
     UserError = user.UserError;
 
-function profile(req, res, next) {
-    assert.strictEqual(typeof req.user, 'object');
-
-    var result = {};
-    result.id = req.user.id;
-    result.tokenType = req.user.tokenType;
-
-    if (req.user.tokenType === tokendb.TYPE_USER || req.user.tokenType === tokendb.TYPE_DEV) {
-        result.username = req.user.username;
-        result.email = req.user.email;
-        result.displayName = req.user.displayName;
-
-        groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
-            if (error) return next(new HttpError(500, error));
-
-            result.admin = isAdmin;
-
-            next(new HttpSuccess(200, result));
-        });
-    } else {
-        next(new HttpSuccess(200, result));
-    }
-}
-
-function createUser(req, res, next) {
+function create(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
@@ -111,33 +85,14 @@ function update(req, res, next) {
     });
 }
 
-function changePassword(req, res, next) {
-    assert.strictEqual(typeof req.body, 'object');
-    assert.strictEqual(typeof req.user, 'object');
-
-    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires the users old password.'));
-    if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'API call requires the users new password.'));
-
-    if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
-
-    user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error) {
-        if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, error.message));
-        if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Wrong password'));
-        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Wrong password'));
-        if (error) return next(new HttpError(500, error));
-
-        next(new HttpSuccess(204));
-    });
-}
-
-function listUser(req, res, next) {
+function list(req, res, next) {
     user.list(function (error, result) {
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, { users: result }));
     });
 }
 
-function info(req, res, next) {
+function get(req, res, next) {
     assert.strictEqual(typeof req.params.userId, 'string');
     assert.strictEqual(typeof req.user, 'object');
 
@@ -161,7 +116,7 @@ function info(req, res, next) {
     });
 }
 
-function removeUser(req, res, next) {
+function remove(req, res, next) {
     assert.strictEqual(typeof req.params.userId, 'string');
 
     // rules:
@@ -187,24 +142,17 @@ function removeUser(req, res, next) {
 function verifyPassword(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
-    // developers are allowed to through without password
+    // developers are allowed through without password
     if (req.user.tokenType === tokendb.TYPE_DEV) return next();
 
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires user password'));
 
-    groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
+    user.verifyWithUsername(req.user.username, req.body.password, function (error) {
+        if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Password incorrect'));
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Password incorrect'));
         if (error) return next(new HttpError(500, error));
 
-        // Only allow admins or users, operating on themselves
-        if (req.params.userId && !(req.user.id === req.params.userId || isAdmin)) return next(new HttpError(403, 'Not allowed'));
-
-        user.verifyWithUsername(req.user.username, req.body.password, function (error) {
-            if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Password incorrect'));
-            if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Password incorrect'));
-            if (error) return next(new HttpError(500, error));
-
-            next();
-        });
+        next();
     });
 }
 

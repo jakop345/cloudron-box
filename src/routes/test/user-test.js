@@ -14,8 +14,7 @@ var config = require('../../config.js'),
     mailer = require('../../mailer.js'),
     superagent = require('superagent'),
     nock = require('nock'),
-    server = require('../../server.js'),
-    userdb = require('../../userdb.js');
+    server = require('../../server.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
@@ -24,14 +23,13 @@ var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'taO@zen.mac';
 var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'USER@foo.bar', EMAIL_2_NEW = 'happy@ME.com';
 var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@FOO.bar';
 
-var server;
 function setup(done) {
     server.start(function (error) {
         expect(!error).to.be.ok();
 
         mailer._clearMailQueue();
 
-        userdb._clear(function (error) {
+        database._clear(function (error) {
             expect(error).to.eql(null);
 
             groups.create('somegroupid', done);
@@ -64,7 +62,6 @@ describe('User API', function () {
     var user_0, user_1, user_2, user_3 = null;
     var token = null;
     var token_1 = tokendb.generateToken();
-    var token_2 = tokendb.generateToken();
 
     before(setup);
     after(cleanup);
@@ -391,26 +388,14 @@ describe('User API', function () {
                 user_3 = result.body;
 
                 // one mail for first user creation, two mails for second user creation (see 'invite' flag)
-                checkMails(3, function () {
-                    // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-                    tokendb.add(token_2, tokendb.PREFIX_USER + user_2.id, 'test-client-id',  Date.now() + 10000, '*', done);
-                });
+                checkMails(3, done);
             });
         });
     });
 
-    it('second user userInfo fails for first user', function (done) {
+    it('get userInfo succeeds for second user', function (done) {
         superagent.get(SERVER_URL + '/api/v1/users/' + user_2.id)
-               .query({ access_token: token_1 })
-               .end(function (error, result) {
-            expect(result.statusCode).to.equal(403);
-            done();
-        });
-    });
-
-    it('second user userInfo succeeds for second user', function (done) {
-        superagent.get(SERVER_URL + '/api/v1/users/' + user_2.id)
-               .query({ access_token: token_2 })
+               .query({ access_token: token })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(200);
             expect(result.body.username).to.equal(USERNAME_2.toLowerCase());
@@ -433,7 +418,7 @@ describe('User API', function () {
 
     it('list users fails for normal user', function (done) {
         superagent.get(SERVER_URL + '/api/v1/users')
-        .query({ access_token: token_2 })
+        .query({ access_token: token_1 })
         .end(function (error, res) {
             expect(res.statusCode).to.equal(403);
             done();
@@ -541,16 +526,6 @@ describe('User API', function () {
         });
     });
 
-    it('change email for other user fails', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
-               .query({ access_token: token_2 })
-               .send({ email: 'foobar@bar.baz' })
-               .end(function (error, result) {
-            expect(result.statusCode).to.equal(403);
-            done();
-        });
-    });
-
     it('change user succeeds without email nor displayName', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
@@ -561,15 +536,15 @@ describe('User API', function () {
         });
     });
 
-    it('change email for own user succeeds', function (done) {
+    it('change email succeeds', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + user_2.id)
-               .query({ access_token: token_2 })
+               .query({ access_token: token })
                .send({ email: EMAIL_2_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(204);
 
             superagent.get(SERVER_URL + '/api/v1/users/' + user_2.id)
-                  .query({ access_token: token_2 })
+                  .query({ access_token: token })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.username).to.equal(USERNAME_2.toLowerCase());
@@ -621,57 +596,6 @@ describe('User API', function () {
 
                 done();
             });
-        });
-    });
-
-    // Change password
-    it('change password fails due to missing current password', function (done) {
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-               .query({ access_token: token })
-               .send({ newPassword: 'some wrong password' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
-            done();
-        });
-    });
-
-    it('change password fails due to missing new password', function (done) {
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-               .query({ access_token: token })
-               .send({ password: PASSWORD })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
-            done();
-        });
-    });
-
-    it('change password fails due to wrong password', function (done) {
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-               .query({ access_token: token })
-               .send({ password: 'some wrong password', newPassword: 'MOre#$%34' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(403);
-            done();
-        });
-    });
-
-    it('change password fails due to invalid password', function (done) {
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-               .query({ access_token: token })
-               .send({ password: PASSWORD, newPassword: 'five' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
-            done();
-        });
-    });
-
-    it('change password succeeds', function (done) {
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
-               .query({ access_token: token })
-               .send({ password: PASSWORD, newPassword: 'MOre#$%34' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(204);
-            done();
         });
     });
 });

@@ -96,19 +96,19 @@ function initializeExpressSync() {
     // feedback
     router.post('/api/v1/cloudron/feedback', usersScope, routes.cloudron.feedback);
 
-    router.get ('/api/v1/profile', profileScope, routes.user.profile);
+    // profile api, working off the user behind the provided token
+    router.get ('/api/v1/profile', profileScope, routes.profile.get);
+    router.put ('/api/v1/profile', profileScope, routes.profile.update);
+    router.put ('/api/v1/profile/password', profileScope, routes.user.verifyPassword, routes.profile.changePassword);
 
     // user routes only for admins
     router.get ('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.list);
     router.post('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.create);
+    router.get ('/api/v1/users/:userId', usersScope, routes.user.requireAdmin, routes.user.get);
     router.del ('/api/v1/users/:userId', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.user.remove);
+    router.put ('/api/v1/users/:userId', usersScope, routes.user.requireAdmin, routes.user.update);
     router.put ('/api/v1/users/:userId/set_groups', usersScope, routes.user.requireAdmin, routes.user.setGroups);
     router.post('/api/v1/users/:userId/invite', usersScope, routes.user.requireAdmin, routes.user.sendInvite);
-
-    // user routes for admins and users operating on their own account
-    router.get ('/api/v1/users/:userId', usersScope, routes.user.info);
-    router.put ('/api/v1/users/:userId', usersScope, routes.user.update);
-    router.post('/api/v1/users/:userId/password', usersScope, routes.user.changePassword); // changePassword verifies password
 
     // Group management
     router.get ('/api/v1/groups', usersScope, routes.user.requireAdmin, routes.groups.list);
