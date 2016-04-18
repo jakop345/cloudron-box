@@ -111,6 +111,25 @@
         </div>
     </div>
 
+    <!-- Modal plan upgrade -->
+    <div class="modal fade" id="upgradeModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Cloudron Upgrade</h4>
+                </div>
+                <div class="modal-body">
+                    <p>See available plans for upgrade at <a href="{{ config.webServerOrigin + '/pricing.html' }}" target="_blank">cloudron.io</a>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" ng-click="requestUpgrade()" ng-disabled="upgradeRequest.busy"><i class="fa fa-spinner fa-pulse" ng-show="upgradeRequest.busy"></i> Request Upgrade</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="animateMe ng-hide" ng-show="initialized">
 
         <!-- Navigation -->
