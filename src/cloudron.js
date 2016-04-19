@@ -102,7 +102,7 @@ function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     exports.events.on(exports.EVENT_CONFIGURED, addDnsRecords);
-    exports.events.on(exports.EVENT_FIRST_RUN, function () { setTimeout(installAppBundle, 30000); }); // wait for 30sec for the addons to start up
+    exports.events.on(exports.EVENT_FIRST_RUN, installAppBundle);
 
     // check activation state for existing cloudrons that do not have first run file
     // can be removed once cloudrons have been updated

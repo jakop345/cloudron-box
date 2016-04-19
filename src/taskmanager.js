@@ -24,6 +24,7 @@ var appdb = require('./appdb.js'),
 
 var gActiveTasks = { };
 var gPendingTasks = [ ];
+var gPlatformReady = false; // PaaS (addons) up and running
 
 var TASK_CONCURRENCY = 5;
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
@@ -38,6 +39,11 @@ function initialize(callback) {
     } else {
         cloudron.events.on(cloudron.EVENT_CONFIGURED, resumeTasks);
     }
+
+    setTimeout(function () {
+        gPlatformReady = true;
+        resumeTasks();
+    }, 30000); // wait 30 seconds to signal platform ready
 
     callback();
 }
@@ -104,6 +110,12 @@ function startAppTask(appId, callback) {
 
     if (appId in gActiveTasks) {
         return callback(new Error(util.format('Task for %s is already active', appId)));
+    }
+
+    if (!gPlatformReady) {
+        debug('Platform not ready yet, queueing task for %s', appId);
+        gPendingTasks.push(appId);
+        return callback();
     }
 
     if (Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
