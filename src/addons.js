@@ -597,7 +597,7 @@ function restoreMongoDb(app, options, callback) {
         input.on('error', callback);
 
         var cmd = [ '/addons/mongodb/service.sh', 'restore', app.id ];
-        docker.execContainer('postgresql', cmd, { stdin: input }, callback);
+        docker.execContainer('mongodb', cmd, { stdin: input }, callback);
     });
 }
 
