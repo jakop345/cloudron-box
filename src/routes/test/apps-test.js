@@ -830,6 +830,34 @@ describe('Apps', function () {
             });
         });
 
+        it('installation - mongodb addon config', function (done) {
+            var appContainer = docker.getContainer(appEntry.containerId);
+            appContainer.inspect(function (error, data) {
+                var mongodbUrl = null;
+                data.Config.Env.forEach(function (env) { if (env.indexOf('MONGODB_URL=') === 0) mongodbUrl = env.split('=')[1]; });
+                expect(mongodbUrl).to.be.ok();
+
+                var urlp = url.parse(mongodbUrl);
+                var username = urlp.auth.split(':')[0];
+                var password = urlp.auth.split(':')[1];
+                var dbname = urlp.path.substr(1);
+
+                expect(data.Config.Env).to.contain('MONGODB_PORT=27017');
+                expect(data.Config.Env).to.contain('MONGODB_HOST=mongodb');
+                expect(data.Config.Env).to.contain('MONGODB_USERNAME=' + username);
+                expect(data.Config.Env).to.contain('MONGODB_PASSWORD=' + password);
+                expect(data.Config.Env).to.contain('MONGODB_DATABASE=' + dbname);
+
+                var cmd = util.format('mongo --quiet -u %s -p %s %s:%s/%s --eval "db.collection.insert({ item: 34 })"',
+                    username, password, 'mongodb', 27017, dbname);
+
+                child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 5000 }, function (error) {
+                    expect(!error).to.be.ok();
+                    done();
+                });
+            });
+        });
+
         it('installation - scheduler', function (done) {
             async.retry({ times: 100, interval: 1000 }, function (retryCallback) {
                 if (fs.existsSync(paths.DATA_DIR + '/' + APP_ID + '/data/every_minute.env')) return retryCallback();
