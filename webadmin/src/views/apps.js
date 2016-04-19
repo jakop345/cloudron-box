@@ -23,6 +23,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         error: {},
         app: {},
         location: '',
+        altDomain: null,
         password: '',
         portBindings: {},
         portBindingsEnabled: {},
@@ -73,6 +74,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.error = {};
         $scope.appConfigure.app = {};
         $scope.appConfigure.location = '';
+        $scope.appConfigure.altDomain = null;
         $scope.appConfigure.password = '';
         $scope.appConfigure.portBindings = {};          // This is the actual model holding the env:port pair
         $scope.appConfigure.portBindingsEnabled = {};   // This is the actual model holding the enabled/disabled flag
@@ -156,6 +158,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         // fill relevant info from the app
         $scope.appConfigure.app = app;
         $scope.appConfigure.location = app.location;
+        $scope.appConfigure.altDomain = app.altDomain;
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
@@ -191,6 +194,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
         var data = {
             location: $scope.appConfigure.location || '',
+            altDomain: $scope.appConfigure.altDomain || null,
             portBindings: finalPortBindings,
             accessRestriction: !$scope.appConfigure.accessRestrictionOption ? null : $scope.appConfigure.accessRestriction,
             cert: $scope.appConfigure.certificateFile,

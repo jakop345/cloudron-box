@@ -82,6 +82,9 @@
                                 <slider id="memoryUsage" ng-model="appConfigure.memoryUsage" step="33554432" tooltip="hide" ticks="memoryTicks" ticks-snap-bounds="67108864"></slider>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" ng-model="appConfigure.altDomain" id="appConfigureAltDomainInput" name="altDomain" placeholder="An alternate external domain" autofocus>
+                        </div>
 
                         <div class="hide">
                         <label class="control-label" for="appConfigureCertificateInput" ng-show="config.isCustomDomain">Certificate (optional)</label>
