@@ -424,7 +424,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     });
 }
 
-function configure(appId, location, portBindings, accessRestriction, cert, key, memoryLimit, callback) {
+function configure(appId, location, portBindings, accessRestriction, cert, key, memoryLimit, altDomain, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
@@ -432,6 +432,7 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
     assert(cert === null || typeof cert === 'string');
     assert(key === null || typeof key === 'string');
     assert.strictEqual(typeof memoryLimit, 'number');
+    assert(altDomain === null || typeof altDomain === 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var error = validateHostname(location, config.fqdn());
@@ -442,6 +443,8 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
 
     error = certificates.validateCertificate(cert, key, config.appFqdn(location));
     if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
+
+    if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
 
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
@@ -467,6 +470,7 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
             accessRestriction: accessRestriction,
             portBindings: portBindings,
             memoryLimit: memoryLimit,
+            altDomain: altDomain,
 
             oldConfig: {
                 location: app.location,
