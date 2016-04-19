@@ -57,11 +57,14 @@ util.inherits(CertificatesError, Error);
 CertificatesError.INTERNAL_ERROR = 'Internal Error';
 CertificatesError.INVALID_CERT = 'Invalid certificate';
 
-function getApi(callback) {
+function getApi(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
 
-        var api = tlsConfig.provider === 'caas' ? caas : acme;
+        var api = !app.altDomain && tlsConfig.provider === 'caas' ? caas : acme;
 
         var options = { };
         options.prod = tlsConfig.provider.match(/.*-prod/) !== null;
@@ -93,7 +96,7 @@ function installAdminCertificate(callback) {
             waitForDns(config.adminFqdn(), ip, zoneName, function (error) {
                 if (error) return callback(error); // this cannot happen because we retry forever
 
-                ensureCertificate(null /* admin */, function (error, certFilePath, keyFilePath) {
+                ensureCertificate({ location: constants.ADMIN_LOCATION }, function (error, certFilePath, keyFilePath) {
                     if (error) { // currently, this can never happen
                         debug('Error obtaining certificate. Proceed anyway', error);
                         return callback();
@@ -126,11 +129,11 @@ function autoRenew(callback) {
     apps.getAll(function (error, allApps) {
         if (error) return callback(error);
 
-        allApps.push({ location: 'my' }); // inject fake webadmin app
+        allApps.push({ location: constants.ADMIN_LOCATION }); // inject fake webadmin app
 
         var expiringApps = [ ];
         for (var i = 0; i < allApps.length; i++) {
-            var appDomain = config.appFqdn(allApps[i].location);
+            var appDomain = allApps[i].altDomain || config.appFqdn(allApps[i].location);
             var certFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.cert');
             var keyFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.key');
 
@@ -144,13 +147,14 @@ function autoRenew(callback) {
             }
         }
 
-        debug('autoRenew: %j needs to be renewed', expiringApps.map(function (a) { return config.appFqdn(a.location); }));
+        debug('autoRenew: %j needs to be renewed', expiringApps.map(function (a) { return a.altDomain || config.appFqdn(a.location); }));
 
-        getApi(function (error, api, apiOptions) {
-            if (error) return callback(error);
+        async.eachSeries(expiringApps, function iterator(app, iteratorCallback) {
+            var domain = app.altDomain || config.appFqdn(app.location);
 
-            async.eachSeries(expiringApps, function iterator(app, iteratorCallback) {
-                var domain = config.appFqdn(app.location);
+            getApi(app, function (error, api, apiOptions) {
+                if (error) return callback(error);
+
                 debug('autoRenew: renewing cert for %s with options %j', domain, apiOptions);
 
                 api.getCertificate(domain, apiOptions, function (error) {
@@ -275,7 +279,7 @@ function ensureCertificate(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var domain = app ? (app.altDomain || config.appFqdn(app.location)) : config.adminFqdn();
+    var domain = app.altDomain || config.appFqdn(app.location);
 
     // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
     var userCertFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
@@ -289,7 +293,7 @@ function ensureCertificate(app, callback) {
 
     debug('ensureCertificate: %s cert require renewal', domain);
 
-    getApi(function (error, api, apiOptions) {
+    getApi(app, function (error, api, apiOptions) {
         if (error) return callback(error);
 
         debug('ensureCertificate: getting certificate for %s with options %j', domain, apiOptions);
