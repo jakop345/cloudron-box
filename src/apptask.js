@@ -99,7 +99,7 @@ function configureNginx(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var vhost = config.appFqdn(app.location);
+    var vhost = app.altDomain || config.appFqdn(app.location);
 
     certificates.ensureCertificate(vhost, function (error, certFilePath, keyFilePath) {
         if (error) return callback(error);
