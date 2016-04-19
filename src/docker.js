@@ -138,12 +138,13 @@ function createSubcontainer(app, name, cmd, options, callback) {
     var manifest = app.manifest;
     var developmentMode = !!manifest.developmentMode;
     var exposedPorts = {}, dockerPortBindings = { };
+    var domain = app.altDomain || config.appFqdn(app.location);
     var stdEnv = [
         'CLOUDRON=1',
         'WEBADMIN_ORIGIN=' + config.adminOrigin(),
         'API_ORIGIN=' + config.adminOrigin(),
-        'APP_ORIGIN=https://' + config.appFqdn(app.location),
-        'APP_DOMAIN=' + config.appFqdn(app.location)
+        'APP_ORIGIN=https://' + domain,
+        'APP_DOMAIN=' + domain
     ];
 
     // docker portBindings requires ports to be exposed
