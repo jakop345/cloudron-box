@@ -72,12 +72,15 @@ function start(callback) {
                         mail: entry.email,
                         displayname: displayName,
                         givenName: firstName,
-                        sn: lastName,
                         username: entry.username,
                         samaccountname: entry.username,      // to support ActiveDirectory clients
                         memberof: groups
                     }
                 };
+
+                // http://www.zytrax.com/books/ldap/ape/core-schema.html#sn has 'name' as SUP which is a DirectoryString
+                // which is required to have atleast one character if present
+                if (lastName.length !== 0) obj.attributes.sn = lastName;
 
                 // ensure all filter values are also lowercase
                 var lowerCaseFilter = ldap.parseFilter(req.filter.toString().toLowerCase());
