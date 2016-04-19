@@ -498,7 +498,8 @@ describe('database', function () {
             lastBackupId: null,
             lastBackupConfig: null,
             oldConfig: null,
-            memoryLimit: 4294967296
+            memoryLimit: 4294967296,
+            altDomain: null
         };
         var APP_1 = {
             id: 'appid-1',
@@ -517,7 +518,8 @@ describe('database', function () {
             lastBackupId: null,
             lastBackupConfig: null,
             oldConfig: null,
-            memoryLimit: 0
+            memoryLimit: 0,
+            altDomain: null
         };
 
         it('add fails due to missing arguments', function () {
