@@ -1,16 +1,16 @@
 'use strict';
 
-var assert = require('assert'),
-    caas = require('./sysinfo/caas.js'),
-    config = require('./config.js'),
-    ec2 = require('./sysinfo/ec2.js'),
-    util = require('util');
-
 exports = module.exports = {
     SysInfoError: SysInfoError,
 
     getIp: getIp
 };
+
+var assert = require('assert'),
+    caas = require('./sysinfo/caas.js'),
+    config = require('./config.js'),
+    ec2 = require('./sysinfo/ec2.js'),
+    util = require('util');
 
 var gCachedIp = null;
 
