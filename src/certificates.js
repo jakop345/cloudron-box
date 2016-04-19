@@ -93,7 +93,7 @@ function installAdminCertificate(callback) {
             waitForDns(config.adminFqdn(), ip, zoneName, function (error) {
                 if (error) return callback(error); // this cannot happen because we retry forever
 
-                ensureCertificate(config.adminFqdn(), function (error, certFilePath, keyFilePath) {
+                ensureCertificate(null /* admin */, function (error, certFilePath, keyFilePath) {
                     if (error) { // currently, this can never happen
                         debug('Error obtaining certificate. Proceed anyway', error);
                         return callback();
@@ -271,9 +271,11 @@ function setAdminCertificate(cert, key, callback) {
     nginx.configureAdmin(certFilePath, keyFilePath, callback);
 }
 
-function ensureCertificate(domain, callback) {
-    assert.strictEqual(typeof domain, 'string');
+function ensureCertificate(app, callback) {
+    assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
+
+    var domain = app ? (app.altDomain || config.appFqdn(app.location)) : config.adminFqdn();
 
     // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
     var userCertFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
