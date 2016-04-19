@@ -547,10 +547,12 @@ function setupMongoDb(app, options, callback) {
 
     var cmd = [ '/addons/mongodb/service.sh', 'add', app.id ];
 
-    docker.execContainer('mongodb', cmd, { bufferStdout: true }, function (error) {
+    docker.execContainer('mongodb', cmd, { bufferStdout: true }, function (error, stdout) {
         if (error) return callback(error);
 
-        appdb.unsetAddonConfig(app.id, 'mongodb', callback);
+        var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
+        debugApp(app, 'Setting mongodb addon config to %j', env);
+        appdb.setAddonConfig(app.id, 'mongodb', env, callback);
     });
 }
 
