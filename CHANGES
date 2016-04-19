@@ -477,3 +477,6 @@
 [0.12.3]
 - LDAP: Do not set sn attribute when user has no surname
 
+[0.12.4]
+- Install app only after platform is ready
+
