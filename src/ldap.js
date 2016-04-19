@@ -62,7 +62,7 @@ function start(callback) {
                 var firstName = nameParts[0];
                 var lastName = nameParts.length > 1  ? nameParts[nameParts.length - 1] : ''; // choose last part, if it exists
 
-                var tmp = {
+                var obj = {
                     dn: dn.toString(),
                     attributes: {
                         objectclass: ['user'],
@@ -82,8 +82,8 @@ function start(callback) {
                 // ensure all filter values are also lowercase
                 var lowerCaseFilter = ldap.parseFilter(req.filter.toString().toLowerCase());
 
-                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(tmp.attributes)) {
-                    res.send(tmp);
+                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
+                    res.send(obj);
                 }
             });
 
@@ -109,7 +109,7 @@ function start(callback) {
                 var dn = ldap.parseDN('cn=' + group.name + ',ou=groups,dc=cloudron');
                 var members = group.admin ? result.filter(function (entry) { return entry.admin; }) : result;
 
-                var tmp = {
+                var obj = {
                     dn: dn.toString(),
                     attributes: {
                         objectclass: ['group'],
@@ -121,8 +121,8 @@ function start(callback) {
                 // ensure all filter values are also lowercase
                 var lowerCaseFilter = ldap.parseFilter(req.filter.toString().toLowerCase());
 
-                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(tmp.attributes)) {
-                    res.send(tmp);
+                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
+                    res.send(obj);
                 }
             });
 
