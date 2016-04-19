@@ -17,7 +17,8 @@ exports = module.exports = {
     _verifyManifest: verifyManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
-    _waitForDnsPropagation: waitForDnsPropagation
+    _waitForDnsPropagation: waitForDnsPropagation,
+    _waitForAltDomainDnsPropagation: waitForAltDomainDnsPropagation
 };
 
 require('supererror')({ splatchError: true });
@@ -57,6 +58,7 @@ var addons = require('./addons.js'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
     uuid = require('node-uuid'),
+    waitForDns = require('./waitfordns.js'),
     _ = require('underscore');
 
 var COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
@@ -330,6 +332,16 @@ function waitForDnsPropagation(app, callback) {
     }, callback);
 }
 
+function waitForAltDomainDnsPropagation(app, callback) {
+    if (!app.altDomain) return callback(null);
+
+    sysinfo.getIp(function (error, ip) {
+        if (error) return callback(error);
+
+        waitForDns(app.altDomain, ip, app.altDomain /* zone */, callback); // waits forever
+    });
+}
+
 // updates the app object and the database
 function updateApp(app, values, callback) {
     assert.strictEqual(typeof app, 'object');
@@ -507,8 +519,11 @@ function restore(app, callback) {
 
         runApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
+        updateApp.bind(null, app, { installationProgress: '85, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '90, Waiting for Alt Domain DNS propagation' }),
+        exports._waitForAltDomainDnsPropagation.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '95, Configuring Nginx' }),
         configureNginx.bind(null, app),
@@ -568,6 +583,9 @@ function configure(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '80, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '85, Waiting for Alt Domain DNS propagation' }),
+        exports._waitForAltDomainDnsPropagation.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '90, Configuring Nginx' }),
         configureNginx.bind(null, app),
