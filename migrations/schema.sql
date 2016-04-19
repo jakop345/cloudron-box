@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS apps(
     oauthProxy BOOLEAN DEFAULT 0,
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     memoryLimit BIGINT DEFAULT 0,
+    altDomain VARCHAR(256),
 
     lastBackupId VARCHAR(128),
     lastBackupConfigJson TEXT, // used for appstore and non-appstore installs. it's here so it's easy to do REST validation
