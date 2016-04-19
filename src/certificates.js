@@ -257,7 +257,7 @@ function setAdminCertificate(cert, key, callback) {
     assert.strictEqual(typeof key, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var vhost = config.appFqdn(constants.ADMIN_LOCATION);
+    var vhost = config.adminFqdn();
     var certFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.cert');
     var keyFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.key');
 
