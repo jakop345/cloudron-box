@@ -319,20 +319,17 @@ function waitForDnsPropagation(app, callback) {
         return callback(null);
     }
 
-    function retry(error) {
-        debugApp(app, 'waitForDnsPropagation: ', error);
-        setTimeout(waitForDnsPropagation.bind(null, app, callback), 5000);
-    }
+    async.retry({ interval: 5000, times: 120 }, function checkStatus(retryCallback) {
+        subdomains.status(app.dnsRecordId, function (error, result) {
+            if (error) return retryCallback(new Error('Failed to get dns record status : ' + error.message));
 
-    subdomains.status(app.dnsRecordId, function (error, result) {
-        if (error) return retry(new Error('Failed to get dns record status : ' + error.message));
+            debugApp(app, 'waitForDnsPropagation: dnsRecordId:%s status:%s', app.dnsRecordId, result);
 
-        debugApp(app, 'waitForDnsPropagation: dnsRecordId:%s status:%s', app.dnsRecordId, result);
+            if (result !== 'done') return retryCallback(new Error(util.format('app:%s not ready yet: %s', app.id, result)));
 
-        if (result !== 'done') return retry(new Error(util.format('app:%s not ready yet: %s', app.id, result)));
-
-        callback(null);
-    });
+            retryCallback(null, result);
+        });
+    }, callback);
 }
 
 // updates the app object and the database
