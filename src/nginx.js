@@ -64,7 +64,7 @@ function configureApp(app, certFilePath, keyFilePath, callback) {
     var sourceDir = path.resolve(__dirname, '..');
     var oauthProxy = requiresOAuthProxy(app);
     var endpoint = oauthProxy ? 'oauthproxy' : 'app';
-    var vhost = config.appFqdn(app.location);
+    var vhost = app.altDomain || config.appFqdn(app.location);
 
     var data = {
         sourceDir: sourceDir,
@@ -92,9 +92,11 @@ function unconfigureApp(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
+    var vhost = app.altDomain || config.appFqdn(app.location);
+
     var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
-        debug('Error removing nginx configuration of "%s": %s', app.location, safe.error.message);
+        debug('Error removing nginx configuration of "%s": %s', vhost, safe.error.message);
         return callback(null);
     }
 
