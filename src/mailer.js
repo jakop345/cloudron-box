@@ -403,7 +403,7 @@ function sendCrashNotification(program, context) {
         from: config.adminEmail(),
         to: 'admin@cloudron.io',
         subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
-        text: render('crash_notification.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
+        text: render('failure_notification.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
     };
 
     sendMails([ mailOptions ]);
