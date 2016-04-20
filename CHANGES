@@ -480,3 +480,6 @@
 [0.12.4]
 - Install app only after platform is ready
 
+[0.12.5]
+- Get alerts for app task failures
+
