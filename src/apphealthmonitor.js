@@ -162,7 +162,7 @@ function processDockerEvents() {
                 debug('OOM Context: %s', context);
 
                 // do not send mails for dev apps
-                if (error || app.appStoreId !== '') mailer.sendCrashNotification(program, context); // app can be null if it's an addon crash
+                if (error || app.appStoreId !== '') mailer.unexpectedExit(program, context); // app can be null if it's an addon crash
             });
         });
 
