@@ -1,7 +1,7 @@
 'use strict';
 
 exports = module.exports = {
-    sendCrashNotification: sendCrashNotification
+    sendFailureLogs: sendFailureLogs
 };
 
 var assert = require('assert'),
@@ -12,22 +12,26 @@ var assert = require('assert'),
 
 var COLLECT_LOGS_CMD = path.join(__dirname, 'scripts/collectlogs.sh');
 
-function collectLogs(program, callback) {
-    assert.strictEqual(typeof program, 'string');
+function collectLogs(unitName, callback) {
+    assert.strictEqual(typeof unitName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var logs = safe.child_process.execSync('sudo ' + COLLECT_LOGS_CMD + ' ' + program, { encoding: 'utf8' });
+    var logs = safe.child_process.execSync('sudo ' + COLLECT_LOGS_CMD + ' ' + unitName, { encoding: 'utf8' });
     callback(null, logs);
 }
 
-function sendCrashNotification(processName) {
+function sendFailureLogs(processName, options) {
+    assert.strictEqual(typeof processName, 'string');
+    assert.strictEqual(typeof options, 'object');
+
     collectLogs(processName, function (error, result) {
         if (error) {
             console.error('Failed to collect logs.', error);
             result = util.format('Failed to collect logs.', error);
         }
 
-        console.log('Sending crash notification email for', processName);
-        mailer.sendFailureLogs(processName, result);
+        console.log('Sending failure logs for', processName);
+
+        mailer.unexpectedExit(options.unit || processName, result);
     });
 }

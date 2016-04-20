@@ -2,7 +2,7 @@
 
 'use strict';
 
-var sendCrashNotification = require('./src/logcollector').sendCrashNotification;
+var sendFailureLogs = require('./src/logcollector').sendFailureLogs;
 
 function main() {
     if (process.argv.length !== 3) return console.error('Usage: crashnotifier.js <processName>');
@@ -10,7 +10,7 @@ function main() {
     var processName = process.argv[2];
     console.log('Started crash notifier for', processName);
 
-    sendCrashNotification(processName);
+    sendFailureLogs(processName, { unit: processName });
 }
 
 main();

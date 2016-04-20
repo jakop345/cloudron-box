@@ -19,7 +19,7 @@ var appdb = require('./appdb.js'),
     cloudron = require('./cloudron.js'),
     debug = require('debug')('box:taskmanager'),
     locker = require('./locker.js'),
-    sendCrashNotification = require('./logcollector.js').sendCrashNotification,
+    sendFailureLogs = require('./logcollector.js').sendFailureLogs,
     util = require('util'),
     _ = require('underscore');
 
@@ -143,8 +143,10 @@ function startAppTask(appId, callback) {
         debug('Task for %s pid %s completed with status %s', appId, pid, code);
         if (code === null /* signal */ || (code !== 0 && code !== 50)) { // apptask crashed
             debug('Apptask crashed with code %s and signal %s', code, signal);
-            sendCrashNotification('box');
+            sendFailureLogs('apptask', { unit: 'box' });
             appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code + ' and signal ' + signal }, NOOP_CALLBACK);
+        } else if (code === 50) {
+            sendFailureLogs('apptask', { unit: 'box' });
         }
         delete gActiveTasks[appId];
         locker.unlock(locker.OP_APPTASK); // unlock event will trigger next task

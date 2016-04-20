@@ -12,7 +12,7 @@ exports = module.exports = {
     appUpdateAvailable: appUpdateAvailable,
 
     sendInvite: sendInvite,
-    sendFailureLogs: sendFailureLogs,
+    unexpectedExit: unexpectedExit,
 
     appDied: appDied,
 
@@ -395,7 +395,7 @@ function certificateRenewed(domain, message) {
 
 // this function bypasses the queue intentionally. it is also expected to work without the mailer module initialized
 // crashnotifier should be able to send mail when there is no db
-function sendFailureLogs(program, context) {
+function unexpectedExit(program, context) {
     assert.strictEqual(typeof program, 'string');
     assert.strictEqual(typeof context, 'string');
 
@@ -403,7 +403,7 @@ function sendFailureLogs(program, context) {
         from: config.adminEmail(),
         to: 'admin@cloudron.io',
         subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
-        text: render('failure_notification.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
+        text: render('unexpected_exit.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
     };
 
     sendMails([ mailOptions ]);
