@@ -230,17 +230,19 @@ function downloadIcon(app, callback) {
 
     var iconUrl = config.apiServerOrigin() + '/api/v1/apps/' + app.appStoreId + '/versions/' + app.manifest.version + '/icon';
 
-    superagent
-        .get(iconUrl)
-        .buffer(true)
-        .end(function (error, res) {
-            if (error && !error.response) return callback(new Error('Network error downloading icon:' + error.message));
-            if (res.statusCode !== 200) return callback(null); // ignore error. this can also happen for apps installed with cloudron-cli
+    async.retry({ times: 10, interval: 5000 }, function (retryCallback) {
+        superagent
+            .get(iconUrl)
+            .buffer(true)
+            .end(function (error, res) {
+                if (error && !error.response) return retryCallback(new Error('Network error downloading icon:' + error.message));
+                if (res.statusCode !== 200) return retryCallback(null); // ignore error. this can also happen for apps installed with cloudron-cli
 
-            if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), res.body)) return callback(new Error('Error saving icon:' + safe.error.message));
+                if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), res.body)) return retryCallback(new Error('Error saving icon:' + safe.error.message));
 
-            callback(null);
-    });
+                retryCallback(null);
+        });
+    }, callback);
 }
 
 function registerSubdomain(app, callback) {
