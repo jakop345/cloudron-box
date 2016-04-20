@@ -19,7 +19,7 @@ var appdb = require('./appdb.js'),
     cloudron = require('./cloudron.js'),
     debug = require('debug')('box:taskmanager'),
     locker = require('./locker.js'),
-    sendCrashNotification = require('./crashnotifier.js').sendCrashNotification,
+    sendCrashNotification = require('./logcollector.js').sendCrashNotification,
     util = require('util'),
     _ = require('underscore');
 
