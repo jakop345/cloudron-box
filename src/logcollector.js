@@ -24,7 +24,7 @@ function sendFailureLogs(processName, options) {
     assert.strictEqual(typeof processName, 'string');
     assert.strictEqual(typeof options, 'object');
 
-    collectLogs(processName, function (error, result) {
+    collectLogs(options.unit || processName, function (error, result) {
         if (error) {
             console.error('Failed to collect logs.', error);
             result = util.format('Failed to collect logs.', error);
@@ -32,6 +32,6 @@ function sendFailureLogs(processName, options) {
 
         console.log('Sending failure logs for', processName);
 
-        mailer.unexpectedExit(options.unit || processName, result);
+        mailer.unexpectedExit(processName, result);
     });
 }
