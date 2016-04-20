@@ -28,6 +28,6 @@ function sendCrashNotification(processName) {
         }
 
         console.log('Sending crash notification email for', processName);
-        mailer.sendCrashNotification(processName, result);
+        mailer.sendFailureLogs(processName, result);
     });
 }

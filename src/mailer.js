@@ -12,7 +12,7 @@ exports = module.exports = {
     appUpdateAvailable: appUpdateAvailable,
 
     sendInvite: sendInvite,
-    sendCrashNotification: sendCrashNotification,
+    sendFailureLogs: sendFailureLogs,
 
     appDied: appDied,
 
@@ -395,7 +395,7 @@ function certificateRenewed(domain, message) {
 
 // this function bypasses the queue intentionally. it is also expected to work without the mailer module initialized
 // crashnotifier should be able to send mail when there is no db
-function sendCrashNotification(program, context) {
+function sendFailureLogs(program, context) {
     assert.strictEqual(typeof program, 'string');
     assert.strictEqual(typeof context, 'string');
 
