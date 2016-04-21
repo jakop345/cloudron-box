@@ -89,6 +89,8 @@ function resumeTasks(callback) {
         apps.forEach(function (app) {
             if (app.installationState === appdb.ISTATE_INSTALLED && app.runState === appdb.RSTATE_RUNNING) return;
 
+            if (app.installationState === appdb.ISTATE_ERROR) return;
+
             debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
             startAppTask(app.id, NOOP_CALLBACK);
         });
