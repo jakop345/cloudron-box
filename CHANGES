@@ -482,4 +482,5 @@
 
 [0.12.5]
 - Get alerts for app task failures
+- Fix update issue when one or more apps are in failed state
 
