@@ -196,11 +196,15 @@ function copyLastBackup(app, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
+        debug('copyLastBackup: copying archive %s to %s', app.lastBackupId, toFilenameArchive);
+
         api(backupConfig.provider).copyObject(backupConfig, app.lastBackupId, toFilenameArchive, function (error) {
             if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
 
             // TODO change that logic by adjusting app.lastBackupId to not contain the file type
             var configFileId = app.lastBackupId.slice(0, -'.tar.gz'.length) + '.json';
+
+            debug('copyLastBackup: copying config %s to %s', configFileId, toFilenameConfig);
 
             api(backupConfig.provider).copyObject(backupConfig, configFileId, toFilenameConfig, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
