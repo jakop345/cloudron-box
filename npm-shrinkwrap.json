@@ -7,11 +7,6 @@
       "from": "async@>=1.2.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/async/-/async-1.5.2.tgz"
     },
-    "attempt": {
-      "version": "1.0.1",
-      "from": "attempt@>=1.0.1 <2.0.0",
-      "resolved": "http://registry.npmjs.org/attempt/-/attempt-1.0.1.tgz"
-    },
     "aws-sdk": {
       "version": "2.3.5",
       "from": "aws-sdk@>=2.1.46 <3.0.0",

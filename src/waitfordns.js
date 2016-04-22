@@ -4,7 +4,6 @@ exports = module.exports = waitForDns;
 
 var assert = require('assert'),
     async = require('async'),
-    attempt = require('attempt'),
     debug = require('debug')('box:src/waitfordns'),
     dns = require('native-dns'),
     tld = require('tldjs');
@@ -56,8 +55,8 @@ function waitForDns(domain, value, type, options, callback) {
     assert(type === 'A' || type === 'CNAME');
 
     var defaultOptions = {
-        retryInterval: 5000,
-        retries: Infinity
+        interval: 5000,
+        times: Infinity
     };
 
     if (typeof options === 'function') {
@@ -71,20 +70,20 @@ function waitForDns(domain, value, type, options, callback) {
     var zoneName = tld.getDomain(zoneName);
     debug('waitForIp: domain %s to be %s in zone %s.', domain, value, zoneName);
 
-    attempt(function (attempts) {
-        var callback = this; // gross
-        debug('waitForDNS: %s attempt %s.', domain, attempts);
+    var attempt = 1;
+    async.retry(options, function retryCallback() {
+        debug('waitForDNS: %s attempt %s.', domain, attempt++);
 
         dns.resolveNs(zoneName, function (error, nameservers) {
-            if (error || !nameservers) return callback(error || new Error('Unable to get nameservers'));
+            if (error || !nameservers) return retryCallback(error || new Error('Unable to get nameservers'));
 
             async.every(nameservers, isChangeSynced.bind(null, domain, value, type), function (synced) {
                 debug('waitForIp: %s %s ns: %j', domain, synced ? 'done' : 'not done', nameservers);
 
-                callback(synced ? null : new Error('ETRYAGAIN'));
+                retryCallback(synced ? null : new Error('ETRYAGAIN'));
             });
         });
-    }, { interval: options.retryInterval, retries: options.retries }, function (error) {
+    }, function retryDone(error) {
          if (error) return callback(error);
 
         debug('waitForDNS: %s done.', domain);
