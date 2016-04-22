@@ -6,7 +6,8 @@ var assert = require('assert'),
     async = require('async'),
     attempt = require('attempt'),
     debug = require('debug')('box:src/waitfordns'),
-    dns = require('native-dns');
+    dns = require('native-dns'),
+    tld = require('tldjs');
 
 // the first arg to callback is not an error argument; this is required for async.every
 function isChangeSynced(domain, value, type, nameserver, callback) {
@@ -49,11 +50,10 @@ function isChangeSynced(domain, value, type, nameserver, callback) {
  }
 
 // check if IP change has propagated to every nameserver
-function waitForDns(domain, value, type, zoneName, options, callback) {
+function waitForDns(domain, value, type, options, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof value, 'string');
     assert(type === 'A' || type === 'CNAME');
-    assert.strictEqual(typeof zoneName, 'string');
 
     var defaultOptions = {
         retryInterval: 5000,
@@ -68,6 +68,7 @@ function waitForDns(domain, value, type, zoneName, options, callback) {
         assert.strictEqual(typeof callback, 'function');
     }
 
+    var zoneName = tld.getDomain(zoneName);
     debug('waitForIp: domain %s to be %s in zone %s.', domain, value, zoneName);
 
     attempt(function (attempts) {
