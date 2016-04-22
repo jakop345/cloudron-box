@@ -1,5 +1,3 @@
-/* jslint node:true */
-
 'use strict';
 
 exports = module.exports = waitForDns;
@@ -11,9 +9,10 @@ var assert = require('assert'),
     dns = require('native-dns');
 
 // the first arg to callback is not an error argument; this is required for async.every
-function isChangeSynced(domain, ip, nameserver, callback) {
+function isChangeSynced(domain, value, type, nameserver, callback) {
     assert.strictEqual(typeof domain, 'string');
-    assert.strictEqual(typeof ip, 'string');
+    assert.strictEqual(typeof value, 'string');
+    assert.strictEqual(typeof type, 'string');
     assert.strictEqual(typeof nameserver, 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -23,7 +22,7 @@ function isChangeSynced(domain, ip, nameserver, callback) {
 
         async.every(nsIps, function (nsIp, iteratorCallback) {
             var req = dns.Request({
-                question: dns.Question({ name: domain, type: 'A' }),
+                question: dns.Question({ name: domain, type: type }),
                 server: { address: nsIp },
                 timeout: 5000
             });
@@ -31,11 +30,15 @@ function isChangeSynced(domain, ip, nameserver, callback) {
             req.on('timeout', function () { return iteratorCallback(false); });
 
             req.on('message', function (error, message) {
-                if (error || !message.answer || message.answer.length === 0) return iteratorCallback(false);
+                if (error) return iteratorCallback(false);
 
-                debug('isChangeSynced: ns: %s (%s), name:%s Actual:%j Expecting:%s', nameserver, nsIp, domain, message.answer[0], ip);
+                var answer = type === 'A' ? message.answer : message.data;
 
-                if (message.answer[0].address !== ip) return iteratorCallback(false);
+                if (!answer || answer.length === 0) return iteratorCallback(false);
+
+                debug('isChangeSynced: ns: %s (%s), name:%s Actual:%j Expecting:%s', nameserver, nsIp, domain, answer[0], value);
+
+                if (answer[0].address !== value) return iteratorCallback(false);
 
                 iteratorCallback(true); // done
             });
@@ -46,9 +49,10 @@ function isChangeSynced(domain, ip, nameserver, callback) {
  }
 
 // check if IP change has propagated to every nameserver
-function waitForDns(domain, ip, zoneName, options, callback) {
+function waitForDns(domain, value, type, zoneName, options, callback) {
     assert.strictEqual(typeof domain, 'string');
-    assert.strictEqual(typeof ip, 'string');
+    assert.strictEqual(typeof value, 'string');
+    assert(type === 'A' || type === 'CNAME');
     assert.strictEqual(typeof zoneName, 'string');
 
     var defaultOptions = {
@@ -64,7 +68,7 @@ function waitForDns(domain, ip, zoneName, options, callback) {
         assert.strictEqual(typeof callback, 'function');
     }
 
-    debug('waitForDNS: domain %s to be %s in zone %s.', domain, ip, zoneName);
+    debug('waitForIp: domain %s to be %s in zone %s.', domain, value, zoneName);
 
     attempt(function (attempts) {
         var callback = this; // gross
@@ -73,8 +77,8 @@ function waitForDns(domain, ip, zoneName, options, callback) {
         dns.resolveNs(zoneName, function (error, nameservers) {
             if (error || !nameservers) return callback(error || new Error('Unable to get nameservers'));
 
-            async.every(nameservers, isChangeSynced.bind(null, domain, ip), function (synced) {
-                debug('waitForDNS: %s %s ns: %j', domain, synced ? 'done' : 'not done', nameservers);
+            async.every(nameservers, isChangeSynced.bind(null, domain, value, type), function (synced) {
+                debug('waitForIp: %s %s ns: %j', domain, synced ? 'done' : 'not done', nameservers);
 
                 callback(synced ? null : new Error('ETRYAGAIN'));
             });
