@@ -111,7 +111,7 @@
                         </div>
                         </div>
 
-                        <a ng-show="!!appConfigure.app.manifest.configurePath" ng-href="https://{{ appConfigure.app.location }}{{ !appConfigure.app.location ? '' : (config.isCustomDomain ? '.' : '-') }}{{ config.fqdn }}/{{ appConfigure.app.manifest.configurePath }}" target="_blank">Application Specific Settings</a>
+                        <a ng-show="!!appConfigure.app.manifest.configurePath" ng-href="https://{{ appConfigure.app.fqdn }}/{{ appConfigure.app.manifest.configurePath }}" target="_blank">Application Specific Settings</a>
                         <br/>
                         <br/>
                         <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) || (!appConfigureForm.password.$dirty && appConfigure.error.password) }">
@@ -139,7 +139,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Really Restore {{ appRestore.app.location }}</h4>
+                <h4 class="modal-title">Really Restore {{ appRestore.app.fqdn }}</h4>
             </div>
             <div class="modal-body">
                 <p ng-show="appRestore.app.lastBackupId !== null">Restoring the app will lose all content generated since last backup of this app!</p>
@@ -172,7 +172,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">{{ appError.app.location }}</h4>
+                <h4 class="modal-title">{{ appError.app.fqdn }}</h4>
             </div>
             <div class="modal-body">
                 <p><b>There was an error:</b></p>
@@ -190,7 +190,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Really uninstall {{ appUninstall.app.location }}</h4>
+                <h4 class="modal-title">Really uninstall {{ appUninstall.app.fqdn }} ?</h4>
             </div>
             <div class="modal-body">
                 <p>Deleting the app will also remove all content generated within this app!</p>
@@ -222,7 +222,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update {{ appUpdate.app.location }}</h4>
+                <h4 class="modal-title">Update {{ appUpdate.app.fqdn }}</h4>
             </div>
             <div class="modal-body">
                 <p>Recent Changes for new version <b>{{ appUpdate.manifest.version}}</b>:</p>
