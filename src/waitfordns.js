@@ -59,7 +59,7 @@ function waitForDns(domain, value, type, callback) {
     debug('waitForIp: domain %s to be %s in zone %s.', domain, value, zoneName);
 
     var attempt = 1;
-    async.retry({ interval: 5000, times: Infinity }, function (retryCallback) {
+    async.retry({ interval: 5000, times: 50000 }, function (retryCallback) {
         debug('waitForDNS: %s attempt %s.', domain, attempt++);
 
         dns.resolveNs(zoneName, function (error, nameservers) {
