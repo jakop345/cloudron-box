@@ -261,7 +261,7 @@ function get(appId, callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         app.iconUrl = getIconUrlSync(app);
-        app.fqdn = config.appFqdn(app.location);
+        app.fqdn = app.altDomain || config.appFqdn(app.location);
 
         callback(null, app);
     });
@@ -276,7 +276,7 @@ function getBySubdomain(subdomain, callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         app.iconUrl = getIconUrlSync(app);
-        app.fqdn = config.appFqdn(app.location);
+        app.fqdn = app.altDomain || config.appFqdn(app.location);
 
         callback(null, app);
     });
@@ -294,7 +294,7 @@ function getByIpAddress(ip, callback) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
             app.iconUrl = getIconUrlSync(app);
-            app.fqdn = config.appFqdn(app.location);
+            app.fqdn = app.altDomain || config.appFqdn(app.location);
 
             callback(null, app);
         });
@@ -309,7 +309,7 @@ function getAll(callback) {
 
         apps.forEach(function (app) {
             app.iconUrl = getIconUrlSync(app);
-            app.fqdn = config.appFqdn(app.location);
+            app.fqdn = app.altDomain || config.appFqdn(app.location);
         });
 
         callback(null, apps);
