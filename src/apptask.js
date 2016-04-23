@@ -414,8 +414,11 @@ function install(app, callback) {
 
         runApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
+        updateApp.bind(null, app, { installationProgress: '85, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '90, Waiting for Alt Domain DNS propagation' }),
+        exports._waitForAltDomainDnsPropagation.bind(null, app), // required when restoring and !lastBackupId
 
         updateApp.bind(null, app, { installationProgress: '95, Configure nginx' }),
         configureNginx.bind(null, app),
