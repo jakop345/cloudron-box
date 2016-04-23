@@ -49,7 +49,8 @@ function removeInternalAppFields(app) {
         portBindings: app.portBindings,
         iconUrl: app.iconUrl,
         fqdn: app.fqdn,
-        memoryLimit: app.memoryLimit
+        memoryLimit: app.memoryLimit,
+        altDomain: app.altDomain
     };
 }
 
