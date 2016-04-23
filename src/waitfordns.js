@@ -55,11 +55,11 @@ function waitForDns(domain, value, type, callback) {
     assert(type === 'A' || type === 'CNAME');
     assert.strictEqual(typeof callback, 'function');
 
-    var zoneName = tld.getDomain(zoneName);
+    var zoneName = tld.getDomain(domain);
     debug('waitForIp: domain %s to be %s in zone %s.', domain, value, zoneName);
 
     var attempt = 1;
-    async.retry({ interval: 5000, times: Infinity }, function retryCallback() {
+    async.retry({ interval: 5000, times: Infinity }, function (retryCallback) {
         debug('waitForDNS: %s attempt %s.', domain, attempt++);
 
         dns.resolveNs(zoneName, function (error, nameservers) {
