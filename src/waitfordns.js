@@ -41,18 +41,21 @@ function isChangeSynced(domain, value, type, nameserver, callback) {
                     return iteratorCallback(false);
                 }
 
-                var answer = type === 'A' ? message.answer : message.data;
+                var answer = message.answer;
 
                 if (!answer || answer.length === 0) {
                     debug('bad answer from nameserver %s (%s) resolving %s (%s): %j', nameserver, nsIp, domain, type, message);
                     return iteratorCallback(false);
                 }
 
-                debug('isChangeSynced: ns: %s (%s), name:%s Actual:%j Expecting:%s', nameserver, nsIp, domain, answer[0], value);
+                debug('isChangeSynced: ns: %s (%s), name:%s Actual:%j Expecting:%s', nameserver, nsIp, domain, answer, value);
 
-                if (answer[0].address !== value) return iteratorCallback(false);
+                if ((type === 'A' && answer[0].address === value) ||
+                    (type === 'CNAME' && answer[0].data === value)) {
+                    return iteratorCallback(true); // done!
+                }
 
-                iteratorCallback(true); // done
+                iteratorCallback(false);
             });
 
             req.send();
