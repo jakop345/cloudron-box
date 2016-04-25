@@ -9,6 +9,7 @@ var assert = require('assert'),
     async = require('async'),
     auth = require('./auth.js'),
     certificates = require('./certificates.js'),
+    clients = require('./clients.js'),
     cloudron = require('./cloudron.js'),
     cron = require('./cron.js'),
     config = require('./config.js'),
@@ -65,12 +66,12 @@ function initializeExpressSync() {
     var multipart = middleware.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT });
 
     // scope middleware implicitly also adds bearer token verification
-    var rootScope = routes.oauth2.scope('root');
-    var profileScope = routes.oauth2.scope('profile');
-    var usersScope = routes.oauth2.scope('users');
-    var appsScope = routes.oauth2.scope('apps');
-    var developerScope = routes.oauth2.scope('developer');
-    var settingsScope = routes.oauth2.scope('settings');
+    var rootScope = routes.oauth2.scope(clients.SCOPE_ROOT);
+    var profileScope = routes.oauth2.scope(clients.SCOPE_PROFILE);
+    var usersScope = routes.oauth2.scope(clients.SCOPE_USERS);
+    var appsScope = routes.oauth2.scope(clients.SCOPE_APPS);
+    var developerScope = routes.oauth2.scope(clients.SCOPE_DEVELOPER);
+    var settingsScope = routes.oauth2.scope(clients.SCOPE_SETTINGS);
 
     // csrf protection
     var csrf = routes.oauth2.csrf;

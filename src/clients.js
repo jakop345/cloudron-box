@@ -8,7 +8,14 @@ exports = module.exports = {
     del: del,
     getAllWithDetailsByUserId: getAllWithDetailsByUserId,
     getClientTokensByUserId: getClientTokensByUserId,
-    delClientTokensByUserId: delClientTokensByUserId
+    delClientTokensByUserId: delClientTokensByUserId,
+
+    SCOPE_APPS: 'apps',
+    SCOPE_DEVELOPER: 'developer',
+    SCOPE_PROFILE: 'profile',
+    SCOPE_ROOT: 'root',
+    SCOPE_SETTINGS: 'settings',
+    SCOPE_USERS: 'users'
 };
 
 var assert = require('assert'),
@@ -47,7 +54,14 @@ ClientsError.INVALID_CLIENT = 'Invalid client';
 function validateScope(scope) {
     assert.strictEqual(typeof scope, 'string');
 
-    var VALID_SCOPES = [ 'root', 'profile', 'users', 'apps', 'developer', 'settings' ];
+    var VALID_SCOPES = [
+        exports.SCOPE_APPS,
+        exports.SCOPE_DEVELOPER,
+        exports.SCOPE_PROFILE,
+        exports.SCOPE_ROOT,
+        exports.SCOPE_SETTINGS,
+        exports.SCOPE_USERS
+    ];
 
     if (scope === '') return new ClientsError(ClientsError.INVALID_SCOPE);
     if (scope === '*') return null;
