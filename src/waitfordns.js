@@ -18,7 +18,10 @@ function isChangeSynced(domain, value, type, nameserver, callback) {
 
     // ns records cannot have cname
     dns.resolve4(nameserver, function (error, nsIps) {
-        if (error || !nsIps || nsIps.length === 0) return callback(false);
+        if (error || !nsIps || nsIps.length === 0) {
+            debug('nameserver %s does not resolve. assuming it stays bad.', nameserver); // it's fine if one or more ns are dead
+            return callback(true);
+        }
 
         async.every(nsIps, function (nsIp, iteratorCallback) {
             var req = dns.Request({
