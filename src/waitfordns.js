@@ -30,14 +30,23 @@ function isChangeSynced(domain, value, type, nameserver, callback) {
                 timeout: 5000
             });
 
-            req.on('timeout', function () { return iteratorCallback(false); });
+            req.on('timeout', function () {
+                debug('nameserver %s (%s) timed out when trying to resolve %s', nameserver, nsIp, domain);
+                return iteratorCallback(false);
+            });
 
             req.on('message', function (error, message) {
-                if (error) return iteratorCallback(false);
+                if (error) {
+                    debug('nameserver %s (%s) returned error trying to resolve %s: %s', nameserver, nsIp, domain, error);
+                    return iteratorCallback(false);
+                }
 
                 var answer = type === 'A' ? message.answer : message.data;
 
-                if (!answer || answer.length === 0) return iteratorCallback(false);
+                if (!answer || answer.length === 0) {
+                    debug('bad answer from nameserver %s (%s) resolving %s (%s): %j', nameserver, nsIp, domain, type, message);
+                    return iteratorCallback(false);
+                }
 
                 debug('isChangeSynced: ns: %s (%s), name:%s Actual:%j Expecting:%s', nameserver, nsIp, domain, answer[0], value);
 
