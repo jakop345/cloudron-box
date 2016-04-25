@@ -47,10 +47,13 @@ ClientsError.INVALID_CLIENT = 'Invalid client';
 function validateScope(scope) {
     assert.strictEqual(typeof scope, 'string');
 
+    var VALID_SCOPES = [ 'root', 'profile', 'users', 'apps', 'developer', 'settings' ];
+
     if (scope === '') return new ClientsError(ClientsError.INVALID_SCOPE);
     if (scope === '*') return null;
 
-    // TODO maybe validate all individual scopes if they exist
+    var allValid = scope.split(',').every(function (s) { return VALID_SCOPES.indexOf(s) !== -1; });
+    if (!allValid) return new ClientsError(ClientsError.INVALID_SCOPE);
 
     return null;
 }
