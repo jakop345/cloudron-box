@@ -476,7 +476,8 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
                 location: app.location,
                 accessRestriction: app.accessRestriction,
                 portBindings: app.portBindings,
-                memoryLimit: app.memoryLimit
+                memoryLimit: app.memoryLimit,
+                altDomain: altDomain
             }
         };
 
@@ -548,7 +549,8 @@ function update(appId, force, manifest, portBindings, icon, callback) {
                 manifest: app.manifest,
                 portBindings: app.portBindings,
                 accessRestriction: app.accessRestriction,
-                memoryLimit: app.memoryLimit
+                memoryLimit: app.memoryLimit,
+                altDomain: app.altDomain
             }
         };
 
@@ -641,7 +643,8 @@ function restore(appId, callback) {
                     accessRestriction: app.accessRestriction,
                     portBindings: app.portBindings,
                     memoryLimit: app.memoryLimit,
-                    manifest: app.manifest
+                    manifest: app.manifest,
+                    altDomain: app.altDomain
                 }
             };
         }
