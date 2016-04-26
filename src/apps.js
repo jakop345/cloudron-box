@@ -353,7 +353,7 @@ function purchase(appStoreId, callback) {
     });
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, cert, key, memoryLimit, callback) {
+function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, cert, key, memoryLimit, altDomain, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
@@ -364,6 +364,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     assert(cert === null || typeof cert === 'string');
     assert(key === null || typeof key === 'string');
     assert.strictEqual(typeof memoryLimit, 'number');
+    assert(altDomain === null || typeof altDomain === 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var error = manifestFormat.parse(manifest);
@@ -387,6 +388,8 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     // memoryLimit might come in as 0 if not specified
     memoryLimit = memoryLimit || manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
 
+    if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
+
     // singleUser mode requires accessRestriction to contain exactly one user
     if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
     if (manifest.singleUser && accessRestriction.users.length !== 1) return callback(new AppsError(AppsError.USER_REQUIRED));
@@ -407,7 +410,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     purchase(appStoreId, function (error) {
         if (error) return callback(error);
 
-        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, memoryLimit, function (error) {
+        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, memoryLimit, altDomain, function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

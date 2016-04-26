@@ -30,7 +30,8 @@ describe('SimpleAuth API', function () {
         location: 'test0',
         portBindings: {},
         accessRestriction: { users: [ 'foobar', 'someone'] },
-        memoryLimit: 0
+        memoryLimit: 0,
+        altDomain: null
     };
 
     var APP_1 = {
@@ -40,7 +41,8 @@ describe('SimpleAuth API', function () {
         location: 'test1',
         portBindings: {},
         accessRestriction: { users: [ 'foobar', 'someone' ] },
-        memoryLimit: 0
+        memoryLimit: 0,
+        altDomain: null
     };
 
     var APP_2 = {
@@ -50,7 +52,8 @@ describe('SimpleAuth API', function () {
         location: 'test2',
         portBindings: {},
         accessRestriction: null,
-        memoryLimit: 0
+        memoryLimit: 0,
+        altDomain: null
     };
 
     var APP_3 = {
@@ -60,7 +63,8 @@ describe('SimpleAuth API', function () {
         location: 'test3',
         portBindings: {},
         accessRestriction: { groups: [ 'someothergroup', 'admin', 'anothergroup' ] },
-        memoryLimit: 0
+        memoryLimit: 0,
+        altDomain: null
     };
 
     var CLIENT_0 = {
@@ -155,10 +159,10 @@ describe('SimpleAuth API', function () {
             clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.type, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
             clientdb.add.bind(null, CLIENT_4.id, CLIENT_4.appId, CLIENT_4.type, CLIENT_4.clientSecret, CLIENT_4.redirectURI, CLIENT_4.scope),
             clientdb.add.bind(null, CLIENT_5.id, CLIENT_5.appId, CLIENT_5.type, CLIENT_5.clientSecret, CLIENT_5.redirectURI, CLIENT_5.scope),
-            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit),
-            appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.memoryLimit),
-            appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.memoryLimit),
-            appdb.add.bind(null, APP_3.id, APP_3.appStoreId, APP_3.manifest, APP_3.location, APP_3.portBindings, APP_3.accessRestriction, APP_3.memoryLimit)
+            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit, APP_0.altDomain),
+            appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.memoryLimit, APP_1.altDomain),
+            appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.memoryLimit, APP_2.altDomain),
+            appdb.add.bind(null, APP_3.id, APP_3.appStoreId, APP_3.manifest, APP_3.location, APP_3.portBindings, APP_3.accessRestriction, APP_3.memoryLimit, APP_3.altDomain)
         ], done);
     });
 

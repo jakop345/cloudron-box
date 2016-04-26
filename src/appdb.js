@@ -177,7 +177,7 @@ function getAll(callback) {
     });
 }
 
-function add(id, appStoreId, manifest, location, portBindings, accessRestriction, memoryLimit, callback) {
+function add(id, appStoreId, manifest, location, portBindings, accessRestriction, memoryLimit, altDomain, callback) {
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
@@ -186,6 +186,7 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
     assert.strictEqual(typeof portBindings, 'object');
     assert.strictEqual(typeof accessRestriction, 'object');
     assert.strictEqual(typeof memoryLimit, 'number');
+    assert(altDomain === null || typeof altDomain === 'string');
     assert.strictEqual(typeof callback, 'function');
 
     portBindings = portBindings || { };
@@ -195,8 +196,8 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
 
     var queries = [ ];
     queries.push({
-        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestrictionJson, memoryLimit ]
+        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestrictionJson, memoryLimit, altDomain ]
     });
 
     Object.keys(portBindings).forEach(function (env) {

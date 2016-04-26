@@ -68,7 +68,7 @@ function setup(done) {
         database.initialize.bind(null),
         database._clear.bind(null),
         ldapServer.start.bind(null),
-        appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit),
+        appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit, null),
         appdb.update.bind(null, APP_0.id, { containerId: APP_0.containerId }),
         function (callback) {
             user.createOwner(USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, function (error, result) {
