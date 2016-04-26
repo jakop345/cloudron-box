@@ -30,12 +30,30 @@
                         <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.location.$dirty && appConfigureForm.location.$invalid) || (!appConfigureForm.location.$dirty && appConfigure.error.location)  }">
                             <label class="control-label" for="appConfigureLocationInput">Location {{ appConfigure.error.location }} </label>
                             <div class="input-group form-inline">
-                                <input type="text" class="form-control" ng-model="appConfigure.location" id="appConfigureLocationInput" name="location" placeholder="Leave empty to use bare domain" autofocus>
-                                <div class="input-group-addon">
-                                    {{ !appConfigure.location ? '' : (config.isCustomDomain ? '.' : '-') }}{{ config.fqdn }}
+                                <input type="text" class="form-control" ng-model="appConfigure.location" id="appConfigureLocationInput" name="location" placeholder="{{ appConfigure.usingAltDomain ? 'app.example.com' : 'Leave empty to use bare domain' }}" autofocus>
+
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                        {{ appConfigure.usingAltDomain ? 'External Domain' : ((!appConfigure.location ? '' : (config.isCustomDomain ? '.' : '-')) + config.fqdn) }}
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li>
+                                            <a href="" ng-click="useAltDomain(false)">{{ config.fqdn }}</a>
+                                        </li>
+                                        <li>
+                                            <a href="" ng-click="useAltDomain(true)"><i class="fa fa-star"></i> External Domain</a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
+
+                        <p class="text-center" ng-show="appConfigure.usingAltDomain && appConfigure.location && appConfigure.isAltDomainValid()">
+                            Add a CNAME record for {{ appConfigure.location }} to {{ appConfigure.app.fqdn }}
+                            <br>
+                        </p>
+
                         <div class="has-error text-center" ng-show="appConfigure.error.port">{{ appConfigure.error.port }}</div>
                         <div ng-repeat="(env, info) in appConfigure.portBindingsInfo">
                             <ng-form name="portInfo_form">
@@ -82,11 +100,6 @@
                                 <slider id="memoryUsage" ng-model="appConfigure.memoryUsage" step="33554432" tooltip="hide" ticks="memoryTicks" ticks-snap-bounds="67108864"></slider>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="control-label" for="appConfigureAltDomainInput">Alternate external domain</label>
-                            <br/>
-                            <input type="text" class="form-control" ng-model="appConfigure.altDomain" id="appConfigureAltDomainInput" name="altDomain" placeholder="chat.example.com" autofocus>
-                        </div>
 
                         <div class="hide">
                         <label class="control-label" for="appConfigureCertificateInput" ng-show="config.isCustomDomain">Certificate (optional)</label>
@@ -128,7 +141,7 @@
             </div>
             <div class="modal-footer ">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || appConfigure.busy || (appConfigure.accessRestrictionOption !== '' && !appConfigure.isAccessRestrictionValid())"><i class="fa fa-spinner fa-pulse" ng-show="appConfigure.busy"></i> Save</button>
+                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || appConfigure.busy || (appConfigure.accessRestrictionOption !== '' && !appConfigure.isAccessRestrictionValid()) || !appConfigure.isAltDomainValid()"><i class="fa fa-spinner fa-pulse" ng-show="appConfigure.busy"></i> Save</button>
             </div>
         </div>
     </div>

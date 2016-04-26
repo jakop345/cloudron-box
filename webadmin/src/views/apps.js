@@ -23,7 +23,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         error: {},
         app: {},
         location: '',
-        altDomain: null,
+        usingAltDomain: false,
         password: '',
         portBindings: {},
         portBindingsEnabled: {},
@@ -39,6 +39,11 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         isAccessRestrictionValid: function () {
             var tmp = $scope.appConfigure.accessRestriction;
             return !!(tmp.users.length || tmp.groups.length);
+        },
+
+        isAltDomainValid: function () {
+            if (!$scope.appConfigure.usingAltDomain) return true;
+            return /.+\..+\..+/.test($scope.appConfigure.location); // 2 dots
         }
     };
 
@@ -74,7 +79,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.error = {};
         $scope.appConfigure.app = {};
         $scope.appConfigure.location = '';
-        $scope.appConfigure.altDomain = null;
+        $scope.appConfigure.usingAltDomain = false;
         $scope.appConfigure.password = '';
         $scope.appConfigure.portBindings = {};          // This is the actual model holding the env:port pair
         $scope.appConfigure.portBindingsEnabled = {};   // This is the actual model holding the enabled/disabled flag
@@ -152,13 +157,23 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         else groups.splice(pos, 1);
     };
 
+    $scope.useAltDomain = function (use) {
+        $scope.appConfigure.usingAltDomain = use;
+
+        if (use) {
+            $scope.appConfigure.location = '';
+        } else {
+            $scope.appConfigure.location = $scope.appConfigure.app.location;
+        }
+    };
+
     $scope.showConfigure = function (app) {
         $scope.reset();
 
         // fill relevant info from the app
         $scope.appConfigure.app = app;
-        $scope.appConfigure.location = app.location;
-        $scope.appConfigure.altDomain = app.altDomain;
+        $scope.appConfigure.location = app.altDomain || app.location;
+        $scope.appConfigure.usingAltDomain = !!app.altDomain;
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
@@ -193,8 +208,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         }
 
         var data = {
-            location: $scope.appConfigure.location || '',
-            altDomain: $scope.appConfigure.altDomain || null,
+            location:  $scope.appConfigure.usingAltDomain ? $scope.appConfigure.app.location : $scope.appConfigure.location,
+            altDomain: $scope.appConfigure.usingAltDomain ? $scope.appConfigure.location : null,
             portBindings: finalPortBindings,
             accessRestriction: !$scope.appConfigure.accessRestrictionOption ? null : $scope.appConfigure.accessRestriction,
             cert: $scope.appConfigure.certificateFile,
