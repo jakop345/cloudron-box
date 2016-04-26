@@ -484,3 +484,6 @@
 - Get alerts for app task failures
 - Fix update issue when one or more apps are in failed state
 
+[0.12.6]
+- Allow setting an alternate external domain for apps
+
