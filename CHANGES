@@ -487,3 +487,6 @@
 [0.12.6]
 - Allow setting an alternate external domain for apps
 
+[0.13.0]
+- Upgrade to ubuntu 16.04
+
