@@ -7,14 +7,15 @@
 'use strict';
 
 var appdb = require('../appdb.js'),
+    async = require('async'),
     authcodedb = require('../authcodedb.js'),
     backupdb = require('../backupdb.js'),
     clientdb = require('../clientdb.js'),
-    hat = require('hat'),
     database = require('../database'),
     DatabaseError = require('../databaseerror.js'),
+    eventlogdb = require('../eventlogdb.js'),
     expect = require('expect.js'),
-    async = require('async'),
+    hat = require('hat'),
     settingsdb = require('../settingsdb.js'),
     tokendb = require('../tokendb.js'),
     userdb = require('../userdb.js'),
@@ -1070,6 +1071,52 @@ describe('database', function () {
             });
         });
 
+    });
+
+    describe('evenlog', function () {
+
+        it('add succeeds', function (done) {
+            eventlogdb.add('someid', 'some.event', { appId: 'thatapp' }, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            eventlogdb.get('someid', function (error, result) {
+                expect(error).to.be(null);
+                expect(result.id).to.be('someid');
+                expect(result.action).to.be('some.event');
+                expect(result.creationTime).to.be.a(Date);
+
+                expect(result.data).to.be.eql({ appId: 'thatapp' });
+
+                done();
+            });
+        });
+
+        it('get of unknown id fails', function (done) {
+            eventlogdb.get('notfoundid', function (error, result) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('getAllPaged succeeds', function (done) {
+            eventlogdb.getAllPaged(1, 1, function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.be.an(Array);
+                expect(results.length).to.be(1);
+
+                expect(results[0].id).to.be('someid');
+                expect(results[0].action).to.be('some.event');
+                expect(results[0].data).to.be.eql({ appId: 'thatapp' });
+
+                done();
+            });
+        });
     });
 });
 
