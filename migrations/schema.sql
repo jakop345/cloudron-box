@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS appAddonConfigs(
     FOREIGN KEY(appId) REFERENCES apps(id));
 
 CREATE TABLE IF NOT EXISTS backups(
-    id VARCHAR(128) NOT NULL,
+    filename VARCHAR(128) NOT NULL,
     creationTime TIMESTAMP,
     version VARCHAR(128) NOT NULL, /* app version or box version */
     type VARCHAR(16) NOT NULL, /* 'box' or 'app' */
@@ -108,3 +108,11 @@ CREATE TABLE IF NOT EXISTS backups(
     state VARCHAR(16) NOT NULL,
 
     PRIMARY KEY (filename));
+
+CREATE TABLE IF NOT EXISTS eventlog(
+    id VARCHAR(128) NOT NULL,
+    creationTime TIMESTAMP,
+    action VARCHAR(128) NOT NULL,
+    dataJson TEXT,
+
+    PRIMARY KEY (id));
