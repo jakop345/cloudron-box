@@ -6,6 +6,7 @@ exports = module.exports = {
     clients: require('./clients.js'),
     cloudron: require('./cloudron.js'),
     developer: require('./developer.js'),
+    eventlog: require('./eventlog.js'),
     graphs: require('./graphs.js'),
     groups: require('./groups.js'),
     oauth2: require('./oauth2.js'),
