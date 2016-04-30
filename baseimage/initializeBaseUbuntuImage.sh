@@ -191,8 +191,8 @@ apt-get -y install build-essential rcconf
 echo "==== Install mysql ===="
 debconf-set-selections <<< 'mysql-server mysql-server/root_password password password'
 debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password password'
-apt-get -y install mysql-server
-[[ "$(mysqld --version 2>&1)" == *"5.6."* ]] || die "Expecting nginx version to be 5.6.x"
+apt-get -y install mysql-server-5.7
+[[ "$(mysqld --version 2>&1)" == *"5.7."* ]] || die "Expecting mysql version to be 5.7.x"
 
 echo "==== Install pwgen and swaks awscli ===="
 apt-get -y install pwgen swaks awscli
