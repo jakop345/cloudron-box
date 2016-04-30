@@ -56,7 +56,7 @@ function activate(req, res, next) {
         if (error && error.reason === CloudronError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
         if (error) return next(new HttpError(500, error));
 
-        eventlog.add(eventlog.ACTION_ACTIVATE, req, { });
+        eventlog.add(eventlog.ACTION_ACTIVATE, req, { username: username });
 
         // only in caas case do we have to notify the api server about activation
         if (config.provider() !== 'caas') return next(new HttpSuccess(201, info));
