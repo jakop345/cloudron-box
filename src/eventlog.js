@@ -49,6 +49,7 @@ function EventLogError(reason, errorOrMessage) {
 }
 util.inherits(EventLogError, Error);
 EventLogError.INTERNAL_ERROR = 'Internal error';
+EventLogError.NOT_FOUND = 'Not Found';
 
 function add(action, source, data, callback) {
     assert.strictEqual(typeof action, 'string');
@@ -58,10 +59,11 @@ function add(action, source, data, callback) {
 
     callback = callback || NOOP_CALLBACK;
 
-    eventlogdb.add(uuid.v4(), action, source, data, function (error) {
+    var id = uuid.v4();
+    eventlogdb.add(id, action, source, data, function (error) {
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
 
-        callback();
+        callback(null, { id: id });
     });
 }
 
@@ -70,7 +72,7 @@ function get(id, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     eventlogdb.get(id, function (error, result) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new EventLogError(EventLogError.NOT_FOUND, 'No such box'));
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new EventLogError(EventLogError.NOT_FOUND, 'No such event'));
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
 
         callback(null, result);
