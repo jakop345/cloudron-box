@@ -8,16 +8,16 @@ exports = module.exports = {
     getAllPaged: getAllPaged,
 
     ACTION_ACTIVATED: 'box.activated',
-    ACTION_APP_CONFIGURING: 'app.configuring',
-    ACTION_APP_INSTALLING: 'app.installing',
-    ACTION_APP_RESTORING: 'app.restoring',
-    ACTION_APP_UNINSTALLING: 'app.uninstalling',
-    ACTION_APP_UPDATING: 'app.updating',
+    ACTION_APP_CONFIGURE: 'app.configure',
+    ACTION_APP_INSTALL: 'app.install',
+    ACTION_APP_RESTORE: 'app.restore',
+    ACTION_APP_UNINSTALL: 'app.uninstall',
+    ACTION_APP_UPDATE: 'app.update',
     ACTION_BACKUP_STARTED: 'backup.started',
     ACTION_BACKUP_DONE: 'backup.done',
     ACTION_BOX_REBOOT: 'box.reboot',
     ACTION_CLI_MODE: 'settings.climode',
-    ACTION_UPDATING: 'box.updating'
+    ACTION_UPDATE: 'box.update'
 };
 
 var assert = require('assert'),
