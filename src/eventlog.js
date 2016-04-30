@@ -5,14 +5,29 @@ exports = module.exports = {
 
     add: add,
     get: get,
-    getAllPaged: getAllPaged
+    getAllPaged: getAllPaged,
+
+    ACTION_ACTIVATED: 'box.activated',
+    ACTION_APP_CONFIGURING: 'app.configuring',
+    ACTION_APP_INSTALLING: 'app.installing',
+    ACTION_APP_RESTORING: 'app.restoring',
+    ACTION_APP_UNINSTALLING: 'app.uninstalling',
+    ACTION_APP_UPDATING: 'app.updating',
+    ACTION_BACKUP_STARTED: 'backup.started',
+    ACTION_BACKUP_DONE: 'backup.done',
+    ACTION_BOX_REBOOT: 'box.reboot',
+    ACTION_CLI_MODE: 'settings.climode',
+    ACTION_UPDATING: 'box.updating'
 };
 
 var assert = require('assert'),
     DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:eventlog'),
     eventlogdb = require('./eventlogdb.js'),
     util = require('util'),
     uuid = require('node-uuid');
+
+var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 function EventLogError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -38,7 +53,9 @@ EventLogError.INTERNAL_ERROR = 'Internal error';
 function add(action, data, callback) {
     assert.strictEqual(typeof action, 'string');
     assert.strictEqual(typeof data, 'object');
-    assert.strictEqual(typeof callback, 'function');
+    assert(!callback || typeof callback === 'function');
+
+    callback = callback || NOOP_CALLBACK;
 
     eventlogdb.add(uuid.v4(), action, data, function (error) {
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
