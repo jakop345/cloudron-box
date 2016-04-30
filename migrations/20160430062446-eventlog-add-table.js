@@ -4,6 +4,7 @@ var type = dbm.dataType;
 exports.up = function(db, callback) {
     var cmd = "CREATE TABLE eventlog(" +
             "id VARCHAR(128) NOT NULL," +
+            "source JSON," +
             "creationTime TIMESTAMP," +
             "action VARCHAR(128) NOT NULL," +
             "data JSON," +

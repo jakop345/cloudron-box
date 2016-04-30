@@ -50,14 +50,15 @@ function EventLogError(reason, errorOrMessage) {
 util.inherits(EventLogError, Error);
 EventLogError.INTERNAL_ERROR = 'Internal error';
 
-function add(action, data, callback) {
+function add(action, source, data, callback) {
     assert.strictEqual(typeof action, 'string');
+    assert.strictEqual(typeof source, 'object');
     assert.strictEqual(typeof data, 'object');
     assert(!callback || typeof callback === 'function');
 
     callback = callback || NOOP_CALLBACK;
 
-    eventlogdb.add(uuid.v4(), action, data, function (error) {
+    eventlogdb.add(uuid.v4(), action, source, data, function (error) {
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
 
         callback();

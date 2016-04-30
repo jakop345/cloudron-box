@@ -111,6 +111,8 @@ CREATE TABLE IF NOT EXISTS backups(
 
 CREATE TABLE IF NOT EXISTS eventlog(
     id VARCHAR(128) NOT NULL,
+    username VARCHAR(254) NOT NULL,
+    ip VARCHAR(32) NOT NULL,
     creationTime TIMESTAMP,
     action VARCHAR(128) NOT NULL,
     dataJson TEXT,

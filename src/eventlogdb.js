@@ -14,10 +14,11 @@ var assert = require('assert'),
     DatabaseError = require('./databaseerror'),
     safe = require('safetydance');
 
-var EVENTLOGS_FIELDS = [ 'id', 'action', 'data', 'creationTime' ].join(',');
+var EVENTLOGS_FIELDS = [ 'id', 'action', 'source', 'data', 'creationTime' ].join(',');
 
 // until mysql module supports automatic type coercion
 function postProcess(eventLog) {
+    eventLog.source = safe.JSON.parse(eventLog.source);
     eventLog.data = safe.JSON.parse(eventLog.data);
     return eventLog;
 }
@@ -48,13 +49,14 @@ function getAllPaged(page, perPage, callback) {
     });
 }
 
-function add(id, action, data, callback) {
+function add(id, action, source, data, callback) {
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof action, 'string');
+    assert.strictEqual(typeof source, 'object');
     assert.strictEqual(typeof data, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('INSERT INTO eventlog (id, action, data) VALUES (?, ?, ?)', [ id, action, JSON.stringify(data) ], function (error, result) {
+    database.query('INSERT INTO eventlog (id, action, source, data) VALUES (?, ?, ?, ?)', [ id, action, JSON.stringify(source), JSON.stringify(data) ], function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 

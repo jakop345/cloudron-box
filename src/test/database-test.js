@@ -1073,10 +1073,10 @@ describe('database', function () {
 
     });
 
-    describe('evenlog', function () {
+    describe('eventlog', function () {
 
         it('add succeeds', function (done) {
-            eventlogdb.add('someid', 'some.event', { appId: 'thatapp' }, function (error) {
+            eventlogdb.add('someid', 'some.event', { ip: '1.2.3.4' }, { appId: 'thatapp' }, function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -1089,6 +1089,7 @@ describe('database', function () {
                 expect(result.action).to.be('some.event');
                 expect(result.creationTime).to.be.a(Date);
 
+                expect(result.source).to.be.eql({ ip: '1.2.3.4' });
                 expect(result.data).to.be.eql({ appId: 'thatapp' });
 
                 done();
@@ -1112,6 +1113,7 @@ describe('database', function () {
 
                 expect(results[0].id).to.be('someid');
                 expect(results[0].action).to.be('some.event');
+                expect(results[0].source).to.be.eql({ ip: '1.2.3.4' });
                 expect(results[0].data).to.be.eql({ appId: 'thatapp' });
 
                 done();
