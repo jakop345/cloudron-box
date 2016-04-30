@@ -9,6 +9,7 @@ exports = module.exports = {
 };
 
 var developer = require('../developer.js'),
+    eventlog = require('../eventlog.js'),
     passport = require('passport'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -25,6 +26,9 @@ function setEnabled(req, res, next) {
 
     developer.setEnabled(req.body.enabled, function (error) {
         if (error) return next(new HttpError(500, error));
+
+        eventlog.add(eventlog.ACTION_CLI_MODE, req, { enabled: req.body.enabled });
+
         next(new HttpSuccess(200, {}));
     });
 }

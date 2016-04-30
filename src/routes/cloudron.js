@@ -13,13 +13,14 @@ exports = module.exports = {
 
 var assert = require('assert'),
     cloudron = require('../cloudron.js'),
-    config = require('../config.js'),
-    progress = require('../progress.js'),
-    mailer = require('../mailer.js'),
     CloudronError = cloudron.CloudronError,
+    config = require('../config.js'),
     debug = require('debug')('box:routes/cloudron'),
+    eventlog = require('../eventlog.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
+    progress = require('../progress.js'),
+    mailer = require('../mailer.js'),
     superagent = require('superagent');
 
 /**
@@ -54,6 +55,8 @@ function activate(req, res, next) {
         if (error && error.reason === CloudronError.BAD_PASSWORD) return next(new HttpError(400, 'Bad password'));
         if (error && error.reason === CloudronError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
         if (error) return next(new HttpError(500, error));
+
+        eventlog.add(eventlog.ACTION_ACTIVATE, req, { });
 
         // only in caas case do we have to notify the api server about activation
         if (config.provider() !== 'caas') return next(new HttpSuccess(201, info));
@@ -104,6 +107,8 @@ function reboot(req, res, next) {
     // Finish the request, to let the appstore know we triggered the restore it
     next(new HttpSuccess(202, {}));
 
+    eventlog.add(eventlog.ACTION_REBOOT, req, { });
+
     cloudron.reboot();
 }
 
@@ -121,6 +126,8 @@ function update(req, res, next) {
         if (error && error.reason === CloudronError.ALREADY_UPTODATE) return next(new HttpError(422, error.message));
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
+
+        eventlog.add(eventlog.ACTION_UPDATE, req, { });
 
         next(new HttpSuccess(202, {}));
     });

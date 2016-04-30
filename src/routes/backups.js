@@ -9,6 +9,7 @@ exports = module.exports = {
 var assert = require('assert'),
     backups = require('../backups.js'),
     BackupsError = require('../backups.js').BackupsError,
+    eventlog = require('../eventlog.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
@@ -33,6 +34,8 @@ function create(req, res, next) {
     backups.backup(function (error) {
         if (error && error.reason === BackupsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
+
+        eventlog.add(eventlog.ACTION_BACKUP, req, { });
 
         next(new HttpSuccess(202, {}));
     });

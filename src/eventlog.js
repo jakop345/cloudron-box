@@ -7,17 +7,20 @@ exports = module.exports = {
     get: get,
     getAllPaged: getAllPaged,
 
-    ACTION_ACTIVATED: 'box.activated',
+    ACTION_ACTIVATE: 'cloudron.activate',
     ACTION_APP_CONFIGURE: 'app.configure',
     ACTION_APP_INSTALL: 'app.install',
     ACTION_APP_RESTORE: 'app.restore',
     ACTION_APP_UNINSTALL: 'app.uninstall',
     ACTION_APP_UPDATE: 'app.update',
-    ACTION_BACKUP_STARTED: 'backup.started',
-    ACTION_BACKUP_DONE: 'backup.done',
-    ACTION_BOX_REBOOT: 'box.reboot',
+    ACTION_BACKUP: 'cloudron.backup',
     ACTION_CLI_MODE: 'settings.climode',
-    ACTION_UPDATE: 'box.update'
+    ACTION_PROFILE: 'user.profile',
+    ACTION_REBOOT: 'cloudron.reboot',
+    ACTION_UPDATE: 'cloudron.update',
+    ACTION_USER_ADD: 'user.add',
+    ACTION_USER_REMOVE: 'user.remove',
+    ACTION_USER_UPDATE: 'user.update'
 };
 
 var assert = require('assert'),
@@ -51,15 +54,17 @@ util.inherits(EventLogError, Error);
 EventLogError.INTERNAL_ERROR = 'Internal error';
 EventLogError.NOT_FOUND = 'Not Found';
 
-function add(action, source, data, callback) {
+function add(action, req, data, callback) {
     assert.strictEqual(typeof action, 'string');
-    assert.strictEqual(typeof source, 'object');
+    assert.strictEqual(typeof req, 'object');
     assert.strictEqual(typeof data, 'object');
     assert(!callback || typeof callback === 'function');
 
     callback = callback || NOOP_CALLBACK;
 
     var id = uuid.v4();
+    var source = { ip: req.ip || null, username: req.user ? req.user.username : null };
+
     eventlogdb.add(id, action, source, data, function (error) {
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
 

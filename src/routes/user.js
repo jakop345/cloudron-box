@@ -13,6 +13,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    eventlog = require('../eventlog.js'),
     generatePassword = require('../password.js').generate,
     groups = require('../groups.js'),
     HttpError = require('connect-lastmile').HttpError,
@@ -52,6 +53,8 @@ function create(req, res, next) {
             resetToken: user.resetToken
         };
 
+        eventlog.add(eventlog.ACTION_USER_ADD, req, { id: user.id, username: user.username, sendInvite: sendInvite });
+
         next(new HttpSuccess(201, userInfo ));
     });
 }
@@ -77,6 +80,8 @@ function update(req, res, next) {
             if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
             if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
             if (error) return next(new HttpError(500, error));
+
+            eventlog.add(eventlog.ACTION_USER_UPDATE, req, { id: req.params.userId, username: result.username });
 
             next(new HttpSuccess(204));
         });
@@ -131,6 +136,8 @@ function remove(req, res, next) {
         user.remove(userObject, function (error) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
             if (error) return next(new HttpError(500, error));
+
+            eventlog.add(eventlog.ACTION_USER_REMOVE, req, { id: req.params.userId, username: userObject.username });
 
             next(new HttpSuccess(204));
         });

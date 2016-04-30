@@ -24,6 +24,7 @@ var apps = require('../apps.js'),
     AppsError = apps.AppsError,
     assert = require('assert'),
     debug = require('debug')('box:routes/apps'),
+    eventlog = require('../eventlog.js'),
     fs = require('fs'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
@@ -142,6 +143,8 @@ function installApp(req, res, next) {
         if (error && error.reason === AppsError.USER_REQUIRED) return next(new HttpError(400, 'accessRestriction must specify one user'));
         if (error) return next(new HttpError(500, error));
 
+        eventlog.add(eventlog.ACTION_APP_INSTALL, req, { id: appId, location: data.location, manifest: data.manifest });
+
         next(new HttpSuccess(202, { id: appId } ));
     });
 }
@@ -182,6 +185,8 @@ function configureApp(req, res, next) {
         if (error && error.reason === AppsError.BAD_CERTIFICATE) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
+        eventlog.add(eventlog.ACTION_APP_CONFIGURE, req, { id: req.params.id, location: data.location });
+
         next(new HttpSuccess(202, { }));
     });
 }
@@ -196,6 +201,8 @@ function restoreApp(req, res, next) {
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
+
+        eventlog.add(eventlog.ACTION_APP_RESTORE, req, { id: req.params.id });
 
         next(new HttpSuccess(202, { }));
     });
@@ -228,6 +235,8 @@ function uninstallApp(req, res, next) {
     apps.uninstall(req.params.id, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error) return next(new HttpError(500, error));
+
+        eventlog.add(eventlog.ACTION_APP_UNINSTALL, req, { id: req.params.id });
 
         next(new HttpSuccess(202, { }));
     });
