@@ -17,7 +17,7 @@ function die {
     exit 1
 }
 
-[[ "$(systemd --version 2>&1)" == *"systemd 225"* ]] || die "Expecting systemd to be 225"
+[[ "$(systemd --version 2>&1)" == *"systemd 229"* ]] || die "Expecting systemd to be 229"
 
 if [ -f "${SOURCE_DIR}/INFRA_VERSION" ]; then
     source "${SOURCE_DIR}/INFRA_VERSION"
