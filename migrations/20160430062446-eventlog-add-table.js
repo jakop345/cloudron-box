@@ -6,7 +6,7 @@ exports.up = function(db, callback) {
             "id VARCHAR(128) NOT NULL," +
             "creationTime TIMESTAMP," +
             "action VARCHAR(128) NOT NULL," +
-            "dataJson TEXT," +
+            "data JSON," +
             "PRIMARY KEY (id))";
 
     db.runSql(cmd, function (error) {
