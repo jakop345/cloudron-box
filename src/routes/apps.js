@@ -143,7 +143,7 @@ function installApp(req, res, next) {
         if (error && error.reason === AppsError.USER_REQUIRED) return next(new HttpError(400, 'accessRestriction must specify one user'));
         if (error) return next(new HttpError(500, error));
 
-        eventlog.add(eventlog.ACTION_APP_INSTALL, req, { id: appId, location: data.location, manifest: data.manifest });
+        eventlog.add(eventlog.ACTION_APP_INSTALL, req, { id: appId, location: data.location, appStoreId: data.appStoreId, version: data.manifest.version });
 
         next(new HttpSuccess(202, { id: appId } ));
     });
