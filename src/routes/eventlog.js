@@ -18,6 +18,6 @@ function get(req, res, next) {
     eventlog.getAllPaged(page, perPage, function (error, result) {
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200, { eventlog: result }));
+        next(new HttpSuccess(200, { eventlogs: result }));
     });
 }
