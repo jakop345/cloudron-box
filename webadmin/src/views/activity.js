@@ -10,9 +10,6 @@ angular.module('Application').controller('ActivityController', ['$scope', '$loca
             if (error) return console.error(error);
 
             $scope.eventLogs = eventLogs;
-            $scope.eventLogs.forEach(function (e) {
-                e.details = Object.keys(e.data).map(function (k) { return k + ':' + e.data[k]; }).join(' ');
-            });
         });
     }
 

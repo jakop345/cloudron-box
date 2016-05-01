@@ -15,18 +15,16 @@
             <table class="table table-striped table-condensed table-hover">
               <thead>
                 <tr>
-                  <th class="col-md-1">Time</th>
-                  <th class="col-md-1">Action</th>
-                  <th class="col-md-1">Source</th>
-                  <th class="col-md-5">Details</th>
+                  <th class="col-md-2">Time</th>
+                  <th class="col-md-2">Source</th>
+                  <th class="col-md-6">Action</th>
                 </tr>
               </thead>
               <tbody>
                 <tr ng-repeat="eventLog in eventLogs">
-                  <td>{{ eventLog.creationTime | prettyDate }}</td>
-                  <th scope="row">{{ eventLog.action }}</td>
+                  <th scope="row">{{ eventLog.creationTime | prettyDate }}</td>
                   <td>{{ eventLog.source.username }} ({{ eventLog.source.ip }})</td>
-                  <td>{{ eventLog.details }}</td>
+                  <td>{{ eventLog | eventLogDetails }}</td>
                 </tr>
               </tbody>
             </table>

@@ -210,6 +210,46 @@ app.filter('markdown2html', function () {
     };
 });
 
+// keep this in sync with eventlog.js
+var ACTION_ACTIVATE = 'cloudron.activate';
+var ACTION_APP_CONFIGURE = 'app.configure';
+var ACTION_APP_INSTALL = 'app.install';
+var ACTION_APP_RESTORE = 'app.restore';
+var ACTION_APP_UNINSTALL = 'app.uninstall';
+var ACTION_APP_UPDATE = 'app.update';
+var ACTION_BACKUP = 'cloudron.backup';
+var ACTION_CLI_MODE = 'settings.climode';
+var ACTION_PROFILE = 'user.profile';
+var ACTION_REBOOT = 'cloudron.reboot';
+var ACTION_UPDATE = 'cloudron.update';
+var ACTION_USER_ADD = 'user.add';
+var ACTION_USER_REMOVE = 'user.remove';
+var ACTION_USER_UPDATE = 'user.update';
+
+app.filter('eventLogDetails', function() {
+    return function(eventLog) {
+        var data = eventLog.data;
+
+        switch (eventLog.action) {
+        case ACTION_ACTIVATE: return 'Cloudron activated by ' + data.username;
+        case ACTION_APP_CONFIGURE: return 'App at location ' + data.location + ' was re-configured';
+        case ACTION_APP_INSTALL: return 'App ' + data.appStoreId + '@' + data.version + ' installed at ' + data.location + ' with id ' + data.id;
+        case ACTION_APP_RESTORE: return 'App ' + data.id + ' restored';
+        case ACTION_APP_UNINSTALL: return 'App ' + data.id + ' uninstalled';
+        case ACTION_APP_UPDATE: return 'App ' + data.id + ' updated to version ' + data.appStoreId + '@' + data.toVersion;
+        case ACTION_BACKUP: return 'Backup';
+        case ACTION_CLI_MODE: return 'CLI mode was ' + (data.enabled ? 'enabled' : 'disabled');
+        case ACTION_PROFILE: return 'User profile change';
+        case ACTION_REBOOT: return 'Reboot';
+        case ACTION_UPDATE: return 'Update';
+        case ACTION_USER_ADD: return 'User ' + data.email + ' added';
+        case ACTION_USER_REMOVE: return 'User ' + (data.username || data.id) + ' removed';
+        case ACTION_USER_UPDATE: return 'User ' + (data.username || data.id) + ' updated';
+        default: return eventLog.action;
+        }
+    };
+});
+
 // custom directive for dynamic names in forms
 // See http://stackoverflow.com/questions/23616578/issue-registering-form-control-with-interpolated-name#answer-23617401
 app.directive('laterName', function () {                   // (2)

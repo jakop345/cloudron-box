@@ -7,6 +7,7 @@ exports = module.exports = {
     get: get,
     getAllPaged: getAllPaged,
 
+    // keep in sync with webadmin index.js filter
     ACTION_ACTIVATE: 'cloudron.activate',
     ACTION_APP_CONFIGURE: 'app.configure',
     ACTION_APP_INSTALL: 'app.install',
