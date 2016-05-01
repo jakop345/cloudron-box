@@ -65,7 +65,8 @@ function add(action, req, data, callback) {
     callback = callback || NOOP_CALLBACK;
 
     var id = uuid.v4();
-    var source = { ip: req.headers['x-forwarded-for'] || req.ip || null, username: req.user ? req.user.username : null };
+    var ip = (req.headers ? req.headers['x-forwarded-for'] : null) || req.ip || null;
+    var source = { ip: ip, username: req.user ? req.user.username : null };
 
     eventlogdb.add(id, action, source, data, function (error) {
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
