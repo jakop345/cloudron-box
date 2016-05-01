@@ -112,8 +112,6 @@ function reboot(req, res, next) {
     // Finish the request, to let the appstore know we triggered the restore it
     next(new HttpSuccess(202, {}));
 
-    eventlog.add(eventlog.ACTION_REBOOT, req, { });
-
     cloudron.reboot();
 }
 

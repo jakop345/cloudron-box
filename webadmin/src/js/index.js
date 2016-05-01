@@ -223,7 +223,6 @@ var ACTION_BACKUP_START = 'backup.start';
 var ACTION_CERTIFICATE_RENEWAL = 'certificate.renew';
 var ACTION_CLI_MODE = 'settings.climode';
 var ACTION_PROFILE = 'user.profile';
-var ACTION_REBOOT = 'cloudron.reboot';
 var ACTION_UPDATE = 'cloudron.update';
 var ACTION_USER_ADD = 'user.add';
 var ACTION_USER_LOGIN = 'user.login';
@@ -247,7 +246,6 @@ app.filter('eventLogDetails', function() {
         case ACTION_CERTIFICATE_RENEWAL: return 'Certificate renewal for ' + data.domain + (data.error ? 'succeeded' : 'failed');
         case ACTION_CLI_MODE: return 'CLI mode was ' + (data.enabled ? 'enabled' : 'disabled');
         case ACTION_PROFILE: return 'User profile change';
-        case ACTION_REBOOT: return 'Reboot';
         case ACTION_UPDATE: return 'Update initiated by ' + source.username + ' to version ' + data.boxUpdateInfo.version;
         case ACTION_USER_ADD: return 'User ' + data.email + ' added';
         case ACTION_USER_LOGIN: return 'User ' + data.username + ' logged in using ' + data.authType + ' at ' + data.appId;
