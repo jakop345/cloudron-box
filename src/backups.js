@@ -27,6 +27,7 @@ var addons = require('./addons.js'),
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:backups'),
+    eventlog = require('./eventlog.js'),
     locker = require('./locker.js'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -408,18 +409,21 @@ function backupBoxAndApps(callback) {
     });
 }
 
-function backup(callback) {
+function backup(eventSource, callback) {
+    assert.strictEqual(typeof eventSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var error = locker.lock(locker.OP_FULL_BACKUP);
     if (error) return callback(new BackupsError(BackupsError.BAD_STATE, error.message));
 
-    // ensure tools can 'wait' on progress
-    progress.set(progress.BACKUP, 0, 'Starting');
+    eventlog.add(eventlog.ACTION_BACKUP_START, eventSource, { });
 
-    // start the backup operation in the background
-    backupBoxAndApps(function (error) {
+    progress.set(progress.BACKUP, 0, 'Starting'); // ensure tools can 'wait' on progress
+
+    backupBoxAndApps(function (error, filename) { // start the backup operation in the background
         if (error) console.error('backup failed.', error);
+
+        eventlog.add(eventlog.ACTION_BACKUP_FINISH, eventSource, { errorMessage: error ? error.message : null, filename: filename });
 
         locker.unlock(locker.OP_FULL_BACKUP);
     });

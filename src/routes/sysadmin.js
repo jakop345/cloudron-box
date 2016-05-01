@@ -19,7 +19,7 @@ function backup(req, res, next) {
 
     // note that cloudron.backup only waits for backup initiation and not for backup to complete
     // backup progress can be checked up ny polling the progress api call
-    backups.backup(function (error) {
+    backups.backup({ userId: null, username: 'sysadmin' }, function (error) {
         if (error && error.reason === BackupsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
 

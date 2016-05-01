@@ -9,9 +9,13 @@ exports = module.exports = {
 var assert = require('assert'),
     backups = require('../backups.js'),
     BackupsError = require('../backups.js').BackupsError,
-    eventlog = require('../eventlog.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
+
+function auditSource(req) {
+    var ip = req.headers['x-forwarded-for'] || req.ip || null;
+    return { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
+}
 
 function get(req, res, next) {
     var page = typeof req.query.page !== 'undefined' ? parseInt(req.query.page) : 1;
@@ -31,11 +35,9 @@ function get(req, res, next) {
 function create(req, res, next) {
     // note that cloudron.backup only waits for backup initiation and not for backup to complete
     // backup progress can be checked up ny polling the progress api call
-    backups.backup(function (error) {
+    backups.backup(auditSource(req), function (error) {
         if (error && error.reason === BackupsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_BACKUP, req, { });
 
         next(new HttpSuccess(202, {}));
     });
