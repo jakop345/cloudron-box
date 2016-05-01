@@ -23,7 +23,7 @@ var assert = require('assert'),
     superagent = require('superagent');
 
 function auditSource(req) {
-    var ip = req.headers['x-forwarded-for'] || req.ip || null;
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
     return { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
 }
 

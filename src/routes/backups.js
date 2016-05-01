@@ -13,7 +13,7 @@ var assert = require('assert'),
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
 function auditSource(req) {
-    var ip = req.headers['x-forwarded-for'] || req.ip || null;
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
     return { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
 }
 
