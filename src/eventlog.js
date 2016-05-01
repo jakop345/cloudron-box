@@ -21,6 +21,7 @@ exports = module.exports = {
     ACTION_REBOOT: 'cloudron.reboot',
     ACTION_UPDATE: 'cloudron.update',
     ACTION_USER_ADD: 'user.add',
+    ACTION_USER_LOGIN: 'user.login',
     ACTION_USER_REMOVE: 'user.remove',
     ACTION_USER_UPDATE: 'user.update'
 };

@@ -1,26 +1,27 @@
 'use strict';
 
-var assert = require('assert'),
+var appdb = require('../appdb'),
     apps = require('../apps'),
+    assert = require('assert'),
     authcodedb = require('../authcodedb'),
     clientdb = require('../clientdb'),
     config = require('../config.js'),
     constants = require('../constants.js'),
     DatabaseError = require('../databaseerror'),
     debug = require('debug')('box:routes/oauth2'),
+    eventlog = require('../eventlog.js'),
+    hat = require('hat'),
     HttpError = require('connect-lastmile').HttpError,
     middleware = require('../middleware/index.js'),
     oauth2orize = require('oauth2orize'),
     passport = require('passport'),
     querystring = require('querystring'),
-    util = require('util'),
     session = require('connect-ensure-login'),
     tokendb = require('../tokendb'),
-    appdb = require('../appdb'),
     url = require('url'),
     user = require('../user.js'),
     UserError = user.UserError,
-    hat = require('hat');
+    util = require('util');
 
 // create OAuth 2.0 server
 var gServer = oauth2orize.createServer();
@@ -409,7 +410,10 @@ var authorization = [
         // Handle our different types of oauth clients
         var type = req.oauth2.client.type;
 
-        if (type === clientdb.TYPE_ADMIN) return next();
+        if (type === clientdb.TYPE_ADMIN) {
+            eventlog.add(eventlog.ACTION_USER_LOGIN, req, { authType: 'oauth', userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: 'admin' });
+            return next();
+        }
         if (type === clientdb.TYPE_EXTERNAL) return next();
         if (type === clientdb.TYPE_SIMPLE_AUTH) return sendError(req, res, 'Unknown OAuth client.');
 
@@ -419,6 +423,8 @@ var authorization = [
             apps.hasAccessTo(appObject, req.oauth2.user, function (error, access) {
                 if (error) return sendError(req, res, 'Internal error');
                 if (!access) return sendErrorPageOrRedirect(req, res, 'No access to this app.');
+
+                eventlog.add(eventlog.ACTION_USER_LOGIN, req, { authType: 'oauth', userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: appObject.id });
 
                 next();
             });

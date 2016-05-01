@@ -224,6 +224,7 @@ var ACTION_PROFILE = 'user.profile';
 var ACTION_REBOOT = 'cloudron.reboot';
 var ACTION_UPDATE = 'cloudron.update';
 var ACTION_USER_ADD = 'user.add';
+var ACTION_USER_LOGIN = 'user.login';
 var ACTION_USER_REMOVE = 'user.remove';
 var ACTION_USER_UPDATE = 'user.update';
 
@@ -245,6 +246,7 @@ app.filter('eventLogDetails', function() {
         case ACTION_REBOOT: return 'Reboot';
         case ACTION_UPDATE: return 'Update';
         case ACTION_USER_ADD: return 'User ' + data.email + ' added';
+        case ACTION_USER_LOGIN: return 'User ' + data.username + ' logged in using ' + data.authType + ' at ' + data.appId;
         case ACTION_USER_REMOVE: return 'User ' + (data.username || data.id) + ' removed';
         case ACTION_USER_UPDATE: return 'User ' + (data.username || data.id) + ' updated';
         default: return eventLog.action;

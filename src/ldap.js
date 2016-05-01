@@ -9,6 +9,7 @@ var assert = require('assert'),
     apps = require('./apps.js'),
     config = require('./config.js'),
     debug = require('debug')('box:ldap'),
+    eventlog = require('./eventlog.js'),
     user = require('./user.js'),
     UserError = user.UserError,
     ldap = require('ldapjs');
@@ -176,6 +177,8 @@ function start(callback) {
 
                     // we return no such object, to avoid leakage of a users existence
                     if (!result) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+
+                    eventlog.add(eventlog.ACTION_USER_LOGIN, req, { authType: 'ldap', userId: userObject.id, username: userObject.username, appId: app.id });
 
                     res.end();
                 });

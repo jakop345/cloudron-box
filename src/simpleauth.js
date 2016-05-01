@@ -14,6 +14,7 @@ var apps = require('./apps.js'),
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:src/simpleauth'),
+    eventlog = require('./eventlog.js'),
     express = require('express'),
     http = require('http'),
     HttpError = require('connect-lastmile').HttpError,
@@ -93,6 +94,8 @@ function login(req, res, next) {
         if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(401, 'Forbidden'));
         if (error && error.reason === AppsError.ACCESS_DENIED) return next(new HttpError(401, 'Forbidden'));
         if (error) return next(new HttpError(500, error));
+
+        eventlog.add(eventlog.ACTION_USER_LOGIN, req, { authType: 'simpleauth', userId: result.user.id, username: result.user.username, clientId: req.body.clientId });
 
         var tmp = {
             accessToken: result.accessToken,

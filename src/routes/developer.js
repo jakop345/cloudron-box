@@ -45,6 +45,8 @@ function login(req, res, next) {
         developer.issueDeveloperToken(user, function (error, result) {
             if (error) return next(new HttpError(500, error));
 
+            eventlog.add(eventlog.ACTION_USER_LOGIN, req, { authType: 'cli', userId: user.id, username: user.username });
+
             next(new HttpSuccess(200, { token: result.token, expiresAt: result.expiresAt }));
         });
   })(req, res, next);
