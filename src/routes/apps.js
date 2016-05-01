@@ -291,6 +291,8 @@ function updateApp(req, res, next) {
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
         if (error) return next(new HttpError(500, error));
 
+        eventlog.add(eventlog.ACTION_APP_UPDATE, req, { id: req.params.id, appStoreId: data.manifest.id, toVersion: data.manifest.version });
+
         next(new HttpSuccess(202, { }));
     });
 }
