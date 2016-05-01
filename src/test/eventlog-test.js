@@ -47,7 +47,7 @@ describe('Eventlog', function () {
             expect(result.action).to.be('some.event');
             expect(result.creationTime).to.be.a(Date);
 
-            expect(result.source).to.be.eql({ ip: '1.2.3.4', username: null });
+            expect(result.source).to.be.eql({ ip: '1.2.3.4', userId: null, username: null });
             expect(result.data).to.be.eql({ appId: 'thatapp' });
 
             done();
@@ -72,7 +72,7 @@ describe('Eventlog', function () {
 
             expect(results[0].id).to.be(eventId);
             expect(results[0].action).to.be('some.event');
-            expect(results[0].source).to.be.eql({ ip: '1.2.3.4', username: null });
+            expect(results[0].source).to.be.eql({ ip: '1.2.3.4', userId: null, username: null });
             expect(results[0].data).to.be.eql({ appId: 'thatapp' });
 
             done();
