@@ -53,7 +53,7 @@ function create(req, res, next) {
             resetToken: user.resetToken
         };
 
-        eventlog.add(eventlog.ACTION_USER_ADD, req, { id: user.id, username: user.username, sendInvite: sendInvite });
+        eventlog.add(eventlog.ACTION_USER_ADD, req, { id: user.id, email: user.email });
 
         next(new HttpSuccess(201, userInfo ));
     });
