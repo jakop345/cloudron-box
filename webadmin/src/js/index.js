@@ -248,7 +248,7 @@ app.filter('eventLogDetails', function() {
         case ACTION_CLI_MODE: return 'CLI mode was ' + (data.enabled ? 'enabled' : 'disabled');
         case ACTION_PROFILE: return 'User profile change';
         case ACTION_REBOOT: return 'Reboot';
-        case ACTION_UPDATE: return 'Update';
+        case ACTION_UPDATE: return 'Update initiated by ' + source.username + ' to version ' + data.boxUpdateInfo.version;
         case ACTION_USER_ADD: return 'User ' + data.email + ' added';
         case ACTION_USER_LOGIN: return 'User ' + data.username + ' logged in using ' + data.authType + ' at ' + data.appId;
         case ACTION_USER_REMOVE: return 'User ' + (data.username || data.id) + ' removed';

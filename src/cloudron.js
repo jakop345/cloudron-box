@@ -35,6 +35,7 @@ var apps = require('./apps.js'),
     config = require('./config.js'),
     debug = require('debug')('box:cloudron'),
     df = require('node-df'),
+    eventlog = require('./eventlog.js'),
     fs = require('fs'),
     locker = require('./locker.js'),
     mailer = require('./mailer.js'),
@@ -510,11 +511,14 @@ function update(boxUpdateInfo, callback) {
 }
 
 
-function updateToLatest(callback) {
+function updateToLatest(auditSource, callback) {
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var boxUpdateInfo = updateChecker.getUpdateInfo().box;
     if (!boxUpdateInfo) return callback(new CloudronError(CloudronError.ALREADY_UPTODATE, 'No update available'));
+
+    eventlog.add(eventlog.ACTION_UPDATE, auditSource, { boxUpdateInfo: boxUpdateInfo });
 
     update(boxUpdateInfo, callback);
 }

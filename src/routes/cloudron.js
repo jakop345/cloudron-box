@@ -23,6 +23,11 @@ var assert = require('assert'),
     mailer = require('../mailer.js'),
     superagent = require('superagent');
 
+function auditSource(req) {
+    var ip = req.headers['x-forwarded-for'] || req.ip || null;
+    return { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
+}
+
 /**
  * Creating an admin user and activate the cloudron.
  *
@@ -122,12 +127,10 @@ function getConfig(req, res, next) {
 
 function update(req, res, next) {
     // this only initiates the update, progress can be checked via the progress route
-    cloudron.updateToLatest(function (error) {
+    cloudron.updateToLatest(auditSource(req), function (error) {
         if (error && error.reason === CloudronError.ALREADY_UPTODATE) return next(new HttpError(422, error.message));
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_UPDATE, req, { });
 
         next(new HttpSuccess(202, {}));
     });
