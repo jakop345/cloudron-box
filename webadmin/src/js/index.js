@@ -218,6 +218,7 @@ var ACTION_APP_RESTORE = 'app.restore';
 var ACTION_APP_UNINSTALL = 'app.uninstall';
 var ACTION_APP_UPDATE = 'app.update';
 var ACTION_BACKUP = 'cloudron.backup';
+var ACTION_CERTIFICATE_RENEWAL = 'certificate.renew';
 var ACTION_CLI_MODE = 'settings.climode';
 var ACTION_PROFILE = 'user.profile';
 var ACTION_REBOOT = 'cloudron.reboot';
@@ -238,6 +239,7 @@ app.filter('eventLogDetails', function() {
         case ACTION_APP_UNINSTALL: return 'App ' + data.id + ' uninstalled';
         case ACTION_APP_UPDATE: return 'App ' + data.id + ' updated to version ' + data.appStoreId + '@' + data.toVersion;
         case ACTION_BACKUP: return 'Backup';
+        case ACTION_CERTIFICATE_RENEWAL: return 'Certificate renewal for ' + data.domain + (data.error ? 'succeeded' : 'failed');
         case ACTION_CLI_MODE: return 'CLI mode was ' + (data.enabled ? 'enabled' : 'disabled');
         case ACTION_PROFILE: return 'User profile change';
         case ACTION_REBOOT: return 'Reboot';
