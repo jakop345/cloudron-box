@@ -9,10 +9,14 @@ exports = module.exports = {
 };
 
 var developer = require('../developer.js'),
-    eventlog = require('../eventlog.js'),
     passport = require('passport'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
+
+function auditSource(req) {
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
+    return { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
+}
 
 function enabled(req, res, next) {
     developer.enabled(function (error, enabled) {
@@ -24,10 +28,8 @@ function enabled(req, res, next) {
 function setEnabled(req, res, next) {
     if (typeof req.body.enabled !== 'boolean') return next(new HttpError(400, 'enabled must be boolean'));
 
-    developer.setEnabled(req.body.enabled, function (error) {
+    developer.setEnabled(req.body.enabled, auditSource(req), function (error) {
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_CLI_MODE, req, { enabled: req.body.enabled });
 
         next(new HttpSuccess(200, {}));
     });
@@ -42,10 +44,8 @@ function login(req, res, next) {
         if (error) return next(new HttpError(500, error));
         if (!user) return next(new HttpError(401, 'Invalid credentials'));
 
-        developer.issueDeveloperToken(user, function (error, result) {
+        developer.issueDeveloperToken(user, auditSource(req), function (error, result) {
             if (error) return next(new HttpError(500, error));
-
-            eventlog.add(eventlog.ACTION_USER_LOGIN, req, { authType: 'cli', userId: user.id, username: user.username });
 
             next(new HttpSuccess(200, { token: result.token, expiresAt: result.expiresAt }));
         });

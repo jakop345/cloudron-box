@@ -14,6 +14,7 @@ exports = module.exports = {
 var assert = require('assert'),
     config = require('./config.js'),
     debug = require('debug')('box:developer'),
+    eventlog = require('./eventlog.js'),
     tokendb = require('./tokendb.js'),
     settings = require('./settings.js'),
     superagent = require('superagent'),
@@ -50,18 +51,23 @@ function enabled(callback) {
     });
 }
 
-function setEnabled(enabled, callback) {
+function setEnabled(enabled, auditSource, callback) {
     assert.strictEqual(typeof enabled, 'boolean');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     settings.setDeveloperMode(enabled, function (error) {
         if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
+
+        eventlog.add(eventlog.ACTION_CLI_MODE, auditSource, { enabled: enabled });
+
         callback(null);
     });
 }
 
-function issueDeveloperToken(user, callback) {
+function issueDeveloperToken(user, auditSource, callback) {
     assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var token = tokendb.generateToken();
@@ -69,6 +75,8 @@ function issueDeveloperToken(user, callback) {
 
     tokendb.add(token, tokendb.PREFIX_DEV + user.id, '', expiresAt, 'developer,apps,settings,users,profile', function (error) {
         if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
+
+        eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource, { authType: 'cli', userId: user.id, username: user.username });
 
         callback(null, { token: token, expiresAt: expiresAt });
     });
