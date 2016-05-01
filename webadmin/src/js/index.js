@@ -235,7 +235,7 @@ app.filter('eventLogDetails', function() {
         var data = eventLog.data;
 
         switch (eventLog.action) {
-        case ACTION_ACTIVATE: return 'Cloudron activated by ' + data.username;
+        case ACTION_ACTIVATE: return 'Cloudron activated by ' + source.username;
         case ACTION_APP_CONFIGURE: return 'App at location ' + data.location + ' was re-configured';
         case ACTION_APP_INSTALL: return 'App ' + data.appStoreId + '@' + data.version + ' installed at ' + data.location + ' with id ' + data.id;
         case ACTION_APP_RESTORE: return 'App ' + data.id + ' restored';

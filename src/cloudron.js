@@ -208,12 +208,13 @@ function setTimeZone(ip, callback) {
     });
 }
 
-function activate(username, password, email, displayName, ip, callback) {
+function activate(username, password, email, displayName, ip, auditSource, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof displayName, 'string');
     assert.strictEqual(typeof ip, 'string');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debug('activating user:%s email:%s', username, email);
@@ -239,6 +240,8 @@ function activate(username, password, email, displayName, ip, callback) {
 
                 // EE API is sync. do not keep the REST API reponse waiting
                 process.nextTick(function () { exports.events.emit(exports.EVENT_ACTIVATED); });
+
+                eventlog.add(eventlog.ACTION_ACTIVATE, auditSource, { });
 
                 callback(null, { token: token, expires: expires });
             });

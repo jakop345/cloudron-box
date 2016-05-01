@@ -16,7 +16,6 @@ var assert = require('assert'),
     CloudronError = cloudron.CloudronError,
     config = require('../config.js'),
     debug = require('debug')('box:routes/cloudron'),
-    eventlog = require('../eventlog.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     progress = require('../progress.js'),
@@ -54,14 +53,12 @@ function activate(req, res, next) {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     debug('activate: username:%s ip:%s', username, ip);
 
-    cloudron.activate(username, password, email, displayName, ip, function (error, info) {
+    cloudron.activate(username, password, email, displayName, ip, auditSource(req), function (error, info) {
         if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already setup'));
         if (error && error.reason === CloudronError.BAD_USERNAME) return next(new HttpError(400, 'Bad username'));
         if (error && error.reason === CloudronError.BAD_PASSWORD) return next(new HttpError(400, 'Bad password'));
         if (error && error.reason === CloudronError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_ACTIVATE, req, { username: username });
 
         // only in caas case do we have to notify the api server about activation
         if (config.provider() !== 'caas') return next(new HttpSuccess(201, info));
