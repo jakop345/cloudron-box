@@ -379,6 +379,20 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.getEventLogs = function (page, perPage, callback) {
+        var config = {
+            params: {
+                page: page,
+                per_page: perPage
+            }
+        };
+        $http.get(client.apiOrigin + '/api/v1/eventlog', config).success(function (data, status) {
+            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
+
+            callback(null, data.eventlogs);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.getApps = function (callback) {
         $http.get(client.apiOrigin + '/api/v1/apps').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));

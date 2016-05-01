@@ -48,6 +48,9 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/settings', {
         controller: 'SettingsController',
         templateUrl: 'views/settings.html'
+    }).when('/activity', {
+        controller: 'ActivityController',
+        templateUrl: 'views/activity.html'
     }).when('/support', {
         controller: 'SupportController',
         templateUrl: 'views/support.html'
