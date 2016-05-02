@@ -415,7 +415,7 @@ var authorization = [
         var type = req.oauth2.client.type;
 
         if (type === clientdb.TYPE_ADMIN) {
-            eventlog.add(eventlog.ACTION_USER_LOGIN, req, { authType: 'oauth', userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: 'admin' });
+            eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req), { authType: 'oauth', userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: 'admin' });
             return next();
         }
         if (type === clientdb.TYPE_EXTERNAL) return next();
@@ -428,7 +428,7 @@ var authorization = [
                 if (error) return sendError(req, res, 'Internal error');
                 if (!access) return sendErrorPageOrRedirect(req, res, 'No access to this app.');
 
-                eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req), { authType: 'oauth', userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: appObject.id });
+                eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req), { authType: 'oauth', userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: appObject.id, appLocation: appObject.location });
 
                 next();
             });
