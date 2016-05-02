@@ -248,10 +248,10 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 // function backupBox(callback) {
 //    apps.getAll(function (error, allApps) {
 //         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
-// 
+//
 //         var appBackupIds = allApps.map(function (app) { return app.lastBackupId; });
 //         appBackupIds = appBackupIds.filter(function (id) { return id !== null; }); // remove apps that were never backed up
-// 
+//
 //         backupBoxWithAppBackupIds(appBackupIds, callback);
 //     });
 // }
@@ -445,7 +445,8 @@ function ensureBackup(callback) {
             return callback(null);
         }
 
-        backup(callback);
+        var eventSource = { userId: null, username: 'cron' };
+        backup(eventSource, callback);
     });
 }
 
