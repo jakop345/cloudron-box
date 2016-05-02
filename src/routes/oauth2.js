@@ -23,9 +23,13 @@ var appdb = require('../appdb'),
     UserError = user.UserError,
     util = require('util');
 
+function auditSource(req) {
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
+    return { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
+}
+
 // create OAuth 2.0 server
 var gServer = oauth2orize.createServer();
-
 
 // Register serialialization and deserialization functions.
 //
@@ -305,7 +309,7 @@ function accountSetup(req, res, next) {
         userObject.username = req.body.username;
         userObject.displayName = req.body.displayName;
 
-        user.update(userObject.id, userObject.username, userObject.email, userObject.displayName, function (error) {
+        user.update(userObject.id, userObject.username, userObject.email, userObject.displayName, auditSource(req), function (error) {
             if (error && error.reason === UserError.ALREADY_EXISTS) return renderAccountSetupSite(res, req, userObject, 'Username already exists');
             if (error) return next(new HttpError(500, error));
 
@@ -424,7 +428,7 @@ var authorization = [
                 if (error) return sendError(req, res, 'Internal error');
                 if (!access) return sendErrorPageOrRedirect(req, res, 'No access to this app.');
 
-                eventlog.add(eventlog.ACTION_USER_LOGIN, req, { authType: 'oauth', userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: appObject.id });
+                eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req), { authType: 'oauth', userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: appObject.id });
 
                 next();
             });

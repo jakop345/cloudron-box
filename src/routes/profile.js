@@ -15,6 +15,11 @@ var assert = require('assert'),
     tokendb = require('../tokendb.js'),
     UserError = user.UserError;
 
+function auditSource(req) {
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
+    return { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
+}
+
 function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
@@ -48,7 +53,7 @@ function update(req, res, next) {
 
     if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
-    user.update(req.user.id, req.user.username, req.body.email || req.user.email, req.body.displayName || req.user.displayName, function (error) {
+    user.update(req.user.id, req.user.username, req.body.email || req.user.email, req.body.displayName || req.user.displayName, auditSource(req), function (error) {
         if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));

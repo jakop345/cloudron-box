@@ -241,13 +241,16 @@ function verifyWithEmail(email, password, callback) {
     });
 }
 
-function removeUser(user, callback) {
+function removeUser(user, auditSource, callback) {
     assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     userdb.del(user.id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        eventlog.add(eventlog.ACTION_USER_REMOVE, auditSource, { userId: user.id });
 
         callback(null);
 
@@ -303,11 +306,12 @@ function getByResetToken(resetToken, callback) {
     });
 }
 
-function updateUser(userId, username, email, displayName, callback) {
+function updateUser(userId, username, email, displayName, auditSource, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof displayName, 'string');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     username = username.toLowerCase();
@@ -323,6 +327,9 @@ function updateUser(userId, username, email, displayName, callback) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error));
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId, username: username });
+
         callback(null);
     });
 }

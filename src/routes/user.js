@@ -13,7 +13,6 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    eventlog = require('../eventlog.js'),
     generatePassword = require('../password.js').generate,
     groups = require('../groups.js'),
     HttpError = require('connect-lastmile').HttpError,
@@ -77,14 +76,12 @@ function update(req, res, next) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
         if (error) return next(new HttpError(500, error));
 
-        user.update(req.params.userId, result.username, req.body.email || result.email, req.body.displayName || result.displayName, function (error) {
+        user.update(req.params.userId, result.username, req.body.email || result.email, req.body.displayName || result.displayName, auditSource(req), function (error) {
             if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, error.message));
             if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, error.message));
             if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
             if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
             if (error) return next(new HttpError(500, error));
-
-            eventlog.add(eventlog.ACTION_USER_UPDATE, req, { id: req.params.userId, username: result.username });
 
             next(new HttpSuccess(204));
         });
@@ -136,11 +133,9 @@ function remove(req, res, next) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
         if (error) return next(new HttpError(500, error));
 
-        user.remove(userObject, function (error) {
+        user.remove(userObject, auditSource(req), function (error) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
             if (error) return next(new HttpError(500, error));
-
-            eventlog.add(eventlog.ACTION_USER_REMOVE, req, { id: req.params.userId, username: userObject.username });
 
             next(new HttpSuccess(204));
         });
