@@ -178,12 +178,12 @@ function initializeExpressSync() {
     router.post('/api/v1/settings/admin_certificate',  settingsScope, routes.settings.setAdminCertificate);
 
     // eventlog route
-    router.get('/api/v1/eventlog', settingsScope, routes.eventlog.get);
+    router.get('/api/v1/eventlog', settingsScope, routes.user.requireAdmin, routes.eventlog.get);
 
     // backup routes
     router.get ('/api/v1/backups', settingsScope, routes.backups.get);
     router.post('/api/v1/backups', settingsScope, routes.backups.create);
-    router.get ('/api/v1/backups/:backupId',   appsScope, routes.user.requireAdmin, routes.backups.download);
+    router.get ('/api/v1/backups/:backupId', appsScope, routes.user.requireAdmin, routes.backups.download);
 
     // disable server timeout. we use the timeout middleware to handle timeouts on a route level
     httpServer.setTimeout(0);
