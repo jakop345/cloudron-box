@@ -95,7 +95,7 @@ function login(req, res, next) {
         if (error && error.reason === AppsError.ACCESS_DENIED) return next(new HttpError(401, 'Forbidden'));
         if (error) return next(new HttpError(500, error));
 
-        eventlog.add(eventlog.ACTION_USER_LOGIN, req, { authType: 'simpleauth', userId: result.user.id, username: result.user.username, clientId: req.body.clientId });
+        eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'simpleauth', clientId: req.body.clientId }, { userId: result.user.id, username: result.user.username });
 
         var tmp = {
             accessToken: result.accessToken,
