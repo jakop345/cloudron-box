@@ -178,7 +178,7 @@ function start(callback) {
                     // we return no such object, to avoid leakage of a users existence
                     if (!result) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
-                    eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap',appId: app.id, location: app.location }, { userId: userObject.id, username: userObject.username, appId: app.id });
+                    eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', appId: app.id }, { userId: userObject.id });
 
                     res.end();
                 });

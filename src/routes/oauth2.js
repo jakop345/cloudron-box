@@ -23,9 +23,9 @@ var appdb = require('../appdb'),
     UserError = user.UserError,
     util = require('util');
 
-function auditSource(req) {
+function auditSource(req, appId) {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
-    return { authType: 'oauth', ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
+    return { authType: 'oauth', ip: ip, appId: appId };
 }
 
 // create OAuth 2.0 server
@@ -415,7 +415,7 @@ var authorization = [
         var type = req.oauth2.client.type;
 
         if (type === clientdb.TYPE_ADMIN) {
-            eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req), { userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: 'admin' });
+            eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req, 'admin'), { userId: req.oauth2.user.id });
             return next();
         }
         if (type === clientdb.TYPE_EXTERNAL) return next();
@@ -428,7 +428,7 @@ var authorization = [
                 if (error) return sendError(req, res, 'Internal error');
                 if (!access) return sendErrorPageOrRedirect(req, res, 'No access to this app.');
 
-                eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req), { userId: req.oauth2.user.id, username: req.oauth2.user.username, appId: appObject.id, appLocation: appObject.location });
+                eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req, appObject.id), { userId: req.oauth2.user.id });
 
                 next();
             });

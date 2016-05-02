@@ -328,7 +328,7 @@ function updateUser(userId, username, email, displayName, auditSource, callback)
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId, username: username });
+        eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId });
 
         callback(null);
     });

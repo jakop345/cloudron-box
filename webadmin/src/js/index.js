@@ -232,23 +232,24 @@ app.filter('eventLogDetails', function() {
     return function(eventLog) {
         var source = eventLog.source;
         var data = eventLog.data;
+        var errorMessage = data.errorMessage;
 
         switch (eventLog.action) {
-        case ACTION_ACTIVATE: return 'Cloudron activated by ' + source.username;
-        case ACTION_APP_CONFIGURE: return 'App at location ' + data.location + ' was re-configured';
-        case ACTION_APP_INSTALL: return 'App ' + data.appStoreId + '@' + data.version + ' installed at ' + data.location + ' with id ' + data.id;
+        case ACTION_ACTIVATE: return 'Cloudron activated';
+        case ACTION_APP_CONFIGURE: return 'App ' + data.appId + ' was configured';
+        case ACTION_APP_INSTALL: return 'App ' + data.manifest.appStoreId + '@' + data.manifest.version + ' installed at ' + data.location + ' with id ' + data.appId;
         case ACTION_APP_RESTORE: return 'App ' + data.id + ' restored';
         case ACTION_APP_UNINSTALL: return 'App ' + data.id + ' uninstalled';
-        case ACTION_APP_UPDATE: return 'App ' + data.id + ' updated to version ' + data.appStoreId + '@' + data.toVersion;
-        case ACTION_BACKUP_START: return 'Backup started by ' + source.username;
-        case ACTION_BACKUP_FINISH: return 'Backup finished. ' + (('error:' + data.errorMessage) || ('id:' + data.filename));
-        case ACTION_CERTIFICATE_RENEWAL: return 'Certificate renewal for ' + data.domain + (data.error ? 'succeeded' : 'failed');
+        case ACTION_APP_UPDATE: return 'App ' + data.id + ' updated to version ' + data.toManifest.appStoreId + '@' + data.toManifest.version;
+        case ACTION_BACKUP_START: return 'Backup started';
+        case ACTION_BACKUP_FINISH: return 'Backup finished. ' + (('error:' + errorMessage) || ('id:' + data.filename));
+        case ACTION_CERTIFICATE_RENEWAL: return 'Certificate renewal for ' + data.domain + (errorMessage ? ' failed' : 'succeeded');
         case ACTION_CLI_MODE: return 'CLI mode was ' + (data.enabled ? 'enabled' : 'disabled');
-        case ACTION_UPDATE: return 'Update initiated by ' + source.username + ' to version ' + data.boxUpdateInfo.version;
+        case ACTION_UPDATE: return 'Updating to version ' + data.boxUpdateInfo.version;
         case ACTION_USER_ADD: return 'User ' + data.email + ' added';
-        case ACTION_USER_LOGIN: return 'User ' + data.username + ' logged in using ' + source.authType + ' at ' + data.appId;
-        case ACTION_USER_REMOVE: return 'User ' + (data.username || data.id) + ' removed';
-        case ACTION_USER_UPDATE: return 'User ' + (data.username || data.id) + ' updated';
+        case ACTION_USER_LOGIN: return 'User ' + data.username + ' logged in';
+        case ACTION_USER_REMOVE: return 'User ' + data.userId + ' removed';
+        case ACTION_USER_UPDATE: return 'User ' + data.userId + ' updated';
         default: return eventLog.action;
         }
     };

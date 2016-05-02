@@ -424,7 +424,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
 
             taskmanager.restartAppTask(appId);
 
-            eventlog.add(eventlog.ACTION_APP_INSTALL, auditSource, { appId: appId, location: location, appStoreId: appStoreId, version: manifest.version });
+            eventlog.add(eventlog.ACTION_APP_INSTALL, auditSource, { appId: appId, location: location, manifest: manifest });
 
             callback(null);
         });
@@ -498,7 +498,7 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
 
             taskmanager.restartAppTask(appId);
 
-            eventlog.add(eventlog.ACTION_APP_CONFIGURE, auditSource, { appId: appId, oldLocation: app.location });
+            eventlog.add(eventlog.ACTION_APP_CONFIGURE, auditSource, { appId: appId });
 
             callback(null);
         });
@@ -572,7 +572,7 @@ function update(appId, force, manifest, portBindings, icon, auditSource, callbac
 
             taskmanager.restartAppTask(appId);
 
-            eventlog.add(eventlog.ACTION_APP_UPDATE, auditSource, { appId: appId, appStoreId: manifest.id, toVersion: manifest.version, fromVersion: app.manifest.version });
+            eventlog.add(eventlog.ACTION_APP_UPDATE, auditSource, { appId: appId, toManifest: manifest, fromManifest: app.manifest });
 
             callback(null);
         });

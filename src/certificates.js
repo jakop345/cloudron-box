@@ -161,7 +161,7 @@ function autoRenew(callback) {
                     var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
 
                     var errorMessage = error ? error.message : '';
-                    eventlog.add(eventlog.ACTION_CERTIFICATE_RENEWAL, { userId: null, username: 'cron' }, { domain: domain, error: errorMessage });
+                    eventlog.add(eventlog.ACTION_CERTIFICATE_RENEWAL, { userId: null, username: 'cron' }, { domain: domain, errorMessage: errorMessage });
                     mailer.certificateRenewed(domain, errorMessage);
 
                     if (error) {
