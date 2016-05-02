@@ -221,7 +221,7 @@ function activate(username, password, email, displayName, ip, auditSource, callb
 
     setTimeZone(ip, function () { }); // TODO: get this from user. note that timezone is detected based on the browser location and not the cloudron region
 
-    user.createOwner(username, password, email, displayName, function (error, userObject) {
+    user.createOwner(username, password, email, displayName, auditSource, function (error, userObject) {
         if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
         if (error && error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
         if (error && error.reason === UserError.BAD_PASSWORD) return callback(new CloudronError(CloudronError.BAD_PASSWORD));

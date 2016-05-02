@@ -26,6 +26,8 @@ var DISPLAY_NAME = 'Nobody cares';
 var DISPLAY_NAME_NEW = 'Somone cares';
 var userObject = null;
 
+var AUDIT_SOURCE = { ip: '1.2.3.4' };
+
 function cleanupUsers(done) {
     async.series([
         groupdb._clear,
@@ -36,7 +38,7 @@ function cleanupUsers(done) {
 
 function createOwner(done) {
     groups.create('admin', function () { // ignore error since it might already exist
-        user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
+        user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
             expect(error).to.not.be.ok();
             expect(result).to.be.ok();
 
@@ -79,7 +81,7 @@ describe('User', function () {
         after(cleanupUsers);
 
         it('fails due to short password', function (done) {
-            user.create(USERNAME, 'Fo$%23', EMAIL, DISPLAY_NAME, function (error, result) {
+            user.create(USERNAME, 'Fo$%23', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -89,7 +91,7 @@ describe('User', function () {
         });
 
         it('fails due to missing upper case password', function (done) {
-            user.create(USERNAME, 'thisiseightch%$234arslong', EMAIL, DISPLAY_NAME, function (error, result) {
+            user.create(USERNAME, 'thisiseightch%$234arslong', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -99,7 +101,7 @@ describe('User', function () {
         });
 
         it('fails due to missing numerics in password', function (done) {
-            user.create(USERNAME, 'foobaRASDF%', EMAIL, DISPLAY_NAME, function (error, result) {
+            user.create(USERNAME, 'foobaRASDF%', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -109,7 +111,7 @@ describe('User', function () {
         });
 
         it('fails due to missing special chars in password', function (done) {
-            user.create(USERNAME, 'foobaRASDF23423', EMAIL, DISPLAY_NAME, function (error, result) {
+            user.create(USERNAME, 'foobaRASDF23423', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -119,7 +121,7 @@ describe('User', function () {
         });
 
         it('fails due to reserved username', function (done) {
-            user.create('admin', PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
+            user.create('admin', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_USERNAME);
@@ -129,7 +131,7 @@ describe('User', function () {
         });
 
         it('fails due to reserved username', function (done) {
-            user.create('AdMiN', PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
+            user.create('AdMiN', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_USERNAME);
@@ -139,7 +141,7 @@ describe('User', function () {
         });
 
         it('succeeds and attempts to send invite', function (done) {
-            user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
+            user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 expect(result.username).to.equal(USERNAME.toLowerCase());
@@ -174,7 +176,7 @@ describe('User', function () {
         });
 
         it('fails because user exists', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.ALREADY_EXISTS);
@@ -184,7 +186,7 @@ describe('User', function () {
         });
 
         it('fails because password is empty', function (done) {
-            user.create(USERNAME, '', EMAIL, DISPLAY_NAME, function (error, result) {
+            user.create(USERNAME, '', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -462,7 +464,7 @@ describe('User', function () {
             };
 
             var invitor = { username: USERNAME, email: EMAIL };
-            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, { invitor: invitor }, function (error, result) {
+            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, AUDIT_SOURCE, { invitor: invitor }, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
@@ -506,7 +508,7 @@ describe('User', function () {
             };
 
             var invitor = { username: USERNAME, email: EMAIL };
-            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, { invitor: invitor }, function (error, result) {
+            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, AUDIT_SOURCE, { invitor: invitor }, function (error, result) {
                 expect(error).to.eql(null);
                 expect(result).to.be.ok();
 

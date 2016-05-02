@@ -22,6 +22,11 @@ var assert = require('assert'),
     tokendb = require('../tokendb.js'),
     UserError = user.UserError;
 
+function auditSource(req) {
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
+    return { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
+}
+
 function create(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
@@ -36,7 +41,7 @@ function create(req, res, next) {
     var username = req.body.username || '';
     var displayName = req.body.displayName || '';
 
-    user.create(username, password, email, displayName, { invitor: req.user, sendInvite: sendInvite }, function (error, user) {
+    user.create(username, password, email, displayName, auditSource(req), { invitor: req.user, sendInvite: sendInvite }, function (error, user) {
         if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, 'Invalid username'));
         if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, 'Invalid email'));
         if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, 'Invalid password'));
@@ -52,8 +57,6 @@ function create(req, res, next) {
             admin: user.admin,
             resetToken: user.resetToken
         };
-
-        eventlog.add(eventlog.ACTION_USER_ADD, req, { id: user.id, email: user.email });
 
         next(new HttpSuccess(201, userInfo ));
     });

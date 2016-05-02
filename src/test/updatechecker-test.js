@@ -12,7 +12,6 @@ var appdb = require('../appdb.js'),
     database = require('../database.js'),
     deepExtend = require('deep-extend'),
     expect = require('expect.js'),
-    fs = require('fs'),
     mailer = require('../mailer.js'),
     nock = require('nock'),
     settings = require('../settings.js'),
@@ -67,6 +66,10 @@ var USER_0 = {
     displayName: 'User 0'
 };
 
+var AUDIT_SOURCE = {
+    ip: '1.2.3.4'
+};
+
 function checkMails(number, done) {
     // mails are enqueued async
     setTimeout(function () {
@@ -83,7 +86,7 @@ describe('updatechecker - checkBoxUpdates', function () {
         async.series([
             database.initialize,
             mailer._clearMailQueue,
-            user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName)
+            user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, AUDIT_SOURCE)
         ], done);
     });
 
@@ -249,7 +252,7 @@ describe('updatechecker - checkAppUpdates', function () {
             database._clear,
             mailer._clearMailQueue,
             appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit, null),
-            user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName)
+            user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, AUDIT_SOURCE)
         ], done);
     });
 

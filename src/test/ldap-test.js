@@ -34,6 +34,10 @@ var USER_1 = {
     displayName: 'User 1'
 };
 
+var AUDIT_SOURCE = {
+    ip: '1.2.3.4'
+};
+
 var APP_0 = {
     id: 'appid-0',
     appStoreId: 'appStoreId-0',
@@ -71,7 +75,7 @@ function setup(done) {
         appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit, null),
         appdb.update.bind(null, APP_0.id, { containerId: APP_0.containerId }),
         function (callback) {
-            user.createOwner(USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, function (error, result) {
+            user.createOwner(USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, AUDIT_SOURCE, function (error, result) {
                 if (error) return callback(error);
 
                 USER_0.id = result.id;
@@ -80,7 +84,7 @@ function setup(done) {
             });
         },
         function (callback) {
-            user.create(USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, { invitor: USER_0 }, function (error, result) {
+            user.create(USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, AUDIT_SOURCE, { invitor: USER_0 }, function (error, result) {
                 if (error) return callback(error);
 
                 USER_1.id = result.id;

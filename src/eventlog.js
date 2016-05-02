@@ -57,17 +57,15 @@ util.inherits(EventLogError, Error);
 EventLogError.INTERNAL_ERROR = 'Internal error';
 EventLogError.NOT_FOUND = 'Not Found';
 
-function add(action, req, data, callback) {
+function add(action, source, data, callback) {
     assert.strictEqual(typeof action, 'string');
-    assert.strictEqual(typeof req, 'object');
+    assert.strictEqual(typeof source, 'object');
     assert.strictEqual(typeof data, 'object');
     assert(!callback || typeof callback === 'function');
 
     callback = callback || NOOP_CALLBACK;
 
     var id = uuid.v4();
-    var ip = (req.headers ? req.headers['x-forwarded-for'] : null) || req.ip || null;
-    var source = { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
 
     eventlogdb.add(id, action, source, data, function (error) {
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));

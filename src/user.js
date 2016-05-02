@@ -25,6 +25,7 @@ var assert = require('assert'),
     clientdb = require('./clientdb.js'),
     crypto = require('crypto'),
     DatabaseError = require('./databaseerror.js'),
+    eventlog = require('./eventlog.js'),
     groups = require('./groups.js'),
     GroupError = groups.GroupError,
     hat = require('hat'),
@@ -111,11 +112,12 @@ function validateDisplayName(name) {
     return null;
 }
 
-function createUser(username, password, email, displayName, options, callback) {
+function createUser(username, password, email, displayName, auditSource, options, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof displayName, 'string');
+    assert.strictEqual(typeof auditSource, 'object');
 
     if (typeof options === 'function') {
         callback = options;
@@ -164,6 +166,8 @@ function createUser(username, password, email, displayName, options, callback) {
             userdb.add(user.id, user, function (error) {
                 if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS));
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+                eventlog.add(eventlog.ACTION_USER_ADD, auditSource, { userId: user.id, email: user.email });
 
                 callback(null, user);
 
@@ -420,11 +424,12 @@ function setPassword(userId, newPassword, callback) {
     });
 }
 
-function createOwner(username, password, email, displayName, callback) {
+function createOwner(username, password, email, displayName, auditSource, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof displayName, 'string');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     // This is only not allowed for the owner
@@ -434,7 +439,7 @@ function createOwner(username, password, email, displayName, callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS));
 
-        createUser(username, password, email, displayName, { owner: true }, function (error, user) {
+        createUser(username, password, email, displayName, auditSource, { owner: true }, function (error, user) {
             if (error) return callback(error);
 
             groups.addMember(groups.ADMIN_GROUP_ID, user.id, function (error) {
