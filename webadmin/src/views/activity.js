@@ -5,8 +5,16 @@ angular.module('Application').controller('ActivityController', ['$scope', '$loca
 
     $scope.eventLogs = [ ];
 
+    $scope.currentPage = 1;
+    $scope.pageItems = 20;
+
+
     function fetchEventLogs() {
-        Client.getEventLogs(1, 20, function (error, eventLogs) {
+        $scope.busy = true;
+
+        Client.getEventLogs($scope.currentPage, $scope.pageItems, function (error, eventLogs) {
+            $scope.busy = false;
+
             if (error) return console.error(error);
 
             $scope.eventLogs = eventLogs;
@@ -17,4 +25,15 @@ angular.module('Application').controller('ActivityController', ['$scope', '$loca
         fetchEventLogs();
     });
 
+    $scope.showNextPage = function () {
+        $scope.currentPage++;
+        fetchEventLogs();
+    };
+
+    $scope.showPrevPage = function () {
+        if ($scope.currentPage > 1) $scope.currentPage--;
+        else $scope.currentPage = 1;
+
+        fetchEventLogs();
+    };
 }]);

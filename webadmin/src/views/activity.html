@@ -2,15 +2,20 @@
 <br/>
 
 <div class="row">
-    <div class="col-md-8 col-md-offset-2">
+    <div class="col-md-8 col-md-offset-1">
         <h1>Activity Log</h1>
     </div>
+
+    <div class="pagination col-md-offset-1">
+      <button class="btn btn-default btn-outline" ng-click="showPrevPage()" ng-disabled="busy || currentPage <= 1"><i class="fa fa-angle-double-left"></i> prev</button>
+      <button class="btn btn-default btn-outline" ng-click="showNextPage()" ng-disabled="busy || pageItems > eventLogs.length">next <i class="fa fa-angle-double-right"></i></button>
+  </div>
 </div>
 
 <br/>
 
 <div class="row">
-    <div class="col-md-8 col-md-offset-2">
+    <div class="col-md-10 col-md-offset-1">
         <div class="card card-block" style="max-width: 100%">
             <table class="table table-striped table-condensed table-hover">
               <thead>
