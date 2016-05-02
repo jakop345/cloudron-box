@@ -50,6 +50,7 @@ var addons = require('./addons.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apps'),
     docker = require('./docker.js'),
+    eventlog = require('./eventlog.js'),
     fs = require('fs'),
     groups = require('./groups.js'),
     manifestFormat = require('cloudron-manifestformat'),
@@ -353,7 +354,7 @@ function purchase(appStoreId, callback) {
     });
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, cert, key, memoryLimit, altDomain, callback) {
+function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, cert, key, memoryLimit, altDomain, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
@@ -365,6 +366,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     assert(key === null || typeof key === 'string');
     assert.strictEqual(typeof memoryLimit, 'number');
     assert(altDomain === null || typeof altDomain === 'string');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var error = manifestFormat.parse(manifest);
@@ -422,12 +424,14 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
 
             taskmanager.restartAppTask(appId);
 
+            eventlog.add(eventlog.ACTION_APP_INSTALL, auditSource, { appId: appId, location: location, appStoreId: appStoreId, version: manifest.version });
+
             callback(null);
         });
     });
 }
 
-function configure(appId, location, portBindings, accessRestriction, cert, key, memoryLimit, altDomain, callback) {
+function configure(appId, location, portBindings, accessRestriction, cert, key, memoryLimit, altDomain, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
@@ -436,6 +440,7 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
     assert(key === null || typeof key === 'string');
     assert.strictEqual(typeof memoryLimit, 'number');
     assert(altDomain === null || typeof altDomain === 'string');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var error = validateHostname(location, config.fqdn());
@@ -493,17 +498,20 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
 
             taskmanager.restartAppTask(appId);
 
+            eventlog.add(eventlog.ACTION_APP_CONFIGURE, auditSource, { appId: appId, oldLocation: app.location });
+
             callback(null);
         });
     });
 }
 
-function update(appId, force, manifest, portBindings, icon, callback) {
+function update(appId, force, manifest, portBindings, icon, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof force, 'boolean');
     assert(manifest && typeof manifest === 'object');
     assert(typeof portBindings === 'object'); // can be null
     assert(!icon || typeof icon === 'string');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debug('Will update app with id:%s', appId);
@@ -564,6 +572,8 @@ function update(appId, force, manifest, portBindings, icon, callback) {
 
             taskmanager.restartAppTask(appId);
 
+            eventlog.add(eventlog.ACTION_APP_UPDATE, auditSource, { appId: appId, appStoreId: manifest.id, toVersion: manifest.version, fromVersion: app.manifest.version });
+
             callback(null);
         });
     });
@@ -614,8 +624,9 @@ function getLogs(appId, lines, follow, callback) {
     });
 }
 
-function restore(appId, callback) {
+function restore(appId, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debug('Will restore app with id:%s', appId);
@@ -658,13 +669,16 @@ function restore(appId, callback) {
 
             taskmanager.restartAppTask(appId);
 
+            eventlog.add(eventlog.ACTION_APP_RESTORE, auditSource, { appId: appId });
+
             callback(null);
         });
     });
 }
 
-function uninstall(appId, callback) {
+function uninstall(appId, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debug('Will uninstall app with id:%s', appId);
@@ -673,6 +687,8 @@ function uninstall(appId, callback) {
         appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UNINSTALL, function (error) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            eventlog.add(eventlog.ACTION_APP_UNINSTALL, auditSource, { appId: appId });
 
             taskmanager.startAppTask(appId, callback);
         });

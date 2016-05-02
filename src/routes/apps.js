@@ -24,7 +24,6 @@ var apps = require('../apps.js'),
     AppsError = apps.AppsError,
     assert = require('assert'),
     debug = require('debug')('box:routes/apps'),
-    eventlog = require('../eventlog.js'),
     fs = require('fs'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
@@ -32,6 +31,11 @@ var apps = require('../apps.js'),
     safe = require('safetydance'),
     util = require('util'),
     uuid = require('node-uuid');
+
+function auditSource(req) {
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
+    return { ip: ip, username: req.user ? req.user.username : null, userId: req.user ? req.user.id : null };
+}
 
 function removeInternalAppFields(app) {
     return {
@@ -132,7 +136,7 @@ function installApp(req, res, next) {
 
     debug('Installing app id:%s storeid:%s loc:%s port:%j accessRestriction:%j memoryLimit:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.memoryLimit, data.manifest);
 
-    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.icon || null, data.cert || null, data.key || null, data.memoryLimit || 0, data.altDomain || null, function (error) {
+    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.icon || null, data.cert || null, data.key || null, data.memoryLimit || 0, data.altDomain || null, auditSource(req), function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
@@ -142,8 +146,6 @@ function installApp(req, res, next) {
         if (error && error.reason === AppsError.BAD_CERTIFICATE) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.USER_REQUIRED) return next(new HttpError(400, 'accessRestriction must specify one user'));
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_APP_INSTALL, req, { id: appId, location: data.location, appStoreId: data.appStoreId, version: data.manifest.version });
 
         next(new HttpSuccess(202, { id: appId } ));
     });
@@ -175,7 +177,7 @@ function configureApp(req, res, next) {
 
     debug('Configuring app id:%s location:%s bindings:%j accessRestriction:%j memoryLimit:%s', req.params.id, data.location, data.portBindings, data.accessRestriction, data.memoryLimit);
 
-    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.cert || null, data.key || null, data.memoryLimit || 0, data.altDomain || null, function (error) {
+    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.cert || null, data.key || null, data.memoryLimit || 0, data.altDomain || null, auditSource(req), function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
@@ -184,8 +186,6 @@ function configureApp(req, res, next) {
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_CERTIFICATE) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_APP_CONFIGURE, req, { id: req.params.id, location: data.location });
 
         next(new HttpSuccess(202, { }));
     });
@@ -196,13 +196,11 @@ function restoreApp(req, res, next) {
 
     debug('Restore app id:%s', req.params.id);
 
-    apps.restore(req.params.id, function (error) {
+    apps.restore(req.params.id, auditSource(req), function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_APP_RESTORE, req, { id: req.params.id });
 
         next(new HttpSuccess(202, { }));
     });
@@ -232,11 +230,9 @@ function uninstallApp(req, res, next) {
 
     debug('Uninstalling app id:%s', req.params.id);
 
-    apps.uninstall(req.params.id, function (error) {
+    apps.uninstall(req.params.id, auditSource(req), function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_APP_UNINSTALL, req, { id: req.params.id });
 
         next(new HttpSuccess(202, { }));
     });
@@ -284,14 +280,12 @@ function updateApp(req, res, next) {
 
     debug('Update app id:%s to manifest:%j with portBindings:%j', req.params.id, data.manifest, data.portBindings);
 
-    apps.update(req.params.id, data.force || false, data.manifest, data.portBindings || null, data.icon, function (error) {
+    apps.update(req.params.id, data.force || false, data.manifest, data.portBindings || null, data.icon, auditSource(req), function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_APP_UPDATE, req, { id: req.params.id, appStoreId: data.manifest.id, toVersion: data.manifest.version });
 
         next(new HttpSuccess(202, { }));
     });

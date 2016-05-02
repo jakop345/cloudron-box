@@ -648,7 +648,7 @@ function installAppBundle(callback) {
             apps.install(uuid.v4(), appstoreId, result.body.manifest, appInfo.location,
                 appInfo.portBindings || null, appInfo.accessRestriction || null,
                 null /* icon */, null /* cert */, null /* key */, 0 /* default mem limit */,
-                null /* altDomain */, iteratorCallback);
+                null /* altDomain */, { userId: null, username: 'autoinstaller' }, iteratorCallback);
         });
     }, function (error) {
         if (error) debug('autoInstallApps: ', error);
