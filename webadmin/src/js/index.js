@@ -222,6 +222,7 @@ var ACTION_BACKUP_FINISH = 'backup.finish';
 var ACTION_BACKUP_START = 'backup.start';
 var ACTION_CERTIFICATE_RENEWAL = 'certificate.renew';
 var ACTION_CLI_MODE = 'settings.climode';
+var ACTION_START = 'cloudron.start';
 var ACTION_UPDATE = 'cloudron.update';
 var ACTION_USER_ADD = 'user.add';
 var ACTION_USER_LOGIN = 'user.login';
@@ -245,6 +246,7 @@ app.filter('eventLogDetails', function() {
         case ACTION_BACKUP_FINISH: return 'Backup finished. ' + (('error:' + errorMessage) || ('id:' + data.filename));
         case ACTION_CERTIFICATE_RENEWAL: return 'Certificate renewal for ' + data.domain + (errorMessage ? ' failed' : 'succeeded');
         case ACTION_CLI_MODE: return 'CLI mode was ' + (data.enabled ? 'enabled' : 'disabled');
+        case ACTION_START: return 'Cloudron started with version ' + data.version;
         case ACTION_UPDATE: return 'Updating to version ' + data.boxUpdateInfo.version;
         case ACTION_USER_ADD: return 'User ' + data.email + ' added';
         case ACTION_USER_LOGIN: return 'User ' + data.username + ' logged in';

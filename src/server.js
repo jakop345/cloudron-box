@@ -14,6 +14,7 @@ var assert = require('assert'),
     cron = require('./cron.js'),
     config = require('./config.js'),
     database = require('./database.js'),
+    eventlog = require('./eventlog.js'),
     express = require('express'),
     http = require('http'),
     mailer = require('./mailer.js'),
@@ -260,7 +261,8 @@ function start(callback) {
         mailer.initialize,
         cron.initialize,
         gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1'),
-        gSysadminHttpServer.listen.bind(gSysadminHttpServer, config.get('sysadminPort'), '127.0.0.1')
+        gSysadminHttpServer.listen.bind(gSysadminHttpServer, config.get('sysadminPort'), '127.0.0.1'),
+        eventlog.add.bind(null, eventlog.ACTION_START, { userId: null, username: 'boot' }, { version: config.version() })
     ], callback);
 }
 
