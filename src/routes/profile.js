@@ -7,7 +7,6 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    eventlog = require('../eventlog.js'),
     groups = require('../groups.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
@@ -59,8 +58,6 @@ function update(req, res, next) {
         if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
-
-        eventlog.add(eventlog.ACTION_PROFILE, req, { });
 
         next(new HttpSuccess(204));
     });
