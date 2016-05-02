@@ -23,7 +23,7 @@
               <tbody>
                 <tr ng-repeat="eventLog in eventLogs">
                   <th scope="row">{{ eventLog.creationTime | prettyDate }}</td>
-                  <td>{{ eventLog.source.username || eventLog.source.userId || eventLog.source.authType }} ({{ eventLog.source.ip || eventLog.source.appId }})</td>
+                  <td>{{ eventLog.source.username || eventLog.source.userId || eventLog.source.authType }} <span ng-show="eventLog.source.ip || eventLog.source.appId"> ({{ eventLog.source.ip || eventLog.source.appId }}) </span> </td>
                   <td>{{ eventLog | eventLogDetails }}</td>
                 </tr>
               </tbody>

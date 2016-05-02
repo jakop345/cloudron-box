@@ -238,18 +238,18 @@ app.filter('eventLogDetails', function() {
         switch (eventLog.action) {
         case ACTION_ACTIVATE: return 'Cloudron activated';
         case ACTION_APP_CONFIGURE: return 'App ' + data.appId + ' was configured';
-        case ACTION_APP_INSTALL: return 'App ' + data.manifest.appStoreId + '@' + data.manifest.version + ' installed at ' + data.location + ' with id ' + data.appId;
-        case ACTION_APP_RESTORE: return 'App ' + data.id + ' restored';
-        case ACTION_APP_UNINSTALL: return 'App ' + data.id + ' uninstalled';
-        case ACTION_APP_UPDATE: return 'App ' + data.id + ' updated to version ' + data.toManifest.appStoreId + '@' + data.toManifest.version;
+        case ACTION_APP_INSTALL: return 'App ' + data.manifest.id + '@' + data.manifest.version + ' installed at ' + data.location + ' with id ' + data.appId;
+        case ACTION_APP_RESTORE: return 'App ' + data.appId + ' restored';
+        case ACTION_APP_UNINSTALL: return 'App ' + data.appId + ' uninstalled';
+        case ACTION_APP_UPDATE: return 'App ' + data.appId + ' updated to version ' + data.toManifest.id + '@' + data.toManifest.version;
         case ACTION_BACKUP_START: return 'Backup started';
-        case ACTION_BACKUP_FINISH: return 'Backup finished. ' + (('error:' + errorMessage) || ('id:' + data.filename));
+        case ACTION_BACKUP_FINISH: return 'Backup finished. ' + (errorMessage ? ('error: ' + errorMessage) : ('id: ' + data.filename));
         case ACTION_CERTIFICATE_RENEWAL: return 'Certificate renewal for ' + data.domain + (errorMessage ? ' failed' : 'succeeded');
         case ACTION_CLI_MODE: return 'CLI mode was ' + (data.enabled ? 'enabled' : 'disabled');
         case ACTION_START: return 'Cloudron started with version ' + data.version;
         case ACTION_UPDATE: return 'Updating to version ' + data.boxUpdateInfo.version;
-        case ACTION_USER_ADD: return 'User ' + data.email + ' added';
-        case ACTION_USER_LOGIN: return 'User ' + data.username + ' logged in';
+        case ACTION_USER_ADD: return 'User ' + data.email + ' added with id ' + data.userId;
+        case ACTION_USER_LOGIN: return 'User ' + data.userId + ' logged in';
         case ACTION_USER_REMOVE: return 'User ' + data.userId + ' removed';
         case ACTION_USER_UPDATE: return 'User ' + data.userId + ' updated';
         default: return eventLog.action;

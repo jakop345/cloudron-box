@@ -492,5 +492,5 @@
 
 [0.13.0]
 - Upgrade to ubuntu 16.04
-- Add event log view
+- Add event log
 
