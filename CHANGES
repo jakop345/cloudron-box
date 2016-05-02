@@ -487,3 +487,5 @@
 [0.12.6]
 - Allow setting an alternate external domain for apps
 
+[0.12.7]
+- Fix changing password
