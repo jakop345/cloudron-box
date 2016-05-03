@@ -176,6 +176,7 @@ function initializeExpressSync() {
     router.post('/api/v1/settings/backup_config',      settingsScope, routes.settings.setBackupConfig);
     router.post('/api/v1/settings/certificate',        settingsScope, routes.settings.setCertificate);
     router.post('/api/v1/settings/admin_certificate',  settingsScope, routes.settings.setAdminCertificate);
+    router.get ('/api/v1/settings/time_zone',          settingsScope, routes.settings.getTimeZone);
 
     // eventlog route
     router.get('/api/v1/eventlog', settingsScope, routes.user.requireAdmin, routes.eventlog.get);

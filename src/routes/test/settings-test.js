@@ -360,5 +360,17 @@ describe('Settings API', function () {
             done();
         });
     });
+
+    describe('time_zone', function () {
+        it('succeeds', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/settings/time_zone')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.timeZone).to.be('America/Los_Angeles');
+                done();
+            });
+        });
+    });
 });
 

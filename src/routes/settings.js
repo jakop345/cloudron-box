@@ -16,6 +16,8 @@ exports = module.exports = {
     getBackupConfig: getBackupConfig,
     setBackupConfig: setBackupConfig,
 
+    getTimeZone: getTimeZone,
+
     setCertificate: setCertificate,
     setAdminCertificate: setAdminCertificate
 };
@@ -66,6 +68,13 @@ function getCloudronName(req, res, next) {
     settings.getCloudronName(function (error, name) {
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, { name: name }));
+    });
+}
+
+function getTimeZone(req, res, next) {
+    settings.getTimeZone(function (error, tz) {
+        if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(200, { timeZone: tz }));
     });
 }
 
