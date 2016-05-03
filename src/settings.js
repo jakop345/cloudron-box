@@ -145,7 +145,7 @@ function getTimeZone(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     settingsdb.get(exports.TIME_ZONE_KEY, function (error, tz) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.AUTOUPDATE_PATTERN_KEY]);
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.TIME_ZONE_KEY]);
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         callback(null, tz);
