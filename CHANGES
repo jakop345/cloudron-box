@@ -494,3 +494,7 @@
 - Upgrade to ubuntu 16.04
 - Add event log
 
+[0.13.1]
+- Make activity log viewable to admins
+- Fix geoip lookup
+
