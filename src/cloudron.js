@@ -203,7 +203,7 @@ function setTimeZone(ip, callback) {
             return callback(null);
         }
 
-        if (typeof result.body.time_zone !== 'string') {
+        if (!result.body.time_zone || typeof result.body.time_zone !== 'string') {
             debug('No timezone in geoip response : %j', result.body);
             return callback(null);
         }
