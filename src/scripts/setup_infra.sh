@@ -17,7 +17,7 @@ readonly DATA_DIR="/home/yellowtent/data"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${script_dir}/../INFRA_VERSION" # this injects INFRA_VERSION
 
-arg_fqdn="$1"
+readonly fqdn="$1"
 
 # removing containers ensures containers are launched with latest config updates
 # restore code in appatask does not delete old containers
@@ -58,9 +58,9 @@ fi
 mail_container_id=$(docker run --restart=always -d --name="mail" \
     -m 75m \
     --memory-swap 150m \
-    -h "${arg_fqdn}" \
-    -e "MAIL_SERVER_NAME=${arg_fqdn}" \
-    -e "MAIL_DOMAIN=${arg_fqdn}" \
+    -h "${fqdn}" \
+    -e "MAIL_SERVER_NAME=${fqdn}" \
+    -e "MAIL_DOMAIN=${fqdn}" \
     -v "${DATA_DIR}/box/mail:/app/data" \
     --read-only -v /tmp -v /run \
     "${MAIL_IMAGE}")
@@ -79,7 +79,7 @@ EOF
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -m 256m \
     --memory-swap 512m \
-    -h "${arg_fqdn}" \
+    -h "${fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
     -v "${DATA_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:ro" \
     --read-only -v /tmp -v /run \
@@ -97,7 +97,7 @@ EOF
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -m 100m \
     --memory-swap 200m \
-    -h "${arg_fqdn}" \
+    -h "${fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/postgresql" \
     -v "${DATA_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:ro" \
     --read-only -v /tmp -v /run \
@@ -115,7 +115,7 @@ EOF
 mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
     -m 100m \
     --memory-swap 200m \
-    -h "${arg_fqdn}" \
+    -h "${fqdn}" \
     -v "${DATA_DIR}/mongodb:/var/lib/mongodb" \
     -v "${DATA_DIR}/addons/mongodb_vars.sh:/etc/mongodb_vars.sh:ro" \
     --read-only -v /tmp -v /run \
