@@ -2,6 +2,16 @@
 
 set -eu -o pipefail
 
+if [[ ${EUID} -ne 0 ]]; then
+    echo "This script should be run as root." > /dev/stderr
+    exit 1
+fi
+
+if [[ $# == 1 && "$1" == "--check" ]]; then
+    echo "OK"
+    exit 0
+fi
+
 readonly DATA_DIR="/home/yellowtent/data"
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
