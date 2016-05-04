@@ -498,3 +498,7 @@
 - Make activity log viewable to admins
 - Fix geoip lookup
 
+[0.13.2]
+- Fix crash in app auto updater
+- Fix crash with empty timezone
+
