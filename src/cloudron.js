@@ -422,7 +422,7 @@ function addDnsRecords() {
     var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
 
     var dkimKey = readDkimPublicKeySync();
-    if (!dkimKey) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, new Error('internal error failed to read dkim public key')));
+    if (!dkimKey) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, new Error('Failed to read dkim public key')));
 
     sysinfo.getIp(function (error, ip) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
