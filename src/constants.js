@@ -4,6 +4,9 @@
 exports = module.exports = {
     ADMIN_LOCATION: 'my',
     API_LOCATION: 'api', // this is unused but reserved for future use (#403)
+    SMTP_LOCATION: 'smtp',
+    IMAP_LOCATION: 'imap',
+
     ADMIN_NAME: 'Settings',
 
     ADMIN_CLIENT_ID: 'webadmin', // oauth client id
