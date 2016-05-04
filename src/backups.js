@@ -368,8 +368,12 @@ function backupApp(app, addonsToBackup, callback) {
 }
 
 // this function expects you to have a lock
-function backupBoxAndApps(callback) {
+function backupBoxAndApps(auditSource, callback) {
+    assert.strictEqual(typeof auditSource, 'object');
+
     callback = callback || NOOP_CALLBACK;
+
+    eventlog.add(eventlog.ACTION_BACKUP_START, auditSource, { });
 
     apps.getAll(function (error, allApps) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
@@ -403,27 +407,25 @@ function backupBoxAndApps(callback) {
             backupBoxWithAppBackupIds(backupIds, function (error, filename) {
                 progress.set(progress.BACKUP, 100, error ? error.message : '');
 
+                eventlog.add(eventlog.ACTION_BACKUP_FINISH, auditSource, { errorMessage: error ? error.message : null, filename: filename });
+
                 callback(error, filename);
             });
         });
     });
 }
 
-function backup(eventSource, callback) {
-    assert.strictEqual(typeof eventSource, 'object');
+function backup(auditSource, callback) {
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var error = locker.lock(locker.OP_FULL_BACKUP);
     if (error) return callback(new BackupsError(BackupsError.BAD_STATE, error.message));
 
-    eventlog.add(eventlog.ACTION_BACKUP_START, eventSource, { });
-
     progress.set(progress.BACKUP, 0, 'Starting'); // ensure tools can 'wait' on progress
 
-    backupBoxAndApps(function (error, filename) { // start the backup operation in the background
+    backupBoxAndApps(auditSource, function (error) { // start the backup operation in the background
         if (error) console.error('backup failed.', error);
-
-        eventlog.add(eventlog.ACTION_BACKUP_FINISH, eventSource, { errorMessage: error ? error.message : null, filename: filename });
 
         locker.unlock(locker.OP_FULL_BACKUP);
     });

@@ -552,7 +552,7 @@ function doUpgrade(boxUpdateInfo, callback) {
 
     progress.set(progress.UPDATE, 5, 'Backing up for upgrade');
 
-    backups.backupBoxAndApps(function (error) {
+    backups.backupBoxAndApps({ userId: null, username: 'upgrader' }, function (error) {
         if (error) return upgradeError(error);
 
         superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
@@ -581,7 +581,7 @@ function doUpdate(boxUpdateInfo, callback) {
 
     progress.set(progress.UPDATE, 5, 'Backing up for update');
 
-    backups.backupBoxAndApps(function (error) {
+    backups.backupBoxAndApps({ userId: null, username: 'updater' }, function (error) {
         if (error) return updateError(error);
 
         // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
