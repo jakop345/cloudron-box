@@ -125,7 +125,7 @@ function initialize(callback) {
     if (process.env.BOX_ENV === 'test') return callback();
 
     debug('initializing addon infrastructure');
-    shell.sudo('seutp_infra', [ SETUP_INFRA_CMD ], callback);
+    shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, config.fqdn() ], callback);
 }
 
 function setupAddons(app, addons, callback) {
