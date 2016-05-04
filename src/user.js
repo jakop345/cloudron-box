@@ -339,19 +339,28 @@ function setGroups(userId, groupIds, callback) {
     assert(Array.isArray(groupIds));
     assert.strictEqual(typeof callback, 'function');
 
-    groups.setGroups(userId, groupIds, function (error) {
-        if (error && error.reason === GroupError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, 'One or more groups not found'));
-        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+    groups.getGroups(userId, function (error, oldGroupIds) {
+        if (error && error.reason !== GroupError.NOT_FOUND) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        if (groupIds.some(function (g) { return g === groups.ADMIN_GROUP_ID; })) {
-            getUser(userId, function (error, result) {
-                if (error) return console.error('Failed to send admin change mail.', error);
+        oldGroupIds = oldGroupIds || [];
 
-                mailer.adminChanged(result, true);
-            });
-        }
+        groups.setGroups(userId, groupIds, function (error) {
+            if (error && error.reason === GroupError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, 'One or more groups not found'));
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        callback();
+            var isAdmin = groupIds.some(function (g) { return g === groups.ADMIN_GROUP_ID; });
+            var wasAdmin = oldGroupIds.some(function (g) { return g === groups.ADMIN_GROUP_ID; });
+
+            if ((isAdmin && !wasAdmin) || (!isAdmin && wasAdmin)) {
+                getUser(userId, function (error, result) {
+                    if (error) return console.error('Failed to send admin change mail.', error);
+
+                    mailer.adminChanged(result, isAdmin);
+                });
+            }
+
+            callback(null);
+        });
     });
 }
 

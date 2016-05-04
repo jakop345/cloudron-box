@@ -25,7 +25,7 @@ var NEW_PASSWORD = 'oTHER@#$235';
 var DISPLAY_NAME = 'Nobody cares';
 var DISPLAY_NAME_NEW = 'Somone cares';
 var userObject = null;
-
+var NON_ADMIN_GROUP = 'members';
 var AUDIT_SOURCE = { ip: '1.2.3.4' };
 
 function cleanupUsers(done) {
@@ -38,13 +38,15 @@ function cleanupUsers(done) {
 
 function createOwner(done) {
     groups.create('admin', function () { // ignore error since it might already exist
-        user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
-            expect(error).to.not.be.ok();
-            expect(result).to.be.ok();
+        groups.create(NON_ADMIN_GROUP, function () { // ignore error since it might already exist
+            user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
 
-            userObject = result;
+                userObject = result;
 
-            done();
+                done();
+            });
         });
     });
 }
@@ -456,12 +458,13 @@ describe('User', function () {
         before(createOwner);
         after(cleanupUsers);
 
+        var user1 = {
+            username: 'seconduser',
+            password: 'ASDFkljsf#$^%2354',
+            email: 'some@thi.ng'
+        };
+
         it('make second user admin succeeds', function (done) {
-            var user1 = {
-                username: 'seconduser',
-                password: 'ASDFkljsf#$^%2354',
-                email: 'some@thi.ng'
-            };
 
             var invitor = { username: USERNAME, email: EMAIL };
             user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, AUDIT_SOURCE, { invitor: invitor }, function (error, result) {
@@ -470,18 +473,27 @@ describe('User', function () {
 
                 user1.id = result.id;
 
-                groups.setGroups(user1.id, [ groups.ADMIN_GROUP_ID ], function (error) {
+                user.setGroups(user1.id, [ groups.ADMIN_GROUP_ID ], function (error) {
                     expect(error).to.not.be.ok();
 
                     // one mail for user creation, one mail for admin change
-                    checkMails(1, done);
+                    checkMails(2, done);
                 });
             });
         });
 
-        xit('succeeds to remove admin flag of first user', function (done) {
-            groups.setGroups(USERNAME, [], function (error) {
+        it('add user to non admin group does not trigger admin mail', function (done) {
+            user.setGroups(user1.id, [ groups.ADMIN_GROUP_ID, NON_ADMIN_GROUP ], function (error) {
+                expect(error).to.equal(null);
+
+                checkMails(0, done);
+            });
+        });
+
+        it('succeeds to remove admin flag', function (done) {
+            user.setGroups(user1.id, [ NON_ADMIN_GROUP ], function (error) {
                 expect(error).to.eql(null);
+
                 checkMails(1, done);
             });
         });
