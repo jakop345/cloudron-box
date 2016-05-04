@@ -5,7 +5,8 @@ exports = module.exports = {
     stop: stop
 };
 
-var assert = require('assert'),
+var addons = require('./addons.js'),
+    assert = require('assert'),
     async = require('async'),
     auth = require('./auth.js'),
     certificates = require('./certificates.js'),
@@ -258,6 +259,7 @@ function start(callback) {
         database.initialize,
         cloudron.initialize, // keep this here because it reads activation state that others depend on
         certificates.installAdminCertificate, // keep this before cron to block heartbeats until cert is ready
+        addons.initialize,
         taskmanager.initialize,
         mailer.initialize,
         cron.initialize,

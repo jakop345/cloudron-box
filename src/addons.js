@@ -1,6 +1,8 @@
 'use strict';
 
 exports = module.exports = {
+    initialize: initialize,
+
     setupAddons: setupAddons,
     teardownAddons: teardownAddons,
     backupAddons: backupAddons,
@@ -109,13 +111,19 @@ var KNOWN_ADDONS = {
     }
 };
 
-var RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh');
+var RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh'),
+    SETUP_INFRA_CMD = path.join(__dirname, 'scripts/setup_infra.sh');;
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
 
     var prefix = app ? (app.location || 'naked_domain') : '(no app)';
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+}
+
+function initialize(callback) {
+    debug('initializing addon infrastructure');
+    shell.sudo('seutp_infra', [ SETUP_INFRA_CMD ], callback);
 }
 
 function setupAddons(app, addons, callback) {
@@ -653,7 +661,7 @@ function setupRedis(app, options, callback) {
         name: 'redis-' + app.id,
         Hostname: 'redis-' + app.location,
         Tty: true,
-        Image: 'cloudron/redis:0.8.0', // if you change this, fix setup/INFRA_VERSION as well
+        Image: 'cloudron/redis:0.8.0', // if you change this, fix src/INFRA_VERSION as well
         Cmd: null,
         Volumes: {
             '/tmp': {},

@@ -4,7 +4,7 @@ set -eu -o pipefail
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 
-source ${SOURCE_DIR}/setup/INFRA_VERSION
+source ${SOURCE_DIR}/src/INFRA_VERSION
 
 readonly mysqldatadir="/tmp/mysqldata-$(date +%s)"
 readonly postgresqldatadir="/tmp/postgresqldata-$(date +%s)"
