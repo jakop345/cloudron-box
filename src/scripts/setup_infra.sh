@@ -55,6 +55,7 @@ fi
 # mail (MAIL_SMTP_PORT is 2500 in addons.js. used in mailer.js as well)
 # MAIL_SERVER_NAME is the hostname of the mailserver i.e server uses these certs
 # MAIL_DOMAIN is the domain for which this server is relaying mails
+docker rmi -f cloudron/mail:0.11.0 || true
 mail_container_id=$(docker run --restart=always -d --name="mail" \
     -m 75m \
     --memory-swap 150m \
