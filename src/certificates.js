@@ -262,14 +262,8 @@ function setFallbackCertificate(cert, key, callback) {
 function getFallbackCertificatePath(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var certFilePath = path.join(paths.APP_CERTS_DIR, 'host.cert');
-    var keyFilePath = path.join(paths.APP_CERTS_DIR, 'host.key');
-
-    if (!safe.fs.existsSync(certFilePath) || !safe.fs.existsSync(keyFilePath)) {
-        return callback(new CertificatesError(CertificatesError.NOT_FOUND));
-    }
-
-    callback(null, certFilePath, keyFilePath);
+    // any user fallback cert is always copied over to nginx cert dir
+    callback(null, path.join(paths.NGINX_CERT_DIR, 'host.cert'), path.join(paths.NGINX_CERT_DIR, 'host.key'));
 }
 
 // FIXME: setting admin cert needs to restart the mail container because it uses admin cert
@@ -295,7 +289,7 @@ function setAdminCertificate(cert, key, callback) {
 function getAdminCertificatePath(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var vhost = config.adminFqn();
+    var vhost = config.adminFqdn();
     var certFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.cert');
     var keyFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.key');
 
