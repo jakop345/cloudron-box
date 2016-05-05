@@ -56,6 +56,7 @@ function CertificatesError(reason, errorOrMessage) {
 util.inherits(CertificatesError, Error);
 CertificatesError.INTERNAL_ERROR = 'Internal Error';
 CertificatesError.INVALID_CERT = 'Invalid certificate';
+CertificatesError.NOT_FOUND = 'Not Found';
 
 function getApi(app, callback) {
     assert.strictEqual(typeof app, 'object');
@@ -257,6 +258,19 @@ function setFallbackCertificate(cert, key, callback) {
     });
 }
 
+function getFallbackCertificate(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    var certFilePath = path.join(paths.APP_CERTS_DIR, 'host.cert');
+    var keyFilePath = path.join(paths.APP_CERTS_DIR, 'host.key');
+
+    if (!safe.fs.existsSync(certFilePath) || !safe.fs.existsSync(keyFilePath)) {
+        return callback(new CertificatesError(CertificatesError.NOT_FOUND));
+    }
+
+    callback(null, certFilePath, keyFilePath);
+}
+
 function setAdminCertificate(cert, key, callback) {
     assert.strictEqual(typeof cert, 'string');
     assert.strictEqual(typeof key, 'string');
@@ -274,6 +288,18 @@ function setAdminCertificate(cert, key, callback) {
     if (!safe.fs.writeFileSync(keyFilePath, key)) return callback(new CertificatesError(CertificatesError.INTERNAL_ERROR, safe.error.message));
 
     nginx.configureAdmin(certFilePath, keyFilePath, callback);
+}
+
+function getAdminCertificate(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    var vhost = config.adminFqn();
+    var certFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.cert');
+    var keyFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.key');
+
+    if (fs.existsSync(certFilePath) && fs.existsSync(keyFilePath)) return callback(null, certFilePath, keyFilePath);
+
+    getFallbackCertificate(callback);
 }
 
 function ensureCertificate(app, callback) {
