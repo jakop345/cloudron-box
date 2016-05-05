@@ -159,7 +159,15 @@ function sendMails(queue) {
 
         var transport = nodemailer.createTransport(smtpTransport({
             host: mailServerIp,
-            port: 2500 // this value comes from mail container
+            port: 2500, // this value comes from mail container
+            requireTLS: true, // STARTTLS
+            auth: {
+                user: 'webadmin',
+                pass: 'supersecret'
+            },
+            tls: {
+                rejectUnauthorized: false // so that it works on dev, staging
+            }
         }));
 
         debug('Processing mail queue of size %d (through %s:2500)', queue.length, mailServerIp);
