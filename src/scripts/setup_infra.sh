@@ -18,6 +18,9 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${script_dir}/../INFRA_VERSION" # this injects INFRA_VERSION
 
 readonly fqdn="$1"
+readonly mail_fqdn="$2"
+readonly mail_tls_cert="$3"
+readonly mail_tls_key="$4"
 
 # removing containers ensures containers are launched with latest config updates
 # restore code in appatask does not delete old containers
@@ -59,9 +62,12 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -m 75m \
     --memory-swap 150m \
     -h "${fqdn}" \
-    -e "MAIL_SERVER_NAME=${fqdn}" \
     -e "MAIL_DOMAIN=${fqdn}" \
+    -e "MAIL_SERVER_NAME=${mail_fqdn}" \
     -v "${DATA_DIR}/box/mail:/app/data" \
+    -v "${mail_tls_key}:/app/config/config/tls_key.pem:r" \
+    -v "${mail_tls_cert}:/app/config/config/tls_cert.pem:r" \
+    -p 0.0.0.0:587:2500 \
     --read-only -v /tmp -v /run \
     "${MAIL_IMAGE}")
 echo "Mail container id: ${mail_container_id}"

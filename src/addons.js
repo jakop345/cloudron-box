@@ -21,6 +21,7 @@ exports = module.exports = {
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
+    certificates = require('./certificates.js'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -125,7 +126,11 @@ function initialize(callback) {
     if (process.env.BOX_ENV === 'test') return callback();
 
     debug('initializing addon infrastructure');
-    shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, config.fqdn() ], callback);
+    certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
+        if (error) return callback(error);
+
+        shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath ], callback);
+    });
 }
 
 function setupAddons(app, addons, callback) {

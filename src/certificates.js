@@ -30,7 +30,8 @@ exports = module.exports = {
     setAdminCertificate: setAdminCertificate,
     CertificatesError: CertificatesError,
     validateCertificate: validateCertificate,
-    ensureCertificate: ensureCertificate
+    ensureCertificate: ensureCertificate,
+    getAdminCertificatePath: getAdminCertificatePath
 };
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
@@ -258,7 +259,7 @@ function setFallbackCertificate(cert, key, callback) {
     });
 }
 
-function getFallbackCertificate(callback) {
+function getFallbackCertificatePath(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var certFilePath = path.join(paths.APP_CERTS_DIR, 'host.cert');
@@ -271,6 +272,7 @@ function getFallbackCertificate(callback) {
     callback(null, certFilePath, keyFilePath);
 }
 
+// FIXME: setting admin cert needs to restart the mail container because it uses admin cert
 function setAdminCertificate(cert, key, callback) {
     assert.strictEqual(typeof cert, 'string');
     assert.strictEqual(typeof key, 'string');
@@ -290,7 +292,7 @@ function setAdminCertificate(cert, key, callback) {
     nginx.configureAdmin(certFilePath, keyFilePath, callback);
 }
 
-function getAdminCertificate(callback) {
+function getAdminCertificatePath(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var vhost = config.adminFqn();
@@ -299,7 +301,7 @@ function getAdminCertificate(callback) {
 
     if (fs.existsSync(certFilePath) && fs.existsSync(keyFilePath)) return callback(null, certFilePath, keyFilePath);
 
-    getFallbackCertificate(callback);
+    getFallbackCertificatePath(callback);
 }
 
 function ensureCertificate(app, callback) {
