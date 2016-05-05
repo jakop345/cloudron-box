@@ -165,26 +165,26 @@ function initializeExpressSync() {
     router.get ('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain);
 
     // settings routes
-    router.get ('/api/v1/settings/autoupdate_pattern', settingsScope, routes.settings.getAutoupdatePattern);
-    router.post('/api/v1/settings/autoupdate_pattern', settingsScope, routes.settings.setAutoupdatePattern);
-    router.get ('/api/v1/settings/cloudron_name',      settingsScope, routes.settings.getCloudronName);
-    router.post('/api/v1/settings/cloudron_name',      settingsScope, routes.settings.setCloudronName);
-    router.get ('/api/v1/settings/cloudron_avatar',    settingsScope, routes.settings.getCloudronAvatar);
-    router.post('/api/v1/settings/cloudron_avatar',    settingsScope, multipart, routes.settings.setCloudronAvatar);
-    router.get ('/api/v1/settings/dns_config',         settingsScope, routes.settings.getDnsConfig);
-    router.post('/api/v1/settings/dns_config',         settingsScope, routes.settings.setDnsConfig);
-    router.get ('/api/v1/settings/backup_config',      settingsScope, routes.settings.getBackupConfig);
-    router.post('/api/v1/settings/backup_config',      settingsScope, routes.settings.setBackupConfig);
-    router.post('/api/v1/settings/certificate',        settingsScope, routes.settings.setCertificate);
-    router.post('/api/v1/settings/admin_certificate',  settingsScope, routes.settings.setAdminCertificate);
-    router.get ('/api/v1/settings/time_zone',          settingsScope, routes.settings.getTimeZone);
+    router.get ('/api/v1/settings/autoupdate_pattern', settingsScope, routes.user.requireAdmin, routes.settings.getAutoupdatePattern);
+    router.post('/api/v1/settings/autoupdate_pattern', settingsScope, routes.user.requireAdmin, routes.settings.setAutoupdatePattern);
+    router.get ('/api/v1/settings/cloudron_name',      settingsScope, routes.user.requireAdmin, routes.settings.getCloudronName);
+    router.post('/api/v1/settings/cloudron_name',      settingsScope, routes.user.requireAdmin, routes.settings.setCloudronName);
+    router.get ('/api/v1/settings/cloudron_avatar',    settingsScope, routes.user.requireAdmin, routes.settings.getCloudronAvatar);
+    router.post('/api/v1/settings/cloudron_avatar',    settingsScope, routes.user.requireAdmin, multipart, routes.settings.setCloudronAvatar);
+    router.get ('/api/v1/settings/dns_config',         settingsScope, routes.user.requireAdmin, routes.settings.getDnsConfig);
+    router.post('/api/v1/settings/dns_config',         settingsScope, routes.user.requireAdmin, routes.settings.setDnsConfig);
+    router.get ('/api/v1/settings/backup_config',      settingsScope, routes.user.requireAdmin, routes.settings.getBackupConfig);
+    router.post('/api/v1/settings/backup_config',      settingsScope, routes.user.requireAdmin, routes.settings.setBackupConfig);
+    router.post('/api/v1/settings/certificate',        settingsScope, routes.user.requireAdmin, routes.settings.setCertificate);
+    router.post('/api/v1/settings/admin_certificate',  settingsScope, routes.user.requireAdmin, routes.settings.setAdminCertificate);
+    router.get ('/api/v1/settings/time_zone',          settingsScope, routes.user.requireAdmin, routes.settings.getTimeZone);
 
     // eventlog route
     router.get('/api/v1/eventlog', settingsScope, routes.user.requireAdmin, routes.eventlog.get);
 
     // backup routes
-    router.get ('/api/v1/backups', settingsScope, routes.backups.get);
-    router.post('/api/v1/backups', settingsScope, routes.backups.create);
+    router.get ('/api/v1/backups', settingsScope, routes.user.requireAdmin, routes.backups.get);
+    router.post('/api/v1/backups', settingsScope, routes.user.requireAdmin, routes.backups.create);
     router.get ('/api/v1/backups/:backupId', appsScope, routes.user.requireAdmin, routes.backups.download);
 
     // disable server timeout. we use the timeout middleware to handle timeouts on a route level
