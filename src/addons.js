@@ -403,6 +403,7 @@ function setupSendMail(app, options, callback) {
         'MAIL_SMTP_PORT=2500', // if you change this, change the mail container
         'MAIL_SMTP_USERNAME=' + username,
         'MAIL_SMTP_PASSWORD=' + hat(256), // this is ignored
+        'MAIL_FROM=' + username + '@' + config.fqdn(),
         'MAIL_DOMAIN=' + config.fqdn()
     ];
 
