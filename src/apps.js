@@ -127,8 +127,12 @@ function validatePortBindings(portBindings, tcpPorts) {
         25, /* smtp */
         53, /* dns */
         80, /* http */
+        143, /* imap */
         443, /* https */
+        465, /* smtps */
+        587, /* submission */
         919, /* ssh */
+        993, /* imaps */
         2003, /* graphite (lo) */
         2004, /* graphite (lo) */
         2020, /* install server */
