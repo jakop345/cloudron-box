@@ -65,8 +65,8 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -e "MAIL_DOMAIN=${fqdn}" \
     -e "MAIL_SERVER_NAME=${mail_fqdn}" \
     -v "${DATA_DIR}/box/mail:/app/data" \
-    -v "${mail_tls_key}:/app/config/config/tls_key.pem:r" \
-    -v "${mail_tls_cert}:/app/config/config/tls_cert.pem:r" \
+    -v "${mail_tls_key}:/app/config/config/tls_key.pem:ro" \
+    -v "${mail_tls_cert}:/app/config/config/tls_cert.pem:ro" \
     -p 0.0.0.0:587:2500 \
     --read-only -v /tmp -v /run \
     "${MAIL_IMAGE}")
