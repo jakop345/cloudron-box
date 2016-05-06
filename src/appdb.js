@@ -4,7 +4,6 @@
 
 exports = module.exports = {
     get: get,
-    getBySubdomain: getBySubdomain,
     getByHttpPort: getByHttpPort,
     getByContainerId: getByContainerId,
     add: add,
@@ -105,22 +104,6 @@ function get(id, callback) {
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
         + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
         + ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE apps.id = ? GROUP BY apps.id', [ id ], function (error, result) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-
-        postProcess(result[0]);
-
-        callback(null, result[0]);
-    });
-}
-
-function getBySubdomain(subdomain, callback) {
-    assert.strictEqual(typeof subdomain, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
-        + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
-        + '  FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE location = ? GROUP BY apps.id', [ subdomain ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
