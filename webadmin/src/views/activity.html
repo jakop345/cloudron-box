@@ -2,17 +2,25 @@
 <br/>
 
 <div class="row">
-    <div class="col-md-8 col-md-offset-1">
-        <h1>Activity Log</h1>
-    </div>
-
-    <div class="pagination col-md-offset-1">
-      <button class="btn btn-default btn-outline" ng-click="showPrevPage()" ng-disabled="busy || currentPage <= 1"><i class="fa fa-angle-double-left"></i> prev</button>
-      <button class="btn btn-default btn-outline" ng-click="showNextPage()" ng-disabled="busy || pageItems > eventLogs.length">next <i class="fa fa-angle-double-right"></i></button>
+  <div class="col-md-10 col-md-offset-1">
+      <h1>Activity Log</h1>
   </div>
 </div>
 
-<br/>
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+    <div class="filter">
+      <input type="text" class="form-control" ng-model="search" ng-model-options="{ debounce: 1000 }" ng-change="updateFilter()" placeholder="Search"/>
+      <select class="form-control" ng-model="action" ng-options="a.name for a in actions" ng-change="updateFilter()">
+        <option value="">-- all actions --</option>
+      </select>
+    </div>
+    <div class="pagination pull-right">
+      <button class="btn btn-default btn-outline" ng-click="showPrevPage()" ng-disabled="busy || currentPage <= 1"><i class="fa fa-angle-double-left"></i> prev</button>
+      <button class="btn btn-default btn-outline" ng-click="showNextPage()" ng-disabled="busy || pageItems > eventLogs.length">next <i class="fa fa-angle-double-right"></i></button>
+    </div>
+  </div>
+</div>
 
 <div class="row">
     <div class="col-md-10 col-md-offset-1">

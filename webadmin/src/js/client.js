@@ -380,9 +380,11 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.getEventLogs = function (page, perPage, callback) {
+    Client.prototype.getEventLogs = function (action, search, page, perPage, callback) {
         var config = {
             params: {
+                action: action,
+                search: search,
                 page: page,
                 per_page: perPage
             }
