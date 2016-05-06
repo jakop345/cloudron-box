@@ -7,6 +7,27 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.config = {};
     $scope.client = Client;
 
+    $scope.welcomeStep = -1;
+    $scope.welcomeSteps = [
+        { title: 'intro', page: '#/apps' },
+        { title: 'apps', page: '#/apps' },
+        { title: 'appstore', page: '#/appstore' },
+        { title: 'users', page: '#/users' },
+        { title: 'finish', page: '#/apps' }
+    ];
+
+    $scope.nextWelcomeStep = function () {
+        $scope.welcomeStep += 1;
+
+        if ($scope.welcomeSteps[$scope.welcomeStep]) window.location.href = $scope.welcomeSteps[$scope.welcomeStep].page;
+    };
+
+    $scope.prevWelcomeStep = function () {
+        $scope.welcomeStep -= 1;
+
+        if ($scope.welcomeSteps[$scope.welcomeStep]) window.location.href = $scope.welcomeSteps[$scope.welcomeStep].page;
+    };
+
     $scope.update = {
         busy: false,
         error: {},
@@ -142,6 +163,11 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                             }
                         });
                     }
+
+                    // welcome screen
+                    // setTimeout(function () {
+                    //     $scope.nextWelcomeStep();
+                    // }, 1000);
                 });
             });
         });

@@ -997,3 +997,35 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
         }
     }
 }
+
+
+// ----------------------------
+// Welcome tutorial
+// ----------------------------
+.welcome {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 3000;
+    width: 100%;
+    height: 100%;
+
+    .dialog {
+        display: block;
+        position: absolute;
+        width: 600px;
+        background-color: white;
+        padding: 10px;
+        box-shadow: 0 3px 5px rgba(0,0,0,.5);
+        left: 50%;
+        top: 200px;
+        margin-left: -300px;
+
+        h2 {
+            margin-bottom: 20px;
+            margin-top: 0;
+        }
+    }
+}
