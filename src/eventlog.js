@@ -6,6 +6,7 @@ exports = module.exports = {
     add: add,
     get: get,
     getAllPaged: getAllPaged,
+    getByQueryPaged: getByQueryPaged,
 
     // keep in sync with webadmin index.js filter
     ACTION_ACTIVATE: 'cloudron.activate',
@@ -92,6 +93,20 @@ function getAllPaged(page, perPage, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     eventlogdb.getAllPaged(page, perPage, function (error, boxes) {
+        if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
+
+        callback(null, boxes);
+    });
+}
+
+function getByQueryPaged(action, search, page, perPage, callback) {
+    assert(typeof action === 'string' || action === null);
+    assert(typeof search === 'string' || search === null);
+    assert.strictEqual(typeof page, 'number');
+    assert.strictEqual(typeof perPage, 'number');
+    assert.strictEqual(typeof callback, 'function');
+
+    eventlogdb.getByQueryPaged(action, search, page, perPage, function (error, boxes) {
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
 
         callback(null, boxes);

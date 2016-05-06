@@ -3,6 +3,7 @@
 exports = module.exports = {
     get: get,
     getAllPaged: getAllPaged,
+    getByQueryPaged: getByQueryPaged,
     add: add,
     count: count,
 
@@ -12,6 +13,7 @@ exports = module.exports = {
 var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
+    mysql = require('mysql'),
     safe = require('safetydance');
 
 var EVENTLOGS_FIELDS = [ 'id', 'action', 'source', 'data', 'creationTime' ].join(',');
@@ -41,6 +43,39 @@ function getAllPaged(page, perPage, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + EVENTLOGS_FIELDS + ' FROM eventlog ORDER BY creationTime DESC LIMIT ?,?', [ (page-1)*perPage, perPage ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        results.forEach(postProcess);
+
+        callback(null, results);
+    });
+}
+
+function getByQueryPaged(action, search, page, perPage, callback) {
+    assert(typeof action === 'string' || action === null);
+    assert(typeof search === 'string' || search === null);
+    assert.strictEqual(typeof page, 'number');
+    assert.strictEqual(typeof perPage, 'number');
+    assert.strictEqual(typeof callback, 'function');
+
+    var data = [];
+    var query = 'SELECT ' + EVENTLOGS_FIELDS + ' FROM eventlog';
+
+    if (action || search) query += ' WHERE';
+    if (search) query += ' data LIKE ' + mysql.escape('%' + search + '%');
+    if (action && search) query += ' AND ';
+
+    if (action) {
+        query += ' action=?';
+        data.push(action);
+    }
+
+    query += ' ORDER BY creationTime DESC LIMIT ?,?';
+
+    data.push((page-1)*perPage);
+    data.push(perPage);
+
+    database.query(query, data, function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         results.forEach(postProcess);

@@ -115,5 +115,38 @@ describe('Eventlog API', function () {
                 done();
             });
         });
+
+        it('succeeds with action', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/eventlog')
+                   .query({ access_token: token, page: 1, per_page: 10, action: 'cloudron.activate' })
+                   .end(function (error, result) {
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.eventlogs.length).to.equal(1);
+
+                done();
+            });
+        });
+
+        it('succeeds with search', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/eventlog')
+                   .query({ access_token: token, page: 1, per_page: 10, search: EMAIL })
+                   .end(function (error, result) {
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.eventlogs.length).to.equal(1);
+
+                done();
+            });
+        });
+
+        it('succeeds with search', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/eventlog')
+                   .query({ access_token: token, page: 1, per_page: 10, search: EMAIL, action: 'cloudron.activate' })
+                   .end(function (error, result) {
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.eventlogs.length).to.equal(0);
+
+                done();
+            });
+        });
     });
 });
