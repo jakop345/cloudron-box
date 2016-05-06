@@ -278,4 +278,45 @@ describe('Profile API', function () {
             });
         });
     });
+
+    describe('showTutorial change', function () {
+        before(setup);
+        after(cleanup);
+
+        it('fails due to missing showTutorial', function (done) {
+            superagent.put(SERVER_URL + '/api/v1/profile/tutorial')
+                   .query({ access_token: token_0 })
+                   .send({})
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails due to wrong showTutorial type', function (done) {
+            superagent.put(SERVER_URL + '/api/v1/profile/tutorial')
+                   .query({ access_token: token_0 })
+                   .send({ showTutorial: 'true' })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            superagent.put(SERVER_URL + '/api/v1/profile/tutorial')
+                   .query({ access_token: token_0 })
+                   .send({ showTutorial: false })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(204);
+
+                superagent.get(SERVER_URL + '/api/v1/profile/').query({ access_token: token_0 }).end(function (error, result) {
+                    expect(result.statusCode).to.equal(200);
+                    expect(result.body.showTutorial).to.not.be.ok();
+
+                    done();
+                });
+            });
+        });
+    });
 });
