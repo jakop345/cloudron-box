@@ -16,10 +16,25 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         { title: 'finish', page: '#/apps' }
     ];
 
+    $scope.startTutorial = function () {
+        $scope.welcomeStep = 0;
+        if ($scope.welcomeSteps[$scope.welcomeStep]) window.location.href = $scope.welcomeSteps[$scope.welcomeStep].page;
+    };
+
+    $scope.endTutorial = function () {
+        $scope.welcomeStep = -1;
+
+        Client.setShowTutorial(false, function (error) {
+            if (error) console.error(error);
+        });
+    };
+
     $scope.nextWelcomeStep = function () {
         $scope.welcomeStep += 1;
 
         if ($scope.welcomeSteps[$scope.welcomeStep]) window.location.href = $scope.welcomeSteps[$scope.welcomeStep].page;
+
+        if ($scope.welcomeStep >= $scope.welcomeSteps.length) $scope.endTutorial();
     };
 
     $scope.prevWelcomeStep = function () {
@@ -165,7 +180,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                     }
 
                     // welcome screen
-                    if ($scope.user.showTutorial && $scope.user.admin) $scope.nextWelcomeStep();
+                    if ($scope.user.showTutorial && $scope.user.admin) $scope.startTutorial();
                 });
             });
         });

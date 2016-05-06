@@ -777,6 +777,15 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         return (available - needed) >= 0;
     };
 
+    Client.prototype.setShowTutorial = function (show, callback) {
+        var data = { showTutorial: show };
+
+        $http.put(client.apiOrigin + '/api/v1/profile/tutorial', data).success(function (data, status) {
+            if (status !== 204) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    }
+
     client = new Client();
     return client;
 }]);

@@ -173,6 +173,13 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         });
     };
 
+    $scope.showTutorial = function () {
+        Client.setShowTutorial(true, function (error) {
+            if (error) return console.error(error);
+            $scope.$parent.startTutorial();
+        });
+    };
+
     Client.onReady(function () {
         $scope.tokenInUse = Client._token;
 
