@@ -446,24 +446,6 @@ describe('Apps', function () {
              });
         });
 
-        it('can get appBySubdomain', function (done) {
-            superagent.get(SERVER_URL + '/api/v1/subdomains/' + APP_LOCATION)
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(200);
-                expect(res.body.id).to.eql(APP_ID);
-                expect(res.body.installationState).to.be.ok();
-                done();
-            });
-        });
-
-        it('cannot get invalid app by Subdomain', function (done) {
-            superagent.get(SERVER_URL + '/api/v1/subdomains/tikaloma')
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(404);
-                done();
-            });
-        });
-
         it('cannot uninstall invalid app', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/whatever/uninstall')
                 .send({ password: PASSWORD })

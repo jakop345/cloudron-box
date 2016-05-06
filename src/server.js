@@ -162,9 +162,6 @@ function initializeExpressSync() {
     router.get ('/api/v1/apps/:id/logs',      appsScope, routes.user.requireAdmin, routes.apps.getLogs);
     router.get ('/api/v1/apps/:id/exec',      routes.developer.enabled, appsScope, routes.user.requireAdmin, routes.apps.exec);
 
-    // subdomain routes
-    router.get ('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain);
-
     // settings routes
     router.get ('/api/v1/settings/autoupdate_pattern', settingsScope, routes.user.requireAdmin, routes.settings.getAutoupdatePattern);
     router.post('/api/v1/settings/autoupdate_pattern', settingsScope, routes.user.requireAdmin, routes.settings.setAutoupdatePattern);

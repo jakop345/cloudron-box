@@ -2,7 +2,6 @@
 
 exports = module.exports = {
     getApp: getApp,
-    getAppBySubdomain: getAppBySubdomain,
     getApps: getApps,
     getAppIcon: getAppIcon,
     installApp: installApp,
@@ -62,17 +61,6 @@ function getApp(req, res, next) {
 
     apps.get(req.params.id, function (error, app) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
-        if (error) return next(new HttpError(500, error));
-
-        next(new HttpSuccess(200, removeInternalAppFields(app)));
-    });
-}
-
-function getAppBySubdomain(req, res, next) {
-    assert.strictEqual(typeof req.params.subdomain, 'string');
-
-    apps.getBySubdomain(req.params.subdomain, function (error, app) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such subdomain'));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, removeInternalAppFields(app)));
