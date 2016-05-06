@@ -127,7 +127,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
             }
 
 
-            Client.refreshUserInfo(function (error, result) {
+            Client.refreshUserInfo(function (error) {
                 if (error) return $scope.error(error);
 
                 Client.refreshInstalledApps(function (error) {
@@ -165,9 +165,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                     }
 
                     // welcome screen
-                    // setTimeout(function () {
-                    //     $scope.nextWelcomeStep();
-                    // }, 1000);
+                    if ($scope.user.showTutorial && $scope.user.admin) $scope.nextWelcomeStep();
                 });
             });
         });
