@@ -74,15 +74,6 @@ describe('Profile API', function () {
         });
     }
 
-    function checkMails(number, done) {
-        // mails are enqueued async
-        setTimeout(function () {
-            expect(mailer._getMailQueue().length).to.equal(number);
-            mailer._clearMailQueue();
-            done();
-        }, 500);
-    }
-
     describe('get profile', function () {
         before(setup);
         after(cleanup);
