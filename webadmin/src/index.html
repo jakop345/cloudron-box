@@ -61,46 +61,24 @@
     <!-- Welcome logic -->
     <div class="welcome" ng-show="tutorialSteps[tutorialStep]">
         <div class="dialog" ng-show="tutorialSteps[tutorialStep].title === 'intro'">
-            <h2>Welcome</h2>
-            <p>This page is the configuration interface to your Cloudron.</p>
+            <h2>Welcome {{ user.username }}</h2>
+            <p>This is the configuration interface to your Cloudron to manage installed applications.</p>
             <br/>
             <button class="btn btn-default pull-left" ng-click="endTutorial();">Skip</button>
-            <button class="btn btn-success pull-right" ng-click="nextTutorialStep();">Next</button>
-        </div>
-
-        <div class="dialog" ng-show="tutorialSteps[tutorialStep].title === 'apps'">
-            <h2>Applications</h2>
-            <p>In this screen you see all applications installed on your Cloudron.</p>
-            <p>Use your mouse to hover over an app icon and you will be able to configure or uninstall it.</p>
-            <br/>
-            <button class="btn btn-default pull-left" ng-click="prevTutorialStep();">Back</button>
             <button class="btn btn-success pull-right" ng-click="nextTutorialStep();">Next: <b>Cloudron Store</b></button>
         </div>
 
         <div class="dialog" ng-show="tutorialSteps[tutorialStep].title === 'appstore'">
             <h2>Cloudron Store</h2>
-            <p>Applications can be installed from this screen onto you Cloudron.</p>
-            <p>Each app is installed on its own subdomain.</p>
-            <p>Access control may be applied to each application individually.</p>
+            <p>Install applications by simply giving a subdomain and set per application access control.</p>
             <br/>
             <button class="btn btn-default pull-left" ng-click="prevTutorialStep();">Back</button>
-            <button class="btn btn-success pull-right" ng-click="nextTutorialStep();">Next: <b>Users and Groups</b></button>
+            <button class="btn btn-success pull-right" ng-click="nextTutorialStep();">Last: <b>Users and Groups</b></button>
         </div>
 
         <div class="dialog" ng-show="tutorialSteps[tutorialStep].title === 'users'">
             <h2>Users and Groups</h2>
-            <p>The Cloudron comes with a built-in user and group managment.</p>
-            <p>Most apps are single sign-on integrated.</p>
-            <p>Just use your Cloudron account to log into them.</p>
-            <br/>
-            <button class="btn btn-default pull-left" ng-click="prevTutorialStep();">Back</button>
-            <button class="btn btn-success pull-right" ng-click="nextTutorialStep();">Got it</button>
-        </div>
-
-        <div class="dialog" ng-show="tutorialSteps[tutorialStep].title === 'finish'">
-            <h2>That's it!</h2>
-            <p>This interface will always be available for you at this domain.</p>
-            <p>You might want to bookmark this page so you can find it later again.</p>
+            <p>The Cloudron comes with a built-in user and group managment, just use your Cloudron account to log into the apps.</p>
             <br/>
             <button class="btn btn-default pull-left" ng-click="prevTutorialStep();">Back</button>
             <button class="btn btn-success pull-right" ng-click="nextTutorialStep();">Start using apps and invite users</button>

@@ -10,10 +10,8 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.tutorialStep = -1;
     $scope.tutorialSteps = [
         { title: 'intro', page: '#/apps' },
-        { title: 'apps', page: '#/apps' },
         { title: 'appstore', page: '#/appstore' },
-        { title: 'users', page: '#/users' },
-        { title: 'finish', page: '#/apps' }
+        { title: 'users', page: '#/users' }
     ];
 
     $scope.startTutorial = function () {
@@ -26,6 +24,8 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
 
         Client.setShowTutorial(false, function (error) {
             if (error) console.error(error);
+
+            window.location.href = '#/apps';
         });
     };
 
