@@ -43,7 +43,8 @@ describe('database', function () {
             createdAt: 'sometime back',
             modifiedAt: 'now',
             resetToken: hat(256),
-            displayName: ''
+            displayName: '',
+            showTutorial: false
         };
 
         var USER_1 = {
@@ -55,7 +56,8 @@ describe('database', function () {
             createdAt: 'sometime back',
             modifiedAt: 'now',
             resetToken: '',
-            displayName: 'Herbert 1'
+            displayName: 'Herbert 1',
+            showTutorial: false
         };
 
         var USER_2 = {
@@ -67,7 +69,8 @@ describe('database', function () {
             createdAt: 'sometime back',
             modifiedAt: 'now',
             resetToken: '',
-            displayName: 'Herbert 2'
+            displayName: 'Herbert 2',
+            showTutorial: false
         };
 
         it('can add user', function (done) {
