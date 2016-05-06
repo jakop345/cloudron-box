@@ -102,6 +102,8 @@ CloudronError.NOT_FOUND = 'Not found';
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
+    ensureDkimKeySync();
+
     exports.events.on(exports.EVENT_CONFIGURED, addDnsRecords);
     exports.events.on(exports.EVENT_FIRST_RUN, installAppBundle);
 
@@ -360,6 +362,21 @@ function sendHeartbeat() {
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with %s %s', result.statusCode, result.text);
         else debug('Heartbeat sent to %s', url);
     });
+}
+
+function ensureDkimKeySync() {
+    var dkimPrivateKeyFile = path.join(paths.MAIL_DATA_DIR, 'dkim/' + config.fqdn() + '/private');
+    var dkimPublicKeyFile = path.join(paths.MAIL_DATA_DIR, 'dkim/' + config.fqdn() + '/public');
+
+    if (fs.existsSync(dkimPrivateKeyFile) && fs.existsSync(dkimPublicKeyFile)) {
+        debug('DKIM keys already present');
+        return;
+    }
+
+    debug('Generating new DKIM keys');
+
+    safe.child_process.execSync('openssl genrsa ' + dkimPrivateKeyFile + ' 1024');
+    safe.child_process.execSync('openssl rsa -in ' + dkimPrivateKeyFile + ' -out ' + dkimPublicKeyFile + ' -pubout -outform PEM');
 }
 
 function readDkimPublicKeySync() {

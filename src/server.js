@@ -259,7 +259,7 @@ function start(callback) {
         database.initialize,
         cloudron.initialize, // keep this here because it reads activation state that others depend on
         certificates.installAdminCertificate, // keep this before cron to block heartbeats until cert is ready
-        addons.initialize,
+        addons.initialize, // starts the addons
         taskmanager.initialize,
         mailer.initialize,
         cron.initialize,

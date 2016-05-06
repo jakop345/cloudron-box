@@ -39,7 +39,7 @@ set_progress "10" "Ensuring directories"
 [[ "${is_update}" == "false" ]] && btrfs subvolume create "${DATA_DIR}/box"
 mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/box/certs"
-mkdir -p "${DATA_DIR}/box/mail"
+mkdir -p "${DATA_DIR}/box/mail/dkim/${arg_fqdn}"
 mkdir -p "${DATA_DIR}/box/acme" # acme keys
 mkdir -p "${DATA_DIR}/graphite"
 
