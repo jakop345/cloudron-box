@@ -9,7 +9,7 @@ readonly BOX_SRC_DIR="/home/yellowtent/box"
 readonly DATA_DIR="/home/yellowtent/data"
 readonly ADMIN_LOCATION="my" # keep this in sync with constants.js
 
-source "${script_dir}/INFRA_VERSION" # this injects INFRA_VERSION
+source "${script_dir}/../src/INFRA_VERSION" # this injects INFRA_VERSION
 
 echo "Setting up nginx update page"
 

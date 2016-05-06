@@ -138,7 +138,7 @@ while true; do
 done
 
 echo "Copying INFRA_VERSION"
-$scp22 "${SCRIPT_DIR}/../setup/INFRA_VERSION" root@${server_ip}:.
+$scp22 "${SCRIPT_DIR}/../src/INFRA_VERSION" root@${server_ip}:.
 
 echo "Copying box source"
 cd "${SOURCE_DIR}"
