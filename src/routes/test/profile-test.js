@@ -108,6 +108,10 @@ describe('Profile API', function () {
                 expect(result.body.username).to.equal(USERNAME_0.toLowerCase());
                 expect(result.body.email).to.equal(EMAIL_0.toLowerCase());
                 expect(result.body.admin).to.be.ok();
+                expect(result.body.showTutorial).to.be.ok();
+                expect(result.body.displayName).to.be.a('string');
+                expect(result.body.password).to.not.be.ok();
+                expect(result.body.salt).to.not.be.ok();
 
                 user_0 = result.body;
 
@@ -143,6 +147,7 @@ describe('Profile API', function () {
                 expect(result.body.username).to.equal(USERNAME_0.toLowerCase());
                 expect(result.body.email).to.equal(EMAIL_0.toLowerCase());
                 expect(result.body.admin).to.be.ok();
+                expect(result.body.showTutorial).to.be.ok();
                 expect(result.body.displayName).to.be.a('string');
                 expect(result.body.password).to.not.be.ok();
                 expect(result.body.salt).to.not.be.ok();
@@ -231,7 +236,7 @@ describe('Profile API', function () {
         before(setup);
         after(cleanup);
 
-        it('change password fails due to missing current password', function (done) {
+        it('fails due to missing current password', function (done) {
             superagent.put(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ newPassword: 'some wrong password' })
@@ -241,7 +246,7 @@ describe('Profile API', function () {
             });
         });
 
-        it('change password fails due to missing new password', function (done) {
+        it('fails due to missing new password', function (done) {
             superagent.put(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ password: PASSWORD })
@@ -251,7 +256,7 @@ describe('Profile API', function () {
             });
         });
 
-        it('change password fails due to wrong password', function (done) {
+        it('fails due to wrong password', function (done) {
             superagent.put(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ password: 'some wrong password', newPassword: 'MOre#$%34' })
@@ -261,7 +266,7 @@ describe('Profile API', function () {
             });
         });
 
-        it('change password fails due to invalid password', function (done) {
+        it('fails due to invalid password', function (done) {
             superagent.put(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ password: PASSWORD, newPassword: 'five' })
@@ -271,7 +276,7 @@ describe('Profile API', function () {
             });
         });
 
-        it('change password succeeds', function (done) {
+        it('succeeds', function (done) {
             superagent.put(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ password: PASSWORD, newPassword: 'MOre#$%34' })
