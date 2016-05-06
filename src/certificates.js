@@ -1,5 +1,16 @@
 'use strict';
 
+exports = module.exports = {
+    installAdminCertificate: installAdminCertificate,
+    autoRenew: autoRenew,
+    setFallbackCertificate: setFallbackCertificate,
+    setAdminCertificate: setAdminCertificate,
+    CertificatesError: CertificatesError,
+    validateCertificate: validateCertificate,
+    ensureCertificate: ensureCertificate,
+    getAdminCertificatePath: getAdminCertificatePath
+};
+
 var acme = require('./cert/acme.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
@@ -22,17 +33,6 @@ var acme = require('./cert/acme.js'),
     util = require('util'),
     waitForDns = require('./waitfordns.js'),
     x509 = require('x509');
-
-exports = module.exports = {
-    installAdminCertificate: installAdminCertificate,
-    autoRenew: autoRenew,
-    setFallbackCertificate: setFallbackCertificate,
-    setAdminCertificate: setAdminCertificate,
-    CertificatesError: CertificatesError,
-    validateCertificate: validateCertificate,
-    ensureCertificate: ensureCertificate,
-    getAdminCertificatePath: getAdminCertificatePath
-};
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
