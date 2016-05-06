@@ -3,7 +3,8 @@
 exports = module.exports = {
     get: get,
     update: update,
-    changePassword: changePassword
+    changePassword: changePassword,
+    setShowTutorial: setShowTutorial
 };
 
 var assert = require('assert'),
@@ -30,6 +31,7 @@ function get(req, res, next) {
         result.username = req.user.username;
         result.email = req.user.email;
         result.displayName = req.user.displayName;
+        result.showTutorial = req.user.showTutorial;
 
         groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
             if (error) return next(new HttpError(500, error));
@@ -74,6 +76,20 @@ function changePassword(req, res, next) {
 
     user.setPassword(req.user.id, req.body.newPassword, function (error) {
         if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, error.message));
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Wrong password'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(204));
+    });
+}
+
+function setShowTutorial(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (typeof req.body.showTutorial !== 'boolean') return next(new HttpError(400, 'showTutorial must be a boolean.'));
+
+    user.setShowTutorial(req.user.id, req.body.showTutorial, function (error) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Wrong password'));
         if (error) return next(new HttpError(500, error));
 
