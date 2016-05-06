@@ -23,7 +23,7 @@ var assert = require('assert'),
     DatabaseError = require('./databaseerror'),
     groups = require('./groups.js');
 
-var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'resetToken', 'displayName' ].join(',');
+var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'resetToken', 'displayName', 'showTutorial' ].join(',');
 
 function postProcess(result) {
     assert.strictEqual(typeof result, 'object');
@@ -137,10 +137,11 @@ function add(userId, user, callback) {
     assert.strictEqual(typeof user.modifiedAt, 'string');
     assert.strictEqual(typeof user.resetToken, 'string');
     assert.strictEqual(typeof user.displayName, 'string');
+    assert.strictEqual(typeof user.showTutorial, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
-    var data = [ userId, user.username || null, user.password, user.email, user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName ];
-    database.query('INSERT INTO users (id, username, password, email, salt, createdAt, modifiedAt, resetToken, displayName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', data, function (error, result) {
+    var data = [ userId, user.username || null, user.password, user.email, user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName, user.showTutorial ];
+    database.query('INSERT INTO users (id, username, password, email, salt, createdAt, modifiedAt, resetToken, displayName, showTutorial) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', data, function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -204,6 +205,9 @@ function update(userId, user, callback) {
         } else if (k === 'email') {
             assert.strictEqual(typeof user.email, 'string');
             args.push(user.email);
+        } else if (k === 'showTutorial') {
+            assert.strictEqual(typeof user.showTutorial, 'boolean');
+            args.push(user.showTutorial);
         } else {
             args.push(user[k]);
         }
