@@ -6,7 +6,6 @@ exports = module.exports = {
     hasAccessTo: hasAccessTo,
 
     get: get,
-    getBySubdomain: getBySubdomain,
     getByIpAddress: getByIpAddress,
     getAll: getAll,
     getAllByUser: getAllByUser,
@@ -262,21 +261,6 @@ function get(appId, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     appdb.get(appId, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-        app.iconUrl = getIconUrlSync(app);
-        app.fqdn = app.altDomain || config.appFqdn(app.location);
-
-        callback(null, app);
-    });
-}
-
-function getBySubdomain(subdomain, callback) {
-    assert.strictEqual(typeof subdomain, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    appdb.getBySubdomain(subdomain, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

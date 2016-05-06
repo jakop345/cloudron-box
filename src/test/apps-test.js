@@ -201,24 +201,6 @@ describe('Apps', function () {
             });
         });
 
-        it('cannot getBySubdomain', function (done) {
-            apps.getBySubdomain('moang', function (error, app) {
-                expect(error).to.be.ok();
-                expect(error.reason).to.be(AppsError.NOT_FOUND);
-                done();
-            });
-        });
-
-        it('can getBySubdomain', function (done) {
-            apps.getBySubdomain(APP_0.location, function (error, app) {
-                expect(error).to.be(null);
-                expect(app).to.be.ok();
-                expect(app.iconUrl).to.eql(null);
-                expect(app.fqdn).to.eql(APP_0.location + '-' + config.fqdn());
-                done();
-            });
-        });
-
         it('can getAll', function (done) {
             apps.getAll(function (error, apps) {
                 expect(error).to.be(null);
