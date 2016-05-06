@@ -401,14 +401,14 @@ function setupSendMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var username = app.location ? app.location + '-app' : 'no-reply'; // use no-reply for bare domains
+    var from = app.location ? app.location + '-app' : app.manifest.title.replace(/[^a-zA-Z0-9]/, ''); // use no-reply for bare domains
 
     var env = [
         'MAIL_SMTP_SERVER=mail',
         'MAIL_SMTP_PORT=2500', // if you change this, change the mail container
-        'MAIL_SMTP_USERNAME=' + username,
-        'MAIL_SMTP_PASSWORD=' + hat(256), // this is ignored
-        'MAIL_FROM=' + username + '@' + config.fqdn(),
+        'MAIL_SMTP_USERNAME=' + from, // change this to app.id after apps have moved
+        'MAIL_SMTP_PASSWORD=' + 'app-' + app.id, // this is ignored
+        'MAIL_FROM=' + from + '@' + config.fqdn(),
         'MAIL_DOMAIN=' + config.fqdn()
     ];
 
