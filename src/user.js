@@ -18,7 +18,8 @@ exports = module.exports = {
     createOwner: createOwner,
     getOwner: getOwner,
     sendInvite: sendInvite,
-    setGroups: setGroups
+    setGroups: setGroups,
+    setShowTutorial: setShowTutorial
 };
 
 var assert = require('assert'),
@@ -160,7 +161,8 @@ function createUser(username, password, email, displayName, auditSource, options
                 createdAt: now,
                 modifiedAt: now,
                 resetToken: hat(256),
-                displayName: displayName
+                displayName: displayName,
+                showTutorial: true
             };
 
             userdb.add(user.id, user, function (error) {
@@ -494,5 +496,18 @@ function sendInvite(userId, callback) {
 
             callback(null, userObject.resetToken);
         });
+    });
+}
+
+function setShowTutorial(userId, showTutorial, callback) {
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof showTutorial, 'boolean');
+    assert.strictEqual(typeof callback, 'function');
+
+    userdb.update(userId, { showTutorial: showTutorial }, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        callback(null);
     });
 }
