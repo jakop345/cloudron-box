@@ -65,7 +65,7 @@ describe('Eventlog', function () {
     });
 
     it('getAllPaged succeeds', function (done) {
-        eventlog.getAllPaged(1, 1, function (error, results) {
+        eventlog.getAllPaged(null, null, 1, 1, function (error, results) {
             expect(error).to.be(null);
             expect(results).to.be.an(Array);
             expect(results.length).to.be(1);
