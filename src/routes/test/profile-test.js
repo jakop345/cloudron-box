@@ -10,28 +10,20 @@ var config = require('../../config.js'),
     database = require('../../database.js'),
     tokendb = require('../../tokendb.js'),
     expect = require('expect.js'),
-    groups = require('../../groups.js'),
     mailer = require('../../mailer.js'),
     superagent = require('superagent'),
     nock = require('nock'),
-    server = require('../../server.js'),
-    userdb = require('../../userdb.js');
+    server = require('../../server.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var USERNAME_0 = 'superaDmIn', PASSWORD = 'Foobar?1337', EMAIL_0 = 'silLY@me.com', EMAIL_0_NEW = 'stupID@me.com', DISPLAY_NAME_0_NEW = 'New Name';
-var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'taO@zen.mac';
-var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'USER@foo.bar', EMAIL_2_NEW = 'happy@ME.com';
-var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@FOO.bar';
 
 describe('Profile API', function () {
     this.timeout(5000);
 
-    var user_0, user_1, user_2, user_3 = null;
+    var user_0 = null;
     var token_0;
-    var token_1 = tokendb.generateToken();
-    var token_2 = tokendb.generateToken();
-    var token_3;
 
     function setup(done) {
         server.start(function (error) {
