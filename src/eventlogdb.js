@@ -3,7 +3,6 @@
 exports = module.exports = {
     get: get,
     getAllPaged: getAllPaged,
-    getByQueryPaged: getByQueryPaged,
     add: add,
     count: count,
 
@@ -37,21 +36,7 @@ function get(eventId, callback) {
     });
 }
 
-function getAllPaged(page, perPage, callback) {
-    assert.strictEqual(typeof page, 'number');
-    assert.strictEqual(typeof perPage, 'number');
-    assert.strictEqual(typeof callback, 'function');
-
-    database.query('SELECT ' + EVENTLOGS_FIELDS + ' FROM eventlog ORDER BY creationTime DESC LIMIT ?,?', [ (page-1)*perPage, perPage ], function (error, results) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
-        results.forEach(postProcess);
-
-        callback(null, results);
-    });
-}
-
-function getByQueryPaged(action, search, page, perPage, callback) {
+function getAllPaged(action, search, page, perPage, callback) {
     assert(typeof action === 'string' || action === null);
     assert(typeof search === 'string' || search === null);
     assert.strictEqual(typeof page, 'number');

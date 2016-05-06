@@ -1109,7 +1109,7 @@ describe('database', function () {
         });
 
         it('getAllPaged succeeds', function (done) {
-            eventlogdb.getAllPaged(1, 1, function (error, results) {
+            eventlogdb.getAllPaged(null, null, 1, 1, function (error, results) {
                 expect(error).to.be(null);
                 expect(results).to.be.an(Array);
                 expect(results.length).to.be(1);
