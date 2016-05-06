@@ -30,6 +30,7 @@ function postProcess(result) {
 
     // The username may be null or undefined in the db, let's ensure it is a string
     result.username = result.username || '';
+    result.showTutorial = !!result.showTutorial;
 
     return result;
 }
