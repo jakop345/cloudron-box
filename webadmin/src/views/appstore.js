@@ -60,8 +60,10 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $('#collapseResourceConstraint').collapse('hide');
             $('#collapseMediaLinksCarousel').collapse('show');
 
-            $scope.appInstallForm.$setPristine();
-            $scope.appInstallForm.$setUntouched();
+            if ($scope.appInstallForm) {
+                $scope.appInstallForm.$setPristine();
+                $scope.appInstallForm.$setUntouched();
+            }
         },
 
         showForm: function (force) {

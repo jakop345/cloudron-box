@@ -7,8 +7,8 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.config = {};
     $scope.client = Client;
 
-    $scope.welcomeStep = -1;
-    $scope.welcomeSteps = [
+    $scope.tutorialStep = -1;
+    $scope.tutorialSteps = [
         { title: 'intro', page: '#/apps' },
         { title: 'apps', page: '#/apps' },
         { title: 'appstore', page: '#/appstore' },
@@ -17,30 +17,30 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     ];
 
     $scope.startTutorial = function () {
-        $scope.welcomeStep = 0;
-        if ($scope.welcomeSteps[$scope.welcomeStep]) window.location.href = $scope.welcomeSteps[$scope.welcomeStep].page;
+        $scope.tutorialStep = 0;
+        if ($scope.tutorialSteps[$scope.tutorialStep]) window.location.href = $scope.tutorialSteps[$scope.tutorialStep].page;
     };
 
     $scope.endTutorial = function () {
-        $scope.welcomeStep = -1;
+        $scope.tutorialStep = -1;
 
         Client.setShowTutorial(false, function (error) {
             if (error) console.error(error);
         });
     };
 
-    $scope.nextWelcomeStep = function () {
-        $scope.welcomeStep += 1;
+    $scope.nextTutorialStep = function () {
+        $scope.tutorialStep += 1;
 
-        if ($scope.welcomeSteps[$scope.welcomeStep]) window.location.href = $scope.welcomeSteps[$scope.welcomeStep].page;
+        if ($scope.tutorialSteps[$scope.tutorialStep]) window.location.href = $scope.tutorialSteps[$scope.tutorialStep].page;
 
-        if ($scope.welcomeStep >= $scope.welcomeSteps.length) $scope.endTutorial();
+        if ($scope.tutorialStep >= $scope.tutorialSteps.length) $scope.endTutorial();
     };
 
-    $scope.prevWelcomeStep = function () {
-        $scope.welcomeStep -= 1;
+    $scope.prevTutorialStep = function () {
+        $scope.tutorialStep -= 1;
 
-        if ($scope.welcomeSteps[$scope.welcomeStep]) window.location.href = $scope.welcomeSteps[$scope.welcomeStep].page;
+        if ($scope.tutorialSteps[$scope.tutorialStep]) window.location.href = $scope.tutorialSteps[$scope.tutorialStep].page;
     };
 
     $scope.update = {
