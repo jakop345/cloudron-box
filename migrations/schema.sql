@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users(
     modifiedAt VARCHAR(512) NOT NULL,
     admin INTEGER NOT NULL,
     displayName VARCHAR(512) DEFAULT '',
+    showTutorial BOOLEAN DEFAULT 0,
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS groups(
