@@ -375,7 +375,7 @@ function ensureDkimKeySync() {
 
     debug('Generating new DKIM keys');
 
-    safe.child_process.execSync('openssl genrsa ' + dkimPrivateKeyFile + ' 1024');
+    safe.child_process.execSync('openssl genrsa -out ' + dkimPrivateKeyFile + ' 1024');
     safe.child_process.execSync('openssl rsa -in ' + dkimPrivateKeyFile + ' -out ' + dkimPublicKeyFile + ' -pubout -outform PEM');
 }
 
