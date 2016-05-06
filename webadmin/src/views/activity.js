@@ -3,8 +3,10 @@
 angular.module('Application').controller('ActivityController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
     $scope.config = Client.getConfig();
 
+    $scope.busy = false;
     $scope.eventLogs = [ ];
 
+    // TODO sync this with the eventlog filter
     $scope.actions = [
         { name: 'cloudron.activate', value: 'cloudron.activate' },
         { name: 'app.configure', value: 'app.configure' },
