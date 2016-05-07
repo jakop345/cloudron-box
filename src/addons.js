@@ -401,7 +401,7 @@ function setupSendMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var from = app.location ? app.location + '-app' : app.manifest.title.replace(/[^a-zA-Z0-9]/, ''); // use no-reply for bare domains
+    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
 
     var env = [
         'MAIL_SMTP_SERVER=mail',

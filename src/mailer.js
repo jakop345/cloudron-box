@@ -160,9 +160,8 @@ function sendMails(queue) {
         var transport = nodemailer.createTransport(smtpTransport({
             host: mailServerIp,
             port: 2500, // this value comes from mail container
-            requireTLS: true, // STARTTLS
             auth: {
-                user: 'webadmin',
+                user: 'no-reply', // derive from adminEmail
                 pass: 'supersecret'
             },
             tls: {
