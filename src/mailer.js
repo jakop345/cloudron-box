@@ -163,9 +163,6 @@ function sendMails(queue) {
             auth: {
                 user: 'no-reply', // derive from adminEmail
                 pass: 'supersecret'
-            },
-            tls: {
-                rejectUnauthorized: false // so that it works on dev, staging
             }
         }));
 
