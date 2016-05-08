@@ -502,3 +502,8 @@
 - Fix crash in app auto updater
 - Fix crash with empty timezone
 
+[0.13.3]
+- Enable auth in email addon
+- Add search for activity log
+- Add tutorial for first time users
+
