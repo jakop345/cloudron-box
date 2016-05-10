@@ -507,3 +507,6 @@
 - Add search for activity log
 - Add tutorial for first time users
 
+[0.13.4]
+- Fix mail addon restart issue
+
