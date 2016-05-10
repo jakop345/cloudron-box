@@ -114,24 +114,20 @@ describe('Apps', function () {
     before(function (done) {
         console.log('Starting addons, this can take 10 seconds');
 
-        child_process.exec(__dirname + '/start_addons.sh', function (error) {
-            if (error) return done(error);
-
-            dockerProxy = startDockerProxy(function interceptor(req, res) {
-                if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
-                    imageCreated = true;
-                    res.writeHead(200);
-                    res.end();
-                    return true;
-                } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
-                    imageDeleted = true;
-                    res.writeHead(200);
-                    res.end();
-                    return true;
-                }
-                return false;
-            }, done);
-        });
+        dockerProxy = startDockerProxy(function interceptor(req, res) {
+            if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
+                imageCreated = true;
+                res.writeHead(200);
+                res.end();
+                return true;
+            } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
+                imageDeleted = true;
+                res.writeHead(200);
+                res.end();
+                return true;
+            }
+            return false;
+        }, done);
     });
 
     after(function (done) {
