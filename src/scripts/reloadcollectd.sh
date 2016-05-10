@@ -13,6 +13,17 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
 fi
 
 if [[ "${BOX_ENV}" == "cloudron" ]]; then
-    /etc/init.d/collectd restart
+    for i in {1..10}; do
+        if systemctl is-active collectd.service; then
+            systemctl restart collectd
+            exit 0
+        fi
+
+        echo "Collectd is not active. Maybe some other apptask is restarting it"
+        sleep 6
+    done
+
+    echo "collectd not running"
+    exit 1
 fi
 
