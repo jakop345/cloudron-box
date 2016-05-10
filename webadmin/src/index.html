@@ -62,7 +62,7 @@
     <div class="welcome" ng-show="tutorialSteps[tutorialStep]">
         <div class="dialog" ng-show="tutorialSteps[tutorialStep].title === 'intro'">
             <h2>Welcome {{ user.username }}</h2>
-            <p>This is the configuration interface to your Cloudron to manage installed applications.</p>
+            <p>This page is the administration page of your Cloudron. It shows your installed apps.</p>
             <br/>
             <button class="btn btn-default pull-left" ng-click="endTutorial();">Skip</button>
             <button class="btn btn-success pull-right" ng-click="nextTutorialStep();">Next: <b>Cloudron Store</b></button>
@@ -70,7 +70,8 @@
 
         <div class="dialog" ng-show="tutorialSteps[tutorialStep].title === 'appstore'">
             <h2>Cloudron Store</h2>
-            <p>Install applications by simply giving a subdomain and set per application access control.</p>
+            <p>Install apps easily into any subdomain and control who can access it.</p>
+            <p>Your apps stay updated, backed up and secure with no effort on your part.</p>
             <br/>
             <button class="btn btn-default pull-left" ng-click="prevTutorialStep();">Back</button>
             <button class="btn btn-success pull-right" ng-click="nextTutorialStep();">Last: <b>Users and Groups</b></button>
@@ -78,7 +79,8 @@
 
         <div class="dialog" ng-show="tutorialSteps[tutorialStep].title === 'users'">
             <h2>Users and Groups</h2>
-            <p>The Cloudron comes with a built-in user and group managment, just use your Cloudron account to log into the apps.</p>
+            <p>The Cloudron comes with built-in user and group managment</p>
+            <p>Remember, you can use the same credentials to login to all your apps.</p>
             <br/>
             <button class="btn btn-default pull-left" ng-click="prevTutorialStep();">Back</button>
             <button class="btn btn-success pull-right" ng-click="nextTutorialStep();">Start using apps and invite users</button>
