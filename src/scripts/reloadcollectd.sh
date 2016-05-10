@@ -13,17 +13,16 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
 fi
 
 if [[ "${BOX_ENV}" == "cloudron" ]]; then
+    # when restoring the cloudron with many apps, the apptasks rush in to restart
+    # collectd which makes systemd/collectd very unhappy and puts the collectd in
+    # inactive state
     for i in {1..10}; do
-        if systemctl is-active collectd.service; then
-            systemctl restart collectd
+        echo "Restarting collectd"
+        if systemctl restart collectd; then
             exit 0
         fi
-
-        echo "Collectd is not active. Maybe some other apptask is restarting it"
-        sleep 6
+        echo "Failed to reload collectd. Maybe some other apptask is restarting it"
+        sleep $((RANDOM%30))
     done
-
-    echo "collectd not running"
-    exit 1
 fi
 
