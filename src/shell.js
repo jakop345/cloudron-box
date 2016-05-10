@@ -35,7 +35,7 @@ function exec(tag, file, args, callback) {
     cp.on('exit', function (code, signal) {
         if (code || signal) debug(tag + ' code: %s, signal: %s', code, signal);
 
-        callback(code === 0 ? null : new Error(util.format('Exited with error %s signal %s', code, signal)));
+        callback(code === 0 ? null : new Error(util.format(tag + ' exited with error %s signal %s', code, signal)));
     });
 
     cp.on('error', function (error) {
