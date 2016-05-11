@@ -141,6 +141,13 @@ function start(callback) {
         res.end();
     });
 
+    // this is the bind for the mail addon to authorize apps
+    gServer.bind('ou=recvmail,dc=cloudron', function(req, res, next) {
+        // TODO: validate password
+        debug('recvmail bind: %s', req.dn.toString()); // note: cn can be email or id
+        res.end();
+    });
+
     gServer.bind('ou=apps,dc=cloudron', function(req, res, next) {
         // TODO: validate password
         debug('application bind: %s', req.dn.toString());
