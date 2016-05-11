@@ -33,6 +33,7 @@ var apps = require('./apps.js'),
     backups = require('./backups.js'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
+    constants = require('./constants.js'),
     debug = require('debug')('box:cloudron'),
     df = require('node-df'),
     eventlog = require('./eventlog.js'),
@@ -444,7 +445,7 @@ function addDnsRecords() {
     sysinfo.getIp(function (error, ip) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        var webadminRecord = { subdomain: 'my', type: 'A', values: [ ip ] };
+        var webadminRecord = { subdomain: constants.ADMIN_LOCATION, type: 'A', values: [ ip ] };
         // t=s limits the domainkey to this domain and not it's subdomains
         var dkimRecord = { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', values: [ '"v=DKIM1; t=s; p=' + dkimKey + '"' ] };
         // DMARC requires special setup if report email id is in different domain
