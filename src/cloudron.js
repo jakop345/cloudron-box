@@ -63,6 +63,8 @@ var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
+var ENABLE_INCOMING_MAIL = true;         // TODO: make settings
+
 var gUpdatingDns = false,                // flag for dns update reentrancy
     gCloudronDetails = null,             // cached cloudron details like region,size...
     gAppstoreUserDetails = {},
@@ -450,10 +452,13 @@ function addDnsRecords() {
         // DMARC requires special setup if report email id is in different domain
         var dmarcRecord = { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' ] };
 
+        var mxRecord = { subdomain: '', type: 'MX', values: [ '10 ' + config.adminFqdn() + '.' ] };
+
         var records = [ ];
         if (config.isCustomDomain()) {
             records.push(webadminRecord);
             records.push(dkimRecord);
+            if (ENABLE_INCOMING_MAIL) records.push(mxRecord);
         } else {
             // for custom domains, we show a nakeddomain.html page
             var nakedDomainRecord = { subdomain: '', type: 'A', values: [ ip ] };
@@ -462,6 +467,7 @@ function addDnsRecords() {
             records.push(webadminRecord);
             records.push(dkimRecord);
             records.push(dmarcRecord);
+            if (ENABLE_INCOMING_MAIL) records.push(mxRecord);
         }
 
         debug('addDnsRecords: %j', records);
