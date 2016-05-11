@@ -62,6 +62,8 @@ if [[ "${enable_incoming_mail}" == "true" ]]; then
         -m 75m \
         --memory-swap 150m \
         -h "${fqdn}" \
+        -e "MAIL_DOMAIN=${fqdn}" \
+        -e "MAIL_SERVER_NAME=${mail_fqdn}" \
         -v "${DATA_DIR}/box/recvmail:/app/data" \
         -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
         -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
