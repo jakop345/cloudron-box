@@ -6,6 +6,7 @@ exports = module.exports = {
     API_LOCATION: 'api', // this is unused but reserved for future use (#403)
     SMTP_LOCATION: 'smtp',
     IMAP_LOCATION: 'imap',
+    MAIL_LOCATION: 'my', // not a typo! should be same as admin location until we figure out certificates
 
     ADMIN_NAME: 'Settings',
 

@@ -451,7 +451,7 @@ function addDnsRecords() {
         // DMARC requires special setup if report email id is in different domain
         var dmarcRecord = { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' ] };
 
-        var mxRecord = { subdomain: '', type: 'MX', values: [ '10 ' + config.adminFqdn() + '.' ] };
+        var mxRecord = { subdomain: '', type: 'MX', values: [ '10 ' + config.mailFqdn() + '.' ] };
 
         var records = [ ];
         if (config.isCustomDomain()) {

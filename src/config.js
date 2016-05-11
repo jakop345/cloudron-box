@@ -28,6 +28,7 @@ exports = module.exports = {
     internalAdminOrigin: internalAdminOrigin,
     sysadminOrigin: sysadminOrigin, // caas routes
     adminFqdn: adminFqdn,
+    mailFqdn: mailFqdn,
     appFqdn: appFqdn,
     zoneName: zoneName,
     adminEmail: adminEmail,
@@ -165,6 +166,10 @@ function appFqdn(location) {
 
 function adminFqdn() {
     return appFqdn(constants.ADMIN_LOCATION);
+}
+
+function mailFqdn() {
+    return appFqdn(constants.MAIL_LOCATION);
 }
 
 function adminOrigin() {
