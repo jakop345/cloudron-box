@@ -35,6 +35,7 @@ var appdb = require('./appdb.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    settings = require('./settings.js'),
     shell = require('./shell.js'),
     util = require('util'),
     uuid = require('node-uuid');
@@ -129,7 +130,7 @@ function initialize(callback) {
     certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
         if (error) return callback(error);
 
-        shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath ], callback);
+        shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath, settings.isIncomingMailEnabled() ], callback);
     });
 }
 

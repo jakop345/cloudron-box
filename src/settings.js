@@ -35,6 +35,9 @@ exports = module.exports = {
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
+    // TODO: make proper setting
+    isIncomingMailEnabled: function () { return true; },
+
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
     TIME_ZONE_KEY: 'time_zone',
     CLOUDRON_NAME_KEY: 'cloudron_name',

@@ -14,6 +14,7 @@ MONGODB_IMAGE=cloudron/mongodb:0.9.0
 REDIS_IMAGE=cloudron/redis:0.8.0 # if you change this, fix src/addons.js as well
 MAIL_IMAGE=cloudron/mail:0.12.0
 GRAPHITE_IMAGE=cloudron/graphite:0.8.0
+RECVMAIL_IMAGE=cloudron/recvmail:0.1.0
 
 MYSQL_REPO=cloudron/mysql
 POSTGRESQL_REPO=cloudron/postgresql

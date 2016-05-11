@@ -179,6 +179,9 @@ else
 
     echo "=== Pulling mail relay ==="
     docker pull "${MAIL_IMAGE}"
+
+    echo "=== Pulling recvmail ==="
+    docker pull "${RECVMAIL_IMAGE}"
 fi
 
 echo "==== Install nginx ===="

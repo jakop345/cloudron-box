@@ -21,6 +21,7 @@ readonly fqdn="$1"
 readonly mail_fqdn="$2"
 readonly mail_tls_cert="$3"
 readonly mail_tls_key="$4"
+readonly enable_incoming_mail="$5"
 
 # removing containers ensures containers are launched with latest config updates
 # restore code in appatask does not delete old containers
@@ -55,6 +56,25 @@ if docker images "${GRAPHITE_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | g
     echo "Removed old graphite images"
 fi
 
+# recvmail (exposes port 993 and 25)
+if [[ "${enable_incoming_mail}" == "true" ]]; then
+    recvmail_container_id=$(docker run --restart=always -d --name="recvmail" \
+        -m 75m \
+        --memory-swap 150m \
+        -h "${fqdn}" \
+        -v "${DATA_DIR}/box/recvmail:/app/data" \
+        -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
+        -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
+        -p 993:9993 \
+        -p 25:25 \
+        --read-only -v /tmp -v /run \
+        "${RECVMAIL_IMAGE}")
+    echo "recvmail container id: ${recvmail_container_id}"
+    if docker images "${RECVMAIL_IMAGE}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${RECVMAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+        echo "Removed old recvmail images"
+    fi
+fi
+
 # mail (MAIL_SMTP_PORT is 2500 in addons.js. used in mailer.js as well)
 # MAIL_SERVER_NAME is the hostname of the mailserver i.e server uses these certs
 # MAIL_DOMAIN is the domain for which this server is relaying mails
@@ -67,6 +87,7 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -v "${DATA_DIR}/box/mail:/app/data" \
     -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
     -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
+    -p 587:2500 \
     --read-only -v /tmp -v /run \
     "${MAIL_IMAGE}")
 echo "Mail container id: ${mail_container_id}"

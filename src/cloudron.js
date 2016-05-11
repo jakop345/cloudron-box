@@ -63,8 +63,6 @@ var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
-var ENABLE_INCOMING_MAIL = true;         // TODO: make settings
-
 var gUpdatingDns = false,                // flag for dns update reentrancy
     gCloudronDetails = null,             // cached cloudron details like region,size...
     gAppstoreUserDetails = {},
@@ -458,7 +456,7 @@ function addDnsRecords() {
         if (config.isCustomDomain()) {
             records.push(webadminRecord);
             records.push(dkimRecord);
-            if (ENABLE_INCOMING_MAIL) records.push(mxRecord);
+            if (settings.isIncomingMailEnabled()) records.push(mxRecord);
         } else {
             // for custom domains, we show a nakeddomain.html page
             var nakedDomainRecord = { subdomain: '', type: 'A', values: [ ip ] };
@@ -467,7 +465,7 @@ function addDnsRecords() {
             records.push(webadminRecord);
             records.push(dkimRecord);
             records.push(dmarcRecord);
-            if (ENABLE_INCOMING_MAIL) records.push(mxRecord);
+            if (settings.isIncomingMailEnabled()) records.push(mxRecord);
         }
 
         debug('addDnsRecords: %j', records);
