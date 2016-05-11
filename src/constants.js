@@ -7,6 +7,7 @@ exports = module.exports = {
     SMTP_LOCATION: 'smtp',
     IMAP_LOCATION: 'imap',
     MAIL_LOCATION: 'my', // not a typo! should be same as admin location until we figure out certificates
+    POSTMAN_LOCATION: 'postman', // used in dovecot bounces
 
     ADMIN_NAME: 'Settings',
 
