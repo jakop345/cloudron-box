@@ -68,7 +68,7 @@ if [[ "${enable_incoming_mail}" == "true" ]]; then
         -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
         -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
         -p 993:9993 \
-        -p 25:25 \
+        -p 25:2525 \
         --read-only -v /tmp -v /run \
         "${RECVMAIL_IMAGE}")
     echo "recvmail container id: ${recvmail_container_id}"
