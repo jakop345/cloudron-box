@@ -45,6 +45,12 @@ var NOOP = function (app, options, callback) { return callback(); };
 // setup can be called multiple times for the same app (configure crash restart) and existing data must not be lost
 // teardown is destructive. app data stored with the addon is lost
 var KNOWN_ADDONS = {
+    email: {
+        setup: setupEmail,
+        teardown: teardownEmail,
+        backup: NOOP,
+        restore: NOOP
+    },
     ldap: {
         setup: setupLdap,
         teardown: teardownLdap,
@@ -365,6 +371,33 @@ function teardownSimpleAuth(app, options, callback) {
 
         appdb.unsetAddonConfig(app.id, 'simpleauth', callback);
     });
+}
+
+function setupEmail(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var env = [
+        'MAIL_SMTP_SERVER=' + config.mailFqdn(),
+        'MAIL_SMTP_PORT=587',
+        'MAIL_IMAP_SERVER=' + config.mailFqdn(),
+        'MAIL_IMAP_PORT=993'
+    ];
+
+    debugApp(app, 'Setting up Email');
+
+    appdb.setAddonConfig(app.id, 'email', env, callback);
+}
+
+function teardownEmail(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    debugApp(app, 'Tearing down Email');
+
+    appdb.unsetAddonConfig(app.id, 'email', callback);
 }
 
 function setupLdap(app, options, callback) {
