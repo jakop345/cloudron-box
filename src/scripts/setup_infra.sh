@@ -41,6 +41,12 @@ if [[ -n "${existing_containers}" ]]; then
     echo "${existing_containers}" | xargs docker rm -f
 fi
 
+# a hack to 'refresh' images when testing with hotfix --recreate-infra
+if [[ -z "${infra_version}" ]]; then
+    echo "Removing existing images"
+    docker rmi "${BASE_IMAGE}" "${MYSQL_IMAGE}" "${POSTGRESQL_IMAGE}" "${MONGODB_IMAGE}" "${REDIS_IMAGE}" "${MAIL_IMAGE}" "${GRAPHITE_IMAGE}" "${RECVMAIL_IMAGE}"
+fi
+
 # graphite
 graphite_container_id=$(docker run --restart=always -d --name="graphite" \
     -m 75m \
@@ -72,7 +78,7 @@ if [[ "${enable_incoming_mail}" == "true" ]]; then
         --read-only -v /tmp -v /run \
         "${RECVMAIL_IMAGE}")
     echo "recvmail container id: ${recvmail_container_id}"
-    if docker images "${RECVMAIL_IMAGE}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${RECVMAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+    if docker images "${RECVMAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${RECVMAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
         echo "Removed old recvmail images"
     fi
 fi

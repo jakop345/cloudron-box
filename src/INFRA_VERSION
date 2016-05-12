@@ -22,3 +22,4 @@ MONGODB_REPO=cloudron/mongodb
 REDIS_REPO=cloudron/redis # if you change this, fix src/addons.js as well
 MAIL_REPO=cloudron/mail
 GRAPHITE_REPO=cloudron/graphite
+RECVMAIL_REPO=cloudron/recvmail
