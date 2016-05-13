@@ -382,7 +382,8 @@ function setupEmail(app, options, callback) {
         'MAIL_SMTP_SERVER=' + config.mailFqdn(),
         'MAIL_SMTP_PORT=587',
         'MAIL_IMAP_SERVER=' + config.mailFqdn(),
-        'MAIL_IMAP_PORT=993'
+        'MAIL_IMAP_PORT=993',
+        'MAIL_DOMAIN=' + config.fqdn()
     ];
 
     debugApp(app, 'Setting up Email');
