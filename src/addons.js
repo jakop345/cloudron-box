@@ -379,10 +379,10 @@ function setupEmail(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var env = [
-        'MAIL_SMTP_SERVER=' + config.mailFqdn(),
-        'MAIL_SMTP_PORT=587',
-        'MAIL_IMAP_SERVER=' + config.mailFqdn(),
-        'MAIL_IMAP_PORT=993',
+        'MAIL_SMTP_SERVER=mail',
+        'MAIL_SMTP_PORT=2500',
+        'MAIL_IMAP_SERVER=recvmail',
+        'MAIL_IMAP_PORT=9993',
         'MAIL_DOMAIN=' + config.fqdn()
     ];
 
