@@ -87,6 +87,12 @@ var KNOWN_ADDONS = {
         backup: backupPostgreSql,
         restore: restorePostgreSql
     },
+    recvmail: {
+        setup: setupRecvMail,
+        teardown: teardownRecvMail,
+        backup: NOOP,
+        restore: NOOP
+    },
     redis: {
         setup: setupRedis,
         teardown: teardownRedis,
@@ -460,6 +466,46 @@ function teardownSendMail(app, options, callback) {
     debugApp(app, 'Tearing down sendmail');
 
     appdb.unsetAddonConfig(app.id, 'sendmail', callback);
+}
+
+function setupRecvMail(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    debugApp(app, 'Setting up recvmail');
+
+    // FIXME: to can conflict with a real user!
+    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
+
+    var cmd = [ '/addons/recvmail/service.sh', to ];
+
+    docker.execContainer('recvmail', cmd, { bufferStdout: true }, function (error, stdout) {
+        if (error) return callback(error);
+
+        var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
+        debugApp(app, 'Setting recvmail addon config to %j', env);
+        appdb.setAddonConfig(app.id, 'recvmail', env, callback);
+    });
+}
+
+function teardownRecvMail(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    // FIXME: to can conflict with a real user!
+    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
+
+    var cmd = [ '/addons/recvmail/service.sh', to ];
+
+    debugApp(app, 'Tearing down recvmail');
+
+    docker.execContainer('recvmail', cmd, { }, function (error) {
+        if (error) return callback(error);
+
+        appdb.unsetAddonConfig(app.id, 'recvmail', callback);
+    });
 }
 
 function setupMySql(app, options, callback) {
