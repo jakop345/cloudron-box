@@ -109,13 +109,18 @@ function get_image_id() {
     local snapshot_name="$1"
     local image_id=""
 
-    image_id=$($CURL "https://api.digitalocean.com/v2/images?per_page=100" \
+    local response=$($CURL "https://api.digitalocean.com/v2/images?per_page=100")
+
+    image_id=$(echo "$response" \
        | $JSON images \
        | $JSON -c "this.name === \"${snapshot_name}\"" 0.id)
 
-    if [[ -n "${image_id}" ]]; then
-        echo "${image_id}"
+    if [[ -z "${image_id}" ]]; then
+        echo "Failed to get image id of ${snapshot_name}. reponse: ${response}"
+        return 1
     fi
+
+    echo "${image_id}"
 }
 
 function snapshot_droplet() {
@@ -137,7 +142,10 @@ function snapshot_droplet() {
     done
     debug ""
 
-    get_image_id "${snapshot_name}"
+    if ! image_id=$(get_image_id "${snapshot_name}"); then
+        return 1
+    fi
+    echo "${image_id}"
 }
 
 function destroy_droplet() {
