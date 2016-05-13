@@ -66,7 +66,7 @@ function userSearch(req, res, next) {
                     cn: entry.id,
                     uid: entry.id,
                     mail: entry.email,
-                    mailAlternateAddress: entry.username + '@' + config.fqdn(), // only valid when incoming mail enabled
+                    mailalternateaddress: entry.username + '@' + config.fqdn(), // only valid when incoming mail enabled
                     displayname: displayName,
                     givenName: firstName,
                     username: entry.username,
