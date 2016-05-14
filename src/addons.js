@@ -237,7 +237,8 @@ function getLinksSync(app, addons) {
         switch (addon) {
         case 'mysql': links.push('mysql:mysql'); break;
         case 'postgresql': links.push('postgresql:postgresql'); break;
-        case 'sendmail': links.push('mail:mail'); break;
+        case 'sendmail': links.push('sendmail:sendmail'); break;
+        case 'recvmail': links.push('recvmail:recvmail'); break;
         case 'redis': links.push('redis-' + app.id + ':redis-' + app.id); break;
         case 'mongodb': links.push('mongodb:mongodb'); break;
         default: break;
