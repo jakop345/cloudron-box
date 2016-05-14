@@ -117,20 +117,17 @@ describe('Apps', function () {
         safe.fs.unlinkSync(paths.DATA_DIR + '/INFRA_VERSION');
 
         var args = [
-            __dirname + '/../../scripts/setup_infra.sh',
+            path.resolve(__dirname + '/../../scripts/setup_infra.sh'),
             paths.DATA_DIR,
             config.fqdn(),
             config.adminFqdn(),
             'cert',
             'key',
             config.database().name,
-            config.database().password
+            '"' + config.database().password + '"' // can be empty...
         ];
 
-console.log(args.join(' '));
-
-        child_process.spawn('sudo', args, { shell: true }, function (error) {
-            console.log(done);
+        child_process.exec('sudo  ' + args.join(' '), { stdio: 'pipe' }, function (error) {
             if (error) return done(error);
 
             dockerProxy = startDockerProxy(function interceptor(req, res) {
