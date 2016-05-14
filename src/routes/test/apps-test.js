@@ -115,14 +115,16 @@ describe('Apps', function () {
         console.log('Starting addons, this can take 10 seconds');
 
         safe.fs.unlinkSync(paths.DATA_DIR + '/INFRA_VERSION');
+        safe.fs.writeFileSync(paths.DATA_DIR + '/cert', 'utf8');
+        safe.fs.writeFileSync(paths.DATA_DIR + '/key', 'utf8');
 
         var args = [
             path.resolve(__dirname + '/../../scripts/setup_infra.sh'),
             paths.DATA_DIR,
             config.fqdn(),
             config.adminFqdn(),
-            'cert',
-            'key',
+            paths.DATA_DIR + '/cert',
+            paths.DATA_DIR + '/key',
             config.database().name,
             '"' + config.database().password + '"' // can be empty...
         ];
