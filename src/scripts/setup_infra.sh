@@ -20,7 +20,6 @@ readonly fqdn="$2"
 readonly mail_fqdn="$3"
 readonly mail_tls_cert="$4"
 readonly mail_tls_key="$5"
-readonly enable_incoming_mail="$6"
 
 # removing containers ensures containers are launched with latest config updates
 # restore code in appatask does not delete old containers
@@ -62,24 +61,22 @@ if docker images "${GRAPHITE_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | g
 fi
 
 # recvmail (exposes port 993 and 25)
-if [[ "${enable_incoming_mail}" == "true" ]]; then
-    recvmail_container_id=$(docker run --restart=always -d --name="recvmail" \
-        -m 75m \
-        --memory-swap 150m \
-        -h "${fqdn}" \
-        -e "MAIL_DOMAIN=${fqdn}" \
-        -e "MAIL_SERVER_NAME=${mail_fqdn}" \
-        -v "${data_dir}/box/recvmail:/app/data" \
-        -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
-        -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
-        -p 993:9993 \
-        -p 25:2525 \
-        --read-only -v /tmp -v /run \
-        "${RECVMAIL_IMAGE}")
-    echo "recvmail container id: ${recvmail_container_id}"
-    if docker images "${RECVMAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${RECVMAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
-        echo "Removed old recvmail images"
-    fi
+recvmail_container_id=$(docker run --restart=always -d --name="recvmail" \
+    -m 75m \
+    --memory-swap 150m \
+    -h "${fqdn}" \
+    -e "MAIL_DOMAIN=${fqdn}" \
+    -e "MAIL_SERVER_NAME=${mail_fqdn}" \
+    -v "${data_dir}/box/recvmail:/app/data" \
+    -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
+    -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
+    -p 993:9993 \
+    -p 25:2525 \
+    --read-only -v /tmp -v /run \
+    "${RECVMAIL_IMAGE}")
+echo "recvmail container id: ${recvmail_container_id}"
+if docker images "${RECVMAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${RECVMAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+    echo "Removed old recvmail images"
 fi
 
 # mail (MAIL_SMTP_PORT is 2500 in addons.js. used in mailer.js as well)
