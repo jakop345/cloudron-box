@@ -20,6 +20,8 @@ readonly fqdn="$2"
 readonly mail_fqdn="$3"
 readonly mail_tls_cert="$4"
 readonly mail_tls_key="$5"
+readonly db_name="$6"
+readonly db_password="$7"
 
 # removing containers ensures containers are launched with latest config updates
 # restore code in appatask does not delete old containers
@@ -164,10 +166,10 @@ fi
 if [[ "${infra_version}" == "none" ]]; then
     # if no existing infra was found (for new, upgraded and restored cloudons), download app backups
     echo "Marking installed apps for restore"
-    mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_restore", oldConfigJson = NULL WHERE installationState = "installed"' box
+    mysql -u root --password="${db_password}" -e 'UPDATE apps SET installationState = "pending_restore", oldConfigJson = NULL WHERE installationState = "installed"' ${db_name}
 else
     # if existing infra was found, just mark apps for reconfiguration
-    mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_configure", oldConfigJson = NULL  WHERE installationState = "installed"' box
+    mysql -u root --password="${db_password}" -e 'UPDATE apps SET installationState = "pending_configure", oldConfigJson = NULL  WHERE installationState = "installed"' ${db_name}
 fi
 
 echo -n "${INFRA_VERSION}" > "${data_dir}/INFRA_VERSION"
