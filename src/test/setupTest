@@ -11,7 +11,7 @@ readonly source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 rm -rf $HOME/.cloudron_test
 mkdir -p $HOME/.cloudron_test
 cd $HOME/.cloudron_test
-mkdir -p data/appdata data/box/appicons data/mail data/nginx/cert data/nginx/applications data/collectd/collectd.conf.d data/addons configs data/box/certs data/box/mail/dkim/localhost
+mkdir -p data/appdata data/box/appicons data/mail data/nginx/cert data/nginx/applications data/collectd/collectd.conf.d data/addons configs data/box/certs data/box/mail/dkim/localhost data/box/mail/dkim/foobar.com
 
 webadmin_scopes="root,profile,users,apps,settings"
 webadmin_origin="https://${ADMIN_LOCATION}-localhost"
