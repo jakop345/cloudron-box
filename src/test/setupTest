@@ -8,7 +8,7 @@ readonly source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 ! "${source_dir}/src/test/checkInstall" && exit 1
 
 # create dir structure
-rm -rf $HOME/.cloudron_test
+rm -rf $HOME/.cloudron_test 2>/dev/null || true # some of those docker container data requires sudo to be removed
 mkdir -p $HOME/.cloudron_test
 cd $HOME/.cloudron_test
 mkdir -p data/appdata data/box/appicons data/mail data/nginx/cert data/nginx/applications data/collectd/collectd.conf.d data/addons configs data/box/certs data/box/mail/dkim/localhost data/box/mail/dkim/foobar.com
