@@ -114,24 +114,43 @@ describe('Apps', function () {
     before(function (done) {
         console.log('Starting addons, this can take 10 seconds');
 
-        dockerProxy = startDockerProxy(function interceptor(req, res) {
-            if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
-                imageCreated = true;
-                res.writeHead(200);
-                res.end();
-                return true;
-            } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
-                imageDeleted = true;
-                res.writeHead(200);
-                res.end();
-                return true;
-            }
-            return false;
-        }, done);
+        safe.fs.unlinkSync(paths.DATA_DIR + '/INFRA_VERSION');
+
+        var args = [
+            __dirname + '/../../scripts/setup_infra.sh',
+            paths.DATA_DIR,
+            config.fqdn(),
+            config.adminFqdn(),
+            'cert',
+            'key',
+            config.database().name,
+            config.database().password
+        ];
+
+console.log(args.join(' '));
+
+        child_process.spawn('sudo', args, { shell: true }, function (error) {
+            console.log(done);
+            if (error) return done(error);
+
+            dockerProxy = startDockerProxy(function interceptor(req, res) {
+                if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
+                    imageCreated = true;
+                    res.writeHead(200);
+                    res.end();
+                    return true;
+                } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
+                    imageDeleted = true;
+                    res.writeHead(200);
+                    res.end();
+                    return true;
+                }
+                return false;
+            }, done);
+        });
     });
 
     after(function (done) {
-        // child_process.exec('docker rm -f mysql; docker rm -f postgresql; docker rm -f mongodb; docker rm -f mail', function (error) {
         child_process.exec('docker ps | awk \'{print $1}\' | xargs docker rm -f', function () {
             dockerProxy.close(done);
         });
