@@ -136,7 +136,7 @@ function initialize(callback) {
     certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
         if (error) return callback(error);
 
-        shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath, settings.isIncomingMailEnabled() ], callback);
+        shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, paths.DATA_DIR, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath, settings.isIncomingMailEnabled() ], callback);
     });
 }
 
