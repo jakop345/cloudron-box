@@ -141,6 +141,7 @@ function validatePortBindings(portBindings, tcpPorts) {
         config.get('oauthProxyPort'), /* oauth proxy server (lo) */
         config.get('simpleAuthPort'), /* simple auth server (lo) */
         3306, /* mysql (lo) */
+        4190, /* managesieve */
         8000 /* graphite (lo) */
     ];
 

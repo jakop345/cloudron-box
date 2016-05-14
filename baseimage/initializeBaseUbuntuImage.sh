@@ -67,9 +67,9 @@ iptables -P OUTPUT ACCEPT
 # allow ssh, http, https, ping, dns
 iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 if [ ${SELFHOSTED} == 0 ]; then
-    iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,202,443,587,993 -j ACCEPT
+    iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,202,443,587,993,4190 -j ACCEPT
 else
-    iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,22,443,587,993 -j ACCEPT
+    iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,22,443,587,993,4190 -j ACCEPT
 fi
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
