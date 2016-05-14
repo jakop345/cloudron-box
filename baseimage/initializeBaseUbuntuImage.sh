@@ -178,7 +178,7 @@ else
     docker pull "${GRAPHITE_IMAGE}"
 
     echo "=== Pulling mail relay ==="
-    docker pull "${MAIL_IMAGE}"
+    docker pull "${SENDMAIL_IMAGE}"
 
     echo "=== Pulling recvmail ==="
     docker pull "${RECVMAIL_IMAGE}"

@@ -44,7 +44,7 @@ fi
 # a hack to 'refresh' images when testing with hotfix --recreate-infra
 if [[ -z "${infra_version}" ]]; then
     echo "Removing existing images"
-    docker rmi "${BASE_IMAGE}" "${MYSQL_IMAGE}" "${POSTGRESQL_IMAGE}" "${MONGODB_IMAGE}" "${REDIS_IMAGE}" "${MAIL_IMAGE}" "${GRAPHITE_IMAGE}" "${RECVMAIL_IMAGE}"
+    docker rmi "${BASE_IMAGE}" "${MYSQL_IMAGE}" "${POSTGRESQL_IMAGE}" "${MONGODB_IMAGE}" "${REDIS_IMAGE}" "${SENDMAIL_IMAGE}" "${GRAPHITE_IMAGE}" "${RECVMAIL_IMAGE}"
 fi
 
 # graphite
@@ -95,9 +95,9 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
     -p 587:2500 \
     --read-only -v /tmp -v /run \
-    "${MAIL_IMAGE}")
+    "${SENDMAIL_IMAGE}")
 echo "Mail container id: ${mail_container_id}"
-if docker images "${MAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${MAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+if docker images "${SENDMAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${SENDMAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
     echo "Removed old mail images"
 fi
 

@@ -62,8 +62,8 @@ if ! docker inspect "${MONGODB_IMAGE}" >/dev/null 2>/dev/null; then
     image_missing="true"
 fi
 
-if ! docker inspect "${MAIL_IMAGE}" >/dev/null 2>/dev/null; then
-    echo "docker pull ${MAIL_IMAGE}"
+if ! docker inspect "${SENDMAIL_IMAGE}" >/dev/null 2>/dev/null; then
+    echo "docker pull ${SENDMAIL_IMAGE}"
     image_missing="true"
 fi
 
