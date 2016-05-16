@@ -185,13 +185,6 @@ function start(callback) {
     gServer.search('ou=groups,dc=cloudron', groupSearch);
     gServer.bind('ou=users,dc=cloudron', userBind);
 
-    // this is the bind for the sendmail addon to authorize apps
-    gServer.bind('ou=sendmail,dc=cloudron', function(req, res, next) {
-        // TODO: validate password
-        debug('sendmail bind: %s', req.dn.toString()); // note: cn can be email or id
-        res.end();
-    });
-
     // this is the bind for addons (after bind, they might search and authenticate)
     gServer.bind('ou=addons,dc=cloudron', function(req, res, next) {
         debug('addons bind: %s', req.dn.toString()); // note: cn can be email or id
