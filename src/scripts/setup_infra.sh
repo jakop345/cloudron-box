@@ -74,7 +74,7 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -v "${data_dir}/box/mail:/app/data" \
     -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
     -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
-    -p 587:2500 \
+    -p 587:2525 \
     -p 993:9993 \
     -p 25:2525 \
     --read-only -v /tmp -v /run \
