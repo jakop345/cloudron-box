@@ -44,7 +44,7 @@ fi
 # a hack to 'refresh' images when testing with hotfix --recreate-infra
 if [[ -z "${infra_version}" ]]; then
     echo "Removing existing images"
-    docker rmi "${BASE_IMAGE}" "${MYSQL_IMAGE}" "${POSTGRESQL_IMAGE}" "${MONGODB_IMAGE}" "${REDIS_IMAGE}" "${MAIL_IMAGE}" "${GRAPHITE_IMAGE}"
+    docker rmi "${BASE_IMAGE}" "${MYSQL_IMAGE}" "${POSTGRESQL_IMAGE}" "${MONGODB_IMAGE}" "${REDIS_IMAGE}" "${MAIL_IMAGE}" "${GRAPHITE_IMAGE}" || true
 fi
 
 # graphite
