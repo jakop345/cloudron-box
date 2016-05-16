@@ -44,7 +44,7 @@ fi
 # a hack to 'refresh' images when testing with hotfix --recreate-infra
 if [[ -z "${infra_version}" ]]; then
     echo "Removing existing images"
-    docker rmi "${BASE_IMAGE}" "${MYSQL_IMAGE}" "${POSTGRESQL_IMAGE}" "${MONGODB_IMAGE}" "${REDIS_IMAGE}" "${SENDMAIL_IMAGE}" "${GRAPHITE_IMAGE}" "${RECVMAIL_IMAGE}"
+    docker rmi "${BASE_IMAGE}" "${MYSQL_IMAGE}" "${POSTGRESQL_IMAGE}" "${MONGODB_IMAGE}" "${REDIS_IMAGE}" "${MAIL_IMAGE}" "${GRAPHITE_IMAGE}"
 fi
 
 # graphite
@@ -62,29 +62,10 @@ if docker images "${GRAPHITE_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | g
     echo "Removed old graphite images"
 fi
 
-# recvmail (exposes port 993 and 25)
-recvmail_container_id=$(docker run --restart=always -d --name="recvmail" \
-    -m 75m \
-    --memory-swap 150m \
-    -h "${fqdn}" \
-    -e "MAIL_DOMAIN=${fqdn}" \
-    -e "MAIL_SERVER_NAME=${mail_fqdn}" \
-    -v "${data_dir}/box/recvmail:/app/data" \
-    -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
-    -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
-    -p 993:9993 \
-    -p 25:2525 \
-    --read-only -v /tmp -v /run \
-    "${RECVMAIL_IMAGE}")
-echo "recvmail container id: ${recvmail_container_id}"
-if docker images "${RECVMAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${RECVMAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
-    echo "Removed old recvmail images"
-fi
-
 # mail (MAIL_SMTP_PORT is 2500 in addons.js. used in mailer.js as well)
 # MAIL_SERVER_NAME is the hostname of the mailserver i.e server uses these certs
 # MAIL_DOMAIN is the domain for which this server is relaying mails
-mail_container_id=$(docker run --restart=always -d --name="sendmail" \
+mail_container_id=$(docker run --restart=always -d --name="mail" \
     -m 75m \
     --memory-swap 150m \
     -h "${fqdn}" \
@@ -94,10 +75,12 @@ mail_container_id=$(docker run --restart=always -d --name="sendmail" \
     -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
     -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
     -p 587:2500 \
+    -p 993:9993 \
+    -p 25:2525 \
     --read-only -v /tmp -v /run \
-    "${SENDMAIL_IMAGE}")
+    "${MAIL_IMAGE}")
 echo "Mail container id: ${mail_container_id}"
-if docker images "${SENDMAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${SENDMAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+if docker images "${MAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${MAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
     echo "Removed old mail images"
 fi
 

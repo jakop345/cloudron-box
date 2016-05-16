@@ -177,11 +177,8 @@ else
     echo "=== Pulling graphite docker images ==="
     docker pull "${GRAPHITE_IMAGE}"
 
-    echo "=== Pulling mail relay ==="
-    docker pull "${SENDMAIL_IMAGE}"
-
-    echo "=== Pulling recvmail ==="
-    docker pull "${RECVMAIL_IMAGE}"
+    echo "=== Pulling mail ==="
+    docker pull "${MAIL_IMAGE}"
 fi
 
 echo "==== Install nginx ===="
