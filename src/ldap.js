@@ -139,9 +139,16 @@ function userBind(req, res, next) {
     if (!commonName) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
     var api;
-    // if mail is specified, enforce mail check
-    if (commonName.indexOf('@') !== -1 || attributeName === 'mail') {
+    if (attributeName === 'mail') {
         api = user.verifyWithEmail;
+    } else if (commonName.indexOf('@') !== -1) { // if mail is specified, enforce mail check
+        var parts = commonName.split('@');
+        if (parts[1] === config.fqdn()) { // internal email, verify with username
+            commonName = parts[0];
+            api = user.verify;
+        } else { // external email
+            api = user.verifyWithEmail;
+        }
     } else if (commonName.indexOf('uid-') === 0) {
         api = user.verify;
     } else {
