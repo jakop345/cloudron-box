@@ -151,7 +151,7 @@ function processQueue() {
 function sendMails(queue) {
     assert(util.isArray(queue));
 
-    docker.getContainer('sendmail').inspect(function (error, data) {
+    docker.getContainer('mail').inspect(function (error, data) {
         if (error) return console.error(error);
 
         var mailServerIp = safe.query(data, 'NetworkSettings.IPAddress');
