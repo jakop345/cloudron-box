@@ -41,7 +41,7 @@ function getAppByRequest(req, callback) {
 }
 
 function userSearch(req, res, next) {
-    debug('user search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
+    debug('user search: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
     user.list(function (error, result) {
         if (error) return next(new ldap.OperationsError(error.toString()));
@@ -92,7 +92,7 @@ function userSearch(req, res, next) {
 }
 
 function groupSearch(req, res, next) {
-    debug('group search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
+    debug('group search: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
     user.list(function (error, result){
         if (error) return next(new ldap.OperationsError(error.toString()));
@@ -131,7 +131,7 @@ function groupSearch(req, res, next) {
 }
 
 function userBind(req, res, next) {
-    debug('user bind: %s', req.dn.toString());
+    debug('user bind: %s (from %s)', req.dn.toString(), req.connection.ldap.id);
 
     // extract the common name which might have different attribute names
     var attributeName = Object.keys(req.dn.rdns[0])[0];
