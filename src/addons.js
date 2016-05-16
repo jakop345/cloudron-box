@@ -233,17 +233,22 @@ function getLinksSync(app, addons) {
 
     if (!addons) return links;
 
+    var addMail = false;
+
     for (var addon in addons) {
         switch (addon) {
         case 'mysql': links.push('mysql:mysql'); break;
         case 'postgresql': links.push('postgresql:postgresql'); break;
-        case 'sendmail': links.push('sendmail:sendmail'); break;
-        case 'recvmail': links.push('recvmail:recvmail'); break;
+        case 'sendmail': addMail = true; break;
+        case 'recvmail': addMail = true; break;
+        case 'email': addMail = true; break;
         case 'redis': links.push('redis-' + app.id + ':redis-' + app.id); break;
         case 'mongodb': links.push('mongodb:mongodb'); break;
         default: break;
         }
     }
+
+    if (addMail) links.push('mail:mail');
 
     return links;
 }
@@ -388,7 +393,7 @@ function setupEmail(app, options, callback) {
     var env = [
         'MAIL_SMTP_SERVER=mail',
         'MAIL_SMTP_PORT=2500',
-        'MAIL_IMAP_SERVER=recvmail',
+        'MAIL_IMAP_SERVER=mail',
         'MAIL_IMAP_PORT=9993',
         'MAIL_DOMAIN=' + config.fqdn()
     ];
