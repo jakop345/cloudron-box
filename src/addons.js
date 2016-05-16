@@ -448,20 +448,18 @@ function setupSendMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
+    // FIXME: to can conflict with a real user!
     var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
 
-    var env = [
-        'MAIL_SMTP_SERVER=mail',
-        'MAIL_SMTP_PORT=2500', // if you change this, change the mail container
-        'MAIL_SMTP_USERNAME=' + from, // change this to app.id after apps have moved
-        'MAIL_SMTP_PASSWORD=' + 'app-' + app.id, // this is ignored
-        'MAIL_FROM=' + from + '@' + config.fqdn(),
-        'MAIL_DOMAIN=' + config.fqdn()
-    ];
+    var cmd = [ '/addons/mail/service.sh', 'add-send', from ];
 
-    debugApp(app, 'Setting up sendmail');
+    docker.execContainer('mail', cmd, { bufferStdout: true }, function (error, stdout) {
+        if (error) return callback(error);
 
-    appdb.setAddonConfig(app.id, 'sendmail', env, callback);
+        var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
+        debugApp(app, 'Setting sendmail addon config to %j', env);
+        appdb.setAddonConfig(app.id, 'sendmail', env, callback);
+    });
 }
 
 function teardownSendMail(app, options, callback) {
@@ -471,7 +469,18 @@ function teardownSendMail(app, options, callback) {
 
     debugApp(app, 'Tearing down sendmail');
 
-    appdb.unsetAddonConfig(app.id, 'sendmail', callback);
+    // FIXME: to can conflict with a real user!
+    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
+
+    var cmd = [ '/addons/mail/service.sh', 'remove-send', from ];
+
+    debugApp(app, 'Tearing down sendmail');
+
+    docker.execContainer('mail', cmd, { }, function (error) {
+        if (error) return callback(error);
+
+        appdb.unsetAddonConfig(app.id, 'sendmail', callback);
+    });
 }
 
 function setupRecvMail(app, options, callback) {
@@ -484,9 +493,9 @@ function setupRecvMail(app, options, callback) {
     // FIXME: to can conflict with a real user!
     var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
 
-    var cmd = [ '/addons/recvmail/service.sh', to ];
+    var cmd = [ '/addons/mail/service.sh', 'add-recv', to ];
 
-    docker.execContainer('recvmail', cmd, { bufferStdout: true }, function (error, stdout) {
+    docker.execContainer('mail', cmd, { bufferStdout: true }, function (error, stdout) {
         if (error) return callback(error);
 
         var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
@@ -503,11 +512,11 @@ function teardownRecvMail(app, options, callback) {
     // FIXME: to can conflict with a real user!
     var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
 
-    var cmd = [ '/addons/recvmail/service.sh', to ];
+    var cmd = [ '/addons/mail/service.sh', 'remove-recv', to ];
 
     debugApp(app, 'Tearing down recvmail');
 
-    docker.execContainer('recvmail', cmd, { }, function (error) {
+    docker.execContainer('mail', cmd, { }, function (error) {
         if (error) return callback(error);
 
         appdb.unsetAddonConfig(app.id, 'recvmail', callback);
