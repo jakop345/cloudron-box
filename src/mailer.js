@@ -159,14 +159,14 @@ function sendMails(queue) {
 
         var transport = nodemailer.createTransport(smtpTransport({
             host: mailServerIp,
-            port: 2500, // this value comes from mail container
+            port: 2525, // this value comes from mail container
             auth: {
                 user: 'no-reply', // derive from adminEmail
                 pass: 'supersecret'
             }
         }));
 
-        debug('Processing mail queue of size %d (through %s:2500)', queue.length, mailServerIp);
+        debug('Processing mail queue of size %d (through %s:2525)', queue.length, mailServerIp);
 
         async.mapSeries(queue, function iterator(mailOptions, callback) {
             transport.sendMail(mailOptions, function (error) {

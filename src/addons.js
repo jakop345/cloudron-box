@@ -390,9 +390,10 @@ function setupEmail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
+    // note that "external" access info can be derived from MAIL_DOMAIN (since it's part of user documentation)
     var env = [
         'MAIL_SMTP_SERVER=mail',
-        'MAIL_SMTP_PORT=2500',
+        'MAIL_SMTP_PORT=2525',
         'MAIL_IMAP_SERVER=mail',
         'MAIL_IMAP_PORT=9993',
         'MAIL_DOMAIN=' + config.fqdn()

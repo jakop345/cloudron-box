@@ -62,7 +62,7 @@ if docker images "${GRAPHITE_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | g
     echo "Removed old graphite images"
 fi
 
-# mail (MAIL_SMTP_PORT is 2500 in addons.js. used in mailer.js as well)
+# mail (note: 2525 is hardcoded in mail container and app use this port)
 # MAIL_SERVER_NAME is the hostname of the mailserver i.e server uses these certs
 # MAIL_DOMAIN is the domain for which this server is relaying mails
 mail_container_id=$(docker run --restart=always -d --name="mail" \
