@@ -48,7 +48,7 @@ var KNOWN_ADDONS = {
         setup: setupEmail,
         teardown: teardownEmail,
         backup: NOOP,
-        restore: NOOP
+        restore: setupEmail
     },
     ldap: {
         setup: setupLdap,
@@ -90,7 +90,7 @@ var KNOWN_ADDONS = {
         setup: setupRecvMail,
         teardown: teardownRecvMail,
         backup: NOOP,
-        restore: NOOP
+        restore: setupRecvMail
     },
     redis: {
         setup: setupRedis,
