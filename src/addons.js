@@ -35,7 +35,6 @@ var appdb = require('./appdb.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
-    settings = require('./settings.js'),
     shell = require('./shell.js'),
     util = require('util'),
     uuid = require('node-uuid');
