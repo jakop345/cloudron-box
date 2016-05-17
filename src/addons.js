@@ -395,6 +395,8 @@ function setupEmail(app, options, callback) {
         'MAIL_SMTP_PORT=2525',
         'MAIL_IMAP_SERVER=mail',
         'MAIL_IMAP_PORT=9993',
+        'MAIL_SIEVE_SERVER=mail',
+        'MAIL_SIEVE_PORT=4190',
         'MAIL_DOMAIN=' + config.fqdn()
     ];
 

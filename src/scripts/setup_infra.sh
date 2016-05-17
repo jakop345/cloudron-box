@@ -76,6 +76,7 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
     -p 587:2525 \
     -p 993:9993 \
+    -p 4190:4190 \
     -p 25:2525 \
     --read-only -v /tmp -v /run \
     "${MAIL_IMAGE}")
