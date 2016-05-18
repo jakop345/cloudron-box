@@ -83,7 +83,7 @@ function validateUsername(username) {
     // allow empty usernames
     if (username === '') return null;
 
-    if (username.length <= 2) return new UserError(UserError.BAD_USERNAME, 'Username must be atleast 3 chars');
+    if (username.length <= 1) return new UserError(UserError.BAD_USERNAME, 'Username must be atleast 2 chars');
     if (username.length > 256) return new UserError(UserError.BAD_USERNAME, 'Username too long');
 
     if (RESERVED_USERNAMES.indexOf(username) !== -1) return new UserError(UserError.BAD_USERNAME, 'Username is reserved');
