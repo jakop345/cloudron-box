@@ -10,7 +10,7 @@ if [[ -z "${JSON}" ]]; then
     exit 1
 fi
 
-readonly CURL="curl -s -u ${DIGITAL_OCEAN_TOKEN}:"
+readonly CURL="curl --retry 5 -s -u ${DIGITAL_OCEAN_TOKEN}:"
 
 function debug() {
     echo "$@" >&2
@@ -109,7 +109,10 @@ function get_image_id() {
     local snapshot_name="$1"
     local image_id=""
 
-    local response=$($CURL "https://api.digitalocean.com/v2/images?per_page=100")
+    if ! response=$($CURL "https://api.digitalocean.com/v2/images?per_page=100"); then
+        echo "Failed to get image listing. ${response}"
+        return 1
+    fi
 
     if ! image_id=$(echo "$response" \
        | $JSON images \
@@ -135,14 +138,21 @@ function snapshot_droplet() {
     debug -n "Waiting for snapshot to complete"
 
     while true; do
-        local event_status=`$CURL "https://api.digitalocean.com/v2/droplets/${droplet_id}/actions/${event_id}" | $JSON action.status`
+        if ! response=$($CURL "https://api.digitalocean.com/v2/droplets/${droplet_id}/actions/${event_id}"); then
+            echo "Could not get action status. ${response}"
+            continue
+        fi
+        if ! event_status=$(echo "${response}" | $JSON action.status); then
+            echo "Could not parse action.status from response. ${response}"
+            continue
+        fi
         if [[ "${event_status}" == "completed" ]]; then
             break
         fi
         debug -n "."
         sleep 10
     done
-    debug ""
+    debug "! done"
 
     if ! image_id=$(get_image_id "${snapshot_name}"); then
         return 1
