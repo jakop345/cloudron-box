@@ -311,11 +311,14 @@ function accountSetup(req, res, next) {
 
         user.update(userObject.id, userObject.username, userObject.email, userObject.displayName, auditSource(req), function (error) {
             if (error && error.reason === UserError.ALREADY_EXISTS) return renderAccountSetupSite(res, req, userObject, 'Username already exists');
+            if (error && error.reason === UserError.BAD_USERNAME) return renderAccountSetupSite(res, req, userObject, error.message);
+            if (error && error.reason === UserError.NOT_FOUND) return renderAccountSetupSite(res, req, userObject, 'No such user');
             if (error) return next(new HttpError(500, error));
 
             // setPassword clears the resetToken
             user.setPassword(userObject.id, req.body.password, function (error, result) {
                 if (error && error.reason === UserError.BAD_PASSWORD) return renderAccountSetupSite(res, req, userObject, 'Password invalid');
+
                 if (error) return next(new HttpError(500, error));
 
                 res.redirect(util.format('%s?accessToken=%s&expiresAt=%s', config.adminOrigin(), result.token, result.expiresAt));
