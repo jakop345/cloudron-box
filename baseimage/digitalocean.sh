@@ -111,9 +111,11 @@ function get_image_id() {
 
     local response=$($CURL "https://api.digitalocean.com/v2/images?per_page=100")
 
-    image_id=$(echo "$response" \
+    if ! image_id=$(echo "$response" \
        | $JSON images \
-       | $JSON -c "this.name === \"${snapshot_name}\"" 0.id)
+       | $JSON -c "this.name === \"${snapshot_name}\"" 0.id); then
+        echo "Failed to parse curl response: ${response}"
+    fi
 
     if [[ -z "${image_id}" ]]; then
         echo "Failed to get image id of ${snapshot_name}. reponse: ${response}"
