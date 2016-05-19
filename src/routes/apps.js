@@ -341,7 +341,7 @@ function getLogs(req, res, next) {
 function exec(req, res, next) {
     assert.strictEqual(typeof req.params.id, 'string');
 
-    debug('Execing into app id:%s', req.params.id);
+    debug('Execing into app id:%s and cmd:%s', req.params.id, req.query.cmd);
 
     var cmd = null;
     if (req.query.cmd) {
