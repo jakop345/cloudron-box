@@ -346,7 +346,7 @@ function exec(req, res, next) {
     var cmd = null;
     if (req.query.cmd) {
         cmd = safe.JSON.parse(req.query.cmd);
-        if (!util.isArray(cmd) && cmd.length < 1) return next(new HttpError(400, 'cmd must be array with atleast size 1'));
+        if (!util.isArray(cmd) || cmd.length < 1) return next(new HttpError(400, 'cmd must be array with atleast size 1'));
     }
 
     var columns = req.query.columns ? parseInt(req.query.columns, 10) : null;
