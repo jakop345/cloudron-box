@@ -88,6 +88,8 @@ function validateUsername(username) {
 
     if (RESERVED_USERNAMES.indexOf(username) !== -1) return new UserError(UserError.BAD_USERNAME, 'Username is reserved');
 
+    if (username.indexOf('-app') !== -1) return UserError(UserError.BAD_USERNAME, 'Username pattern is reserved for apps');
+
     return null;
 }
 
