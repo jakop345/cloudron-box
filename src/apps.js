@@ -748,10 +748,14 @@ function exec(appId, options, callback) {
 
         var container = docker.connection.getContainer(app.containerId);
 
-       var execOptions = {
+        var execOptions = {
             AttachStdin: true,
             AttachStdout: true,
             AttachStderr: true,
+            // A pseudo tty is a terminal which processes can detect (for example, disable colored output)
+            // Creating a pseudo terminal also assigns a terminal driver which detects control sequences
+            // When passing binary data, tty must be disabled. In addition, the stdout/stderr becomes a single
+            // unified stream because of the nature of a tty (see https://github.com/docker/docker/issues/19696)
             Tty: options.tty,
             Cmd: cmd
         };
@@ -761,9 +765,18 @@ function exec(appId, options, callback) {
             var startOptions = {
                 Detach: false,
                 Tty: options.tty,
-                stdin: true // this is a dockerode option that enabled openStdin in the modem
+                // hijacking upgrades the docker connection from http to tcp. because of this upgrade,
+                // we can work with half-close connections (not defined in http). this way, the client
+                // can properly signal that stdin is EOF by closing it's side of the socket. In http,
+                // the whole connection will be dropped when stdin get EOF.
+                // https://github.com/apocas/dockerode/commit/b4ae8a03707fad5de893f302e4972c1e758592fe
+                hijack: true,
+                stream: true,
+                stdin: true,
+                stdout: true,
+                stderr: true
             };
-            exec.start(startOptions, function(error, stream) {
+            exec.start(startOptions, function(error, stream /* in hijacked mode, this is a net.socket */) {
                 if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
                 if (options.rows && options.columns) {

@@ -357,7 +357,7 @@ function exec(req, res, next) {
 
     var tty = req.query.tty === 'true' ? true : false;
 
-    apps.exec(req.params.id, { cmd: cmd, rows: rows, columns: columns, tty: tty }, function (error, duplexStream) {
+    apps.exec(req.params.id, { cmd: cmd, rows: rows, columns: columns, tty: tty }, function (error, execStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
@@ -367,8 +367,14 @@ function exec(req, res, next) {
         req.clearTimeout();
         res.sendUpgradeHandshake();
 
-        duplexStream.pipe(res.socket);
-        res.socket.pipe(duplexStream);
+        // allowHalfOpen allows the client to close it's connection (end()) to signal a stdin EOF. If allowHalfOpen
+        // is not set, our socket will call end() automatically. Setting this to true, leaves our socket open
+        // and allows us to send the result of the command (made possible by docker hijacking feature).
+        res.socket.allowHalfOpen = true;
+
+        // When tty is disabled, the execStream is a duplex stream. When enabled, it has stdout/stderr merged.
+        execStream.pipe(res.socket);
+        res.socket.pipe(execStream);
     });
 }
 
