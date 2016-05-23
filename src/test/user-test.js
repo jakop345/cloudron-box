@@ -133,7 +133,7 @@ describe('User', function () {
         });
 
         it('fails due to reserved username', function (done) {
-            user.create('AdMiN', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
+            user.create('Mailer-Daemon', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_USERNAME);
