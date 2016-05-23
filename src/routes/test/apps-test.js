@@ -113,42 +113,22 @@ describe('Apps', function () {
 
     before(function (done) {
         safe.fs.unlinkSync(paths.DATA_DIR + '/INFRA_VERSION');
-        safe.fs.writeFileSync(paths.DATA_DIR + '/cert', 'somecert');
-        safe.fs.writeFileSync(paths.DATA_DIR + '/key', 'somekey');
         child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
 
-        var args = [
-            path.resolve(__dirname + '/../../scripts/setup_infra.sh'),
-            paths.DATA_DIR,
-            config.fqdn(),
-            config.adminFqdn(),
-            paths.DATA_DIR + '/cert',
-            paths.DATA_DIR + '/key',
-            config.database().name,
-            '"' + config.database().password + '"' // can be empty...
-        ];
-
-        console.log('Starting addons, this can take 10 seconds');
-        console.log(args.join(' '));
-
-        child_process.exec('sudo  ' + args.join(' '), { stdio: 'inherit' }, function (error) {
-            if (error) return done(error);
-
-            dockerProxy = startDockerProxy(function interceptor(req, res) {
-                if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
-                    imageCreated = true;
-                    res.writeHead(200);
-                    res.end();
-                    return true;
-                } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
-                    imageDeleted = true;
-                    res.writeHead(200);
-                    res.end();
-                    return true;
-                }
-                return false;
-            }, done);
-        });
+        dockerProxy = startDockerProxy(function interceptor(req, res) {
+            if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
+                imageCreated = true;
+                res.writeHead(200);
+                res.end();
+                return true;
+            } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
+                imageDeleted = true;
+                res.writeHead(200);
+                res.end();
+                return true;
+            }
+            return false;
+        }, done);
     });
 
     after(function (done) {
@@ -163,6 +143,8 @@ describe('Apps', function () {
     */
     function setup(done) {
         config._reset();
+
+        process.env.CREATE_INFRA = 1;
 
         async.series([
             // first clear, then start server. otherwise, taskmanager spins up tasks for obsolete appIds
@@ -218,6 +200,8 @@ describe('Apps', function () {
     }
 
     function cleanup(done) {
+        delete process.env.CREATE_INFRA;
+
         // db is not cleaned up here since it's too late to call it after server.stop. if called before server.stop taskmanager apptasks are unhappy :/
         async.series([
             taskmanager.stopPendingTasks,

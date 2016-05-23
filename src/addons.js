@@ -135,7 +135,7 @@ function debugApp(app, args) {
 }
 
 function initialize(callback) {
-    if (process.env.BOX_ENV === 'test') return callback();
+    if (process.env.BOX_ENV === 'test' && !process.env.CREATE_INFRA) return callback();
 
     debug('initializing addon infrastructure');
     certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
