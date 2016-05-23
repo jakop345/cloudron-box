@@ -37,9 +37,7 @@ echo "Upgrading infrastructure from ${infra_version} to ${INFRA_VERSION}"
 # TODO: be nice and stop addons cleanly (example, shutdown commands)
 existing_containers=$(docker ps -qa)
 echo "Remove containers: ${existing_containers}"
-if [[ -n "${existing_containers}" ]]; then
-    echo "${existing_containers}" | xargs docker rm -f
-fi
+echo "${existing_containers}" | xargs --no-run-if-empty docker rm -f
 
 # a hack to 'refresh' images when testing with hotfix --recreate-infra
 if [[ -z "${infra_version}" ]]; then

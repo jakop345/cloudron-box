@@ -112,11 +112,10 @@ describe('Apps', function () {
     var imageCreated = false;
 
     before(function (done) {
-        console.log('Starting addons, this can take 10 seconds');
-
         safe.fs.unlinkSync(paths.DATA_DIR + '/INFRA_VERSION');
-        safe.fs.writeFileSync(paths.DATA_DIR + '/cert', 'utf8');
-        safe.fs.writeFileSync(paths.DATA_DIR + '/key', 'utf8');
+        safe.fs.writeFileSync(paths.DATA_DIR + '/cert', 'somecert');
+        safe.fs.writeFileSync(paths.DATA_DIR + '/key', 'somekey');
+        child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
 
         var args = [
             path.resolve(__dirname + '/../../scripts/setup_infra.sh'),
@@ -129,7 +128,10 @@ describe('Apps', function () {
             '"' + config.database().password + '"' // can be empty...
         ];
 
-        child_process.exec('sudo  ' + args.join(' '), { stdio: 'pipe' }, function (error) {
+        console.log('Starting addons, this can take 10 seconds');
+        console.log(args.join(' '));
+
+        child_process.exec('sudo  ' + args.join(' '), { stdio: 'inherit' }, function (error) {
             if (error) return done(error);
 
             dockerProxy = startDockerProxy(function interceptor(req, res) {
