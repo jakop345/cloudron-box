@@ -513,3 +513,7 @@
 [0.14.0]
 - You have mail :-)
 
+[0.14.1]
+- 2-character usernames are now allowed
+- Make cloudron CLI push/pull more robust
+
