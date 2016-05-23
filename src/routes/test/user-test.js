@@ -21,7 +21,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 var USERNAME_0 = 'superaDmIn', PASSWORD = 'Foobar?1337', EMAIL_0 = 'silLY@me.com', EMAIL_0_NEW = 'stupID@me.com', DISPLAY_NAME_0_NEW = 'New Name';
 var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'taO@zen.mac';
 var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'USER@foo.bar', EMAIL_2_NEW = 'happy@ME.com';
-var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@FOO.bar';
+var USERNAME_3 = 'ut', EMAIL_3 = 'user3@FOO.bar';
 
 function setup(done) {
     server.start(function (error) {
@@ -362,6 +362,26 @@ describe('User API', function () {
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
                .send({ username: USERNAME_2, email: EMAIL_2 })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('create user reserved name fails', function (done) {
+        superagent.post(SERVER_URL + '/api/v1/users')
+               .query({ access_token: token })
+               .send({ username: 'no-reply' })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('create user with short name fails', function (done) {
+        superagent.post(SERVER_URL + '/api/v1/users')
+               .query({ access_token: token })
+               .send({ username: 'n' })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(400);
             done();
