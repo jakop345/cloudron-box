@@ -69,7 +69,8 @@ function getApi(app, callback) {
         var api = !app.altDomain && tlsConfig.provider === 'caas' ? caas : acme;
 
         var options = { };
-        options.prod = tlsConfig.provider.match(/.*-prod/) !== null;
+        // used by acme backend to determine the LE origin.
+        options.prod = (api === caas) ? !config.isDev() : tlsConfig.provider.match(/.*-prod/) !== null;
 
         // registering user with an email requires A or MX record (https://github.com/letsencrypt/boulder/issues/1197)
         // we cannot use admin@fqdn because the user might not have set it up.
