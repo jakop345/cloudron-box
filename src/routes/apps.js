@@ -338,6 +338,28 @@ function getLogs(req, res, next) {
     });
 }
 
+function demuxStream(stream, stdin) {
+    var header = null;
+
+    stream.on('readable', function() {
+        header = header || stream.read(4);
+
+        while (header !== null) {
+            var length = header.readUInt32BE(0);
+            if (length === 0) {
+                header = null;
+                return stdin.end(); // EOF
+            }
+
+            var payload = stream.read(length);
+
+            if (payload === null) break;
+            stdin.write(payload);
+            header = stream.read(4);
+        }
+    });
+}
+
 function exec(req, res, next) {
     assert.strictEqual(typeof req.params.id, 'string');
 
@@ -357,7 +379,7 @@ function exec(req, res, next) {
 
     var tty = req.query.tty === 'true' ? true : false;
 
-    apps.exec(req.params.id, { cmd: cmd, rows: rows, columns: columns, tty: tty }, function (error, execStream) {
+    apps.exec(req.params.id, { cmd: cmd, rows: rows, columns: columns, tty: tty }, function (error, duplexStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
@@ -370,11 +392,20 @@ function exec(req, res, next) {
         // allowHalfOpen allows the client to close it's connection (end()) to signal a stdin EOF. If allowHalfOpen
         // is not set, our socket will call end() automatically. Setting this to true, leaves our socket open
         // and allows us to send the result of the command (made possible by docker hijacking feature).
+        // That said, we don't use half-close feature and instead wrap the stdin in a custom format to signal
+        // EOF because nginx (our reverse proxy) does not support half-closed connections
         res.socket.allowHalfOpen = true;
 
-        // When tty is disabled, the execStream is a duplex stream. When enabled, it has stdout/stderr merged.
-        execStream.pipe(res.socket);
-        res.socket.pipe(execStream);
+        // When tty is disabled, the duplexStream has 2 separate streams. When enabled, it has stdout/stderr merged.
+        duplexStream.pipe(res.socket);
+
+        if (tty) {
+            res.socket.pipe(duplexStream); // in tty mode, the client always waits for server to exit
+        } else {
+            demuxStream(res.socket, duplexStream);
+            res.socket.on('error', function () { duplexStream.end(); });
+            res.socket.on('end', function () { duplexStream.end(); });
+        }
     });
 }
 
