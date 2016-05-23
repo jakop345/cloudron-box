@@ -389,13 +389,6 @@ function exec(req, res, next) {
         req.clearTimeout();
         res.sendUpgradeHandshake();
 
-        // allowHalfOpen allows the client to close it's connection (end()) to signal a stdin EOF. If allowHalfOpen
-        // is not set, our socket will call end() automatically. Setting this to true, leaves our socket open
-        // and allows us to send the result of the command (made possible by docker hijacking feature).
-        // That said, we don't use half-close feature and instead wrap the stdin in a custom format to signal
-        // EOF because nginx (our reverse proxy) does not support half-closed connections
-        res.socket.allowHalfOpen = true;
-
         // When tty is disabled, the duplexStream has 2 separate streams. When enabled, it has stdout/stderr merged.
         duplexStream.pipe(res.socket);
 
