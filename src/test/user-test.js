@@ -142,6 +142,36 @@ describe('User', function () {
             });
         });
 
+        it('fails due to short username', function (done) {
+            user.create('Z', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+
+                done();
+            });
+        });
+
+        it('fails due to long username', function (done) {
+            user.create(new Array(257).fill('Z').join(''), PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+
+                done();
+            });
+        });
+
+        it('fails due to reserved pattern', function (done) {
+            user.create('maybe-app', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+
+                done();
+            });
+        });
+
         it('succeeds and attempts to send invite', function (done) {
             user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).not.to.be.ok();
