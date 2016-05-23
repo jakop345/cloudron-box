@@ -132,9 +132,8 @@ describe('Apps', function () {
     });
 
     after(function (done) {
-        child_process.exec('docker ps | awk \'{print $1}\' | xargs docker rm -f', function () {
-            dockerProxy.close(done);
-        });
+        // child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
+        dockerProxy.close(done);
     });
 
 
@@ -603,6 +602,8 @@ describe('Apps', function () {
         var appResult = null /* the json response */, appEntry = null /* entry from database */;
 
         it('can install test app', function (done) {
+            console.log('This test can take ~30 seconds to start as it waits for infra to be ready');
+
             var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
             var count = 0;
@@ -800,11 +801,11 @@ describe('Apps', function () {
                 expect(data.Config.Env).to.contain('POSTGRESQL_PASSWORD=' + password);
                 expect(data.Config.Env).to.contain('POSTGRESQL_DATABASE=' + dbname);
 
-                var cmd = util.format('bash -c "PGPASSWORD=%s psql -q -h %s -U%s --dbname=%s -e \'CREATE TABLE IF NOT EXISTS foo (id INT);\'"',
+                var cmd = util.format('bash -c "PGPASSWORD=%s psql -q -h %s -U%s --dbname=%s -c \'CREATE TABLE IF NOT EXISTS foo (id INT);\'"',
                     password, 'postgresql', username, dbname);
 
-                child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 5000 }, function (error, stdout, stderr) {
-                    expect(!error).to.be.ok();
+                child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 20000 }, function (error, stdout, stderr) {
+                    expect(error).to.not.be.ok();
                     expect(stdout.length).to.be(0);
                     expect(stderr.length).to.be(0);
                     done();
