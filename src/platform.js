@@ -11,6 +11,7 @@ var apps = require('./apps.js'),
     debug = require('debug')('box:platform'),
     fs = require('fs'),
     infra = require('./infra_version.js'),
+    ini = require('ini'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
@@ -18,6 +19,8 @@ var apps = require('./apps.js'),
     util = require('util');
 
 var SETUP_INFRA_CMD = path.join(__dirname, 'scripts/setup_infra.sh');
+
+var gAddonVars = null;
 
 function initialize(callback) {
     if (process.env.BOX_ENV === 'test' && !process.env.CREATE_INFRA) return callback();
@@ -52,6 +55,8 @@ function initialize(callback) {
             if (error) return callback(error);
 
             fs.writeFileSync(paths.INFRA_VERSION_FILE, JSON.stringify(infra));
+
+            loadAddonVarsSync();
 
             callback();
         });
@@ -90,4 +95,13 @@ function startAddons(callback) {
             callback(error);
         });
     });
+}
+
+function loadAddonVarsSync() {
+    gAddonVars = {
+        mail: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mail_vars.sh', 'utf8')),
+        postgresql: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/postgresql_vars.sh', 'utf8')),
+        mysql: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh', 'utf8')),
+        mongodb: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mongodb_vars.sh', 'utf8'))
+    };
 }

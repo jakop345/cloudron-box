@@ -40,8 +40,8 @@ echo "Graphite container id: ${graphite_container_id}"
 readonly mail_image=$(node -e "console.log(require('${infra_version}').images.mail.tag);")
 mail_addon_root_password=$(pwgen -1 -s)
 cat > "${data_dir}/addons/mail_vars.sh" <<EOF
-readonly MAIL_ROOT_USERNAME=no-reply
-readonly MAIL_ROOT_PASSWORD=${mail_addon_root_password}
+MAIL_ROOT_USERNAME=no-reply
+MAIL_ROOT_PASSWORD=${mail_addon_root_password}
 EOF
 mail_container_id=$(docker run --restart=always -d --name="mail" \
     -m 75m \
@@ -66,8 +66,8 @@ readonly mysql_image=$(node -e "console.log(require('${infra_version}').images.m
 mysql_addon_root_password=$(pwgen -1 -s)
 docker0_ip=$(/sbin/ifconfig docker0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')
 cat > "${data_dir}/addons/mysql_vars.sh" <<EOF
-readonly MYSQL_ROOT_PASSWORD='${mysql_addon_root_password}'
-readonly MYSQL_ROOT_HOST='${docker0_ip}'
+MYSQL_ROOT_PASSWORD='${mysql_addon_root_password}'
+MYSQL_ROOT_HOST='${docker0_ip}'
 EOF
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -m 256m \
@@ -83,7 +83,7 @@ echo "MySQL container id: ${mysql_container_id}"
 readonly postgresql_image=$(node -e "console.log(require('${infra_version}').images.postgresql.tag);")
 postgresql_addon_root_password=$(pwgen -1 -s)
 cat > "${data_dir}/addons/postgresql_vars.sh" <<EOF
-readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_addon_root_password}'
+POSTGRESQL_ROOT_PASSWORD='${postgresql_addon_root_password}'
 EOF
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -m 100m \
@@ -99,7 +99,7 @@ echo "PostgreSQL container id: ${postgresql_container_id}"
 readonly mongodb_image=$(node -e "console.log(require('${infra_version}').images.mongodb.tag);")
 mongodb_addon_root_password=$(pwgen -1 -s)
 cat > "${data_dir}/addons/mongodb_vars.sh" <<EOF
-readonly MONGODB_ROOT_PASSWORD='${mongodb_addon_root_password}'
+MONGODB_ROOT_PASSWORD='${mongodb_addon_root_password}'
 EOF
 mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
     -m 100m \
