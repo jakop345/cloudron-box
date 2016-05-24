@@ -20,30 +20,6 @@ readonly fqdn="$2"
 readonly mail_fqdn="$3"
 readonly mail_tls_cert="$4"
 readonly mail_tls_key="$5"
-readonly db_name="$6"
-readonly db_password="$7"
-
-# removing containers ensures containers are launched with latest config updates
-# restore code in appatask does not delete old containers
-infra_version="none"
-[[ -f "${data_dir}/INFRA_VERSION" ]] && infra_version=$(cat "${data_dir}/INFRA_VERSION")
-if [[ "${infra_version}" == "${INFRA_VERSION}" ]]; then
-    echo "Infrastructure is upto date"
-    exit 0
-fi
-
-echo "Upgrading infrastructure from ${infra_version} to ${INFRA_VERSION}"
-
-# TODO: be nice and stop addons cleanly (example, shutdown commands)
-existing_containers=$(docker ps -qa)
-echo "Remove containers: ${existing_containers}"
-echo "${existing_containers}" | xargs --no-run-if-empty docker rm -f
-
-# a hack to 'refresh' images when testing with hotfix --recreate-infra
-if [[ -z "${infra_version}" ]]; then
-    echo "Removing existing images"
-    docker rmi "${BASE_IMAGE}" "${MYSQL_IMAGE}" "${POSTGRESQL_IMAGE}" "${MONGODB_IMAGE}" "${REDIS_IMAGE}" "${MAIL_IMAGE}" "${GRAPHITE_IMAGE}" || true
-fi
 
 # graphite
 graphite_container_id=$(docker run --restart=always -d --name="graphite" \
@@ -143,15 +119,3 @@ fi
 if docker images "${REDIS_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${REDIS_IMAGE}" | xargs --no-run-if-empty docker rmi; then
     echo "Removed old redis images"
 fi
-
-# only touch apps in installed state. any other state is just resumed by the taskmanager
-if [[ "${infra_version}" == "none" ]]; then
-    # if no existing infra was found (for new, upgraded and restored cloudons), download app backups
-    echo "Marking installed apps for restore"
-    mysql -u root --password="${db_password}" -e 'UPDATE apps SET installationState = "pending_restore", oldConfigJson = NULL WHERE installationState = "installed"' ${db_name}
-else
-    # if existing infra was found, just mark apps for reconfiguration
-    mysql -u root --password="${db_password}" -e 'UPDATE apps SET installationState = "pending_configure", oldConfigJson = NULL  WHERE installationState = "installed"' ${db_name}
-fi
-
-echo -n "${INFRA_VERSION}" > "${data_dir}/INFRA_VERSION"
