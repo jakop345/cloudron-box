@@ -5,6 +5,7 @@ exports = module.exports = {
 };
 
 var apps = require('./apps.js'),
+    assert = require('assert'),
     config = require('./config.js'),
     certificates = require('./certificates.js'),
     debug = require('debug')('box:platform'),
@@ -39,21 +40,17 @@ function initialize(callback) {
 
     if (!existingInfra.INFRA_VERSION) removeImagesSync(); // a hack for --recreate-infra
 
-    certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
+    startAddons(function (error) {
         if (error) return callback(error);
 
-        shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, paths.DATA_DIR, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath ], function (error) {
+        var func = existingInfra ? apps.configureInstalledApps : apps.restoreInstalledApps;
+
+        func(function (error) {
             if (error) return callback(error);
 
-            var func = existingInfra ? apps.configureInstalledApps : apps.restoreInstalledApps;
+            fs.writeFileSync(paths.INFRA_VERSION_FILE, currentInfraData);
 
-            func(function (error) {
-                if (error) return callback(error);
-
-                fs.writeFileSync(paths.INFRA_VERSION_FILE, currentInfraData);
-
-                callback();
-            });
+            callback();
         });
     });
 }
@@ -67,4 +64,16 @@ function stopContainersSync() {
     // TODO: be nice and stop addons cleanly (example, shutdown commands)
     debug('stopping existing containers');
     shell.execSync('stopContainersSync', 'docker ps -qa | xargs --no-run-if-empty docker rm -f');
+}
+
+function startAddons(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
+        if (error) return callback(error);
+
+        shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, paths.DATA_DIR, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath ], function (error) {
+            callback(error);
+        });
+    });
 }
