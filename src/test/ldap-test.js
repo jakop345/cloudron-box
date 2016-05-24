@@ -139,8 +139,11 @@ function setup(done) {
 }
 
 function cleanup(done) {
-    dockerProxy.close(function () {
-        database._clear(done);
+    async.series([
+        ldapServer.stop,
+        database._clear
+    ], function () {
+        dockerProxy.close(function () { done(); }); // some strange error
     });
 }
 
