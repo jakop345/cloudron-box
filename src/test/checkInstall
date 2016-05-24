@@ -5,8 +5,6 @@ set -eu
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly TEST_IMAGE="cloudron/test:15.0.0"
 
-source ${SOURCE_DIR}/src/INFRA_VERSION
-
 # reset sudo timestamp to avoid wrong success
 sudo -k || sudo --reset-timestamp
 
@@ -37,35 +35,14 @@ done
 
 image_missing=""
 
-if ! docker inspect "${TEST_IMAGE}" >/dev/null 2>/dev/null; then
-    echo "docker pull ${TEST_IMAGE}"
-    image_missing="true"
-fi
+images=$(node -e "var i = require('${SOURCE_DIR}/src/infra_version.js'); console.log(Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join('\n'));")
 
-if ! docker inspect "${REDIS_IMAGE}" >/dev/null 2>/dev/null; then
-    echo "docker pull ${REDIS_IMAGE}"
-    image_missing="true"
-fi
-
-if ! docker inspect "${MYSQL_IMAGE}" >/dev/null 2>/dev/null; then
-    echo "docker pull ${MYSQL_IMAGE}"
-    image_missing="true"
-fi
-
-if ! docker inspect "${POSTGRESQL_IMAGE}" >/dev/null 2>/dev/null; then
-    echo "docker pull ${POSTGRESQL_IMAGE}"
-    image_missing="true"
-fi
-
-if ! docker inspect "${MONGODB_IMAGE}" >/dev/null 2>/dev/null; then
-    echo "docker pull ${MONGODB_IMAGE}"
-    image_missing="true"
-fi
-
-if ! docker inspect "${MAIL_IMAGE}" >/dev/null 2>/dev/null; then
-    echo "docker pull ${MAIL_IMAGE}"
-    image_missing="true"
-fi
+for image in ${images}; do
+    if ! docker inspect "${image}" >/dev/null 2>/dev/null; then
+        echo "docker pull ${image}"
+        image_missing="true"
+    fi
+done
 
 if [[ "${image_missing}" == "true" ]]; then
     echo "Pull above images before running tests"
