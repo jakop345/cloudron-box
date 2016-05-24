@@ -3,7 +3,7 @@
 set -eu
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-readonly TEST_IMAGE="cloudron/test:14.0.0"
+readonly TEST_IMAGE="cloudron/test:15.0.0"
 
 source ${SOURCE_DIR}/src/INFRA_VERSION
 

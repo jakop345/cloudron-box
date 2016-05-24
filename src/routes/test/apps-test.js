@@ -42,7 +42,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 
 // Test image information
 var TEST_IMAGE_REPO = 'cloudron/test';
-var TEST_IMAGE_TAG = '14.0.0';
+var TEST_IMAGE_TAG = '15.0.0';
 var TEST_IMAGE = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
 var TEST_IMAGE_ID = child_process.execSync('docker inspect --format={{.Id}} ' + TEST_IMAGE).toString('utf8').trim();
 
@@ -128,12 +128,7 @@ describe('Apps', function () {
                 return true;
             }
             return false;
-        }, function (error) {
-            if (error) return done(error);
-
-            console.log('This test can take ~30 seconds to start as it waits for infra to be ready');
-            setTimeout(done, 30000);
-        });
+        }, done);
     });
 
     after(function (done) {
@@ -202,7 +197,12 @@ describe('Apps', function () {
             settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
             settings.setTlsConfig.bind(null, { provider: 'caas' }),
             settings.setBackupConfig.bind(null, { provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' })
-        ], done);
+        ], function (error) {
+            if (error) return done(error);
+
+            console.log('This test can take ~30 seconds to start as it waits for infra to be ready');
+            setTimeout(done, 30000);
+        });
     }
 
     function cleanup(done) {
@@ -755,20 +755,16 @@ describe('Apps', function () {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
-                    delete res.body.sendmail; // sendmail auth fails
-                    delete res.body.recvmail; // dovecot mail delivery won't work
+                    delete res.body.recvmail; // unclear why dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
 
                     for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + res.body);
+                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
                     }
 
                     callback();
                 });
-            }, function (error) {
-                console.log(error);
-                done(error);
-            });
+            }, done);
         });
 
         var redisIp, exportedRedisPort;
@@ -916,12 +912,11 @@ describe('Apps', function () {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
-                    delete res.body.sendmail; // sendmail auth fails
-                    delete res.body.recvmail; // dovecot mail delivery won't work
+                    delete res.body.recvmail; // unclear why dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
 
                     for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + res.body);
+                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
                     }
 
                     callback();
@@ -1189,12 +1184,11 @@ describe('Apps', function () {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
-                    delete res.body.sendmail; // sendmail auth fails
-                    delete res.body.recvmail; // dovecot mail delivery won't work
+                    delete res.body.recvmail; // unclear why dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
 
                     for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + res.body);
+                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
                     }
 
                     callback();
@@ -1360,12 +1354,11 @@ describe('Apps', function () {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
-                    delete res.body.sendmail; // sendmail auth fails
-                    delete res.body.recvmail; // dovecot mail delivery won't work
+                    delete res.body.recvmail; // unclear why dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
 
                     for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + res.body);
+                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
                     }
 
                     callback();
