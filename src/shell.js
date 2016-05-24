@@ -14,12 +14,13 @@ var assert = require('assert'),
 
 var SUDO = '/usr/bin/sudo';
 
-function execSync(tag, cmd) {
+function execSync(tag, cmd, callback) {
     assert.strictEqual(typeof tag, 'string');
     assert.strictEqual(typeof cmd, 'string');
 
     debug(cmd);
     child_process.execSync(cmd, { stdio: 'inherit' });
+    if (callback) return callback();
 }
 
 function exec(tag, file, args, callback) {
