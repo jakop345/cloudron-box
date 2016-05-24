@@ -1,7 +1,9 @@
 'use strict';
 
 exports = module.exports = {
-    initialize: initialize
+    initialize: initialize,
+
+    mailConfig: mailConfig
 };
 
 var apps = require('./apps.js'),
@@ -103,5 +105,13 @@ function loadAddonVarsSync() {
         postgresql: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/postgresql_vars.sh', 'utf8')),
         mysql: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh', 'utf8')),
         mongodb: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mongodb_vars.sh', 'utf8'))
+    };
+}
+
+function mailConfig() {
+    return {
+        username: gAddonVars.mail.MAIL_ROOT_USERNAME,
+        from: '"Cloudron" <' + gAddonVars.mail.MAIL_ROOT_USERNAME + '@' + config.fqdn() + '>',
+        password: gAddonVars.mail.MAIL_ROOT_PASSWORD
     };
 }

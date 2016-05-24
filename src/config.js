@@ -31,7 +31,6 @@ exports = module.exports = {
     mailFqdn: mailFqdn,
     appFqdn: appFqdn,
     zoneName: zoneName,
-    adminEmail: adminEmail,
 
     isDev: isDev,
 
@@ -74,7 +73,6 @@ function initConfig() {
     data.fqdn = 'localhost';
 
     data.token = null;
-    data.adminEmail = null;
     data.boxVersionsUrl = null;
     data.version = null;
     data.isCustomDomain = false;
@@ -102,7 +100,6 @@ function initConfig() {
             name: 'boxtest'
         };
         data.token = 'APPSTORE_TOKEN';
-        data.adminEmail = 'no-reply@localhost';
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
@@ -139,10 +136,6 @@ function get(key) {
     assert.strictEqual(typeof key, 'string');
 
     return safe.query(data, key);
-}
-
-function adminEmail() {
-    return get('adminEmail');
 }
 
 function apiServerOrigin() {
