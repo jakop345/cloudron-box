@@ -28,6 +28,7 @@ var appdb = require('./appdb.js'),
     fs = require('fs'),
     generatePassword = require('password-generator'),
     hat = require('hat'),
+    infra = require('./infra_version.js'),
     once = require('once'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -752,7 +753,7 @@ function setupRedis(app, options, callback) {
         name: 'redis-' + app.id,
         Hostname: 'redis-' + app.location,
         Tty: true,
-        Image: 'cloudron/redis:0.8.0', // if you change this, fix src/INFRA_VERSION as well
+        Image: infra.images.redis.tag,
         Cmd: null,
         Volumes: {
             '/tmp': {},
