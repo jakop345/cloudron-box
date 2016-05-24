@@ -23,18 +23,18 @@ var appdb = require('../../appdb.js'),
     http = require('http'),
     https = require('https'),
     js2xml = require('js2xmlparser'),
+    ldap = require('../../ldap.js'),
     net = require('net'),
     nock = require('nock'),
     paths = require('../../paths.js'),
-    redis = require('redis'),
-    superagent = require('superagent'),
     safe = require('safetydance'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
+    simpleauth = require('../../simpleauth.js'),
+    superagent = require('superagent'),
     taskmanager = require('../../taskmanager.js'),
     tokendb = require('../../tokendb.js'),
     url = require('url'),
-    util = require('util'),
     uuid = require('node-uuid'),
     _ = require('underscore');
 
@@ -151,6 +151,8 @@ describe('Apps', function () {
             database._clear,
 
             server.start.bind(server),
+            ldap.start,
+            simpleauth.start,
 
             function (callback) {
                 var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
@@ -206,6 +208,8 @@ describe('Apps', function () {
             taskmanager.stopPendingTasks,
             taskmanager.waitForPendingTasks,
             server.stop,
+            ldap.stop,
+            simpleauth.stop,
             config._reset,
         ], done);
     }
@@ -702,6 +706,15 @@ describe('Apps', function () {
             });
         });
 
+        it('installation - app responnds to http request', function (done) {
+            superagent.get('http://localhost:' + appEntry.httpPort).end(function (err, res) {
+                expect(!err).to.be.ok();
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.status).to.be('OK');
+                done();
+            });
+        });
+
         it('installation - oauth addon config', function (done) {
             var appContainer = docker.getContainer(appEntry.containerId);
             appContainer.inspect(function (error, data) {
@@ -716,6 +729,39 @@ describe('Apps', function () {
                     done();
                 });
             });
+        });
+
+        it('installation - app can populate addons', function (done) {
+            superagent.get('http://localhost:' + appEntry.httpPort + '/populate_addons').end(function (err, res) {
+                expect(!err).to.be.ok();
+                expect(res.statusCode).to.equal(200);
+                for (var key in res.body) {
+                    expect(res.body[key]).to.be('OK');
+                }
+                done();
+            });
+        });
+
+        it('installation - app can check addons', function (done) {
+            async.retry({ times: 100, interval: 5000 }, function (callback) {
+                superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
+                    .query({ username: USERNAME, password: PASSWORD })
+                    .end(function (err, res) {
+
+                    expect(!err).to.be.ok();
+                    expect(res.statusCode).to.equal(200);
+
+                    delete res.body.sendmail; // sendmail auth fails
+                    delete res.body.recvmail; // dovecot mail delivery won't work
+                    delete res.body.stdenv; // cannot access APP_ORIGIN
+
+                    for (var key in res.body) {
+                        if (res.body[key] !== 'OK') return callback('Not done yet');
+                    }
+
+                    callback();
+                });
+            }, done);
         });
 
         var redisIp, exportedRedisPort;
@@ -733,129 +779,6 @@ describe('Apps', function () {
 
                 done();
             });
-        });
-
-        it('installation - redis addon config', function (done) {
-            docker.getContainer(appEntry.containerId).inspect(function (error, data) {
-                var redisUrl = null;
-                data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
-                expect(redisUrl).to.be.ok();
-
-                var urlp = url.parse(redisUrl);
-                var password = urlp.auth.split(':')[1];
-
-                expect(data.Config.Env).to.contain('REDIS_PORT=6379');
-                expect(data.Config.Env).to.contain('REDIS_HOST=redis-' + APP_ID);
-                expect(data.Config.Env).to.contain('REDIS_PASSWORD=' + password);
-
-                expect(urlp.hostname).to.be('redis-' + APP_ID);
-
-                var client = redis.createClient(parseInt(urlp.port, 10), redisIp, { auth_pass: password });
-                client.on('error', done);
-                client.set('key', 'value');
-                client.get('key', function (err, reply) {
-                    expect(err).to.not.be.ok();
-                    expect(reply.toString()).to.be('value');
-                    client.end();
-                    done();
-                });
-            });
-        });
-
-        it('installation - mysql addon config', function (done) {
-            var appContainer = docker.getContainer(appEntry.containerId);
-            appContainer.inspect(function (error, data) {
-                var mysqlUrl = null;
-                data.Config.Env.forEach(function (env) { if (env.indexOf('MYSQL_URL=') === 0) mysqlUrl = env.split('=')[1]; });
-                expect(mysqlUrl).to.be.ok();
-
-                var urlp = url.parse(mysqlUrl);
-                var username = urlp.auth.split(':')[0];
-                var password = urlp.auth.split(':')[1];
-                var dbname = urlp.path.substr(1);
-
-                expect(data.Config.Env).to.contain('MYSQL_PORT=3306');
-                expect(data.Config.Env).to.contain('MYSQL_HOST=mysql');
-                expect(data.Config.Env).to.contain('MYSQL_USERNAME=' + username);
-                expect(data.Config.Env).to.contain('MYSQL_PASSWORD=' + password);
-                expect(data.Config.Env).to.contain('MYSQL_DATABASE=' + dbname);
-
-                var cmd = util.format('mysql -h %s -u%s -p%s --database=%s -e "CREATE TABLE IF NOT EXISTS foo (id INT);"',
-                    'mysql', username, password, dbname);
-
-                child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 5000 }, function (error, stdout, stderr) {
-                    expect(!error).to.be.ok();
-                    expect(stdout.length).to.be(0);
-                    // expect(stderr.length).to.be(0); // "Warning: Using a password on the command line interface can be insecure."
-                    done();
-                });
-            });
-        });
-
-        it('installation - postgresql addon config', function (done) {
-            var appContainer = docker.getContainer(appEntry.containerId);
-            appContainer.inspect(function (error, data) {
-                var postgresqlUrl = null;
-                data.Config.Env.forEach(function (env) { if (env.indexOf('POSTGRESQL_URL=') === 0) postgresqlUrl = env.split('=')[1]; });
-                expect(postgresqlUrl).to.be.ok();
-
-                var urlp = url.parse(postgresqlUrl);
-                var username = urlp.auth.split(':')[0];
-                var password = urlp.auth.split(':')[1];
-                var dbname = urlp.path.substr(1);
-
-                expect(data.Config.Env).to.contain('POSTGRESQL_PORT=5432');
-                expect(data.Config.Env).to.contain('POSTGRESQL_HOST=postgresql');
-                expect(data.Config.Env).to.contain('POSTGRESQL_USERNAME=' + username);
-                expect(data.Config.Env).to.contain('POSTGRESQL_PASSWORD=' + password);
-                expect(data.Config.Env).to.contain('POSTGRESQL_DATABASE=' + dbname);
-
-                var cmd = util.format('bash -c "PGPASSWORD=%s psql -q -h %s -U%s --dbname=%s -c \'CREATE TABLE IF NOT EXISTS foo (id INT);\'"',
-                    password, 'postgresql', username, dbname);
-
-                child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 20000 }, function (error, stdout, stderr) {
-                    expect(error).to.not.be.ok();
-                    expect(stdout.length).to.be(0);
-                    expect(stderr.length).to.be(0);
-                    done();
-                });
-            });
-        });
-
-        it('installation - mongodb addon config', function (done) {
-            var appContainer = docker.getContainer(appEntry.containerId);
-            appContainer.inspect(function (error, data) {
-                var mongodbUrl = null;
-                data.Config.Env.forEach(function (env) { if (env.indexOf('MONGODB_URL=') === 0) mongodbUrl = env.split('=')[1]; });
-                expect(mongodbUrl).to.be.ok();
-
-                var urlp = url.parse(mongodbUrl);
-                var username = urlp.auth.split(':')[0];
-                var password = urlp.auth.split(':')[1];
-                var dbname = urlp.path.substr(1);
-
-                expect(data.Config.Env).to.contain('MONGODB_PORT=27017');
-                expect(data.Config.Env).to.contain('MONGODB_HOST=mongodb');
-                expect(data.Config.Env).to.contain('MONGODB_USERNAME=' + username);
-                expect(data.Config.Env).to.contain('MONGODB_PASSWORD=' + password);
-                expect(data.Config.Env).to.contain('MONGODB_DATABASE=' + dbname);
-
-                var cmd = util.format('mongo --quiet -u %s -p %s %s:%s/%s --eval "db.collection.insert({ item: 34 })"',
-                    username, password, 'mongodb', 27017, dbname);
-
-                child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 5000 }, function (error) {
-                    expect(!error).to.be.ok();
-                    done();
-                });
-            });
-        });
-
-        it('installation - scheduler', function (done) {
-            async.retry({ times: 100, interval: 1000 }, function (retryCallback) {
-                if (fs.existsSync(paths.DATA_DIR + '/' + APP_ID + '/data/every_minute.env')) return retryCallback();
-
-                retryCallback(new Error('not run yet'));
-            }, done);
         });
 
         xit('logs - stdout and stderr', function (done) {
@@ -975,6 +898,27 @@ describe('Apps', function () {
             }
 
             checkStartState();
+        });
+
+        it('installation - app can check addons', function (done) {
+            async.retry({ times: 100, interval: 5000 }, function (callback) {
+                superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
+                    .query({ username: USERNAME, password: PASSWORD })
+                    .end(function (err, res) {
+                    expect(!err).to.be.ok();
+                    expect(res.statusCode).to.equal(200);
+
+                    delete res.body.sendmail; // sendmail auth fails
+                    delete res.body.recvmail; // dovecot mail delivery won't work
+                    delete res.body.stdenv; // cannot access APP_ORIGIN
+
+                    for (var key in res.body) {
+                        if (res.body[key] !== 'OK') return callback('Not done yet');
+                    }
+
+                    callback();
+                });
+            }, done);
         });
 
         it('can uninstall app', function (done) {
@@ -1216,6 +1160,39 @@ describe('Apps', function () {
             });
         });
 
+
+        it('installation - app can populate addons', function (done) {
+            superagent.get('http://localhost:' + appEntry.httpPort + '/populate_addons').end(function (err, res) {
+                expect(!err).to.be.ok();
+                expect(res.statusCode).to.equal(200);
+                for (var key in res.body) {
+                    expect(res.body[key]).to.be('OK');
+                }
+                done();
+            });
+        });
+
+        it('installation - app can check addons', function (done) {
+            async.retry({ times: 100, interval: 5000 }, function (callback) {
+                superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
+                    .query({ username: USERNAME, password: PASSWORD })
+                    .end(function (err, res) {
+                    expect(!err).to.be.ok();
+                    expect(res.statusCode).to.equal(200);
+
+                    delete res.body.sendmail; // sendmail auth fails
+                    delete res.body.recvmail; // dovecot mail delivery won't work
+                    delete res.body.stdenv; // cannot access APP_ORIGIN
+
+                    for (var key in res.body) {
+                        if (res.body[key] !== 'OK') return callback('Not done yet');
+                    }
+
+                    callback();
+                });
+            }, done);
+        });
+
         var redisIp, exportedRedisPort;
 
         it('installation - redis addon created', function (done) {
@@ -1230,37 +1207,6 @@ describe('Apps', function () {
                 expect(exportedRedisPort).to.be.ok();
 
                 done();
-            });
-        });
-
-        it('installation - redis addon config', function (done) {
-            docker.getContainer(appEntry.containerId).inspect(function (error, data) {
-                var redisUrl = null;
-                data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
-                expect(redisUrl).to.be.ok();
-
-                var urlp = url.parse(redisUrl);
-                expect(urlp.hostname).to.be('redis-' + APP_ID);
-
-                var password = urlp.auth.split(':')[1];
-
-                expect(data.Config.Env).to.contain('REDIS_PORT=6379');
-                expect(data.Config.Env).to.contain('REDIS_HOST=redis-' + APP_ID);
-                expect(data.Config.Env).to.contain('REDIS_PASSWORD=' + password);
-
-                function checkRedis() {
-                    var client = redis.createClient(parseInt(urlp.port, 10), redisIp, { auth_pass: password });
-                    client.on('error', done);
-                    client.set('key', 'value');
-                    client.get('key', function (err, reply) {
-                        expect(err).to.not.be.ok();
-                        expect(reply.toString()).to.be('value');
-                        client.end();
-                        done();
-                    });
-                }
-
-                setTimeout(checkRedis, 1000); // the bridge network takes time to come up?
             });
         });
 
@@ -1396,40 +1342,24 @@ describe('Apps', function () {
             });
         });
 
-        it('redis addon works after reconfiguration', function (done) {
-            docker.getContainer(appEntry.containerId).inspect(function (error, data) {
-                var redisUrl = null;
-                data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
-                expect(redisUrl).to.be.ok();
+        it('installation - app can check addons', function (done) {
+            async.retry({ times: 100, interval: 5000 }, function (callback) {
+                superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
+                    .query({ username: USERNAME, password: PASSWORD })
+                    .end(function (err, res) {
+                    expect(!err).to.be.ok();
+                    expect(res.statusCode).to.equal(200);
 
-                var urlp = url.parse(redisUrl);
-                var password = urlp.auth.split(':')[1];
+                    delete res.body.sendmail; // sendmail auth fails
+                    delete res.body.recvmail; // dovecot mail delivery won't work
+                    delete res.body.stdenv; // cannot access APP_ORIGIN
 
-                expect(urlp.hostname).to.be('redis-' + APP_ID);
+                    for (var key in res.body) {
+                        if (res.body[key] !== 'OK') return callback('Not done yet');
+                    }
 
-                expect(data.Config.Env).to.contain('REDIS_PORT=6379');
-                expect(data.Config.Env).to.contain('REDIS_HOST=redis-' + APP_ID);
-                expect(data.Config.Env).to.contain('REDIS_PASSWORD=' + password);
-
-                var client = redis.createClient(parseInt(urlp.port, 10), redisIp, { auth_pass: password });
-                client.on('error', done);
-                client.set('key', 'value');
-                client.get('key', function (err, reply) {
-                    expect(err).to.not.be.ok();
-                    expect(reply.toString()).to.be('value');
-                    client.end();
-                    done();
+                    callback();
                 });
-            });
-        });
-
-        it('scheduler works after reconfiguration', function (done) {
-            async.retry({ times: 100, interval: 1000 }, function (callback) {
-                var data = safe.fs.readFileSync(paths.DATA_DIR + '/' + APP_ID + '/data/every_minute.env', 'utf8');
-
-                if (data && data.indexOf('ECHO_SERVER_PORT=7172') !== -1) return callback();
-
-                callback(new Error('not run yet'));
             }, done);
         });
 
