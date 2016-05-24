@@ -137,8 +137,8 @@ while true; do
     sleep 30
 done
 
-echo "Copying INFRA_VERSION"
-$scp22 "${SCRIPT_DIR}/../src/INFRA_VERSION" root@${server_ip}:.
+echo "Copying infra_version.js"
+$scp22 "${SCRIPT_DIR}/../src/infra_version.js" root@${server_ip}:.
 
 echo "Copying box source"
 cd "${SOURCE_DIR}"

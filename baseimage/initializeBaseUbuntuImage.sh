@@ -19,12 +19,6 @@ function die {
 
 [[ "$(systemd --version 2>&1)" == *"systemd 229"* ]] || die "Expecting systemd to be 229"
 
-if [ -f "${SOURCE_DIR}/INFRA_VERSION" ]; then
-    source "${SOURCE_DIR}/INFRA_VERSION"
-else
-    echo "No INFRA_VERSION found, skip pulling docker images"
-fi
-
 if [ ${SELFHOSTED} == 0 ]; then
     echo "!! Initializing Ubuntu image for CaaS"
 else
@@ -156,30 +150,22 @@ update-grub
 # now add the user to the docker group
 usermod "${USER}" -a -G docker
 
-if [ -z $(echo "${INFRA_VERSION}") ]; then
-    echo "Skip pulling base docker images"
-else
-    echo "=== Pulling base docker images ==="
-    docker pull "${BASE_IMAGE}"
+echo "==== Install nodejs ===="
+# Cannot use anything above 4.1.1 - https://github.com/nodejs/node/issues/3803
+mkdir -p /usr/local/node-4.1.1
+curl -sL https://nodejs.org/dist/v4.1.1/node-v4.1.1-linux-x64.tar.gz | tar zxvf - --strip-components=1 -C /usr/local/node-4.1.1
+ln -s /usr/local/node-4.1.1/bin/node /usr/bin/node
+ln -s /usr/local/node-4.1.1/bin/npm /usr/bin/npm
+apt-get install -y python   # Install python which is required for npm rebuild
+[[ "$(python --version 2>&1)" == "Python 2.7."* ]] || die "Expecting python version to be 2.7.x"
 
-    echo "=== Pulling mysql addon image ==="
-    docker pull "${MYSQL_IMAGE}"
+echo "==== Downloading docker images ===="
+images=$(node -e "var i = require('${SOURCE_DIR}/infra_version.js'); console.log(i.baseImage); console.log(Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join('\n'));")
 
-    echo "=== Pulling postgresql addon image ==="
-    docker pull "${POSTGRESQL_IMAGE}"
-
-    echo "=== Pulling redis addon image ==="
-    docker pull "${REDIS_IMAGE}"
-
-    echo "=== Pulling mongodb addon image ==="
-    docker pull "${MONGODB_IMAGE}"
-
-    echo "=== Pulling graphite docker images ==="
-    docker pull "${GRAPHITE_IMAGE}"
-
-    echo "=== Pulling mail ==="
-    docker pull "${MAIL_IMAGE}"
-fi
+echo "Pulling images: ${images}"
+for image in images; do
+    docker pull "${image}"
+done
 
 echo "==== Install nginx ===="
 apt-get -y install nginx-full
@@ -209,15 +195,6 @@ update-rc.d -f collectd remove
 echo "==== Install logrotate ==="
 apt-get install -y cron logrotate
 systemctl enable cron
-
-echo "==== Install nodejs ===="
-# Cannot use anything above 4.1.1 - https://github.com/nodejs/node/issues/3803
-mkdir -p /usr/local/node-4.1.1
-curl -sL https://nodejs.org/dist/v4.1.1/node-v4.1.1-linux-x64.tar.gz | tar zxvf - --strip-components=1 -C /usr/local/node-4.1.1
-ln -s /usr/local/node-4.1.1/bin/node /usr/bin/node
-ln -s /usr/local/node-4.1.1/bin/npm /usr/bin/npm
-apt-get install -y python   # Install python which is required for npm rebuild
-[[ "$(python --version 2>&1)" == "Python 2.7."* ]] || die "Expecting python version to be 2.7.x"
 
 echo "=== Rebuilding npm packages ==="
 cd "${INSTALLER_SOURCE_DIR}" && npm install --production
