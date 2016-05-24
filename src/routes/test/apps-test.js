@@ -755,7 +755,6 @@ describe('Apps', function () {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
-                    delete res.body.email; // sendmail auth fails
                     delete res.body.sendmail; // sendmail auth fails
                     delete res.body.recvmail; // dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
@@ -917,7 +916,6 @@ describe('Apps', function () {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
-                    delete res.body.email; // sendmail auth fails
                     delete res.body.sendmail; // sendmail auth fails
                     delete res.body.recvmail; // dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
@@ -1191,7 +1189,6 @@ describe('Apps', function () {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
-                    delete res.body.email; // sendmail auth fails
                     delete res.body.sendmail; // sendmail auth fails
                     delete res.body.recvmail; // dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
@@ -1363,7 +1360,6 @@ describe('Apps', function () {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
-                    delete res.body.email; // sendmail auth fails
                     delete res.body.sendmail; // sendmail auth fails
                     delete res.body.recvmail; // dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
