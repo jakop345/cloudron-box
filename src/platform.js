@@ -14,7 +14,8 @@ var apps = require('./apps.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
-    shell = require('./shell.js');
+    shell = require('./shell.js'),
+    util = require('util');
 
 var SETUP_INFRA_CMD = path.join(__dirname, 'scripts/setup_infra.sh');
 
@@ -43,6 +44,8 @@ function initialize(callback) {
     startAddons(function (error) {
         if (error) return callback(error);
 
+        removeOldImagesSync();
+
         var func = existingInfra ? apps.configureInstalledApps : apps.restoreInstalledApps;
 
         func(function (error) {
@@ -53,6 +56,17 @@ function initialize(callback) {
             callback();
         });
     });
+}
+
+function removeOldImagesSync() {
+    debug('removing old addon images');
+
+    for (var imageName in infra.images) {
+        var image = infra.images[imageName];
+        debug('cleaning up images of %s', image);
+        var cmd = 'docker images "%s" | tail -n +2 | awk \'{ print $1 ":" $2 }\' | grep -v "%s" | xargs --no-run-if-empty docker rmi';
+        shell.execSync('removeOldImagesSync', util.format(cmd, image.repo, image.tag));
+    }
 }
 
 function removeImagesSync() {
