@@ -10,9 +10,10 @@ var apps = require('./apps.js'),
     certificates = require('./certificates.js'),
     debug = require('debug')('box:platform'),
     fs = require('fs'),
-    ini = require('ini'),
+    infra = require('./infra_version.js'),
     path = require('path'),
     paths = require('./paths.js'),
+    safe = require('safetydance'),
     shell = require('./shell.js');
 
 var SETUP_INFRA_CMD = path.join(__dirname, 'scripts/setup_infra.sh');
@@ -22,19 +23,18 @@ function initialize(callback) {
 
     debug('initializing addon infrastructure');
 
-    var currentInfraData = fs.readFileSync(__dirname + '/INFRA_VERSION', 'utf8');
-    var currentInfra = ini.parse(currentInfraData);
-    var existingInfra = { INFRA_VERSION: 'none' };
+    var existingInfra = { version: 'none' };
     if (fs.existsSync(paths.INFRA_VERSION_FILE)) {
-        existingInfra = ini.parse(fs.readFileSync(paths.INFRA_VERSION_FILE, 'utf8'));
+        existingInfra = safe.JSON.parse(fs.readFileSync(paths.INFRA_VERSION_FILE, 'utf8'));
+        if (!existingInfra) existingInfra = { version: 'legacy' };
     }
 
-    if (currentInfra.INFRA_VERSION === existingInfra.INFRA_VERSION) {
-        debug('platform is uptodate at version %s', currentInfra.INFRA_VERSION);
+    if (infra.version === existingInfra.version) {
+        debug('platform is uptodate at version %s', infra.version);
         return callback();
     }
 
-    debug('Updating infrastructure from %s to %s', existingInfra.INFRA_VERSION, currentInfra.INFRA_VERSION);
+    debug('Updating infrastructure from %s to %s', existingInfra.version, infra.version);
 
     stopContainersSync();
 
@@ -48,7 +48,7 @@ function initialize(callback) {
         func(function (error) {
             if (error) return callback(error);
 
-            fs.writeFileSync(paths.INFRA_VERSION_FILE, currentInfraData);
+            fs.writeFileSync(paths.INFRA_VERSION_FILE, JSON.stringify(infra));
 
             callback();
         });
