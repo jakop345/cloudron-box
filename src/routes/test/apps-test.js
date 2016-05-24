@@ -112,7 +112,7 @@ describe('Apps', function () {
     var imageCreated = false;
 
     before(function (done) {
-        safe.fs.unlinkSync(paths.DATA_DIR + '/INFRA_VERSION');
+        safe.fs.unlinkSync(paths.INFRA_VERSION_FILE);
         child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
 
         dockerProxy = startDockerProxy(function interceptor(req, res) {
