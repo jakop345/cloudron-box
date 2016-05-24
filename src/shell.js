@@ -18,6 +18,7 @@ function execSync(tag, cmd) {
     assert.strictEqual(typeof tag, 'string');
     assert.strictEqual(typeof cmd, 'string');
 
+    debug(cmd);
     child_process.execSync(cmd, { stdio: 'inherit' });
 }
 
