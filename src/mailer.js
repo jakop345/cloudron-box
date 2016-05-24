@@ -159,7 +159,7 @@ function sendMails(queue) {
 
         var transport = nodemailer.createTransport(smtpTransport({
             host: mailServerIp,
-            port: 2525, // this value comes from mail container
+            port: config.get('smtpPort'),
             auth: {
                 user: 'no-reply', // derive from adminEmail
                 pass: 'supersecret'

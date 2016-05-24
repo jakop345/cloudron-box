@@ -137,6 +137,7 @@ function validatePortBindings(portBindings, tcpPorts) {
         2020, /* install server */
         config.get('port'), /* app server (lo) */
         config.get('sysadminPort'), /* sysadmin app server (lo) */
+        config.get('smtpPort'), /* internal smtp port (lo) */
         config.get('ldapPort'), /* ldap server (lo) */
         config.get('oauthProxyPort'), /* oauth proxy server (lo) */
         config.get('simpleAuthPort'), /* simple auth server (lo) */

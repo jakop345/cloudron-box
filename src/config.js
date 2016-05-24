@@ -79,6 +79,7 @@ function initConfig() {
     data.version = null;
     data.isCustomDomain = false;
     data.webServerOrigin = null;
+    data.smtpPort = 2525; // // this value comes from mail container
     data.sysadminPort = 3001;
     data.ldapPort = 3002;
     data.oauthProxyPort = 3003;
