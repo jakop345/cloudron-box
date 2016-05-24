@@ -38,6 +38,11 @@ echo "Graphite container id: ${graphite_container_id}"
 # MAIL_SERVER_NAME is the hostname of the mailserver i.e server uses these certs
 # MAIL_DOMAIN is the domain for which this server is relaying mails
 readonly mail_image=$(node -e "console.log(require('${infra_version}').images.mail.tag);")
+mail_addon_root_password=$(pwgen -1 -s)
+cat > "${data_dir}/addons/mail_vars.sh" <<EOF
+readonly MAIL_ROOT_USERNAME=no-reply
+readonly MAIL_ROOT_PASSWORD=${mail_addon_root_password}
+EOF
 mail_container_id=$(docker run --restart=always -d --name="mail" \
     -m 75m \
     --memory-swap 150m \
@@ -45,6 +50,7 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -e "MAIL_DOMAIN=${fqdn}" \
     -e "MAIL_SERVER_NAME=${mail_fqdn}" \
     -v "${data_dir}/box/mail:/app/data" \
+    -v "${data_dir}/addons/mail_vars.sh:/etc/mail/mail_vars.sh:ro" \
     -v "${mail_tls_key}:/etc/tls_key.pem:ro" \
     -v "${mail_tls_cert}:/etc/tls_cert.pem:ro" \
     -p 587:2525 \
