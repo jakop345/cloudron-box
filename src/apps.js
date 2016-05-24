@@ -32,6 +32,9 @@ exports = module.exports = {
 
     autoupdateApps: autoupdateApps,
 
+    restoreInstalledApps: restoreInstalledApps,
+    configureInstalledApps: configureInstalledApps,
+
     // exported for testing
     _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings,
@@ -871,5 +874,37 @@ function listBackups(page, perPage, appId, callback) {
 
             callback(null, results);
         });
+    });
+}
+
+function restoreInstalledApps(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    appdb.getAll(function (error, apps) {
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        async.map(apps, function (app, iteratorDone) {
+            if (app.installationState !== appdb.ISTATE_INSTALLED) return iteratorDone();
+
+            debug('marking %s for restore', app.location || app.id);
+
+            appdb.setInstallationCommand(app.id, appdb.ISTATE_PENDING_RESTORE, { oldConfig: null }, iteratorDone);
+        }, callback);
+    });
+}
+
+function configureInstalledApps(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    appdb.getAll(function (error, apps) {
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        async.map(apps, function (app, iteratorDone) {
+            if (app.installationState !== appdb.ISTATE_INSTALLED) return iteratorDone();
+
+            debug('marking %s for reconfigure', app.location || app.id);
+
+            appdb.setInstallationCommand(app.id, appdb.ISTATE_PENDING_CONFIGURE, { oldConfig: null }, iteratorDone);
+        }, callback);
     });
 }

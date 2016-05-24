@@ -326,4 +326,57 @@ describe('Apps', function () {
             });
         });
     });
+
+    describe('configureInstalledApps', function () {
+        before(function (done) {
+            async.series([
+                appdb.update.bind(null, APP_0.id, { installationState: appdb.ISTATE_INSTALLED }),
+                appdb.update.bind(null, APP_1.id, { installationState: appdb.ISTATE_ERROR }),
+                appdb.update.bind(null, APP_2.id, { installationState: appdb.ISTATE_INSTALLED })
+            ], done);
+        });
+
+        it('can mark apps for reconfigure', function (done) {
+            apps.configureInstalledApps(function (error) {
+                expect(error).to.be(null);
+
+                apps.getAll(function (error, apps) {
+                    expect(apps[0].installationState).to.be(appdb.ISTATE_PENDING_CONFIGURE);
+                    expect(apps[0].oldConfig).to.be(null);
+                    expect(apps[1].installationState).to.be(appdb.ISTATE_ERROR);
+                    expect(apps[2].installationState).to.be(appdb.ISTATE_PENDING_CONFIGURE);
+                    expect(apps[2].oldConfig).to.be(null);
+
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('restoreInstalledApps', function () {
+        before(function (done) {
+            async.series([
+                appdb.update.bind(null, APP_0.id, { installationState: appdb.ISTATE_INSTALLED }),
+                appdb.update.bind(null, APP_1.id, { installationState: appdb.ISTATE_ERROR }),
+                appdb.update.bind(null, APP_2.id, { installationState: appdb.ISTATE_INSTALLED })
+            ], done);
+        });
+
+        it('can mark apps for reconfigure', function (done) {
+            apps.restoreInstalledApps(function (error) {
+                expect(error).to.be(null);
+
+                apps.getAll(function (error, apps) {
+                    expect(apps[0].installationState).to.be(appdb.ISTATE_PENDING_RESTORE);
+                    expect(apps[0].oldConfig).to.be(null);
+                    expect(apps[1].installationState).to.be(appdb.ISTATE_ERROR);
+                    expect(apps[2].installationState).to.be(appdb.ISTATE_PENDING_RESTORE);
+                    expect(apps[2].oldConfig).to.be(null);
+
+                    done();
+                });
+            });
+        });
+    });
 });
+
