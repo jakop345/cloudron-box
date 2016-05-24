@@ -1,8 +1,6 @@
 'use strict';
 
 exports = module.exports = {
-    initialize: initialize,
-
     setupAddons: setupAddons,
     teardownAddons: teardownAddons,
     backupAddons: backupAddons,
@@ -21,7 +19,6 @@ exports = module.exports = {
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
-    certificates = require('./certificates.js'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -124,25 +121,13 @@ var KNOWN_ADDONS = {
     }
 };
 
-var RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh'),
-    SETUP_INFRA_CMD = path.join(__dirname, 'scripts/setup_infra.sh');;
+var RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh');
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
 
     var prefix = app ? (app.location || 'naked_domain') : '(no app)';
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
-}
-
-function initialize(callback) {
-    if (process.env.BOX_ENV === 'test' && !process.env.CREATE_INFRA) return callback();
-
-    debug('initializing addon infrastructure');
-    certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
-        if (error) return callback(error);
-
-        shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, paths.DATA_DIR, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath, config.database().name, config.database().password ], callback);
-    });
 }
 
 function setupAddons(app, addons, callback) {

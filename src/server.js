@@ -5,8 +5,7 @@ exports = module.exports = {
     stop: stop
 };
 
-var addons = require('./addons.js'),
-    assert = require('assert'),
+var assert = require('assert'),
     async = require('async'),
     auth = require('./auth.js'),
     certificates = require('./certificates.js'),
@@ -22,6 +21,7 @@ var addons = require('./addons.js'),
     middleware = require('./middleware'),
     passport = require('passport'),
     path = require('path'),
+    platform = require('./platform.js'),
     routes = require('./routes/index.js'),
     taskmanager = require('./taskmanager.js');
 
@@ -257,7 +257,7 @@ function start(callback) {
         database.initialize,
         cloudron.initialize, // keep this here because it reads activation state that others depend on
         certificates.installAdminCertificate, // keep this before cron to block heartbeats until cert is ready
-        addons.initialize, // starts the addons
+        platform.initialize,
         taskmanager.initialize,
         mailer.initialize,
         cron.initialize,
