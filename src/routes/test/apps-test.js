@@ -132,7 +132,7 @@ describe('Apps', function () {
     });
 
     after(function (done) {
-        // child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
+        child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
         dockerProxy.close(done);
     });
 
