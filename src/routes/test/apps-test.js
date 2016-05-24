@@ -128,7 +128,12 @@ describe('Apps', function () {
                 return true;
             }
             return false;
-        }, done);
+        }, function (error) {
+            if (error) return done(error);
+
+            console.log('This test can take ~30 seconds to start as it waits for infra to be ready');
+            setTimeout(done, 30000);
+        });
     });
 
     after(function (done) {
@@ -606,8 +611,6 @@ describe('Apps', function () {
         var appResult = null /* the json response */, appEntry = null /* entry from database */;
 
         it('can install test app', function (done) {
-            console.log('This test can take ~30 seconds to start as it waits for infra to be ready');
-
             var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
             var count = 0;
