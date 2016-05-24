@@ -743,7 +743,8 @@ describe('Apps', function () {
         });
 
         it('installation - app can check addons', function (done) {
-            async.retry({ times: 100, interval: 5000 }, function (callback) {
+            this.timeout(120000);
+            async.retry({ times: 15, interval: 6000 }, function (callback) {
                 superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
                     .query({ username: USERNAME, password: PASSWORD })
                     .end(function (err, res) {
@@ -751,17 +752,21 @@ describe('Apps', function () {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
+                    delete res.body.email; // sendmail auth fails
                     delete res.body.sendmail; // sendmail auth fails
                     delete res.body.recvmail; // dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
 
                     for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet');
+                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + res.body);
                     }
 
                     callback();
                 });
-            }, done);
+            }, function (error) {
+                console.log(error);
+                done(error);
+            });
         });
 
         var redisIp, exportedRedisPort;
@@ -901,19 +906,21 @@ describe('Apps', function () {
         });
 
         it('installation - app can check addons', function (done) {
-            async.retry({ times: 100, interval: 5000 }, function (callback) {
+            this.timeout(120000);
+            async.retry({ times: 15, interval: 6000 }, function (callback) {
                 superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
                     .query({ username: USERNAME, password: PASSWORD })
                     .end(function (err, res) {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
+                    delete res.body.email; // sendmail auth fails
                     delete res.body.sendmail; // sendmail auth fails
                     delete res.body.recvmail; // dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
 
                     for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet');
+                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + res.body);
                     }
 
                     callback();
@@ -1173,19 +1180,21 @@ describe('Apps', function () {
         });
 
         it('installation - app can check addons', function (done) {
-            async.retry({ times: 100, interval: 5000 }, function (callback) {
+            this.timeout(120000);
+            async.retry({ times: 15, interval: 6000 }, function (callback) {
                 superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
                     .query({ username: USERNAME, password: PASSWORD })
                     .end(function (err, res) {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
+                    delete res.body.email; // sendmail auth fails
                     delete res.body.sendmail; // sendmail auth fails
                     delete res.body.recvmail; // dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
 
                     for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet');
+                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + res.body);
                     }
 
                     callback();
@@ -1343,19 +1352,21 @@ describe('Apps', function () {
         });
 
         it('installation - app can check addons', function (done) {
-            async.retry({ times: 100, interval: 5000 }, function (callback) {
+            this.timeout(120000);
+            async.retry({ times: 15, interval: 6000 }, function (callback) {
                 superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
                     .query({ username: USERNAME, password: PASSWORD })
                     .end(function (err, res) {
                     expect(!err).to.be.ok();
                     expect(res.statusCode).to.equal(200);
 
+                    delete res.body.email; // sendmail auth fails
                     delete res.body.sendmail; // sendmail auth fails
                     delete res.body.recvmail; // dovecot mail delivery won't work
                     delete res.body.stdenv; // cannot access APP_ORIGIN
 
                     for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet');
+                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + res.body);
                     }
 
                     callback();
