@@ -47,5 +47,20 @@ describe('shell', function () {
             done();
         });
     });
+
+    it('execSync a valid program', function (done) {
+        shell.execSync('test', 'ls -l | wc -c');
+        done();
+    });
+
+    it('execSync throws for invalid program', function (done) {
+        expect(function () { shell.execSync('test', 'cannotexist') }).to.throwException();
+        done();
+    });
+
+    it('execSync throws for failed program', function (done) {
+        expect(function () { shell.execSync('test', 'false'); }).to.throwException();
+        done();
+    });
 });
 

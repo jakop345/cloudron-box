@@ -2,7 +2,8 @@
 
 exports = module.exports = {
     sudo: sudo,
-    exec: exec
+    exec: exec,
+    execSync: execSync
 };
 
 var assert = require('assert'),
@@ -12,6 +13,13 @@ var assert = require('assert'),
     util = require('util');
 
 var SUDO = '/usr/bin/sudo';
+
+function execSync(tag, cmd) {
+    assert.strictEqual(typeof tag, 'string');
+    assert.strictEqual(typeof cmd, 'string');
+
+    child_process.execSync(cmd, { stdio: 'inherit' });
+}
 
 function exec(tag, file, args, callback) {
     assert.strictEqual(typeof tag, 'string');
