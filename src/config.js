@@ -102,7 +102,7 @@ function initConfig() {
             name: 'boxtest'
         };
         data.token = 'APPSTORE_TOKEN';
-        data.adminEmail = 'test@cloudron.foo';
+        data.adminEmail = 'no-reply@localhost';
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
