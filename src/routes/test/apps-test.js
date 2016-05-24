@@ -656,14 +656,7 @@ describe('Apps', function () {
                 expect(data.Config.Env).to.contain('APP_ORIGIN=https://' + config.appFqdn(APP_LOCATION));
                 expect(data.Config.Env).to.contain('APP_DOMAIN=' + config.appFqdn(APP_LOCATION));
                 expect(data.Config.Hostname).to.be(APP_LOCATION);
-                clientdb.getByAppIdAndType(appResult.id, clientdb.TYPE_OAUTH, function (error, client) {
-                    expect(error).to.not.be.ok();
-                    expect(client.id.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
-                    expect(client.clientSecret.length).to.be(64); // 32 hex chars (256 bits)
-                    expect(data.Config.Env).to.contain('OAUTH_CLIENT_ID=' + client.id);
-                    expect(data.Config.Env).to.contain('OAUTH_CLIENT_SECRET=' + client.clientSecret);
-                    done();
-                });
+                done();
             });
         });
 
@@ -706,6 +699,22 @@ describe('Apps', function () {
                 }
 
                 done();
+            });
+        });
+
+        it('installation - oauth addon config', function (done) {
+            var appContainer = docker.getContainer(appEntry.containerId);
+            appContainer.inspect(function (error, data) {
+                expect(error).to.not.be.ok();
+
+                clientdb.getByAppIdAndType(APP_ID, clientdb.TYPE_OAUTH, function (error, client) {
+                    expect(error).to.not.be.ok();
+                    expect(client.id.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
+                    expect(client.clientSecret.length).to.be(64); // 32 hex chars (256 bits)
+                    expect(data.Config.Env).to.contain('OAUTH_CLIENT_ID=' + client.id);
+                    expect(data.Config.Env).to.contain('OAUTH_CLIENT_SECRET=' + client.clientSecret);
+                    done();
+                });
             });
         });
 
