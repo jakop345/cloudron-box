@@ -34,7 +34,7 @@ for script in "${scripts[@]}"; do
 done
 
 # setup_infra requires node to be in path for the root user
-if ! sudo -n "node" 2>/dev/null; then
+if ! test -x /usr/bin/node 2>/dev/null; then
     echo "node is not in PATH for the root user. Create a symlink to /usr/bin/node possibly"
     exit 1
 fi
