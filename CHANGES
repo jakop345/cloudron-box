@@ -517,3 +517,6 @@
 - 2-character usernames are now allowed
 - Make cloudron CLI push/pull more robust
 
+[0.14.2]
+- Update mail addon
+
