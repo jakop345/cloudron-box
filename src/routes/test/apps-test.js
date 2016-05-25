@@ -44,7 +44,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 var TEST_IMAGE_REPO = 'cloudron/test';
 var TEST_IMAGE_TAG = '15.0.0';
 var TEST_IMAGE = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
-var TEST_IMAGE_ID = child_process.execSync('docker inspect --format={{.Id}} ' + TEST_IMAGE).toString('utf8').trim();
+// var TEST_IMAGE_ID = child_process.execSync('docker inspect --format={{.Id}} ' + TEST_IMAGE).toString('utf8').trim();
 
 var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'appslocation';
@@ -112,38 +112,12 @@ describe('Apps', function () {
     var imageCreated = false;
 
     before(function (done) {
-        safe.fs.unlinkSync(paths.INFRA_VERSION_FILE);
-        child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
-
-        dockerProxy = startDockerProxy(function interceptor(req, res) {
-            if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
-                imageCreated = true;
-                res.writeHead(200);
-                res.end();
-                return true;
-            } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
-                imageDeleted = true;
-                res.writeHead(200);
-                res.end();
-                return true;
-            }
-            return false;
-        }, done);
-    });
-
-    after(function (done) {
-        child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
-        dockerProxy.close(done);
-    });
-
-
-    /*
-        Individual sub category setup and cleanup
-    */
-    function setup(done) {
         config._reset();
 
         process.env.CREATE_INFRA = 1;
+
+        safe.fs.unlinkSync(paths.INFRA_VERSION_FILE);
+        child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
 
         async.series([
             // first clear, then start server. otherwise, taskmanager spins up tasks for obsolete appIds
@@ -194,6 +168,23 @@ describe('Apps', function () {
                 tokendb.add(token_1, tokendb.PREFIX_USER + USER_1_ID, 'test-client-id',  Date.now() + 100000, '*', callback);
             },
 
+            function (callback) {
+                dockerProxy = startDockerProxy(function interceptor(req, res) {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
+                        imageCreated = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
+                        imageDeleted = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    }
+                    return false;
+                }, callback);
+            },
+
             settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
             settings.setTlsConfig.bind(null, { provider: 'caas' }),
             settings.setBackupConfig.bind(null, { provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' })
@@ -203,10 +194,13 @@ describe('Apps', function () {
             console.log('This test can take ~30 seconds to start as it waits for infra to be ready');
             setTimeout(done, 30000);
         });
-    }
+    });
 
-    function cleanup(done) {
+    after(function (done) {
         delete process.env.CREATE_INFRA;
+
+        // child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
+        dockerProxy.close(function () { });
 
         // db is not cleaned up here since it's too late to call it after server.stop. if called before server.stop taskmanager apptasks are unhappy :/
         async.series([
@@ -217,16 +211,11 @@ describe('Apps', function () {
             simpleauth.stop,
             config._reset,
         ], done);
-    }
+    });
 
     describe('App API', function () {
-        this.timeout(50000);
-
-        before(setup);
-
         after(function (done) {
-            APP_ID = null;
-            cleanup(done);
+            appdb._clear(done); // TODO: test proper uninstall (requires mock for aws)
         });
 
         it('app install fails - missing manifest', function (done) {
@@ -572,8 +561,6 @@ describe('Apps', function () {
             imageCreated = false;
 
             async.series([
-                setup,
-
                 function (callback) {
                     apiHockInstance
                         .get('/api/v1/apps/' + APP_STORE_ID + '/versions/' + APP_MANIFEST.version + '/icon')
@@ -602,7 +589,6 @@ describe('Apps', function () {
             APP_ID = null;
 
             async.series([
-                cleanup,
                 apiHockServer.close.bind(apiHockServer),
                 awsHockServer.close.bind(awsHockServer)
             ], done);
@@ -746,7 +732,8 @@ describe('Apps', function () {
         });
 
         it('installation - app can check addons', function (done) {
-            this.timeout(120000);
+            console.log('This test can take a while as it waits for scheduler addon to tick');
+
             async.retry({ times: 15, interval: 6000 }, function (callback) {
                 superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
                     .query({ username: USERNAME, password: PASSWORD })
@@ -1007,8 +994,6 @@ describe('Apps', function () {
             APP_ID = uuid.v4();
 
             async.series([
-                setup,
-
                 function (callback) {
                     config.set('fqdn', 'test.foobar.com');
                     callback();
@@ -1045,7 +1030,6 @@ describe('Apps', function () {
         after(function (done) {
             APP_ID = null;
             async.series([
-                cleanup,
                 apiHockServer.close.bind(apiHockServer),
                 awsHockServer.close.bind(awsHockServer)
             ], done);

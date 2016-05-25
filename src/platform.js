@@ -44,8 +44,6 @@ function initialize(callback) {
 
     stopContainersSync();
 
-    if (!existingInfra.INFRA_VERSION) removeImagesSync(); // a hack for --recreate-infra
-
     startAddons(function (error) {
         if (error) return callback(error);
 
