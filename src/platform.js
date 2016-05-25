@@ -109,6 +109,8 @@ function loadAddonVarsSync() {
 }
 
 function mailConfig() {
+    if (!gAddonVars) return { username: 'no-reply', from: 'no-reply@' + config.fqdn(), password: 'doesnotwork' }; // for tests which don't run infra
+
     return {
         username: gAddonVars.mail.MAIL_ROOT_USERNAME,
         from: '"Cloudron" <' + gAddonVars.mail.MAIL_ROOT_USERNAME + '@' + config.fqdn() + '>',
