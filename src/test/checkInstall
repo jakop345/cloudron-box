@@ -35,7 +35,7 @@ done
 
 image_missing=""
 
-images=$(node -e "var i = require('${SOURCE_DIR}/src/infra_version.js'); console.log(Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join('\n'));")
+images=$(node -e "var i = require('${SOURCE_DIR}/src/infra_version.js'); console.log(Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join('\n'));"; echo $TEST_IMAGE)
 
 for image in ${images}; do
     if ! docker inspect "${image}" >/dev/null 2>/dev/null; then
