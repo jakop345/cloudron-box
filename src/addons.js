@@ -437,7 +437,7 @@ function setupSendMail(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     // FIXME: to can conflict with a real user!
-    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
+    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '.app';
 
     var cmd = [ '/addons/mail/service.sh', 'add-send', from ];
 
@@ -458,7 +458,7 @@ function teardownSendMail(app, options, callback) {
     debugApp(app, 'Tearing down sendmail');
 
     // FIXME: to can conflict with a real user!
-    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
+    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '.app';
 
     var cmd = [ '/addons/mail/service.sh', 'remove-send', from ];
 
@@ -479,7 +479,7 @@ function setupRecvMail(app, options, callback) {
     debugApp(app, 'Setting up recvmail');
 
     // FIXME: to can conflict with a real user!
-    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
+    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '.app';
 
     var cmd = [ '/addons/mail/service.sh', 'add-recv', to ];
 
@@ -498,7 +498,7 @@ function teardownRecvMail(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     // FIXME: to can conflict with a real user!
-    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '-app';
+    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '.app';
 
     var cmd = [ '/addons/mail/service.sh', 'remove-recv', to ];
 
