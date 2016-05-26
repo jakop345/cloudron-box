@@ -88,6 +88,9 @@ function validateUsername(username) {
 
     if (RESERVED_USERNAMES.indexOf(username) !== -1) return new UserError(UserError.BAD_USERNAME, 'Username is reserved');
 
+    // +/- can be tricky in emails
+    if (/[^a-zA-Z0-9.]/.test(username)) return new UserError(UserError.BAD_USERNAME, 'Username can only contain alphanumerals and dot');
+
     if (username.indexOf('-app') !== -1) return new UserError(UserError.BAD_USERNAME, 'Username pattern is reserved for apps');
 
     return null;
