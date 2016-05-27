@@ -16,6 +16,7 @@ var appdb = require('../appdb.js'),
     eventlogdb = require('../eventlogdb.js'),
     expect = require('expect.js'),
     hat = require('hat'),
+    mailboxdb = require('../mailboxdb.js'),
     settingsdb = require('../settingsdb.js'),
     tokendb = require('../tokendb.js'),
     userdb = require('../userdb.js'),
@@ -1119,6 +1120,51 @@ describe('database', function () {
                 expect(results[0].source).to.be.eql({ ip: '1.2.3.4' });
                 expect(results[0].data).to.be.eql({ appId: 'thatapp' });
 
+                done();
+            });
+        });
+    });
+
+    describe('mailboxes', function () {
+        it('add succeeds', function (done) {
+            mailboxdb.add('supportid', 'support', function (error, mailbox) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('cannot add dup entry', function (done) {
+            mailboxdb.add('supportid2', 'support', function (error, mailbox) {
+                expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            mailboxdb.get('supportid', function (error, mailbox) {
+                expect(error).to.be(null);
+                expect(mailbox.id).to.be('supportid');
+                expect(mailbox.name).to.be('support');
+                expect(mailbox.creationTime).to.be.a(Date);
+
+                done();
+            });
+        });
+
+        it('getAll succeeds', function (done) {
+            mailboxdb.getAll(function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.be.an(Array);
+                expect(results.length).to.be(1);
+                expect(results[0].id).to.be('supportid');
+
+                done();
+            });
+        });
+
+        it('del succeeds', function (done) {
+            mailboxdb.del('supportid', function (error) {
+                expect(error).to.be(null);
                 done();
             });
         });

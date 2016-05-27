@@ -120,7 +120,8 @@ function clear(callback) {
         require('./groupdb.js')._clear,
         require('./userdb.js')._clear,
         require('./settingsdb.js')._clear,
-        require('./eventlogdb.js')._clear
+        require('./eventlogdb.js')._clear,
+        require('./mailboxdb.js')._clear
     ], callback);
 }
 
