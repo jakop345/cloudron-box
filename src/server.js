@@ -120,6 +120,12 @@ function initializeExpressSync() {
     router.get ('/api/v1/groups/:groupId', usersScope, routes.user.requireAdmin, routes.groups.get);
     router.del ('/api/v1/groups/:groupId', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.groups.remove);
 
+    // Mailbox management
+    router.get ('/api/v1/mailboxes', usersScope, routes.user.requireAdmin, routes.mailboxes.list);
+    router.post('/api/v1/mailboxes', usersScope, routes.user.requireAdmin, routes.mailboxes.create);
+    router.get ('/api/v1/mailboxes/:mailboxId', usersScope, routes.user.requireAdmin, routes.mailboxes.get);
+    router.del ('/api/v1/mailboxes/:mailboxId', usersScope, routes.user.requireAdmin, routes.mailboxes.remove);
+
     // form based login routes used by oauth2 frame
     router.get ('/api/v1/session/login', csrf, routes.oauth2.loginForm);
     router.post('/api/v1/session/login', csrf, routes.oauth2.login);

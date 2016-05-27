@@ -9,9 +9,10 @@ exports = module.exports = {
     eventlog: require('./eventlog.js'),
     graphs: require('./graphs.js'),
     groups: require('./groups.js'),
+    mailboxes: require('./mailboxes.js'),
     oauth2: require('./oauth2.js'),
     profile: require('./profile.js'),
-    settings: require('./settings.js'),
     sysadmin: require('./sysadmin.js'),
+    settings: require('./settings.js'),
     user: require('./user.js')
 };
