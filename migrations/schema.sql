@@ -118,3 +118,11 @@ CREATE TABLE IF NOT EXISTS eventlog(
     creationTime TIMESTAMP,
 
     PRIMARY KEY (id));
+
+CREATE TABLE IF NOT EXISTS mailboxes(
+    id VARCHAR(128) NOT NULL,
+    name VARCHAR(128) NOT NULL UNIQUE,
+    aliasTarget VARCHAR(128), /* the target if type is an alias */
+    creationTime TIMESTAMP,
+
+    PRIMARY KEY (id));
