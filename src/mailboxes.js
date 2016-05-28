@@ -13,6 +13,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     DatabaseError = require('./databaseerror.js'),
+    docker = require('./docker.js'),
     mailboxdb = require('./mailboxdb.js'),
     util = require('util');
 
@@ -39,6 +40,7 @@ MailboxError.ALREADY_EXISTS = 'already exists';
 MailboxError.BAD_NAME = 'bad name';
 MailboxError.NOT_FOUND = 'not found';
 MailboxError.INTERNAL_ERROR = 'internal error';
+MailboxError.EXTERNAL_ERROR = 'external error';
 
 function validateName(name) {
     var RESERVED_NAMES = [ 'no-reply', 'postmaster', 'mailer-daemon' ];
@@ -73,15 +75,31 @@ function add(name, callback) {
     });
 }
 
+function pushAlias(name, aliases, callback) {
+    if (process.env.BOX_ENV === 'test') return callback();
+
+    var cmd = [ '/addons/mail/service.sh', 'set-alias', name ].concat(aliases);
+
+    docker.execContainer('mail', cmd, { }, function (error) {
+        if (error) return callback(new MailboxError(MailboxError.EXTERNAL_ERROR, error));
+
+        callback();
+    });
+}
+
 function del(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    mailboxdb.del(name, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
-        if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
+    pushAlias(name, [ ], function (error) {
+        if (error) return callback(error);
 
-        callback();
+        mailboxdb.del(name, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
+            if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
+
+            callback();
+        });
     });
 }
 
@@ -119,12 +137,17 @@ function setAliases(name, aliases, callback) {
         if (error) return callback(error);
     }
 
-    mailboxdb.setAliases(name, aliases, function (error) {
-        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new MailboxError(MailboxError.ALREADY_EXISTS, error.message))
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
-        if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
+    pushAlias(name, aliases, function (error) {
+        if (error) return callback(error);
 
-        callback(null);
+        mailboxdb.setAliases(name, aliases, function (error) {
+            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new MailboxError(MailboxError.ALREADY_EXISTS, error.message))
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
+            if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
+
+
+            callback(null);
+        });
     });
 }
 
