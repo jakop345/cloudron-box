@@ -38,7 +38,7 @@ function cleanup(done) {
     database._clear(done);
 }
 
-var MAILBOX_ID = 'test';
+var MAILBOX_NAME = 'test';
 
 describe('Mailboxes', function () {
     before(setup);
@@ -73,14 +73,14 @@ describe('Mailboxes', function () {
     });
 
     it('can create valid mailbox', function (done) {
-        mailboxes.add(MAILBOX_ID, function (error) {
+        mailboxes.add(MAILBOX_NAME, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('cannot add existing mailbox', function (done) {
-        mailboxes.add(MAILBOX_ID, function (error) {
+        mailboxes.add(MAILBOX_NAME, function (error) {
             expect(error.reason).to.be(MailboxError.ALREADY_EXISTS);
             done();
         });
@@ -94,9 +94,38 @@ describe('Mailboxes', function () {
     });
 
     it('can get valid mailbox', function (done) {
-        mailboxes.get(MAILBOX_ID, function (error, group) {
+        mailboxes.get(MAILBOX_NAME, function (error, group) {
             expect(error).to.be(null);
-            expect(group.name).to.equal(MAILBOX_ID);
+            expect(group.name).to.equal(MAILBOX_NAME);
+            done();
+        });
+    });
+
+    it('can set aliases', function (done) {
+        mailboxes.setAliases(MAILBOX_NAME, [ 'alias1', 'alias2' ], function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('can set subset alias', function (done) {
+        mailboxes.setAliases(MAILBOX_NAME, [ 'alias1' ], function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('can get aliases', function (done) {
+        mailboxes.getAliases(MAILBOX_NAME, function (error, aliases) {
+            expect(error).to.be(null);
+            expect(aliases[0]).to.be('alias1');
+            done();
+        });
+    });
+
+    it('cannot set self-referential alias', function (done) {
+        mailboxes.setAliases(MAILBOX_NAME, [ MAILBOX_NAME ], function (error) {
+            expect(error.reason).to.be(MailboxError.ALREADY_EXISTS);
             done();
         });
     });

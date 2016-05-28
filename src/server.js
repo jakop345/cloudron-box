@@ -125,6 +125,8 @@ function initializeExpressSync() {
     router.post('/api/v1/mailboxes', usersScope, routes.user.requireAdmin, routes.mailboxes.create);
     router.get ('/api/v1/mailboxes/:mailboxId', usersScope, routes.user.requireAdmin, routes.mailboxes.get);
     router.del ('/api/v1/mailboxes/:mailboxId', usersScope, routes.user.requireAdmin, routes.mailboxes.remove);
+    router.put ('/api/v1/mailboxes/:mailboxId/aliases', usersScope, routes.user.requireAdmin, routes.mailboxes.setAliases);
+    router.get ('/api/v1/mailboxes/:mailboxId/aliases', usersScope, routes.user.requireAdmin, routes.mailboxes.getAliases);
 
     // form based login routes used by oauth2 frame
     router.get ('/api/v1/session/login', csrf, routes.oauth2.loginForm);

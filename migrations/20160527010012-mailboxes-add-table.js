@@ -5,11 +5,10 @@ var type = dbm.dataType;
 
 exports.up = function(db, callback) {
 	var cmd = 'CREATE TABLE mailboxes(' +
-				'id VARCHAR(128) NOT NULL,' +
-				'name VARCHAR(128) NOT NULL UNIQUE,' +
+				'name VARCHAR(128) NOT NULL,' +
 				'aliasTarget VARCHAR(128),' +
 				'creationTime TIMESTAMP,' +
-				'PRIMARY KEY (id))';
+				'PRIMARY KEY (name))';
 
     db.runSql(cmd, function (error) {
         if (error) console.error(error);

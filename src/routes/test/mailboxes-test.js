@@ -116,6 +116,36 @@ describe('Mailbox API', function () {
         });
     });
 
+    it('cannot set with invalid alias', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/mailboxes/' + MAILBOX_ID + '/aliases')
+               .query({ access_token: token })
+               .send({ aliases: [ 'a' ]})
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('cannot set with invalid type', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/mailboxes/' + MAILBOX_ID + '/aliases')
+               .query({ access_token: token })
+               .send({ aliases: [ 'apple', 34 ]})
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('can set aliases of mailbox', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/mailboxes/' + MAILBOX_ID + '/aliases')
+               .query({ access_token: token })
+               .send({ aliases: [ 'alias1', 'alias2' ]})
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done();
+        });
+    });
+
     it('can list mailboxes', function (done) {
         superagent.get(SERVER_URL + '/api/v1/mailboxes')
                .query({ access_token: token })
@@ -123,6 +153,38 @@ describe('Mailbox API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.mailboxes).to.be.an(Array);
             expect(res.body.mailboxes[0].name).to.be(MAILBOX_ID);
+            done();
+        });
+    });
+
+    it('can get aliases', function (done) {
+        superagent.get(SERVER_URL + '/api/v1/mailboxes/' + MAILBOX_ID + '/aliases')
+               .query({ access_token: token })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.aliases).to.be.an(Array);
+            expect(res.body.aliases[0]).to.be('alias1');
+            expect(res.body.aliases[1]).to.be('alias2');
+            done();
+        });
+    });
+
+    it('can add another mailbox', function (done) {
+        superagent.post(SERVER_URL + '/api/v1/mailboxes')
+               .query({ access_token: token })
+               .send({ name: MAILBOX_ID + '2' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(201);
+            done();
+        });
+    });
+
+    it('cannot alias existing mailbox', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/mailboxes/' + MAILBOX_ID + '/aliases')
+               .query({ access_token: token })
+               .send({ aliases: [ MAILBOX_ID + '2' ]})
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(409);
             done();
         });
     });

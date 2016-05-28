@@ -5,6 +5,8 @@ exports = module.exports = {
     del: del,
     get: get,
     getAll: getAll,
+    setAliases: setAliases,
+    getAliases: getAliases,
 
     MailboxError: MailboxError
 };
@@ -59,12 +61,11 @@ function add(name, callback) {
     var error = validateName(name);
     if (error) return callback(error);
 
-    mailboxdb.add(name /* id */, name, function (error) {
+    mailboxdb.add(name, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new MailboxError(MailboxError.ALREADY_EXISTS));
         if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
 
         var mailbox = {
-            id: name,
             name: name
         };
 
@@ -72,11 +73,11 @@ function add(name, callback) {
     });
 }
 
-function del(id, callback) {
-    assert.strictEqual(typeof id, 'string');
+function del(name, callback) {
+    assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    mailboxdb.del(id, function (error) {
+    mailboxdb.del(name, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
         if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
 
@@ -84,11 +85,11 @@ function del(id, callback) {
     });
 }
 
-function get(id, callback) {
-    assert.strictEqual(typeof id, 'string');
+function get(name, callback) {
+    assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    mailboxdb.get(id, function (error, mailbox) {
+    mailboxdb.get(name, function (error, mailbox) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
         if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
 
@@ -103,5 +104,38 @@ function getAll(callback) {
         if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
 
         callback(null, results);
+    });
+}
+
+function setAliases(name, aliases, callback) {
+    assert.strictEqual(typeof name, 'string');
+    assert(util.isArray(aliases));
+    assert.strictEqual(typeof callback, 'function');
+
+    for (var i = 0; i < aliases.length; i++) {
+        aliases[i] = aliases[i].toLowerCase();
+
+        var error = validateName(aliases[i]);
+        if (error) return callback(error);
+    }
+
+    mailboxdb.setAliases(name, aliases, function (error) {
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new MailboxError(MailboxError.ALREADY_EXISTS, error.message))
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
+        if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
+
+        callback(null);
+    });
+}
+
+function getAliases(name, callback) {
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    mailboxdb.getAliases(name, function (error, aliases) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
+        if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
+
+        callback(null, aliases);
     });
 }
