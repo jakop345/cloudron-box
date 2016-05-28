@@ -14,6 +14,7 @@ var apps = require('./apps.js'),
     fs = require('fs'),
     infra = require('./infra_version.js'),
     ini = require('ini'),
+    mailboxes = require('./mailboxes.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
@@ -54,11 +55,13 @@ function initialize(callback) {
         func(function (error) {
             if (error) return callback(error);
 
-            fs.writeFileSync(paths.INFRA_VERSION_FILE, JSON.stringify(infra));
-
             loadAddonVarsSync();
 
-            callback();
+            mailboxes.setupAliases(function (error) {
+                if (error) return callback(error);
+
+                fs.writeFile(paths.INFRA_VERSION_FILE, JSON.stringify(infra), callback);
+            });
         });
     });
 }

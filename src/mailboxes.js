@@ -8,10 +8,13 @@ exports = module.exports = {
     setAliases: setAliases,
     getAliases: getAliases,
 
+    setupAliases: setupAliases,
+
     MailboxError: MailboxError
 };
 
 var assert = require('assert'),
+    async = require('async'),
     DatabaseError = require('./databaseerror.js'),
     docker = require('./docker.js'),
     mailboxdb = require('./mailboxdb.js'),
@@ -162,3 +165,24 @@ function getAliases(name, callback) {
         callback(null, aliases);
     });
 }
+
+// push aliases to the mail container on startup
+function setupAliases(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    getAll(function (error, mailboxes) {
+        if (error) return callback(error);
+
+        async.each(mailboxes, function iteratorDone(mailbox) {
+            console.log('why am i here????', mailbox);
+            getAliases(mailbox.name, function (error, aliases) {
+                if (error) return iteratorDone(error);
+
+                if (aliases.length === 0) return iteratorDone();
+
+                pushAlias(mailbox.name, aliases, iteratorDone);
+            });
+        }, callback)
+    });
+}
+
