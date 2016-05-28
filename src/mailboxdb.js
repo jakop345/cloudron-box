@@ -41,8 +41,9 @@ function del(id, callback) {
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('DELETE FROM mailboxes WHERE id=?', [ id ], function (error) {
+    database.query('DELETE FROM mailboxes WHERE id=?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.affectedRows === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
     });
