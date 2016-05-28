@@ -136,4 +136,14 @@ describe('Mailbox API', function () {
             done();
         });
     });
+
+    it('cannot delete random mailbox', function (done) {
+        superagent.del(SERVER_URL + '/api/v1/mailboxes/' + MAILBOX_ID)
+               .query({ access_token: token })
+               .send({ name: MAILBOX_ID })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(404);
+            done();
+        });
+    });
 });
