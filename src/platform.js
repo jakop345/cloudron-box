@@ -8,6 +8,7 @@ exports = module.exports = {
 
 var apps = require('./apps.js'),
     assert = require('assert'),
+    async = require('async'),
     config = require('./config.js'),
     certificates = require('./certificates.js'),
     debug = require('debug')('box:platform'),
@@ -43,30 +44,18 @@ function initialize(callback) {
 
     debug('Updating infrastructure from %s to %s', existingInfra.version, infra.version);
 
-    stopContainersSync();
-
-    startAddons(function (error) {
-        if (error) return callback(error);
-
-        removeOldImagesSync();
-
-        var func = existingInfra ? apps.configureInstalledApps : apps.restoreInstalledApps;
-
-        func(function (error) {
-            if (error) return callback(error);
-
-            loadAddonVarsSync();
-
-            mailboxes.setupAliases(function (error) {
-                if (error) return callback(error);
-
-                fs.writeFile(paths.INFRA_VERSION_FILE, JSON.stringify(infra), callback);
-            });
-        });
-    });
+    async.series([
+        stopContainers,
+        startAddons,
+        removeOldImages,
+        existingInfra ? apps.configureInstalledApps : apps.restoreInstalledApps,
+        loadAddonVars,
+        mailboxes.setupAliases,
+        fs.writeFile.bind(fs, paths.INFRA_VERSION_FILE, JSON.stringify(infra))
+    ], callback);
 }
 
-function removeOldImagesSync() {
+function removeOldImages(callback) {
     debug('removing old addon images');
 
     for (var imageName in infra.images) {
@@ -75,6 +64,8 @@ function removeOldImagesSync() {
         var cmd = 'docker images "%s" | tail -n +2 | awk \'{ print $1 ":" $2 }\' | grep -v "%s" | xargs --no-run-if-empty docker rmi';
         shell.execSync('removeOldImagesSync', util.format(cmd, image.repo, image.tag));
     }
+
+    callback();
 }
 
 function removeImagesSync() {
@@ -82,10 +73,11 @@ function removeImagesSync() {
     shell.execSync('removeImagesSync', 'docker images -q | xargs --no-run-if-empty docker rmi -f');
 }
 
-function stopContainersSync() {
+function stopContainers(callback) {
     // TODO: be nice and stop addons cleanly (example, shutdown commands)
     debug('stopping existing containers');
     shell.execSync('stopContainersSync', 'docker ps -qa | xargs --no-run-if-empty docker rm -f');
+    callback();
 }
 
 function startAddons(callback) {
@@ -100,13 +92,14 @@ function startAddons(callback) {
     });
 }
 
-function loadAddonVarsSync() {
+function loadAddonVars(callback) {
     gAddonVars = {
         mail: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mail_vars.sh', 'utf8')),
         postgresql: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/postgresql_vars.sh', 'utf8')),
         mysql: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh', 'utf8')),
         mongodb: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mongodb_vars.sh', 'utf8'))
     };
+    callback();
 }
 
 function mailConfig() {
