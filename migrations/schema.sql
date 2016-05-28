@@ -119,6 +119,10 @@ CREATE TABLE IF NOT EXISTS eventlog(
 
     PRIMARY KEY (id));
 
+/* Future fields:
+   * accessRestriction - to determine who can access it. So this has foreign keys
+   * quota - per mailbox quota
+*/
 CREATE TABLE IF NOT EXISTS mailboxes(
     name VARCHAR(128) NOT NULL,
     aliasTarget VARCHAR(128), /* the target name type is an alias */
