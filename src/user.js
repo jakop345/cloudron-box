@@ -25,6 +25,7 @@ exports = module.exports = {
 var assert = require('assert'),
     clientdb = require('./clientdb.js'),
     crypto = require('crypto'),
+    debug = require('debug')('box:user'),
     DatabaseError = require('./databaseerror.js'),
     eventlog = require('./eventlog.js'),
     groups = require('./groups.js'),
