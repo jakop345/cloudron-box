@@ -43,7 +43,7 @@ SubdomainError.NOT_FOUND = 'No such domain';
 SubdomainError.EXTERNAL_ERROR = 'External error';
 SubdomainError.STILL_BUSY = 'Still busy';
 SubdomainError.MISSING_CREDENTIALS = 'Missing credentials';
-SubdomainError.INTERNAL_ERROR = 'Missing credentials';
+SubdomainError.INTERNAL_ERROR = 'Internal error';
 SubdomainError.ACCESS_DENIED = 'Access denied';
 
 // choose which subdomain backend we use for test purpose we use route53
