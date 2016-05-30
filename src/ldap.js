@@ -12,7 +12,9 @@ var assert = require('assert'),
     eventlog = require('./eventlog.js'),
     user = require('./user.js'),
     UserError = user.UserError,
-    ldap = require('ldapjs');
+    ldap = require('ldapjs'),
+    mailboxes = require('./mailboxes.js'),
+    MailboxError = mailboxes.MailboxError;
 
 var gServer = null;
 
@@ -169,6 +171,7 @@ function authenticateUser(req, res, next) {
 function authorizeUserForApp(req, res, next) {
     assert(req.user);
 
+    // We simply authorize the user to access a mailbox by his own name
     getAppByRequest(req, function (error, app) {
         if (error) return next(error);
 
@@ -190,6 +193,19 @@ function authorizeUserForApp(req, res, next) {
     });
 }
 
+function authorizeUserForMailbox(req, res, next) {
+    assert(req.user);
+
+    mailboxes.get(req.user.username, function (error) {
+        if (error && error.reason === MailboxError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+        if (error) return next(new ldap.OperationsError(error));
+
+        eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', mailboxId: req.user.username }, { userId: req.user.username });
+
+        res.end();
+    });
+}
+
 function start(callback) {
     assert.strictEqual(typeof callback, 'function');
 
@@ -198,6 +214,8 @@ function start(callback) {
     gServer.search('ou=users,dc=cloudron', userSearch);
     gServer.search('ou=groups,dc=cloudron', groupSearch);
     gServer.bind('ou=users,dc=cloudron', authenticateUser, authorizeUserForApp);
+
+    gServer.bind('ou=mailboxes,dc=cloudron', authenticateUser, authorizeUserForMailbox);
 
     // this is the bind for addons (after bind, they might search and authenticate)
     gServer.bind('ou=addons,dc=cloudron', function(req, res, next) {
