@@ -130,7 +130,7 @@ function groupSearch(req, res, next) {
     });
 }
 
-function appUserBind(req, res, next) {
+function authenticateUser(req, res, next) {
     debug('user bind: %s (from %s)', req.dn.toString(), req.connection.ldap.id);
 
     // extract the common name which might have different attribute names
@@ -155,30 +155,37 @@ function appUserBind(req, res, next) {
         api = user.verifyWithUsername;
     }
 
-    // TODO this should be done after we verified the app has access to avoid leakage of user existence
-    api(commonName, req.credentials || '', function (error, userObject) {
+    api(commonName, req.credentials || '', function (error, user) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error && error.reason === UserError.WRONG_PASSWORD) return next(new ldap.InvalidCredentialsError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error));
 
-        getAppByRequest(req, function (error, app) {
-            if (error) return next(error);
+        req.user = user;
 
-            if (!app) {
-                debug('no app found for this container, allow access');
-                return res.end();
-            }
+        next();
+    });
+}
 
-            apps.hasAccessTo(app, userObject, function (error, result) {
-                if (error) return next(new ldap.OperationsError(error.toString()));
+function authorizeUserForApp(req, res, next) {
+    assert(req.user);
 
-                // we return no such object, to avoid leakage of a users existence
-                if (!result) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+    getAppByRequest(req, function (error, app) {
+        if (error) return next(error);
 
-                eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', appId: app.id }, { userId: userObject.id });
+        if (!app) {
+            debug('no app found for this container, allow access');
+            return res.end();
+        }
 
-                res.end();
-            });
+        apps.hasAccessTo(app, req.user, function (error, result) {
+            if (error) return next(new ldap.OperationsError(error.toString()));
+
+            // we return no such object, to avoid leakage of a users existence
+            if (!result) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+
+            eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', appId: app.id }, { userId: req.user.id });
+
+            res.end();
         });
     });
 }
@@ -190,7 +197,7 @@ function start(callback) {
 
     gServer.search('ou=users,dc=cloudron', userSearch);
     gServer.search('ou=groups,dc=cloudron', groupSearch);
-    gServer.bind('ou=users,dc=cloudron', appUserBind);
+    gServer.bind('ou=users,dc=cloudron', authenticateUser, authorizeUserForApp);
 
     // this is the bind for addons (after bind, they might search and authenticate)
     gServer.bind('ou=addons,dc=cloudron', function(req, res, next) {
