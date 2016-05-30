@@ -130,7 +130,7 @@ function groupSearch(req, res, next) {
     });
 }
 
-function userBind(req, res, next) {
+function appUserBind(req, res, next) {
     debug('user bind: %s (from %s)', req.dn.toString(), req.connection.ldap.id);
 
     // extract the common name which might have different attribute names
@@ -190,7 +190,7 @@ function start(callback) {
 
     gServer.search('ou=users,dc=cloudron', userSearch);
     gServer.search('ou=groups,dc=cloudron', groupSearch);
-    gServer.bind('ou=users,dc=cloudron', userBind);
+    gServer.bind('ou=users,dc=cloudron', appUserBind);
 
     // this is the bind for addons (after bind, they might search and authenticate)
     gServer.bind('ou=addons,dc=cloudron', function(req, res, next) {
