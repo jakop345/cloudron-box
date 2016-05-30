@@ -593,6 +593,28 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.createMailbox = function (name, callback) {
+        var data = {
+            name: name
+        };
+
+        $http.post(client.apiOrigin + '/api/v1/mailboxes', data).success(function(data, status) {
+            if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
+    Client.prototype.removeMailbox = function (name, callback) {
+        var data = {
+            name: name
+        };
+
+        $http({ method: 'DELETE', url: client.apiOrigin + '/api/v1/mailboxes/' + name, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
+            if (status !== 204) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.createUser = function (username, email, displayName, sendInvite, callback) {
         var data = {
             username: username,
