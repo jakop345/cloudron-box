@@ -123,6 +123,16 @@ describe('Mailboxes', function () {
         });
     });
 
+    it('can get aliases from mailbox', function (done) {
+        mailboxes.get(MAILBOX_NAME, function (error, group) {
+            expect(error).to.be(null);
+            expect(group.name).to.equal(MAILBOX_NAME);
+            expect(group.aliases.length).to.be(1);
+            expect(group.aliases[0]).to.be('alias1');
+            done();
+        });
+    });
+
     it('cannot set self-referential alias', function (done) {
         mailboxes.setAliases(MAILBOX_NAME, [ MAILBOX_NAME ], function (error) {
             expect(error.reason).to.be(MailboxError.ALREADY_EXISTS);
