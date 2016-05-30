@@ -8,6 +8,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     $scope.groups = [];
     $scope.config = Client.getConfig();
     $scope.userInfo = Client.getUserInfo();
+    $scope.mailboxes = [];
 
     $scope.userremove = {
         busy: false,
@@ -216,9 +217,14 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.useredit.error.email = null;
         $scope.useredit.email = userInfo.email;
         $scope.useredit.userInfo = userInfo;
-        $scope.useredit.aliases = mailboxes[userInfo.username].aliases.join(',');
         $scope.useredit.groupIds = angular.copy(userInfo.groupIds);
         $scope.useredit.superuser = userInfo.groupIds.indexOf('admin') !== -1;
+
+        $scope.useredit.aliases = '';
+        for (var i = 0; i < $scope.mailboxes.length; i++) {
+            if ($scope.mailboxes[i].name !== userInfo.username) continue;
+            $scope.useredit.aliases = $scope.mailboxes[i].aliases.join(',');
+        }
 
         $scope.useredit_form.$setPristine();
         $scope.useredit_form.$setUntouched();
@@ -259,7 +265,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             Client.setGroups(data.id, $scope.useredit.groupIds, function (error) {
                 if (error) return console.error('Unable to update groups for user:', error);
 
-                Client.setAliases($scope.useredit.userInfo.username, $scope.useredit.aliases.split(','), function (error) {
+                var aliases = $scope.useredit.aliases ? $scope.useredit.aliases.split(',') : [ ];
+                Client.setAliases($scope.useredit.userInfo.username, aliases, function (error) {
                     $scope.useredit.busy = false;
 
                     if (error) return console.error('Unable to update aliases for user:', error);

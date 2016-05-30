@@ -622,14 +622,14 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.setAliases = function (username, aliases, callback) {
+    Client.prototype.setAliases = function (name, aliases, callback) {
         var data = {
             aliases: aliases
         };
 
         $http.put(client.apiOrigin + '/api/v1/mailboxes/' + name + '/aliases', data).success(function(data, status) {
-            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null, data);
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
         }).error(defaultErrorHandler(callback));
     };
 

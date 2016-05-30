@@ -342,7 +342,7 @@ function updateUser(userId, username, email, displayName, auditSource, callback)
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId });
-        if (username) mailboxes.add(username, NOOP_CALLBACK);
+        if (username) mailboxes.add(username, NOOP_CALLBACK); // TODO: do this only when username actually changes
 
         callback(null);
     });
