@@ -48,7 +48,7 @@ function initialize(callback) {
         stopContainers,
         startAddons,
         removeOldImages,
-        existingInfra ? apps.configureInstalledApps : apps.restoreInstalledApps,
+        existingInfra.version === 'none' ? apps.restoreInstalledApps : apps.configureInstalledApps,
         loadAddonVars,
         mailboxes.setupAliases,
         fs.writeFile.bind(fs, paths.INFRA_VERSION_FILE, JSON.stringify(infra))
