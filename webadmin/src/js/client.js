@@ -615,6 +615,17 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.setAliases = function (username, aliases, callback) {
+        var data = {
+            aliases: aliases
+        };
+
+        $http.put(client.apiOrigin + '/api/v1/mailboxes/' + name + '/aliases', data).success(function(data, status) {
+            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.createUser = function (username, email, displayName, sendInvite, callback) {
         var data = {
             username: username,
