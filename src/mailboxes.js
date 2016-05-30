@@ -55,6 +55,8 @@ function validateName(name) {
 
     if (/[^a-zA-Z0-9.]/.test(name)) return new MailboxError(MailboxError.BAD_NAME, 'Name can only contain alphanumerals and dot');
 
+    if (name.indexOf('.app') !== -1) return new UserError(UserError.BAD_USERNAME, 'Alias pattern is reserved for apps');
+
     return null;
 }
 
