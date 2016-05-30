@@ -262,6 +262,7 @@ function removeUser(user, auditSource, callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         eventlog.add(eventlog.ACTION_USER_REMOVE, auditSource, { userId: user.id });
+        if (user.username) mailboxes.del(user.username, NOOP_CALLBACK);
 
         callback(null);
 
