@@ -52,13 +52,25 @@ function del(name, callback) {
     });
 }
 
+function postProcess(result) {
+    result.aliases = result.aliases ? result.aliases.split(',') : [ ];
+}
+
 function get(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE name=? AND aliasTarget IS NULL', [ name ], function (error, results) {
+    var query = 'SELECT m1.name, m1.creationTime, GROUP_CONCAT(m2.name) AS aliases ' +
+                'FROM mailboxes as m1 ' +
+                'LEFT OUTER JOIN mailboxes as m2 ON m1.name = m2.aliasTarget ' +
+                'WHERE m1.name=? AND m1.aliasTarget IS NULL ' +
+                'GROUP BY m1.name';
+
+    database.query(query, [ name ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        postProcess(results[0]);
 
         callback(null, results[0]);
     });
@@ -67,8 +79,16 @@ function get(name, callback) {
 function getAll(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE aliasTarget IS NULL', function (error, results) {
+    var query = 'SELECT m1.name, m1.creationTime, GROUP_CONCAT(m2.name) AS aliases ' +
+                'FROM mailboxes as m1 ' +
+                'LEFT OUTER JOIN mailboxes as m2 ON m1.name = m2.aliasTarget ' +
+                'WHERE m1.aliasTarget IS NULL ' +
+                'GROUP BY m1.name';
+
+    database.query(query, function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        results.forEach(postProcess);
 
         callback(null, results);
     });
