@@ -180,8 +180,7 @@ function setupAliases(callback) {
     getAll(function (error, mailboxes) {
         if (error) return callback(error);
 
-        async.each(mailboxes, function iteratorDone(mailbox) {
-            console.log('why am i here????', mailbox);
+        async.each(mailboxes, function (mailbox, iteratorDone) {
             getAliases(mailbox.name, function (error, aliases) {
                 if (error) return iteratorDone(error);
 
