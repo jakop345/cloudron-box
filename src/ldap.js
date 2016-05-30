@@ -133,6 +133,39 @@ function groupSearch(req, res, next) {
     });
 }
 
+function mailboxSearch(req, res, next) {
+    debug('mailbox search: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
+
+    mailboxes.getAll(function (error, result) {
+        if (error) return next(new ldap.OperationsError(error.toString()));
+
+        result.forEach(function (entry) {
+            var dn = ldap.parseDN('cn=' + entry.name + ',ou=mailboxes,dc=cloudron');
+
+            // TODO: send aliases
+            var obj = {
+                dn: dn.toString(),
+                attributes: {
+                    objectclass: ['mailbox'],
+                    objectcategory: 'mailbox',
+                    cn: entry.name,
+                    uid: entry.name,
+                    mail: entry.name + '@' + config.fqdn()
+                }
+            };
+
+            // ensure all filter values are also lowercase
+            var lowerCaseFilter = ldap.parseFilter(req.filter.toString().toLowerCase());
+
+            if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
+                res.send(obj);
+            }
+        });
+
+        res.end();
+    });
+}
+
 function authenticateUser(req, res, next) {
     debug('user bind: %s (from %s)', req.dn.toString(), req.connection.ldap.id);
 
@@ -216,6 +249,7 @@ function start(callback) {
     gServer.search('ou=groups,dc=cloudron', groupSearch);
     gServer.bind('ou=users,dc=cloudron', authenticateUser, authorizeUserForApp);
 
+    gServer.search('ou=mailboxes,dc=cloudron', mailboxSearch);
     gServer.bind('ou=mailboxes,dc=cloudron', authenticateUser, authorizeUserForMailbox);
 
     // this is the bind for addons (after bind, they might search and authenticate)
