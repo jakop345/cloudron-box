@@ -16,6 +16,7 @@ exports = module.exports = {
 var assert = require('assert'),
     async = require('async'),
     DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:mailboxes'),
     docker = require('./docker.js'),
     mailboxdb = require('./mailboxdb.js'),
     util = require('util');
@@ -70,6 +71,8 @@ function add(name, callback) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new MailboxError(MailboxError.ALREADY_EXISTS));
         if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
 
+        debug('Added mailbox %s', name);
+
         var mailbox = {
             name: name
         };
@@ -82,6 +85,8 @@ function pushAlias(name, aliases, callback) {
     if (process.env.BOX_ENV === 'test') return callback();
 
     var cmd = [ '/addons/mail/service.sh', 'set-alias', name ].concat(aliases);
+
+    debug('pushing alias for %s : %j', name, aliases);
 
     docker.execContainer('mail', cmd, { }, function (error) {
         if (error) return callback(new MailboxError(MailboxError.EXTERNAL_ERROR, error));
@@ -100,6 +105,8 @@ function del(name, callback) {
         mailboxdb.del(name, function (error) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
             if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
+
+            debug('deleted mailbox %s', name);
 
             callback();
         });
