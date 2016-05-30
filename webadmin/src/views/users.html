@@ -99,6 +99,13 @@
                         </div>
                     </div>
                     <br/>
+                    <div class="form-group" ng-show="config.isCustomDomain && useredit.username">
+                        <label class="control-label">Email aliases</label>
+                        <div class="form-group">
+                            <input type="text" class="form-control" ng-model="useredit.aliases" name="aliases" placeholder="Separate aliases by comma">
+                        </div>
+                    </div>
+                    <br/>
                     <div class="form-group" ng-hide="isMe(useredit.userInfo)">
                         <div class="checkbox">
                             <label>

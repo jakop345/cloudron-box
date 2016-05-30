@@ -417,6 +417,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.getMailboxes = function (callback) {
+        $http.get(client.apiOrigin + '/api/v1/mailboxes').success(function (data, status) {
+            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null, data.mailboxes);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.setGroups = function (userId, groupIds, callback) {
         $http.put(client.apiOrigin + '/api/v1/users/' + userId + '/set_groups', { groupIds: groupIds }).success(function (data, status) {
             if (status !== 204) return callback(new ClientError(status, data));

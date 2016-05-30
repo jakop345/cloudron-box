@@ -6,6 +6,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     $scope.ready = false;
     $scope.users = [];
     $scope.groups = [];
+    $scope.config = Client.getConfig();
     $scope.userInfo = Client.getUserInfo();
 
     $scope.userremove = {
@@ -29,6 +30,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         error: {},
         userInfo: {},
         email: '',
+        aliases: '',
         superuser: false
     };
 
@@ -214,6 +216,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.useredit.error.email = null;
         $scope.useredit.email = userInfo.email;
         $scope.useredit.userInfo = userInfo;
+        $scope.useredit.aliases = mailboxes[userInfo.username].aliases.join(',');
         $scope.useredit.groupIds = angular.copy(userInfo.groupIds);
         $scope.useredit.superuser = userInfo.groupIds.indexOf('admin') !== -1;
 
@@ -254,21 +257,26 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             }
 
             Client.setGroups(data.id, $scope.useredit.groupIds, function (error) {
-                $scope.useredit.busy = false;
-
                 if (error) return console.error('Unable to update groups for user:', error);
 
-                $scope.useredit.userInfo = {};
-                $scope.useredit.email = '';
-                $scope.useredit.superuser = false;
-                $scope.useredit.groupIds = [];
+                Client.setAliases($scope.useredit.userInfo.username, $scope.useredit.aliases.split(','), function (error) {
+                    $scope.useredit.busy = false;
 
-                $scope.useredit_form.$setPristine();
-                $scope.useredit_form.$setUntouched();
+                    if (error) return console.error('Unable to update aliases for user:', error);
 
-                refresh();
+                    $scope.useredit.userInfo = {};
+                    $scope.useredit.email = '';
+                    $scope.useredit.superuser = false;
+                    $scope.useredit.groupIds = [];
+                    $scope.useredit.aliases = '';
 
-                $('#userEditModal').modal('hide');
+                    $scope.useredit_form.$setPristine();
+                    $scope.useredit_form.$setUntouched();
+
+                    refresh();
+
+                    $('#userEditModal').modal('hide');
+                });
             });
         });
     };
@@ -335,7 +343,14 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 if (error) return console.error('Unable to get user listing.', error);
 
                 $scope.users = result;
-                $scope.ready = true;
+
+                Client.getMailboxes(function (error, result) {
+                    if (error) return console.error('Unable to get mailboxes.', error);
+
+                    $scope.mailboxes = result;
+
+                    $scope.ready = true;
+                });
             });
         });
     }
