@@ -39,7 +39,7 @@ function initialize(callback) {
 
     if (infra.version === existingInfra.version) {
         debug('platform is uptodate at version %s', infra.version);
-        return callback();
+        return loadAddonVars(callback);
     }
 
     debug('Updating infrastructure from %s to %s', existingInfra.version, infra.version);
