@@ -119,7 +119,8 @@ else
 fi
 
 set_progress "33" "Changing ownership"
-chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd" "${DATA_DIR}/addons" "${DATA_DIR}/acme" "${DATA_DIR}/INFRA_VERSION"
+chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd" "${DATA_DIR}/addons" "${DATA_DIR}/acme"
+chown "${DATA_DIR}/INFRA_VERSION" || true
 chown "${USER}:${USER}" "${DATA_DIR}"
 
 set_progress "65" "Creating cloudron.conf"
