@@ -31,6 +31,7 @@ var assert = require('assert'),
     GroupError = groups.GroupError,
     hat = require('hat'),
     mailer = require('./mailer.js'),
+    mailboxes = require('./mailboxes.js'),
     tokendb = require('./tokendb.js'),
     userdb = require('./userdb.js'),
     util = require('util'),
@@ -42,6 +43,8 @@ var assert = require('assert'),
 var CRYPTO_SALT_SIZE = 64; // 512-bit salt
 var CRYPTO_ITERATIONS = 10000; // iterations
 var CRYPTO_KEY_LENGTH = 512; // bits
+
+var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
@@ -175,6 +178,7 @@ function createUser(username, password, email, displayName, auditSource, options
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 eventlog.add(eventlog.ACTION_USER_ADD, auditSource, { userId: user.id, email: user.email });
+                if (username) mailboxes.add(username, NOOP_CALLBACK);
 
                 callback(null, user);
 
@@ -336,6 +340,7 @@ function updateUser(userId, username, email, displayName, auditSource, callback)
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId });
+        if (username) mailboxes.add(username, NOOP_CALLBACK);
 
         callback(null);
     });
