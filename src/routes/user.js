@@ -54,6 +54,7 @@ function create(req, res, next) {
             displayName: user.displayName,
             email: user.email,
             admin: user.admin,
+            groupIds: [ ],
             resetToken: user.resetToken
         };
 
