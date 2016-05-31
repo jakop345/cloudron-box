@@ -43,6 +43,7 @@ function initializeExpressSync() {
     app.set('views', path.join(__dirname, 'oauth2views'));
     app.set('view options', { layout: true, debug: false });
     app.set('view engine', 'ejs');
+    app.set('json spaces', 2); // pretty json
 
     if (process.env.BOX_ENV !== 'test') app.use(middleware.morgan('Box :method :url :status :response-time ms - :res[content-length]', { immediate: false }));
 
