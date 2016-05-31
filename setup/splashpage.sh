@@ -24,14 +24,14 @@ cp -r "${script_dir}/splash/website/"* "${SETUP_WEBSITE_DIR}"
 # create nginx config
 readonly current_infra=$(node -e "console.log(require('${script_dir}/../src/infra_version.js').version);")
 existing_infra="none"
-[[ -f "${DATA_DIR}/INFRA_VERSION" ]] && infra_version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${DATA_DIR}/INFRA_VERSION', 'utf8')).version);")
+[[ -f "${DATA_DIR}/INFRA_VERSION" ]] && existing_infra=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${DATA_DIR}/INFRA_VERSION', 'utf8')).version);")
 if [[ "${arg_retire}" == "true" || "${existing_infra}" != "${current_infra}" ]]; then
+    echo "Showing progress bar on all subdomains in retired mode or infra update. retire: ${arg_retire} existing: ${existing_infra} current: ${current_infra}"
     rm -f ${DATA_DIR}/nginx/applications/*
-    # show progress bar on all subdomains in retired mode or infra update
     ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
         -O "{ \"vhost\": \"~^(.+)\$\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"splash\", \"sourceDir\": \"${SETUP_WEBSITE_DIR}\", \"certFilePath\": \"cert/host.cert\", \"keyFilePath\": \"cert/host.key\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
 else
-    # show progress bar only on admin domain for normal updates
+    echo "Show progress bar only on admin domain for normal update"
     ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
         -O "{ \"vhost\": \"${admin_fqdn}\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"splash\", \"sourceDir\": \"${SETUP_WEBSITE_DIR}\", \"certFilePath\": \"cert/host.cert\", \"keyFilePath\": \"cert/host.key\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
 fi
