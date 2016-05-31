@@ -24,7 +24,7 @@ cp -r "${script_dir}/splash/website/"* "${SETUP_WEBSITE_DIR}"
 # create nginx config
 readonly current_infra=$(node -e "console.log(require('${script_dir}/../src/infra_version.js').version);")
 existing_infra="none"
-[[ -f "${DATA_DIR}/INFRA_VERSION" ]] && infra_version=$(node -e "console.log(require('${DATA_DIR}/INFRA_VERSION').version);")
+[[ -f "${DATA_DIR}/INFRA_VERSION" ]] && infra_version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${DATA_DIR}/INFRA_VERSION', 'utf8')).version);")
 if [[ "${arg_retire}" == "true" || "${existing_infra}" != "${current_infra}" ]]; then
     rm -f ${DATA_DIR}/nginx/applications/*
     # show progress bar on all subdomains in retired mode or infra update
