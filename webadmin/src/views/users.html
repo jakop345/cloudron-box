@@ -98,8 +98,7 @@
                             </span>
                         </div>
                     </div>
-                    <br/>
-                    <div class="form-group" ng-show="(config.isDev || config.isCustomDomain)">
+                    <div class="form-group" ng-show="useredit.userInfo.username && (config.isDev || config.isCustomDomain)">
                         <label class="control-label">Email aliases</label>
                         <div class="form-group">
                             <input type="text" class="form-control" ng-model="useredit.aliases" name="aliases" placeholder="Separate aliases by comma">

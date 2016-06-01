@@ -266,7 +266,12 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 if (error) return console.error('Unable to update groups for user:', error);
 
                 var aliases = $scope.useredit.aliases ? $scope.useredit.aliases.split(',') : [ ];
-                Client.setAliases($scope.useredit.userInfo.username, aliases, function (error) {
+                var setAliasesFunc = Client.setAliases.bind(null, $scope.useredit.userInfo.username, aliases);
+
+                // cannot set aliases without username
+                if (!$scope.useredit.userInfo.username) setAliasesFunc = function (next) { return next(); };
+
+                setAliasesFunc(function (error) {
                     $scope.useredit.busy = false;
 
                     if (error) return console.error('Unable to update aliases for user:', error);
