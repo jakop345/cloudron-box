@@ -10,6 +10,8 @@ exports.up = function(db, callback) {
                 if (error) return done(error);
 
                 async.eachSeries(results, function (r, next) {
+                    if (!r.username) return next();
+
                     db.runSql('INSERT INTO mailboxes (name) VALUES (?)', [ r.username ], next);
                 }, done);
             });
