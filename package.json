@@ -16,7 +16,6 @@
     "async": "^1.2.1",
     "aws-sdk": "^2.1.46",
     "body-parser": "^1.13.1",
-    "bytes": "^2.3.0",
     "cloudron-manifestformat": "^2.4.0",
     "connect-ensure-login": "^0.1.1",
     "connect-lastmile": "^0.1.0",
