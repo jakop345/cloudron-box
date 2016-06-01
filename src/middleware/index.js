@@ -4,7 +4,6 @@ exports = module.exports = {
     cookieParser: require('cookie-parser'),
     cors: require('./cors'),
     csrf: require('csurf'),
-    favicon: require('serve-favicon'),
     json: require('body-parser').json,
     morgan: require('morgan'),
     proxy: require('proxy-middleware'),
