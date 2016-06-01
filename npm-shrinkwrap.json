@@ -3394,11 +3394,6 @@
       "from": "sequencify@>=0.0.7 <0.1.0",
       "resolved": "https://registry.npmjs.org/sequencify/-/sequencify-0.0.7.tgz"
     },
-    "serve-favicon": {
-      "version": "2.3.0",
-      "from": "serve-favicon@>=2.2.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/serve-favicon/-/serve-favicon-2.3.0.tgz"
-    },
     "serve-static": {
       "version": "1.10.3",
       "from": "serve-static@>=1.10.2 <1.11.0",
