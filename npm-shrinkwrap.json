@@ -820,11 +820,6 @@
       "from": "dotenv@>=0.5.1 <0.6.0",
       "resolved": "http://registry.npmjs.org/dotenv/-/dotenv-0.5.1.tgz"
     },
-    "double-ended-queue": {
-      "version": "2.1.0-0",
-      "from": "double-ended-queue@>=2.1.0-0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz"
-    },
     "dtrace-provider": {
       "version": "0.2.8",
       "from": "dtrace-provider@0.2.8",
@@ -3233,16 +3228,6 @@
       "version": "1.0.0",
       "from": "redent@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/redent/-/redent-1.0.0.tgz"
-    },
-    "redis-commands": {
-      "version": "1.2.0",
-      "from": "redis-commands@>=1.0.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/redis-commands/-/redis-commands-1.2.0.tgz"
-    },
-    "redis-parser": {
-      "version": "1.3.0",
-      "from": "redis-parser@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/redis-parser/-/redis-parser-1.3.0.tgz"
     },
     "reduce-component": {
       "version": "1.0.1",
