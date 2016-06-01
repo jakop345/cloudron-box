@@ -38,6 +38,13 @@ server {
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection $connection_upgrade;
 
+    # http://serverfault.com/questions/121766/webdav-rename-fails-on-an-apache-mod-dav-install-behind-nginx
+    set $destination $http_destination;
+    if ($destination ~* ^https(.+)$) {
+        set $destination http$1;
+    }
+    proxy_set_header Destination $destination;
+
     # only serve up the status page if we get proxy gateway errors
     error_page 502 503 504 @appstatus;
     location @appstatus {
