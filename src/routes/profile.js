@@ -23,26 +23,18 @@ function auditSource(req) {
 function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    var result = {};
-    result.id = req.user.id;
-    result.tokenType = req.user.tokenType;
+    groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
+        if (error) return next(new HttpError(500, error));
 
-    if (req.user.tokenType === tokendb.TYPE_USER || req.user.tokenType === tokendb.TYPE_DEV) {
-        result.username = req.user.username;
-        result.email = req.user.email;
-        result.displayName = req.user.displayName;
-        result.showTutorial = req.user.showTutorial;
-
-        groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
-            if (error) return next(new HttpError(500, error));
-
-            result.admin = isAdmin;
-
-            next(new HttpSuccess(200, result));
-        });
-    } else {
-        next(new HttpSuccess(200, result));
-    }
+        next(new HttpSuccess(200, {
+            id: req.user.id,
+            username: req.user.username,
+            email: req.user.email,
+            admin: isAdmin,
+            displayName: req.user.displayName,
+            showTutorial: req.user.showTutorial
+        }));
+    });
 }
 
 function update(req, res, next) {
@@ -51,8 +43,6 @@ function update(req, res, next) {
 
     if ('email' in req.body && typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
     if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be string'));
-
-    if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
     user.update(req.user.id, req.user.username, req.body.email || req.user.email, req.body.displayName || req.user.displayName, auditSource(req), function (error) {
         if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
@@ -70,8 +60,6 @@ function changePassword(req, res, next) {
 
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be set to old password'));
     if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'newPassword must be a string'));
-
-    if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
     user.setPassword(req.user.id, req.body.newPassword, function (error) {
         if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
