@@ -528,7 +528,7 @@ describe('User API', function () {
 
     // Change email
     it('change email fails due to missing token', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
+        superagent.post(SERVER_URL + '/api/v1/users/' + user_0.id)
                .send({ email: EMAIL_0_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(401);
@@ -537,7 +537,7 @@ describe('User API', function () {
     });
 
     it('change email fails due to invalid email', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
+        superagent.post(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
                .send({ email: 'foo@bar' })
                .end(function (error, result) {
@@ -547,7 +547,7 @@ describe('User API', function () {
     });
 
     it('change user succeeds without email nor displayName', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
+        superagent.post(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
                .send({})
                .end(function (error, result) {
@@ -557,7 +557,7 @@ describe('User API', function () {
     });
 
     it('change email succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_2.id)
+        superagent.post(SERVER_URL + '/api/v1/users/' + user_2.id)
                .query({ access_token: token })
                .send({ email: EMAIL_2_NEW })
                .end(function (error, result) {
@@ -578,7 +578,7 @@ describe('User API', function () {
     });
 
     it('change email as admin for other user succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_2.id)
+        superagent.post(SERVER_URL + '/api/v1/users/' + user_2.id)
                .query({ access_token: token })
                .send({ email: EMAIL_2 })
                .end(function (error, result) {
@@ -599,7 +599,7 @@ describe('User API', function () {
     });
 
     it('change displayName succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id)
+        superagent.post(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })
                .send({ displayName: DISPLAY_NAME_0_NEW })
                .end(function (error, result) {
