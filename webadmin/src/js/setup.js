@@ -225,7 +225,7 @@ app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', f
     Client.createAdmin(Wizard.username, Wizard.password, Wizard.email, Wizard.displayName, Wizard.setupToken, function (error) {
         if (error) {
             console.error('Internal error', error);
-            window.location.href = '/error.html';
+            $location.path('/step2').search('error', error.message);
             return;
         }
 
