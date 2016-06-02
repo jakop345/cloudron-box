@@ -8,7 +8,10 @@
 
 // very basic angular app
 var app = angular.module('Application', []);
-app.controller('Controller', [function () {}]);
+app.controller('Controller', ['$scope', function ($scope) {
+    $scope.username = '<%= (user && user.username) ? user.username : '' %>';
+    $scope.displayName = '<%= (user && user.displayName) ? user.displayName : '' %>';
+}]);
 
 </script>
 
@@ -31,7 +34,7 @@ app.controller('Controller', [function () {}]);
 <% if (user && user.username) { %>
                 <div class="form-group"">
                     <label class="control-label">Username</label>
-                    <input type="text" class="form-control" ng-model="username" name="username" disabled value="<%= user.username %>" required>
+                    <input type="text" class="form-control" ng-model="username" name="username" disabled required>
                 </div>
 <% } else { %>
                 <div class="form-group" ng-class="{ 'has-error': (setupForm.username.$dirty && setupForm.username.$invalid) }">
@@ -47,7 +50,7 @@ app.controller('Controller', [function () {}]);
 
                 <div class="form-group">
                     <label class="control-label">Display Name</label>
-                    <input type="displayName" class="form-control" ng-model="displayName" name="displayName" value="<%= (user && user.displayName) ? user.displayName : '' %>" required>
+                    <input type="displayName" class="form-control" ng-model="displayName" name="displayName" required>
                 </div>
 
                 <div class="form-group" ng-class="{ 'has-error': (setupForm.password.$dirty && setupForm.password.$invalid) }">
