@@ -13,7 +13,7 @@ exports = module.exports = {
     SCOPE_APPS: 'apps',
     SCOPE_DEVELOPER: 'developer',
     SCOPE_PROFILE: 'profile',
-    SCOPE_ROOT: 'root',
+    SCOPE_CLOUDRON: 'cloudron',
     SCOPE_SETTINGS: 'settings',
     SCOPE_USERS: 'users'
 };
@@ -58,7 +58,7 @@ function validateScope(scope) {
         exports.SCOPE_APPS,
         exports.SCOPE_DEVELOPER,
         exports.SCOPE_PROFILE,
-        exports.SCOPE_ROOT,
+        exports.SCOPE_CLOUDRON,
         exports.SCOPE_SETTINGS,
         exports.SCOPE_USERS
     ];

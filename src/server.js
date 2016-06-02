@@ -69,7 +69,7 @@ function initializeExpressSync() {
     var multipart = middleware.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT });
 
     // scope middleware implicitly also adds bearer token verification
-    var rootScope = routes.oauth2.scope(clients.SCOPE_ROOT);
+    var cloudronScope = routes.oauth2.scope(clients.SCOPE_CLOUDRON);
     var profileScope = routes.oauth2.scope(clients.SCOPE_PROFILE);
     var usersScope = routes.oauth2.scope(clients.SCOPE_USERS);
     var appsScope = routes.oauth2.scope(clients.SCOPE_APPS);
@@ -91,11 +91,11 @@ function initializeExpressSync() {
     router.post('/api/v1/developer/login', routes.developer.enabled, routes.developer.login);
     router.get ('/api/v1/developer/apps', developerScope, routes.developer.enabled, routes.developer.apps);
 
-    // private routes
-    router.get ('/api/v1/cloudron/config', rootScope, routes.cloudron.getConfig);
-    router.post('/api/v1/cloudron/update', rootScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.cloudron.update);
-    router.post('/api/v1/cloudron/reboot', rootScope, routes.cloudron.reboot);
-    router.get ('/api/v1/cloudron/graphs', rootScope, routes.graphs.getGraphs);
+    // cloudron routes
+    router.get ('/api/v1/cloudron/config', cloudronScope, routes.cloudron.getConfig);
+    router.post('/api/v1/cloudron/update', cloudronScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.cloudron.update);
+    router.post('/api/v1/cloudron/reboot', cloudronScope, routes.cloudron.reboot);
+    router.get ('/api/v1/cloudron/graphs', cloudronScope, routes.graphs.getGraphs);
 
     // feedback
     router.post('/api/v1/cloudron/feedback', usersScope, routes.cloudron.feedback);
