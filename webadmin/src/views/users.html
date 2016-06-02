@@ -18,6 +18,25 @@
                         <input type="email" class="form-control" ng-model="useradd.email" name="email" id="inputUserAddEmail" required autofocus>
                     </div>
 
+                    <div class="form-group" ng-class="{ 'has-error': (useradd_form.username.$dirty && useradd_form.username.$invalid) || (!useradd_form.username.$dirty && useradd.error.username) }">
+                        <label class="control-label">Username (optional)</label>
+                        <p>If not specified, the user can choose the username following the invite link.</p>
+                        <div class="control-label" ng-show="(!useradd_form.username.$dirty && useradd.error.username) || (useradd_form.username.$dirty && useradd_form.username.$invalid) || (!useradd_form.username.$dirty && useradd.error.username)">
+                            <small ng-show="useradd_form.username.$error.username">This is not a valid username</small>
+                            <small ng-show="!useradd_form.username.$dirty && useradd.error.username">{{ useradd.error.username }}</small>
+                        </div>
+                        <input type="text" class="form-control" ng-model="useradd.username" name="username" id="inputUserAddUsername">
+                    </div>
+
+                    <div class="form-group" ng-class="{ 'has-error': (useradd_form.displayName.$dirty && useradd_form.displayName.$invalid) || (!useradd_form.displayName.$dirty && useradd.error.displayName) }">
+                        <label class="control-label">Display Name (optional)</label>
+                        <div class="control-label" ng-show="(!useradd_form.displayName.$dirty && useradd.error.displayName) || (useradd_form.displayName.$dirty && useradd_form.displayName.$invalid) || (!useradd_form.displayName.$dirty && useradd.error.displayName)">
+                            <small ng-show="useradd_form.displayName.$error.displayName">This is not a valid displayName</small>
+                            <small ng-show="!useradd_form.displayName.$dirty && useradd.error.displayName">{{ useradd.error.displayName }}</small>
+                        </div>
+                        <input type="text" class="form-control" ng-model="useradd.displayName" name="displayName" id="inputUserAddDisplayName">
+                    </div>
+
                     <div class="checkbox">
                         <label>
                             <input type="checkbox" ng-model="useradd.sendInvite" id="inputUserAddSendInvite"> Send invite

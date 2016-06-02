@@ -23,6 +23,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         alreadyTaken: false,
         error: {},
         email: '',
+        username: '',
+        displayName: '',
         sendInvite: true
     };
 
@@ -166,6 +168,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     $scope.showUserAdd = function () {
         $scope.useradd.error = {};
         $scope.useradd.email = '';
+        $scope.useradd.username = '';
+        $scope.useradd.displayName = '';
 
         $scope.useradd_form.$setUntouched();
         $scope.useradd_form.$setPristine();
@@ -178,8 +182,10 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
         $scope.useradd.alreadyTaken = false;
         $scope.useradd.error.email = null;
+        $scope.useradd.error.username = null;
+        $scope.useradd.error.displayName = null;
 
-        Client.createUser('' /* username */, $scope.useradd.email, '' /* displayName */, $scope.useradd.sendInvite, function (error) {
+        Client.createUser($scope.useradd.username, $scope.useradd.email, $scope.useradd.displayName, $scope.useradd.sendInvite, function (error) {
             $scope.useradd.busy = false;
 
             if (error && error.statusCode === 409) {
@@ -203,6 +209,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
             $scope.useradd.error = {};
             $scope.useradd.email = '';
+            $scope.useradd.username = '';
+            $scope.useradd.displayName = '';
 
             $scope.useradd_form.$setUntouched();
             $scope.useradd_form.$setPristine();
