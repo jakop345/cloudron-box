@@ -143,7 +143,16 @@ function add(userId, user, callback) {
 
     var data = [ userId, user.username || null, user.password, user.email, user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName, user.showTutorial ];
     database.query('INSERT INTO users (id, username, password, email, salt, createdAt, modifiedAt, resetToken, displayName, showTutorial) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', data, function (error, result) {
-        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error && error.code === 'ER_DUP_ENTRY') {
+            var msg = error.message;
+            if (error.message.indexOf('users_email') !== -1) {
+                msg = 'email already exists';
+            } else if (error.message.indexOf('users_username') !== -1) {
+                msg = 'username already exists';
+            }
+
+            return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, msg));
+        }
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
@@ -216,7 +225,16 @@ function update(userId, user, callback) {
     args.push(userId);
 
     database.query('UPDATE users SET ' + fields.join(', ') + ' WHERE id = ?', args, function (error, result) {
-        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error && error.code === 'ER_DUP_ENTRY') {
+            var msg = error.message;
+            if (error.message.indexOf('users_email') !== -1) {
+                msg = 'email already exists';
+            } else if (error.message.indexOf('users_username') !== -1) {
+                msg = 'username already exists';
+            }
+
+            return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, msg));
+        }
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 

@@ -86,10 +86,28 @@ describe('database', function () {
             userdb.add(USER_2.id, USER_2, done);
         });
 
-        it('cannot add same user again', function (done) {
-            userdb.add(USER_0.id, USER_0, function (error) {
+        it('cannot add user width same email again', function (done) {
+            var tmp = JSON.parse(JSON.stringify(USER_0));
+            tmp.id = 'somethingelse';
+            tmp.username = 'somethingelse';
+
+            userdb.add(tmp.id, tmp, function (error) {
                 expect(error).to.be.ok();
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
+                expect(error.message).to.equal('email already exists');
+                done();
+            });
+        });
+
+        it('cannot add user width same username again', function (done) {
+            var tmp = JSON.parse(JSON.stringify(USER_0));
+            tmp.id = 'somethingelse';
+            tmp.email = 'somethingelse@not.taken';
+
+            userdb.add(tmp.id, tmp, function (error) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
+                expect(error.message).to.equal('username already exists');
                 done();
             });
         });
@@ -182,6 +200,24 @@ describe('database', function () {
                     expect(user.displayName).to.equal('Heiter');
                     done();
                 });
+            });
+        });
+
+        it('can update the user with already existing email', function (done) {
+            userdb.update(USER_0.id, { email: USER_2.email }, function (error) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
+                expect(error.message).to.equal('email already exists');
+                done();
+            });
+        });
+
+        it('can update the user with already existing username', function (done) {
+            userdb.update(USER_0.id, { username: USER_2.username }, function (error) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
+                expect(error.message).to.equal('username already exists');
+                done();
             });
         });
 
