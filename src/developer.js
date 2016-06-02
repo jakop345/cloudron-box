@@ -5,7 +5,7 @@
 exports = module.exports = {
     DeveloperError: DeveloperError,
 
-    enabled: enabled,
+    isEnabled: isEnabled,
     setEnabled: setEnabled,
     issueDeveloperToken: issueDeveloperToken,
     getNonApprovedApps: getNonApprovedApps
@@ -42,7 +42,7 @@ util.inherits(DeveloperError, Error);
 DeveloperError.INTERNAL_ERROR = 'Internal Error';
 DeveloperError.EXTERNAL_ERROR = 'External Error';
 
-function enabled(callback) {
+function isEnabled(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     settings.getDeveloperMode(function (error, enabled) {

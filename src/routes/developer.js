@@ -19,7 +19,7 @@ function auditSource(req) {
 }
 
 function enabled(req, res, next) {
-    developer.enabled(function (error, enabled) {
+    developer.isEnabled(function (error, enabled) {
         if (enabled) return next();
         next(new HttpError(412, 'Developer mode not enabled'));
     });
