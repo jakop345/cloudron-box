@@ -12,7 +12,6 @@ var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     user = require('../user.js'),
-    tokendb = require('../tokendb.js'),
     UserError = user.UserError;
 
 function auditSource(req) {
