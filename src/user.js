@@ -73,9 +73,6 @@ UserError.ALREADY_EXISTS = 'Already Exists';
 UserError.NOT_FOUND = 'Not Found';
 UserError.WRONG_PASSWORD = 'Wrong User or Password';
 UserError.BAD_FIELD = 'Bad field';
-UserError.BAD_USERNAME = 'Bad username';
-UserError.BAD_EMAIL = 'Bad email';
-UserError.BAD_PASSWORD = 'Bad password';
 UserError.BAD_TOKEN = 'Bad token';
 
 function validateUsername(username) {
@@ -87,16 +84,16 @@ function validateUsername(username) {
     // allow empty usernames
     if (username === '') return null;
 
-    if (username.length <= 1) return new UserError(UserError.BAD_USERNAME, 'Username must be atleast 2 chars');
-    if (username.length > 256) return new UserError(UserError.BAD_USERNAME, 'Username too long');
+    if (username.length <= 1) return new UserError(UserError.BAD_FIELD, 'Username must be atleast 2 chars');
+    if (username.length > 256) return new UserError(UserError.BAD_FIELD, 'Username too long');
 
-    if (RESERVED_USERNAMES.indexOf(username) !== -1) return new UserError(UserError.BAD_USERNAME, 'Username is reserved');
+    if (RESERVED_USERNAMES.indexOf(username) !== -1) return new UserError(UserError.BAD_FIELD, 'Username is reserved');
 
     // +/- can be tricky in emails
-    if (/[^a-zA-Z0-9.]/.test(username)) return new UserError(UserError.BAD_USERNAME, 'Username can only contain alphanumerals and dot');
+    if (/[^a-zA-Z0-9.]/.test(username)) return new UserError(UserError.BAD_FIELD, 'Username can only contain alphanumerals and dot');
 
     // app emails are sent using the .app suffix
-    if (username.indexOf('.app') !== -1) return new UserError(UserError.BAD_USERNAME, 'Username pattern is reserved for apps');
+    if (username.indexOf('.app') !== -1) return new UserError(UserError.BAD_FIELD, 'Username pattern is reserved for apps');
 
     return null;
 }
@@ -104,7 +101,7 @@ function validateUsername(username) {
 function validateEmail(email) {
     assert.strictEqual(typeof email, 'string');
 
-    if (!validator.isEmail(email)) return new UserError(UserError.BAD_EMAIL, 'Invalid email');
+    if (!validator.isEmail(email)) return new UserError(UserError.BAD_FIELD, 'Invalid email');
 
     return null;
 }
@@ -147,7 +144,7 @@ function createUser(username, password, email, displayName, auditSource, options
     if (error) return callback(error);
 
     error = validatePassword(password);
-    if (error) return callback(new UserError(UserError.BAD_PASSWORD, error.message));
+    if (error) return callback(new UserError(UserError.BAD_FIELD, error.message));
 
     error = validateEmail(email);
     if (error) return callback(error);
@@ -419,7 +416,7 @@ function setPassword(userId, newPassword, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var error = validatePassword(newPassword);
-    if (error) return callback(new UserError(UserError.BAD_PASSWORD, error.message));
+    if (error) return callback(new UserError(UserError.BAD_FIELD, error.message));
 
     userdb.get(userId, function (error, user) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
@@ -464,7 +461,7 @@ function createOwner(username, password, email, displayName, auditSource, callba
     assert.strictEqual(typeof callback, 'function');
 
     // This is only not allowed for the owner
-    if (username === '') return callback(new UserError(UserError.BAD_USERNAME, 'Username cannot be empty'));
+    if (username === '') return callback(new UserError(UserError.BAD_FIELD, 'Username cannot be empty'));
 
     userdb.count(function (error, count) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));

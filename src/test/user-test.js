@@ -86,7 +86,7 @@ describe('User', function () {
             user.create(USERNAME, 'Fo$%23', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -96,7 +96,7 @@ describe('User', function () {
             user.create(USERNAME, 'thisiseightch%$234arslong', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -106,7 +106,7 @@ describe('User', function () {
             user.create(USERNAME, 'foobaRASDF%', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -116,7 +116,7 @@ describe('User', function () {
             user.create(USERNAME, 'foobaRASDF23423', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -126,7 +126,7 @@ describe('User', function () {
             user.create('admin', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -136,7 +136,7 @@ describe('User', function () {
             user.create('Mailer-Daemon', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -146,7 +146,7 @@ describe('User', function () {
             user.create('Z', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -156,7 +156,7 @@ describe('User', function () {
             user.create(new Array(257).fill('Z').join(''), PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -166,7 +166,7 @@ describe('User', function () {
             user.create('maybe-app', PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -221,7 +221,7 @@ describe('User', function () {
             user.create(USERNAME, '', EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -445,7 +445,7 @@ describe('User', function () {
         it('fails due to invalid email', function (done) {
             user.update(userObject.id, USERNAME_NEW, 'brokenemailaddress', DISPLAY_NAME_NEW, AUDIT_SOURCE, function (error) {
                 expect(error).to.be.a(UserError);
-                expect(error.reason).to.equal(UserError.BAD_EMAIL);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });

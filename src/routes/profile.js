@@ -55,8 +55,7 @@ function update(req, res, next) {
     if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
     user.update(req.user.id, req.user.username, req.body.email || req.user.email, req.body.displayName || req.user.displayName, auditSource(req), function (error) {
-        if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, error.message));
-        if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, error.message));
+        if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
@@ -75,7 +74,7 @@ function changePassword(req, res, next) {
     if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
     user.setPassword(req.user.id, req.body.newPassword, function (error) {
-        if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, error.message));
+        if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Wrong password'));
         if (error) return next(new HttpError(500, error));
 

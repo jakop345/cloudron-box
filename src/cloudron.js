@@ -92,10 +92,6 @@ CloudronError.BAD_FIELD = 'Field error';
 CloudronError.INTERNAL_ERROR = 'Internal Error';
 CloudronError.EXTERNAL_ERROR = 'External Error';
 CloudronError.ALREADY_PROVISIONED = 'Already Provisioned';
-CloudronError.BAD_USERNAME = 'Bad username';
-CloudronError.BAD_EMAIL = 'Bad email';
-CloudronError.BAD_PASSWORD = 'Bad password';
-CloudronError.BAD_NAME = 'Bad name';
 CloudronError.BAD_STATE = 'Bad state';
 CloudronError.ALREADY_UPTODATE = 'No Update Available';
 CloudronError.NOT_FOUND = 'Not found';
@@ -232,9 +228,7 @@ function activate(username, password, email, displayName, ip, auditSource, callb
 
     user.createOwner(username, password, email, displayName, auditSource, function (error, userObject) {
         if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
-        if (error && error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
-        if (error && error.reason === UserError.BAD_PASSWORD) return callback(new CloudronError(CloudronError.BAD_PASSWORD));
-        if (error && error.reason === UserError.BAD_EMAIL) return callback(new CloudronError(CloudronError.BAD_EMAIL));
+        if (error && error.reason === UserError.BAD_FIELD) return callback(new CloudronError(CloudronError.BAD_FIELD, error.message));
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         clientdb.getByAppIdAndType('webadmin', clientdb.TYPE_ADMIN, function (error, result) {

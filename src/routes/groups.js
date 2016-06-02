@@ -20,7 +20,7 @@ function create(req, res, next) {
     if (typeof req.body.name !== 'string') return next(new HttpError(400, 'name must be string'));
 
     groups.create(req.body.name, function (error, group) {
-        if (error && error.reason === GroupError.BAD_NAME) return next(new HttpError(400, error.message));
+        if (error && error.reason === GroupError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === GroupError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
         if (error) return next(new HttpError(500, error));
 

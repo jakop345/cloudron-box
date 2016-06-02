@@ -53,28 +53,28 @@ describe('Groups', function () {
 
     it('cannot create group - too small', function (done) {
         groups.create('a', function (error) {
-            expect(error.reason).to.be(GroupError.BAD_NAME);
+            expect(error.reason).to.be(GroupError.BAD_FIELD);
             done();
         });
     });
 
     it('cannot create group - too big', function (done) {
         groups.create(new Array(256).join('a'), function (error) {
-            expect(error.reason).to.be(GroupError.BAD_NAME);
+            expect(error.reason).to.be(GroupError.BAD_FIELD);
             done();
         });
     });
 
     it('cannot create group - bad name', function (done) {
         groups.create('bad:name', function (error) {
-            expect(error.reason).to.be(GroupError.BAD_NAME);
+            expect(error.reason).to.be(GroupError.BAD_FIELD);
             done();
         });
     });
 
     it('cannot create group - reserved', function (done) {
         groups.create('users', function (error) {
-            expect(error.reason).to.be(GroupError.BAD_NAME);
+            expect(error.reason).to.be(GroupError.BAD_FIELD);
             done();
         });
     });

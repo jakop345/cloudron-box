@@ -41,9 +41,6 @@ function create(req, res, next) {
     var displayName = req.body.displayName || '';
 
     user.create(username, password, email, displayName, auditSource(req), { invitor: req.user, sendInvite: sendInvite }, function (error, user) {
-        if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, 'Invalid username'));
-        if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, 'Invalid email'));
-        if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, 'Invalid password'));
         if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'User already exists'));
         if (error) return next(new HttpError(500, error));
@@ -78,8 +75,7 @@ function update(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         user.update(req.params.userId, result.username, req.body.email || result.email, req.body.displayName || result.displayName, auditSource(req), function (error) {
-            if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, error.message));
-            if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, error.message));
+            if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
             if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
             if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
             if (error) return next(new HttpError(500, error));

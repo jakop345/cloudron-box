@@ -11,20 +11,6 @@ var database = require('../database.js'),
     MailboxError = mailboxes.MailboxError,
     hat = require('hat');
 
-var USER_0 = {
-    id: 'uuid213',
-    username: 'uuid213',
-    password: 'secret',
-    email: 'safe@me.com',
-    admin: false,
-    salt: 'morton',
-    createdAt: 'sometime back',
-    modifiedAt: 'now',
-    resetToken: hat(256),
-    displayName: '',
-    showTutorial: false
-};
-
 function setup(done) {
     // ensure data/config/mount paths
     database.initialize(function (error) {
@@ -46,28 +32,28 @@ describe('Mailboxes', function () {
 
     it('cannot create mailbox - too small', function (done) {
         mailboxes.add('a', function (error) {
-            expect(error.reason).to.be(MailboxError.BAD_NAME);
+            expect(error.reason).to.be(MailboxError.BAD_FIELD);
             done();
         });
     });
 
     it('cannot create mailbox - too big', function (done) {
         mailboxes.add(new Array(129).join('a'), function (error) {
-            expect(error.reason).to.be(MailboxError.BAD_NAME);
+            expect(error.reason).to.be(MailboxError.BAD_FIELD);
             done();
         });
     });
 
     it('cannot create mailbox - bad name', function (done) {
         mailboxes.add('bad:name', function (error) {
-            expect(error.reason).to.be(MailboxError.BAD_NAME);
+            expect(error.reason).to.be(MailboxError.BAD_FIELD);
             done();
         });
     });
 
     it('cannot create mailbox - reserved', function (done) {
         mailboxes.add('no-reply', function (error) {
-            expect(error.reason).to.be(MailboxError.BAD_NAME);
+            expect(error.reason).to.be(MailboxError.BAD_FIELD);
             done();
         });
     });

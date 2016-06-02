@@ -22,7 +22,7 @@ function create(req, res, next) {
     if (typeof req.body.name !== 'string') return next(new HttpError(400, 'name must be string'));
 
     mailboxes.add(req.body.name, function (error, mailbox) {
-        if (error && error.reason === MailboxError.BAD_NAME) return next(new HttpError(400, error.message));
+        if (error && error.reason === MailboxError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === MailboxError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
         if (error) return next(new HttpError(500, error));
 
@@ -71,7 +71,7 @@ function setAliases(req, res, next) {
 
     mailboxes.setAliases(req.params.mailboxId, req.body.aliases, function (error) {
         if (error && error.reason === MailboxError.NOT_FOUND) return next(new HttpError(404, 'No such mailbox'));
-        if (error && error.reason === MailboxError.BAD_NAME) return next(new HttpError(400, error.reason));
+        if (error && error.reason === MailboxError.BAD_FIELD) return next(new HttpError(400, error.reason));
         if (error && error.reason === MailboxError.ALREADY_EXISTS) return next(new HttpError(409, 'One or more alias already exist'));
         if (error) return next(new HttpError(500, error));
 

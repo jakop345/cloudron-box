@@ -51,7 +51,7 @@ util.inherits(GroupError, Error);
 GroupError.INTERNAL_ERROR = 'Internal Error';
 GroupError.ALREADY_EXISTS = 'Already Exists';
 GroupError.NOT_FOUND = 'Not Found';
-GroupError.BAD_NAME = 'Bad name';
+GroupError.BAD_FIELD = 'Field error';
 GroupError.NOT_EMPTY = 'Not Empty';
 GroupError.NOT_ALLOWED = 'Not Allowed';
 
@@ -59,12 +59,12 @@ function validateGroupname(name) {
     assert.strictEqual(typeof name, 'string');
     var RESERVED = [ 'admins', 'users' ]; // ldap code uses 'users' pseudo group
 
-    if (name.length <= 2) return new GroupError(GroupError.BAD_NAME, 'name must be atleast 2 chars');
-    if (name.length >= 200) return new GroupError(GroupError.BAD_NAME, 'name too long');
+    if (name.length <= 2) return new GroupError(GroupError.BAD_FIELD, 'name must be atleast 2 chars');
+    if (name.length >= 200) return new GroupError(GroupError.BAD_FIELD, 'name too long');
 
-    if (!/^[A-Za-z0-9_-]*$/.test(name)) return new GroupError(GroupError.BAD_NAME, 'name can only have A-Za-z0-9_-');
+    if (!/^[A-Za-z0-9_-]*$/.test(name)) return new GroupError(GroupError.BAD_FIELD, 'name can only have A-Za-z0-9_-');
 
-    if (RESERVED.indexOf(name) !== -1) return new GroupError(GroupError.BAD_NAME, 'name is reserved');
+    if (RESERVED.indexOf(name) !== -1) return new GroupError(GroupError.BAD_FIELD, 'name is reserved');
 
     return null;
 }

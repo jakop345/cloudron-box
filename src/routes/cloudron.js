@@ -55,9 +55,7 @@ function activate(req, res, next) {
 
     cloudron.activate(username, password, email, displayName, ip, auditSource(req), function (error, info) {
         if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already setup'));
-        if (error && error.reason === CloudronError.BAD_USERNAME) return next(new HttpError(400, 'Bad username'));
-        if (error && error.reason === CloudronError.BAD_PASSWORD) return next(new HttpError(400, 'Bad password'));
-        if (error && error.reason === CloudronError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
+        if (error && error.reason === CloudronError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
         // only in caas case do we have to notify the api server about activation
