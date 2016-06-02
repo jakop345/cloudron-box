@@ -18,7 +18,6 @@ exports = module.exports = {
 
     PREFIX_USER: 'user-',
     PREFIX_DEV: 'dev-',
-    PREFIX_APP: 'app-',
 
     _clear: clear
 };
