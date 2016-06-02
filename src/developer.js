@@ -73,7 +73,7 @@ function issueDeveloperToken(user, auditSource, callback) {
     var token = tokendb.generateToken();
     var expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
-    tokendb.add(token, tokendb.PREFIX_DEV + user.id, '', expiresAt, 'developer,apps,settings,users,profile', function (error) {
+    tokendb.add(token, tokendb.PREFIX_DEV + user.id, '', expiresAt, '*', function (error) {
         if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
 
         eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource, { authType: 'cli', userId: user.id, username: user.username });
