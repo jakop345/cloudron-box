@@ -20,12 +20,11 @@
 
                     <div class="form-group" ng-class="{ 'has-error': (useradd_form.username.$dirty && useradd_form.username.$invalid) || (!useradd_form.username.$dirty && useradd.error.username) }">
                         <label class="control-label">Username (optional)</label>
-                        <p>If not specified, the user can choose the username following the invite link.</p>
                         <div class="control-label" ng-show="(!useradd_form.username.$dirty && useradd.error.username) || (useradd_form.username.$dirty && useradd_form.username.$invalid) || (!useradd_form.username.$dirty && useradd.error.username)">
                             <small ng-show="useradd_form.username.$error.username">This is not a valid username</small>
                             <small ng-show="!useradd_form.username.$dirty && useradd.error.username">{{ useradd.error.username }}</small>
                         </div>
-                        <input type="text" class="form-control" ng-model="useradd.username" name="username" id="inputUserAddUsername">
+                        <input type="text" class="form-control" ng-model="useradd.username" name="username" id="inputUserAddUsername" placeholder="If empty, the user can choose on his own">
                     </div>
 
                     <div class="form-group" ng-class="{ 'has-error': (useradd_form.displayName.$dirty && useradd_form.displayName.$invalid) || (!useradd_form.displayName.$dirty && useradd.error.displayName) }">
@@ -34,7 +33,7 @@
                             <small ng-show="useradd_form.displayName.$error.displayName">This is not a valid displayName</small>
                             <small ng-show="!useradd_form.displayName.$dirty && useradd.error.displayName">{{ useradd.error.displayName }}</small>
                         </div>
-                        <input type="text" class="form-control" ng-model="useradd.displayName" name="displayName" id="inputUserAddDisplayName">
+                        <input type="text" class="form-control" ng-model="useradd.displayName" name="displayName" id="inputUserAddDisplayName" placeholder="If empty, the user can choose on his own">
                     </div>
 
                     <div class="checkbox">
