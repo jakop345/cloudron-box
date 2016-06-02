@@ -49,13 +49,15 @@ MailboxError.EXTERNAL_ERROR = 'external error';
 function validateName(name) {
     var RESERVED_NAMES = [ 'no-reply', 'postmaster', 'mailer-daemon' ];
 
-    if (name.length < 2) return new MailboxError(MailboxError.BAD_FIELD, 'Name too small');
-    if (name.length > 127) return new MailboxError(MailboxError.BAD_FIELD, 'Name too long');
-    if (RESERVED_NAMES.indexOf(name) !== -1) return new MailboxError(MailboxError.BAD_FIELD, 'Name is reserved');
+    if (!name.length) return new MailboxError(MailboxError.BAD_FIELD, "name cannot be empty");
 
-    if (/[^a-zA-Z0-9.]/.test(name)) return new MailboxError(MailboxError.BAD_FIELD, 'Name can only contain alphanumerals and dot');
+    if (name.length < 2) return new MailboxError(MailboxError.BAD_FIELD, 'name too small');
+    if (name.length > 127) return new MailboxError(MailboxError.BAD_FIELD, 'name too long');
+    if (RESERVED_NAMES.indexOf(name) !== -1) return new MailboxError(MailboxError.BAD_FIELD, 'name is reserved');
 
-    if (name.indexOf('.app') !== -1) return new MailboxError(MailboxError.BAD_FIELD, 'Alias pattern is reserved for apps');
+    if (/[^a-zA-Z0-9.]/.test(name)) return new MailboxError(MailboxError.BAD_FIELD, 'name can only contain alphanumerals and dot');
+
+    if (name.indexOf('.app') !== -1) return new MailboxError(MailboxError.BAD_FIELD, 'alias pattern is reserved for apps');
 
     return null;
 }
