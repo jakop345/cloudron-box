@@ -51,6 +51,7 @@ var assert = require('assert'),
     config = require('./config.js'),
     CronJob = require('cron').CronJob,
     DatabaseError = require('./databaseerror.js'),
+    moment = require('moment-timezone'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     settingsdb = require('./settingsdb.js'),
@@ -131,6 +132,8 @@ function getAutoupdatePattern(callback) {
 function setTimeZone(tz, callback) {
     assert.strictEqual(typeof tz, 'string');
     assert.strictEqual(typeof callback, 'function');
+
+    if (moment.tz.names().indexOf(tz) === -1) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Bad timeZone'));
 
     settingsdb.set(exports.TIME_ZONE_KEY, tz, function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));

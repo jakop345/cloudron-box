@@ -17,6 +17,7 @@ exports = module.exports = {
     setBackupConfig: setBackupConfig,
 
     getTimeZone: getTimeZone,
+    setTimeZone: setTimeZone,
 
     setCertificate: setCertificate,
     setAdminCertificate: setAdminCertificate
@@ -78,6 +79,19 @@ function getTimeZone(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { timeZone: tz }));
+    });
+}
+
+function setTimeZone(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (typeof req.body.timeZone !== 'string') return next(new HttpError(400, 'timeZone is required'));
+
+    settings.setTimeZone(req.body.timeZone, function (error) {
+        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200));
     });
 }
 
