@@ -293,7 +293,7 @@ describe('User API', function () {
     });
 
     it('set second user as admin succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_1.id + '/set_groups')
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_1.id + '/groups')
                .query({ access_token: token })
                .send({ groupIds: [ groups.ADMIN_GROUP_ID ] })
                .end(function (err, res) {
@@ -311,7 +311,7 @@ describe('User API', function () {
     });
 
     it('remove itself from admins fails', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id + '/set_groups')
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id + '/groups')
                .query({ access_token: token })
                .send({ groupIds: [ 'somegroupid' ] })
                .end(function (err, res) {
@@ -321,7 +321,7 @@ describe('User API', function () {
     });
 
     it('remove second user from admins succeeds', function (done) {
-        superagent.put(SERVER_URL + '/api/v1/users/' + user_1.id + '/set_groups')
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_1.id + '/groups')
                .query({ access_token: token })
                .send({ groupIds: [ 'somegroupid' ] })
                .end(function (err, res) {

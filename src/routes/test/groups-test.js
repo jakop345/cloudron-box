@@ -224,7 +224,7 @@ describe('Groups API', function () {
         });
 
         it('cannot add user to invalid group', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/set_groups')
+            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/groups')
                   .query({ access_token: token })
                   .send({ groupIds: [ 'admin', 'something' ]})
                   .end(function (error, result) {
@@ -234,7 +234,7 @@ describe('Groups API', function () {
         });
 
         it('can add user to valid group', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/set_groups')
+            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/groups')
                   .query({ access_token: token })
                   .send({ groupIds: [ 'admin', 'group0', 'group1' ]})
                   .end(function (error, result) {
@@ -244,7 +244,7 @@ describe('Groups API', function () {
         });
 
         it('can remove last user from admin', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/set_groups')
+            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/groups')
                   .query({ access_token: token })
                   .send({ groupIds: [ 'group0', 'group1' ]})
                   .end(function (error, result) {
