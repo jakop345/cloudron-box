@@ -1,4 +1,3 @@
-/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
@@ -62,7 +61,7 @@ describe('Settings', function () {
         it('can get default developer mode', function (done) {
             settings.getDeveloperMode(function (error, enabled) {
                 expect(error).to.be(null);
-                expect(enabled).to.equal(false);
+                expect(enabled).to.equal(true);
                 done();
             });
         });
