@@ -166,7 +166,10 @@ function setCloudronName(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!name) return callback(new SettingsError(SettingsError.BAD_FIELD));
+    if (!name) return callback(new SettingsError(SettingsError.BAD_FIELD, 'name is empty'));
+
+    // some arbitrary restrictions (for sake of ui layout)
+    if (name.length > 32) return callback(new SettingsError(SettingsError.BAD_FIELD, 'name cannot exceed 32 characters'));
 
     settingsdb.set(exports.CLOUDRON_NAME_KEY, name, function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
