@@ -200,6 +200,10 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                     $scope.useradd.error.emailAttempted = $scope.useradd.email;
                     $scope.useradd_form.email.$setPristine();
                     $('#inputUserAddEmail').focus();
+                } else if (error.message.indexOf('username') !== -1) {
+                    $scope.useradd.error.username = 'Invalid Username';
+                    $scope.useradd_form.username.$setPristine();
+                    $('#inputUserAddUsername').focus();
                 } else {
                     console.error('Unable to create user.', error.statusCode, error.message);
                 }
