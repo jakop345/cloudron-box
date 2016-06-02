@@ -45,7 +45,7 @@ function setAutoupdatePattern(req, res, next) {
     if (typeof req.body.pattern !== 'string') return next(new HttpError(400, 'pattern is required'));
 
     settings.setAutoupdatePattern(req.body.pattern, function (error) {
-        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, 'Invalid pattern'));
+        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200));
@@ -58,8 +58,9 @@ function setCloudronName(req, res, next) {
     if (typeof req.body.name !== 'string') return next(new HttpError(400, 'name is required'));
 
     settings.setCloudronName(req.body.name, function (error) {
-        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, 'Invalid name'));
+        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
+
         next(new HttpSuccess(200));
     });
 }
@@ -67,6 +68,7 @@ function setCloudronName(req, res, next) {
 function getCloudronName(req, res, next) {
     settings.getCloudronName(function (error, name) {
         if (error) return next(new HttpError(500, error));
+
         next(new HttpSuccess(200, { name: name }));
     });
 }
@@ -74,6 +76,7 @@ function getCloudronName(req, res, next) {
 function getTimeZone(req, res, next) {
     settings.getTimeZone(function (error, tz) {
         if (error) return next(new HttpError(500, error));
+
         next(new HttpSuccess(200, { timeZone: tz }));
     });
 }
@@ -86,6 +89,7 @@ function setCloudronAvatar(req, res, next) {
 
     settings.setCloudronAvatar(avatar, function (error) {
         if (error) return next(new HttpError(500, error));
+
         next(new HttpSuccess(202, {}));
     });
 }
