@@ -115,6 +115,7 @@
                                 <button class="btn btn-default" type="button" ng-click="userEditToggleGroup(group);" ng-class="{ 'btn-primary': (useredit.groupIds.indexOf(group.id) !== -1) }">{{ group.name }}</button>
                             </span>
                         </div>
+                        <div ng-show="groups.length <= 1">No groups available.</div>
                     </div>
                     <div class="form-group" ng-show="useredit.userInfo.username && (config.isDev || config.isCustomDomain)">
                         <label class="control-label">Email aliases</label>
