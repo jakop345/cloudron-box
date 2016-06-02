@@ -32,7 +32,7 @@ function initializeExpressSync() {
     var app = express();
     var httpServer = http.createServer(app);
 
-    var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
+    var QUERY_LIMIT = '1mb', // max size for json and urlencoded queries (see also client_max_body_size in nginx)
         FIELD_LIMIT = 2 * 1024 * 1024; // max fields that can appear in multipart
 
     var REQUEST_TIMEOUT = 10000; // timeout for all requests (see also setTimeout on the httpServer)
@@ -63,7 +63,7 @@ function initializeExpressSync() {
        .use(middleware.lastMile());
 
     // NOTE: these limits have to be in sync with nginx limits
-    var FILE_SIZE_LIMIT = '1mb', // max file size that can be uploaded
+    var FILE_SIZE_LIMIT = '1mb', // max file size that can be uploaded (see also client_max_body_size in nginx)
         FILE_TIMEOUT = 60 * 1000; // increased timeout for file uploads (1 min)
 
     var multipart = middleware.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT });
@@ -230,7 +230,7 @@ function initializeSysadminExpressSync() {
     var app = express();
     var httpServer = http.createServer(app);
 
-    var QUERY_LIMIT = '10mb'; // max size for json and urlencoded queries
+    var QUERY_LIMIT = '1mb'; // max size for json and urlencoded queries
     var REQUEST_TIMEOUT = 10000; // timeout for all requests
 
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
