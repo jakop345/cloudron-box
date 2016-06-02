@@ -67,7 +67,6 @@ function update(req, res, next) {
     if ('email' in req.body && typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
     if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be string'));
 
-    if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
     if (req.user.id !== req.params.userId && !req.user.admin) return next(new HttpError(403, 'Not allowed'));
 
     user.get(req.params.userId, function (error, result) {
