@@ -208,6 +208,10 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         if (config.progress.update && config.progress.update.percent !== -1) {
             window.location.href = '/update.html';
         }
+
+        if (config.cloudronName) {
+            document.title = config.cloudronName;
+        }
     });
 
 

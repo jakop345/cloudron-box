@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
+    <!-- this gets changed once we get the config (because angular has not loaded yet, we see template string for a flash) -->
     <title> Cloudron </title>
 
     <link id="favicon" href="/api/v1/cloudron/avatar" rel="icon" type="image/png">
@@ -173,7 +174,7 @@
                         <span class="icon-bar"></span>
                     </button>
                     <a class="navbar-brand navbar-brand-icon" href="#/"><img ng-src="{{ client.avatar }}" width="40" height="40"/></a>
-                    <a class="navbar-brand" href="#/">Cloudron</a>
+                    <a class="navbar-brand" href="#/">{{ config.cloudronName || 'Cloudron' }}</a>
                 </div>
                 <!-- /.navbar-header -->
 
