@@ -34,7 +34,7 @@ app.controller('Controller', ['$scope', function ($scope) {
 <% if (user && user.username) { %>
                 <div class="form-group"">
                     <label class="control-label">Username</label>
-                    <input type="text" class="form-control" ng-model="username" name="username" disabled required>
+                    <input type="text" class="form-control" ng-model="username" name="username" readonly required>
                 </div>
 <% } else { %>
                 <div class="form-group" ng-class="{ 'has-error': (setupForm.username.$dirty && setupForm.username.$invalid) }">
