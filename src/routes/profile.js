@@ -57,7 +57,6 @@ function changePassword(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
     assert.strictEqual(typeof req.user, 'object');
 
-    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be set to old password'));
     if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'newPassword must be a string'));
 
     user.setPassword(req.user.id, req.body.newPassword, function (error) {
