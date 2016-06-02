@@ -173,7 +173,7 @@ function createUser(username, password, email, displayName, auditSource, options
             };
 
             userdb.add(user.id, user, function (error) {
-                if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS));
+                if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 eventlog.add(eventlog.ACTION_USER_ADD, auditSource, { userId: user.id, email: user.email });
@@ -335,7 +335,7 @@ function updateUser(userId, username, email, displayName, auditSource, callback)
     if (error) return callback(error);
 
     userdb.update(userId, { username: username, email: email, displayName: displayName }, function (error) {
-        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error));
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
@@ -465,7 +465,7 @@ function createOwner(username, password, email, displayName, auditSource, callba
 
     userdb.count(function (error, count) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-        if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS));
+        if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS, 'Owner already exists'));
 
         createUser(username, password, email, displayName, auditSource, { owner: true }, function (error, user) {
             if (error) return callback(error);
