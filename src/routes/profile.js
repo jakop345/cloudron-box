@@ -45,7 +45,7 @@ function update(req, res, next) {
 
     user.update(req.user.id, req.user.username, req.body.email || req.user.email, req.body.displayName || req.user.displayName, auditSource(req), function (error) {
         if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
-        if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
+        if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
 
