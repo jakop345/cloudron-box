@@ -106,9 +106,6 @@ function initialize(callback) {
             if (token.identifier.indexOf(tokendb.PREFIX_DEV) === 0) {
                 token.identifier = token.identifier.slice(tokendb.PREFIX_DEV.length);
                 tokenType = tokendb.TYPE_DEV;
-            } else if (token.identifier.indexOf(tokendb.PREFIX_APP) === 0) {
-                tokenType = tokendb.TYPE_APP;
-                return callback(null, { id: token.identifier.slice(tokendb.PREFIX_APP.length), tokenType: tokenType }, info);
             } else if (token.identifier.indexOf(tokendb.PREFIX_USER) === 0) {
                 tokenType = tokendb.TYPE_USER;
                 token.identifier = token.identifier.slice(tokendb.PREFIX_USER.length);
