@@ -102,9 +102,9 @@ function initializeExpressSync() {
 
     // profile api, working off the user behind the provided token
     router.get ('/api/v1/profile', profileScope, routes.profile.get);
-    router.put ('/api/v1/profile', profileScope, routes.profile.update);
-    router.put ('/api/v1/profile/password', profileScope, routes.user.verifyPassword, routes.profile.changePassword);
-    router.put ('/api/v1/profile/tutorial', profileScope, routes.profile.setShowTutorial);
+    router.post('/api/v1/profile', profileScope, routes.profile.update);
+    router.post('/api/v1/profile/password', profileScope, routes.user.verifyPassword, routes.profile.changePassword);
+    router.post('/api/v1/profile/tutorial', profileScope, routes.profile.setShowTutorial);
 
     // user routes
     router.get ('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.list);

@@ -153,7 +153,7 @@ describe('Profile API', function () {
         after(cleanup);
 
         it('change email fails due to missing token', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile')
+            superagent.post(SERVER_URL + '/api/v1/profile')
                    .send({ email: EMAIL_0_NEW })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(401);
@@ -162,7 +162,7 @@ describe('Profile API', function () {
         });
 
         it('change email fails due to invalid email', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile')
+            superagent.post(SERVER_URL + '/api/v1/profile')
                    .query({ access_token: token_0 })
                    .send({ email: 'foo@bar' })
                    .end(function (error, result) {
@@ -172,7 +172,7 @@ describe('Profile API', function () {
         });
 
         it('change user succeeds without email nor displayName', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile')
+            superagent.post(SERVER_URL + '/api/v1/profile')
                    .query({ access_token: token_0 })
                    .send({})
                    .end(function (error, result) {
@@ -182,7 +182,7 @@ describe('Profile API', function () {
         });
 
         it('change email succeeds', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile')
+            superagent.post(SERVER_URL + '/api/v1/profile')
                    .query({ access_token: token_0 })
                    .send({ email: EMAIL_0_NEW })
                    .end(function (error, result) {
@@ -203,7 +203,7 @@ describe('Profile API', function () {
         });
 
         it('change displayName succeeds', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile')
+            superagent.post(SERVER_URL + '/api/v1/profile')
                    .query({ access_token: token_0 })
                    .send({ displayName: DISPLAY_NAME_0_NEW })
                    .end(function (error, result) {
@@ -229,7 +229,7 @@ describe('Profile API', function () {
         after(cleanup);
 
         it('fails due to missing current password', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile/password')
+            superagent.post(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ newPassword: 'some wrong password' })
                    .end(function (err, res) {
@@ -239,7 +239,7 @@ describe('Profile API', function () {
         });
 
         it('fails due to missing new password', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile/password')
+            superagent.post(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ password: PASSWORD })
                    .end(function (err, res) {
@@ -249,7 +249,7 @@ describe('Profile API', function () {
         });
 
         it('fails due to wrong password', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile/password')
+            superagent.post(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ password: 'some wrong password', newPassword: 'MOre#$%34' })
                    .end(function (err, res) {
@@ -259,7 +259,7 @@ describe('Profile API', function () {
         });
 
         it('fails due to invalid password', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile/password')
+            superagent.post(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ password: PASSWORD, newPassword: 'five' })
                    .end(function (err, res) {
@@ -269,7 +269,7 @@ describe('Profile API', function () {
         });
 
         it('succeeds', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile/password')
+            superagent.post(SERVER_URL + '/api/v1/profile/password')
                    .query({ access_token: token_0 })
                    .send({ password: PASSWORD, newPassword: 'MOre#$%34' })
                    .end(function (err, res) {
@@ -284,7 +284,7 @@ describe('Profile API', function () {
         after(cleanup);
 
         it('fails due to missing showTutorial', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile/tutorial')
+            superagent.post(SERVER_URL + '/api/v1/profile/tutorial')
                    .query({ access_token: token_0 })
                    .send({})
                    .end(function (err, res) {
@@ -294,7 +294,7 @@ describe('Profile API', function () {
         });
 
         it('fails due to wrong showTutorial type', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile/tutorial')
+            superagent.post(SERVER_URL + '/api/v1/profile/tutorial')
                    .query({ access_token: token_0 })
                    .send({ showTutorial: 'true' })
                    .end(function (err, res) {
@@ -304,7 +304,7 @@ describe('Profile API', function () {
         });
 
         it('succeeds', function (done) {
-            superagent.put(SERVER_URL + '/api/v1/profile/tutorial')
+            superagent.post(SERVER_URL + '/api/v1/profile/tutorial')
                    .query({ access_token: token_0 })
                    .send({ showTutorial: false })
                    .end(function (err, res) {

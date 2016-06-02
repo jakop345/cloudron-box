@@ -68,8 +68,8 @@ function changePassword(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
     assert.strictEqual(typeof req.user, 'object');
 
-    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires the users old password.'));
-    if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'API call requires the users new password.'));
+    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be set to old password'));
+    if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'newPassword must be a string'));
 
     if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
