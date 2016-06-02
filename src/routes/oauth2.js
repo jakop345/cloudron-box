@@ -306,14 +306,14 @@ function accountSetup(req, res, next) {
     user.getByResetToken(req.body.resetToken, function (error, userObject) {
         if (error) return sendError(req, res, 'Invalid Reset Token');
 
-        userObject.username = req.body.username;
-        userObject.displayName = req.body.displayName;
-
-        user.update(userObject.id, userObject.username, userObject.email, userObject.displayName, auditSource(req), function (error) {
+        user.update(userObject.id, req.body.username, userObject.email, req.body.displayName, auditSource(req), function (error) {
             if (error && error.reason === UserError.ALREADY_EXISTS) return renderAccountSetupSite(res, req, userObject, 'Username already exists');
             if (error && error.reason === UserError.BAD_FIELD) return renderAccountSetupSite(res, req, userObject, error.message);
             if (error && error.reason === UserError.NOT_FOUND) return renderAccountSetupSite(res, req, userObject, 'No such user');
             if (error) return next(new HttpError(500, error));
+
+            userObject.username = req.body.username;
+            userObject.displayName = req.body.displayName;
 
             // setPassword clears the resetToken
             user.setPassword(userObject.id, req.body.password, function (error, result) {
