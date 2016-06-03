@@ -43,7 +43,7 @@ gServer.serializeClient(function (client, callback) {
 });
 
 gServer.deserializeClient(function (id, callback) {
-    clientdb.get(id, callback);
+    clients.get(id, callback);
 });
 
 
@@ -203,7 +203,7 @@ function loginForm(req, res) {
         });
     }
 
-    clientdb.get(u.query.client_id, function (error, result) {
+    clients.get(u.query.client_id, function (error, result) {
         if (error) return sendError(req, res, 'Unknown OAuth client');
 
         switch (result.type) {
@@ -405,7 +405,7 @@ var authorization = [
     gServer.authorization({}, function (clientId, redirectURI, callback) {
         debug('authorization: client %s with callback to %s.', clientId, redirectURI);
 
-        clientdb.get(clientId, function (error, client) {
+        clients.get(clientId, function (error, client) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
 
