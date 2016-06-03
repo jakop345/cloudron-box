@@ -10,6 +10,7 @@ exports = module.exports = {
     getByAppIdAndType: getByAppIdAndType,
     getClientTokensByUserId: getClientTokensByUserId,
     delClientTokensByUserId: delClientTokensByUserId,
+    delByAppIdAndType: delByAppIdAndType,
 
     // keep this in sync with start.sh ADMIN_SCOPES that generates the cid-webadmin
     SCOPE_APPS: 'apps',
@@ -215,6 +216,17 @@ function delClientTokensByUserId(clientId, userId, callback) {
             });
             return;
         }
+        if (error) return callback(error);
+        callback(null);
+    });
+}
+
+function delByAppIdAndType(appId, type, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    clientdb.delByAppIdAndType(appId, type, function (error) {
         if (error) return callback(error);
         callback(null);
     });

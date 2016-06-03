@@ -37,6 +37,7 @@ var addons = require('./addons.js'),
     backups = require('./backups.js'),
     certificates = require('./certificates.js'),
     clientdb = require('./clientdb.js'),
+    clients = require('./clients.js'),
     config = require('./config.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -57,7 +58,6 @@ var addons = require('./addons.js'),
     superagent = require('superagent'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
-    uuid = require('node-uuid'),
     waitForDns = require('./waitfordns.js'),
     _ = require('underscore');
 
@@ -163,19 +163,18 @@ function allocateOAuthProxyCredentials(app, callback) {
 
     if (!nginx.requiresOAuthProxy(app)) return callback(null);
 
-    var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
 
-    clientdb.add(id, app.id, clientdb.TYPE_PROXY, clientSecret, redirectURI, scope, callback);
+    clients.add(app.id, clientdb.TYPE_PROXY, clientSecret, redirectURI, scope, callback);
 }
 
 function removeOAuthProxyCredentials(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    clientdb.delByAppIdAndType(app.id, clientdb.TYPE_PROXY, function (error) {
+    clients.delByAppIdAndType(app.id, clientdb.TYPE_PROXY, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) {
             debugApp(app, 'Error removing OAuth client id', error);
             return callback(error);
