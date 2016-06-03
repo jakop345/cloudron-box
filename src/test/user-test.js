@@ -433,7 +433,8 @@ describe('User', function () {
         after(cleanupUsers);
 
         it('fails due to unknown userid', function (done) {
-            user.update(USERNAME, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, AUDIT_SOURCE, function (error) {
+            var data = { username: USERNAME_NEW, email: EMAIL_NEW, displayName: DISPLAY_NAME_NEW };
+            user.update(USERNAME, data, AUDIT_SOURCE, function (error) {
                 expect(error).to.be.a(UserError);
                 expect(error.reason).to.equal(UserError.NOT_FOUND);
 
@@ -442,7 +443,8 @@ describe('User', function () {
         });
 
         it('fails due to invalid email', function (done) {
-            user.update(userObject.id, USERNAME_NEW, 'brokenemailaddress', DISPLAY_NAME_NEW, AUDIT_SOURCE, function (error) {
+            var data = { username: USERNAME_NEW, email: 'brokenemailaddress', displayName: DISPLAY_NAME_NEW };
+            user.update(userObject.id, data, AUDIT_SOURCE, function (error) {
                 expect(error).to.be.a(UserError);
                 expect(error.reason).to.equal(UserError.BAD_FIELD);
 
@@ -451,7 +453,9 @@ describe('User', function () {
         });
 
         it('succeeds', function (done) {
-            user.update(userObject.id, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, AUDIT_SOURCE, function (error) {
+            var data = { username: USERNAME_NEW, email: EMAIL_NEW, displayName: DISPLAY_NAME_NEW };
+
+            user.update(userObject.id, data, AUDIT_SOURCE, function (error) {
                 expect(error).to.not.be.ok();
 
                 user.get(userObject.id, function (error, result) {
@@ -467,7 +471,9 @@ describe('User', function () {
         });
 
         it('succeeds with same data', function (done) {
-            user.update(userObject.id, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, AUDIT_SOURCE, function (error) {
+            var data = { username: USERNAME_NEW, email: EMAIL_NEW, displayName: DISPLAY_NAME_NEW };
+
+            user.update(userObject.id, data, AUDIT_SOURCE, function (error) {
                 expect(error).to.not.be.ok();
 
                 user.get(userObject.id, function (error, result) {

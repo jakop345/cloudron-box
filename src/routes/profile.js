@@ -12,7 +12,8 @@ var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     user = require('../user.js'),
-    UserError = user.UserError;
+    UserError = user.UserError,
+    _ = require('underscore');
 
 function auditSource(req) {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
@@ -43,7 +44,9 @@ function update(req, res, next) {
     if ('email' in req.body && typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
     if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be string'));
 
-    user.update(req.user.id, req.user.username, req.body.email || req.user.email, req.body.displayName || req.user.displayName, auditSource(req), function (error) {
+    var data = _.pick(req.body, 'email', 'displayName');
+
+    user.update(req.user.id, data, auditSource(req), function (error) {
         if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));

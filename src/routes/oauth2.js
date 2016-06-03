@@ -21,7 +21,8 @@ var appdb = require('../appdb'),
     url = require('url'),
     user = require('../user.js'),
     UserError = user.UserError,
-    util = require('util');
+    util = require('util'),
+    _ = require('underscore');
 
 function auditSource(req, appId) {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
@@ -306,7 +307,8 @@ function accountSetup(req, res, next) {
     user.getByResetToken(req.body.resetToken, function (error, userObject) {
         if (error) return sendError(req, res, 'Invalid Reset Token');
 
-        user.update(userObject.id, req.body.username, userObject.email, req.body.displayName, auditSource(req), function (error) {
+        var data = _.pick(req.body, 'username', 'displayName');
+        user.update(userObject.id, data, auditSource(req), function (error) {
             if (error && error.reason === UserError.ALREADY_EXISTS) return renderAccountSetupSite(res, req, userObject, 'Username already exists');
             if (error && error.reason === UserError.BAD_FIELD) return renderAccountSetupSite(res, req, userObject, error.message);
             if (error && error.reason === UserError.NOT_FOUND) return renderAccountSetupSite(res, req, userObject, 'No such user');

@@ -66,21 +66,17 @@ function update(req, res, next) {
 
     if ('email' in req.body && typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
     if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be string'));
+    if ('username' in req.body && typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be a string'));
 
     if (req.user.id !== req.params.userId && !req.user.admin) return next(new HttpError(403, 'Not allowed'));
 
-    user.get(req.params.userId, function (error, result) {
-        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
+    user.update(req.params.userId, req.body, auditSource(req), function (error) {
+        if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
 
-        user.update(req.params.userId, result.username, req.body.email || result.email, req.body.displayName || result.displayName, auditSource(req), function (error) {
-            if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
-            if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
-            if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
-            if (error) return next(new HttpError(500, error));
-
-            next(new HttpSuccess(204));
-        });
+        next(new HttpSuccess(204));
     });
 }
 

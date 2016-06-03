@@ -321,30 +321,36 @@ function getByResetToken(resetToken, callback) {
     });
 }
 
-function updateUser(userId, username, email, displayName, auditSource, callback) {
+function updateUser(userId, data, auditSource, callback) {
     assert.strictEqual(typeof userId, 'string');
-    assert.strictEqual(typeof username, 'string');
-    assert.strictEqual(typeof email, 'string');
-    assert.strictEqual(typeof displayName, 'string');
+    assert.strictEqual(typeof data, 'object');
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    username = username.toLowerCase();
-    email = email.toLowerCase();
+    var error;
+    data = _.pick(data, 'email', 'displayName', 'username');
 
-    var error = validateUsername(username);
-    if (error) return callback(error);
+    if (_.isEmpty(data)) return callback();
 
-    error = validateEmail(email);
-    if (error) return callback(error);
+    if (data.username) {
+        data.username = data.username.toLowerCase();
+        error = validateUsername(data.username);
+        if (error) return callback(error);
+    }
 
-    userdb.update(userId, { username: username, email: email, displayName: displayName }, function (error) {
+    if (data.email) {
+        data.email = data.email.toLowerCase();
+        error = validateEmail(data.email);
+        if (error) return callback(error);
+    }
+
+    userdb.update(userId, data, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId });
-        if (username) mailboxes.add(username, NOOP_CALLBACK); // TODO: do this only when username actually changes
+        if (data.username) mailboxes.add(data.username, NOOP_CALLBACK); // TODO: do this only when username actually changes
 
         callback(null);
     });
