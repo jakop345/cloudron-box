@@ -80,7 +80,7 @@ function issueDeveloperToken(user, auditSource, callback) {
 
         eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource, { authType: 'cli', userId: user.id, username: user.username });
 
-        callback(null, { token: token, expiresAt: expiresAt });
+        callback(null, { token: token, expiresAt: new Date(expiresAt).toISOString() });
     });
 }
 
