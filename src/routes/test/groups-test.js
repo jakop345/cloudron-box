@@ -6,18 +6,15 @@
 
 'use strict';
 
-var appdb = require('../../appdb.js'),
-    async = require('async'),
+var async = require('async'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
     groups = require('../../groups.js'),
     superagent = require('superagent'),
     server = require('../../server.js'),
-    settings = require('../../settings.js'),
     tokendb = require('../../tokendb.js'),
-    nock = require('nock'),
-    userdb = require('../../userdb.js');
+    nock = require('nock');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
@@ -117,6 +114,9 @@ describe('Groups API', function () {
                 expect(res.body.groups).to.be.an(Array);
                 expect(res.body.groups.length).to.be(1);
                 expect(res.body.groups[0].name).to.eql('admin');
+                expect(res.body.groups[0].userIds).to.be.an(Array);
+                expect(res.body.groups[0].userIds.length).to.be(1);
+                expect(res.body.groups[0].userIds[0]).to.be(userId);
                 done();
             });
         });
@@ -243,12 +243,44 @@ describe('Groups API', function () {
             });
         });
 
-        it('can remove last user from admin', function (done) {
+        it('cannot remove self from admin', function (done) {
             superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/groups')
                   .query({ access_token: token })
                   .send({ groupIds: [ 'group0', 'group1' ]})
                   .end(function (error, result) {
                 expect(result.statusCode).to.equal(403); // not allowed
+                done();
+            });
+        });
+
+        it('can add another user to admin', function (done) {
+            superagent.put(SERVER_URL + '/api/v1/users/' + userId_1 + '/groups')
+                  .query({ access_token: token })
+                  .send({ groupIds: [ 'admin' ]})
+                  .end(function (error, result) {
+                expect(result.statusCode).to.equal(204);
+                done();
+            });
+        });
+
+        it('lists members of admin group', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/groups/admin')
+                  .query({ access_token: token })
+                  .end(function (error, result) {
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.userIds.length).to.be(2);
+                expect(result.body.userIds[0]).to.be(userId);
+                expect(result.body.userIds[1]).to.be(userId_1);
+                done();
+            });
+        });
+
+        it('remove activation user from admin', function (done) {
+            superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/groups')
+                  .query({ access_token: token_1 })
+                  .send({ groupIds: [ 'group0', 'group1' ]})
+                  .end(function (error, result) {
+                expect(result.statusCode).to.equal(204); // user_1 is still admin, so we can remove the other person
                 done();
             });
         });

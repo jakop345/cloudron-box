@@ -10,6 +10,7 @@ exports = module.exports = {
     get: get,
     getWithMembers: getWithMembers,
     getAll: getAll,
+    getAllWithMembers: getAllWithMembers,
 
     getMembers: getMembers,
     addMember: addMember,
@@ -127,6 +128,16 @@ function getAll(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     groupdb.getAll(function (error, result) {
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        return callback(null, result);
+    });
+}
+
+function getAllWithMembers(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    groupdb.getAllWithMembers(function (error, result) {
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
         return callback(null, result);

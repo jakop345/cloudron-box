@@ -45,7 +45,7 @@ function get(req, res, next) {
 }
 
 function list(req, res, next) {
-    groups.getAll(function (error, result) {
+    groups.getAllWithMembers(function (error, result) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { groups: result }));

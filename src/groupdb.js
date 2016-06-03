@@ -4,6 +4,7 @@ exports = module.exports = {
     get: get,
     getWithMembers: getWithMembers,
     getAll: getAll,
+    getAllWithMembers: getAllWithMembers,
     add: add,
     del: del,
     count: count,
@@ -62,6 +63,19 @@ function getAll(callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, result);
+    });
+}
+
+function getAllWithMembers(callback) {
+    database.query('SELECT ' + GROUPS_FIELDS + ',GROUP_CONCAT(groupMembers.userId) AS userIds ' +
+                    ' FROM groups LEFT OUTER JOIN groupMembers ON groups.id = groupMembers.groupId ' +
+                    ' GROUP BY groups.id', function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        results.forEach(function (result) { result.userIds = result.userIds ? result.userIds.split(',') : [ ]; });
+
+        callback(null, results);
     });
 }
 
