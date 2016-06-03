@@ -5,6 +5,7 @@ var appdb = require('../appdb'),
     assert = require('assert'),
     authcodedb = require('../authcodedb'),
     clientdb = require('../clientdb'),
+    clients = require('../clients'),
     config = require('../config.js'),
     constants = require('../constants.js'),
     DatabaseError = require('../databaseerror'),
@@ -462,9 +463,15 @@ function validateRequestedScopes(req, requestedScopes) {
     assert(Array.isArray(requestedScopes));
 
     if (!req.authInfo || !req.authInfo.scope) return new Error('No scope found');
-    if (req.authInfo.scope === '*') return null;
 
     var scopes = req.authInfo.scope.split(',');
+
+    // check for roles separately
+    if (requestedScopes.indexOf(clients.SCOPE_ROLE_SDK) !== -1 && scopes.indexOf(clients.SCOPE_ROLE_SDK) === -1) {
+        return new Error('Missing required scope role "' + clients.SCOPE_ROLE_SDK + '"');
+    }
+
+    if (scopes.indexOf('*') !== -1) return null;
 
     for (var i = 0; i < requestedScopes.length; ++i) {
         if (scopes.indexOf(requestedScopes[i]) === -1) {
