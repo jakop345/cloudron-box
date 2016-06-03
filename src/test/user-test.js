@@ -1,4 +1,3 @@
-/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
@@ -675,6 +674,25 @@ describe('User', function () {
             user.sendInvite(userObject.id, function (error) {
                 expect(error).to.eql(null);
                 checkMails(1, done);
+            });
+        });
+    });
+
+    describe('remove', function () {
+        before(createOwner);
+        after(cleanupUsers);
+
+        it('fails for unkown user', function (done) {
+            user.remove('unknown', { }, function (error) {
+                expect(error.reason).to.be(UserError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('can remove valid user', function (done) {
+            user.remove(userObject.id, { }, function (error) {
+                expect(error).to.be(null);
+                done();
             });
         });
     });

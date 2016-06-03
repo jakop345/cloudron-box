@@ -467,6 +467,16 @@ describe('User API', function () {
         });
     });
 
+    it('remove random user fails', function (done) {
+        superagent.del(SERVER_URL + '/api/v1/users/randomid')
+               .query({ access_token: token })
+               .send({ password: PASSWORD })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(404);
+            done();
+        });
+    });
+
     it('user removes himself is not allowed', function (done) {
         superagent.del(SERVER_URL + '/api/v1/users/' + user_0.id)
                .query({ access_token: token })

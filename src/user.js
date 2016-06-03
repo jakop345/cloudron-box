@@ -251,21 +251,25 @@ function verifyWithEmail(email, password, callback) {
     });
 }
 
-function removeUser(user, auditSource, callback) {
-    assert.strictEqual(typeof user, 'object');
+function removeUser(userId, auditSource, callback) {
+    assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.del(user.id, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
-        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+    getUser(userId, function (error, user) {
+        if (error) return callback(error);
 
-        eventlog.add(eventlog.ACTION_USER_REMOVE, auditSource, { userId: user.id });
-        if (user.username) mailboxes.del(user.username, NOOP_CALLBACK);
+        userdb.del(userId, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        callback(null);
+            eventlog.add(eventlog.ACTION_USER_REMOVE, auditSource, { userId: userId });
+            if (user.username) mailboxes.del(user.username, NOOP_CALLBACK);
 
-        mailer.userRemoved(user);
+            callback(null);
+
+            mailer.userRemoved(user);
+        });
     });
 }
 
