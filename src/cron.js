@@ -123,7 +123,7 @@ function recreateJobs(unusedTimeZone, callback) {
         if (gCertificateRenewJob) gCertificateRenewJob.stop();
         gCertificateRenewJob = new CronJob({
             cronTime: '00 00 */12 * * *', // every 12 hours
-            onTick: certificates.autoRenew,
+            onTick: certificates.renewAll.bind(null, AUDIT_SOURCE, NOOP_CALLBACK),
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });

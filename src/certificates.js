@@ -2,7 +2,7 @@
 
 exports = module.exports = {
     installAdminCertificate: installAdminCertificate,
-    autoRenew: autoRenew,
+    renewAll: renewAll,
     setFallbackCertificate: setFallbackCertificate,
     setAdminCertificate: setAdminCertificate,
     CertificatesError: CertificatesError,
@@ -124,9 +124,11 @@ function isExpiringSync(certFilePath, hours) {
     return result.status === 1; // 1 - expired 0 - not expired
 }
 
-function autoRenew(callback) {
-    debug('autoRenew: Checking certificates for renewal');
-    callback = callback || NOOP_CALLBACK;
+function renewAll(auditSource, callback) {
+    assert.strictEqual(typeof auditSource, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    debug('renewAll: Checking certificates for renewal');
 
     apps.getAll(function (error, allApps) {
         if (error) return callback(error);
@@ -140,7 +142,7 @@ function autoRenew(callback) {
             var keyFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.key');
 
             if (!safe.fs.existsSync(keyFilePath)) {
-                debug('autoRenew: no existing key file for %s. skipping', appDomain);
+                debug('renewAll: no existing key file for %s. skipping', appDomain);
                 continue;
             }
 
@@ -149,7 +151,7 @@ function autoRenew(callback) {
             }
         }
 
-        debug('autoRenew: %j needs to be renewed', expiringApps.map(function (a) { return a.altDomain || config.appFqdn(a.location); }));
+        debug('renewAll: %j needs to be renewed', expiringApps.map(function (a) { return a.altDomain || config.appFqdn(a.location); }));
 
         async.eachSeries(expiringApps, function iterator(app, iteratorCallback) {
             var domain = app.altDomain || config.appFqdn(app.location);
@@ -157,28 +159,28 @@ function autoRenew(callback) {
             getApi(app, function (error, api, apiOptions) {
                 if (error) return callback(error);
 
-                debug('autoRenew: renewing cert for %s with options %j', domain, apiOptions);
+                debug('renewAll: renewing cert for %s with options %j', domain, apiOptions);
 
                 api.getCertificate(domain, apiOptions, function (error) {
                     var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
                     var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
 
                     var errorMessage = error ? error.message : '';
-                    eventlog.add(eventlog.ACTION_CERTIFICATE_RENEWAL, { userId: null, username: 'cron' }, { domain: domain, errorMessage: errorMessage });
+                    eventlog.add(eventlog.ACTION_CERTIFICATE_RENEWAL, auditSource, { domain: domain, errorMessage: errorMessage });
                     mailer.certificateRenewed(domain, errorMessage);
 
                     if (error) {
-                        debug('autoRenew: could not renew cert for %s because %s', domain, error);
+                        debug('renewAll: could not renew cert for %s because %s', domain, error);
 
                         // check if we should fallback if we expire in the coming day
                         if (!isExpiringSync(certFilePath, 24 * 1)) return iteratorCallback();
 
-                        debug('autoRenew: using fallback certs for %s since it expires soon', domain, error);
+                        debug('renewAll: using fallback certs for %s since it expires soon', domain, error);
 
                         certFilePath = 'cert/host.cert';
                         keyFilePath = 'cert/host.key';
                     } else {
-                        debug('autoRenew: certificate for %s renewed', domain);
+                        debug('renewAll: certificate for %s renewed', domain);
                     }
 
                     // reconfigure and reload nginx. this is required for the case where we got a renewed cert after fallback
