@@ -366,4 +366,60 @@ describe('Developer API', function () {
             });
         });
     });
+
+    describe('sdk tokens are valid without password checks', function () {
+        var token_normal, token_sdk;
+
+        before(function (done) {
+            async.series([
+                setup,
+
+                settings.setDeveloperMode.bind(null, true),
+
+                function (callback) {
+                    var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+                    var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
+
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
+                           .query({ setupToken: 'somesetuptoken' })
+                           .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+                           .end(function (error, result) {
+                        expect(result).to.be.ok();
+                        expect(scope1.isDone()).to.be.ok();
+                        expect(scope2.isDone()).to.be.ok();
+
+                        token_normal = result.body.token;
+
+                        superagent.post(SERVER_URL + '/api/v1/developer/login')
+                          .send({ username: USERNAME, password: PASSWORD })
+                          .end(function (error, result) {
+                            expect(result.statusCode).to.equal(200);
+                            expect(result.body.expiresAt).to.be.a('number');
+                            expect(result.body.token).to.be.a('string');
+
+                            token_sdk = result.body.token;
+
+                            callback();
+                        });
+                    });
+                },
+            ], done);
+        });
+
+        after(cleanup);
+
+        it('fails with non sdk token', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/profile/password').query({ access_token: token_normal }).send({ newPassword: 'Some?$123' }).end(function (error, result) {
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/profile/password').query({ access_token: token_sdk }).send({ newPassword: 'Some?$123' }).end(function (error, result) {
+                expect(result.statusCode).to.equal(204);
+                done();
+            });
+        });
+    });
 });
