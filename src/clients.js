@@ -70,10 +70,10 @@ function validateScope(scope) {
         exports.SCOPE_ROLE_SDK
     ];
 
-    if (scope === '') return new ClientsError(ClientsError.INVALID_SCOPE);
+    if (scope === '') return new ClientsError(ClientsError.INVALID_SCOPE, 'Empty scope not allowed');
 
     var allValid = scope.split(',').every(function (s) { return VALID_SCOPES.indexOf(s) !== -1; });
-    if (!allValid) return new ClientsError(ClientsError.INVALID_SCOPE);
+    if (!allValid) return new ClientsError(ClientsError.INVALID_SCOPE, 'Invalid scope. Available scopes are ' + VALID_SCOPES.join(', '));
 
     return null;
 }

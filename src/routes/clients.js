@@ -28,7 +28,7 @@ function add(req, res, next) {
     if (!validUrl.isWebUri(data.redirectURI)) return next(new HttpError(400, 'redirectURI must be a valid uri'));
 
     clients.add(data.appId, clientdb.TYPE_EXTERNAL, data.redirectURI, data.scope, function (error, result) {
-        if (error && error.reason === ClientsError.INVALID_SCOPE) return next(new HttpError(400, 'Invalid scope'));
+        if (error && error.reason === ClientsError.INVALID_SCOPE) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(201, result));
     });
