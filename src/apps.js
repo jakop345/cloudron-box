@@ -30,7 +30,7 @@ exports = module.exports = {
 
     checkManifestConstraints: checkManifestConstraints,
 
-    autoupdateApps: autoupdateApps,
+    updateApps: updateApps,
 
     restoreInstalledApps: restoreInstalledApps,
     configureInstalledApps: configureInstalledApps,
@@ -793,8 +793,9 @@ function exec(appId, options, callback) {
     });
 }
 
-function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { manifest } }
+function updateApps(updateInfo, auditSource, callback) { // updateInfo is { appId -> { manifest } }
     assert.strictEqual(typeof updateInfo, 'object');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     function canAutoupdateApp(app, newManifest) {
@@ -829,7 +830,7 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
             }
 
            update(appId, false /* force */, updateInfo[appId].manifest, app.portBindings,
-                  null /* icon */, { userId: null, username: 'cron' }, function (error) {
+                  null /* icon */, auditSource, function (error) {
                 if (error) debug('Error initiating autoupdate of %s. %s', appId, error.message);
 
                 iteratorDone(null);
