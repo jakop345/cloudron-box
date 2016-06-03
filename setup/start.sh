@@ -192,12 +192,11 @@ fi
 # The domain might have changed, therefor we have to update the record
 # !!! This needs to be in sync with the webadmin, specifically login_callback.js
 echo "Add webadmin oauth cient"
-ADMIN_SCOPES="root,developer,profile,users,apps,settings"
+readonly ADMIN_SCOPES="cloudron,developer,profile,users,apps,settings"
 mysql -u root -p${mysql_root_password} \
     -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"admin\", \"secret-webadmin\", \"${admin_origin}\", \"${ADMIN_SCOPES}\")" box
 
 echo "Add localhost test oauth client"
-ADMIN_SCOPES="root,developer,profile,users,apps,settings"
 mysql -u root -p${mysql_root_password} \
     -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-test\", \"test\", \"test\", \"secret-test\", \"http://127.0.0.1:5000\", \"${ADMIN_SCOPES}\")" box
 

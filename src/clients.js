@@ -10,6 +10,7 @@ exports = module.exports = {
     getClientTokensByUserId: getClientTokensByUserId,
     delClientTokensByUserId: delClientTokensByUserId,
 
+    // keep this in sync with start.sh ADMIN_SCOPES that generates the cid-webadmin
     SCOPE_APPS: 'apps',
     SCOPE_DEVELOPER: 'developer',
     SCOPE_PROFILE: 'profile',

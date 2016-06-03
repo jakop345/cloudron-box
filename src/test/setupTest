@@ -16,7 +16,7 @@ mkdir -p data/appdata data/box/appicons data/mail data/nginx/cert data/nginx/app
 # put cert
 openssl req -x509 -newkey rsa:1024 -keyout data/nginx/cert/host.key -out data/nginx/cert/host.cert -days 3650 -subj '/CN=localhost' -nodes
 
-webadmin_scopes="root,profile,users,apps,settings"
+webadmin_scopes="cloudron,profile,users,apps,settings"
 webadmin_origin="https://${ADMIN_LOCATION}-localhost"
 mysql --user=root --password="" \
     -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"admin\", \"secret-webadmin\", \"${webadmin_origin}\", \"${webadmin_scopes}\")" boxtest
