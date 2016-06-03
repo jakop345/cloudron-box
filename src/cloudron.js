@@ -237,7 +237,7 @@ function activate(username, password, email, displayName, ip, auditSource, callb
             var token = tokendb.generateToken();
             var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
-            tokendb.add(token, tokendb.PREFIX_USER + userObject.id, result.id, expires, '*', function (error) {
+            tokendb.add(token, userObject.id, result.id, expires, '*', function (error) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
                 // EE API is sync. do not keep the REST API reponse waiting
