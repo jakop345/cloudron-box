@@ -44,7 +44,6 @@ var addons = require('./addons.js'),
     docker = require('./docker.js'),
     ejs = require('ejs'),
     fs = require('fs'),
-    hat = require('hat'),
     manifestFormat = require('cloudron-manifestformat'),
     net = require('net'),
     nginx = require('./nginx.js'),
@@ -162,11 +161,10 @@ function allocateOAuthProxyCredentials(app, callback) {
 
     if (!nginx.requiresOAuthProxy(app)) return callback(null);
 
-    var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
 
-    clients.add(app.id, clients.TYPE_PROXY, clientSecret, redirectURI, scope, callback);
+    clients.add(app.id, clients.TYPE_PROXY, redirectURI, scope, callback);
 }
 
 function removeOAuthProxyCredentials(app, callback) {

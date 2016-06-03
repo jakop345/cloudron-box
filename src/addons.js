@@ -283,19 +283,18 @@ function setupOauth(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var appId = app.id;
-    var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
 
     clients.delByAppIdAndType(appId, clients.TYPE_OAUTH, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clients.add(appId, clients.TYPE_OAUTH, clientSecret, redirectURI, scope, function (error, result) {
+        clients.add(appId, clients.TYPE_OAUTH, redirectURI, scope, function (error, result) {
             if (error) return callback(error);
 
             var env = [
                 'OAUTH_CLIENT_ID=' + result.id,
-                'OAUTH_CLIENT_SECRET=' + clientSecret,
+                'OAUTH_CLIENT_SECRET=' + result.clientSecret,
                 'OAUTH_ORIGIN=' + config.adminOrigin()
             ];
 
@@ -331,7 +330,7 @@ function setupSimpleAuth(app, options, callback) {
     clients.delByAppIdAndType(app.id, clients.TYPE_SIMPLE_AUTH, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clients.add(appId, clients.TYPE_SIMPLE_AUTH, '', '', scope, function (error, result) {
+        clients.add(appId, clients.TYPE_SIMPLE_AUTH, '', scope, function (error, result) {
             if (error) return callback(error);
 
             var env = [
