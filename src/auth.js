@@ -102,10 +102,6 @@ function initialize(callback) {
             // passport put the 'info' object into req.authInfo, where we can further validate the scopes
             var info = { scope: token.scope };
 
-            if (token.identifier.indexOf(tokendb.PREFIX_USER) === 0) {
-                token.identifier = token.identifier.slice(tokendb.PREFIX_USER.length);
-            }
-
             userdb.get(token.identifier, function (error, user) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);
