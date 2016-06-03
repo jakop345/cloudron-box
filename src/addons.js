@@ -20,6 +20,7 @@ var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
     clientdb = require('./clientdb.js'),
+    clients = require('./clients.js'),
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:addons'),
@@ -34,8 +35,7 @@ var appdb = require('./appdb.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
-    util = require('util'),
-    uuid = require('node-uuid');
+    util = require('util');
 
 var NOOP = function (app, options, callback) { return callback(); };
 
@@ -284,21 +284,18 @@ function setupOauth(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var appId = app.id;
-    var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
 
-    debugApp(app, 'setupOauth: id:%s clientSecret:%s', id, clientSecret);
-
-    clientdb.delByAppIdAndType(appId, clientdb.TYPE_OAUTH, function (error) { // remove existing creds
+    clients.delByAppIdAndType(appId, clientdb.TYPE_OAUTH, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clientdb.add(id, appId, clientdb.TYPE_OAUTH, clientSecret, redirectURI, scope, function (error) {
+        clients.add(appId, clientdb.TYPE_OAUTH, clientSecret, redirectURI, scope, function (error, result) {
             if (error) return callback(error);
 
             var env = [
-                'OAUTH_CLIENT_ID=' + id,
+                'OAUTH_CLIENT_ID=' + result.id,
                 'OAUTH_CLIENT_SECRET=' + clientSecret,
                 'OAUTH_ORIGIN=' + config.adminOrigin()
             ];
@@ -317,7 +314,7 @@ function teardownOauth(app, options, callback) {
 
     debugApp(app, 'teardownOauth');
 
-    clientdb.delByAppIdAndType(app.id, clientdb.TYPE_OAUTH, function (error) {
+    clients.delByAppIdAndType(app.id, clientdb.TYPE_OAUTH, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
@@ -330,15 +327,12 @@ function setupSimpleAuth(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var appId = app.id;
-    var id = 'cid-' + uuid.v4();
     var scope = 'profile';
 
-    debugApp(app, 'setupSimpleAuth: id:%s', id);
-
-    clientdb.delByAppIdAndType(app.id, clientdb.TYPE_SIMPLE_AUTH, function (error) { // remove existing creds
+    clients.delByAppIdAndType(app.id, clientdb.TYPE_SIMPLE_AUTH, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clientdb.add(id, appId, clientdb.TYPE_SIMPLE_AUTH, '', '', scope, function (error) {
+        clients.add(appId, clientdb.TYPE_SIMPLE_AUTH, '', '', scope, function (error, result) {
             if (error) return callback(error);
 
             var env = [
@@ -346,7 +340,7 @@ function setupSimpleAuth(app, options, callback) {
                 'SIMPLE_AUTH_PORT=' + config.get('simpleAuthPort'),
                 'SIMPLE_AUTH_URL=http://172.17.0.1:' + config.get('simpleAuthPort'), // obsolete, remove
                 'SIMPLE_AUTH_ORIGIN=http://172.17.0.1:' + config.get('simpleAuthPort'),
-                'SIMPLE_AUTH_CLIENT_ID=' + id
+                'SIMPLE_AUTH_CLIENT_ID=' + result.id
             ];
 
             debugApp(app, 'Setting simple auth addon config to %j', env);
@@ -363,7 +357,7 @@ function teardownSimpleAuth(app, options, callback) {
 
     debugApp(app, 'teardownSimpleAuth');
 
-    clientdb.delByAppIdAndType(app.id, clientdb.TYPE_SIMPLE_AUTH, function (error) {
+    clients.delByAppIdAndType(app.id, clientdb.TYPE_SIMPLE_AUTH, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'simpleauth', callback);
