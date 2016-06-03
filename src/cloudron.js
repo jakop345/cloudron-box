@@ -495,14 +495,17 @@ function reboot(callback) {
     shell.sudo('reboot', [ REBOOT_CMD ], callback);
 }
 
-function update(boxUpdateInfo, callback) {
+function update(boxUpdateInfo, auditSource, callback) {
     assert.strictEqual(typeof boxUpdateInfo, 'object');
+    assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     if (!boxUpdateInfo) return callback(null);
 
     var error = locker.lock(locker.OP_BOX_UPDATE);
     if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
+
+    eventlog.add(eventlog.ACTION_UPDATE, auditSource, { boxUpdateInfo: boxUpdateInfo });
 
     // ensure tools can 'wait' on progress
     progress.set(progress.UPDATE, 0, 'Starting');
@@ -542,9 +545,7 @@ function updateToLatest(auditSource, callback) {
     var boxUpdateInfo = updateChecker.getUpdateInfo().box;
     if (!boxUpdateInfo) return callback(new CloudronError(CloudronError.ALREADY_UPTODATE, 'No update available'));
 
-    eventlog.add(eventlog.ACTION_UPDATE, auditSource, { boxUpdateInfo: boxUpdateInfo });
-
-    update(boxUpdateInfo, callback);
+    update(boxUpdateInfo, auditSource, callback);
 }
 
 function doShortCircuitUpdate(boxUpdateInfo, callback) {
