@@ -30,14 +30,14 @@ describe('janitor', function () {
 
     var TOKEN_0 = {
         accessToken: tokendb.generateToken(),
-        identifier: tokendb.PREFIX_USER + '0',
+        identifier: '0',
         clientId: 'clientid-0',
         expires: Date.now() + 60 * 60 * 1000,
         scope: '*'
     };
     var TOKEN_1 = {
         accessToken: tokendb.generateToken(),
-        identifier: tokendb.PREFIX_USER + '1',
+        identifier: '1',
         clientId: 'clientid-1',
         expires: Date.now() - 1000,
         scope: '*',

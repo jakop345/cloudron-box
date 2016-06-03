@@ -543,7 +543,7 @@ describe('Clients', function () {
                 expect(result.statusCode).to.equal(200);
 
                 expect(result.body.tokens.length).to.eql(1);
-                expect(result.body.tokens[0].identifier).to.eql('user-' + USER_0.id);
+                expect(result.body.tokens[0].identifier).to.eql(USER_0.id);
 
                 done();
             });
@@ -596,7 +596,7 @@ describe('Clients', function () {
                 expect(result.statusCode).to.equal(200);
 
                 expect(result.body.tokens.length).to.eql(1);
-                expect(result.body.tokens[0].identifier).to.eql('user-' + USER_0.id);
+                expect(result.body.tokens[0].identifier).to.eql(USER_0.id);
 
                 superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
                 .query({ access_token: token })

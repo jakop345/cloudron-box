@@ -366,21 +366,21 @@ describe('database', function () {
     describe('token', function () {
         var TOKEN_0 = {
             accessToken: tokendb.generateToken(),
-            identifier: tokendb.PREFIX_USER + '0',
+            identifier: '0',
             clientId: 'clientid-0',
             expires: Date.now() + 60 * 60000,
             scope: '*'
         };
         var TOKEN_1 = {
             accessToken: tokendb.generateToken(),
-            identifier: tokendb.PREFIX_USER + '1',
+            identifier: '1',
             clientId: 'clientid-1',
             expires: Number.MAX_SAFE_INTEGER,
             scope: '*'
         };
         var TOKEN_2 = {
             accessToken: tokendb.generateToken(),
-            identifier: tokendb.PREFIX_USER + '2',
+            identifier: '2',
             clientId: 'clientid-2',
             expires: Date.now(),
             scope: '*'

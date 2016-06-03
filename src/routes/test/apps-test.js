@@ -165,7 +165,7 @@ describe('Apps', function () {
                 token_1 = tokendb.generateToken();
 
                 // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-                tokendb.add(token_1, tokendb.PREFIX_USER + USER_1_ID, 'test-client-id',  Date.now() + 100000, '*', callback);
+                tokendb.add(token_1, USER_1_ID, 'test-client-id',  Date.now() + 100000, '*', callback);
             },
 
             function (callback) {

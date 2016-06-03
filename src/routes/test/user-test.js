@@ -160,7 +160,7 @@ describe('User API', function () {
         var token = tokendb.generateToken();
         var expires = Date.now() + 2000; // 1 sec
 
-        tokendb.add(token, tokendb.PREFIX_USER + user_0.id, null, expires, '*', function (error) {
+        tokendb.add(token, user_0.id, null, expires, '*', function (error) {
             expect(error).to.not.be.ok();
 
             setTimeout(function () {
@@ -260,7 +260,7 @@ describe('User API', function () {
 
             checkMails(2, function () {
               // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-              tokendb.add(token_1, tokendb.PREFIX_USER + user_1.id, 'test-client-id',  Date.now() + 10000, '*', done);
+              tokendb.add(token_1, user_1.id, 'test-client-id',  Date.now() + 10000, '*', done);
             });
         });
     });
