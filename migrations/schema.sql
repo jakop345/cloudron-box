@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS eventlog(
     action VARCHAR(128) NOT NULL,
     source JSON, /* { userId, username, ip }. userId can be null for cron,sysadmin */
     data JSON, /* free flowing json based on action */
-    creationTime TIMESTAMP,
+    creationTime TIMESTAMP, /* FIXME: precision must be TIMESTAMP(2) */
 
     PRIMARY KEY (id));
 
