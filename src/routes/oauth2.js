@@ -456,6 +456,25 @@ var token = [
     gServer.errorHandler()
 ];
 
+// tests if all requestedScopes are attached to the request
+function hasRequestedScopes(req, requestedScopes) {
+    assert.strictEqual(typeof req, 'object');
+    assert(Array.isArray(requestedScopes));
+
+    if (!req.authInfo || !req.authInfo.scope) return new Error('No scope found');
+    if (req.authInfo.scope === '*') return null;
+
+    var scopes = req.authInfo.scope.split(',');
+
+    for (var i = 0; i < requestedScopes.length; ++i) {
+        if (scopes.indexOf(requestedScopes[i]) === -1) {
+            debug('scope: missing scope "%s".', requestedScopes[i]);
+            return new Error('Missing required scope "' + requestedScopes[i] + '"');
+        }
+    }
+
+    return null;
+}
 
 //  The scope middleware provides an auth middleware for routes.
 //
@@ -475,17 +494,8 @@ function scope(requestedScope) {
     return [
         passport.authenticate(['bearer'], { session: false }),
         function (req, res, next) {
-            if (!req.authInfo || !req.authInfo.scope) return next(new HttpError(401, 'No scope found'));
-            if (req.authInfo.scope === '*') return next();
-
-            var scopes = req.authInfo.scope.split(',');
-
-            for (var i = 0; i < requestedScopes.length; ++i) {
-                if (scopes.indexOf(requestedScopes[i]) === -1) {
-                    debug('scope: missing scope "%s".', requestedScopes[i]);
-                    return next(new HttpError(401, 'Missing required scope "' + requestedScopes[i] + '"'));
-                }
-            }
+            var error = hasRequestedScopes(req, requestedScopes);
+            if (error) return next(new HttpError(401, error.message));
 
             next();
         }
@@ -516,6 +526,7 @@ exports = module.exports = {
     accountSetup: accountSetup,
     authorization: authorization,
     token: token,
+    hasRequestedScopes: hasRequestedScopes,
     scope: scope,
     csrf: csrf
 };
