@@ -131,7 +131,7 @@ function getAllWithDetailsByUserId(userId, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    clientdb.getAllWithTokenCountByIdentifier(tokendb.PREFIX_USER + userId, function (error, results) {
+    clientdb.getAllWithTokenCountByIdentifier(userId, function (error, results) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, []);
         if (error) return callback(error);
 
@@ -175,7 +175,7 @@ function getClientTokensByUserId(clientId, userId, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    tokendb.getByIdentifierAndClientId(tokendb.PREFIX_USER + userId, clientId, function (error, result) {
+    tokendb.getByIdentifierAndClientId(userId, clientId, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) {
             // this can mean either that there are no tokens or the clientId is actually unknown
             clientdb.get(clientId, function (error/*, result*/) {
@@ -194,7 +194,7 @@ function delClientTokensByUserId(clientId, userId, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    tokendb.delByIdentifierAndClientId(tokendb.PREFIX_USER + userId, clientId, function (error) {
+    tokendb.delByIdentifierAndClientId(userId, clientId, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) {
             // this can mean either that there are no tokens or the clientId is actually unknown
             clientdb.get(clientId, function (error/*, result*/) {
