@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS tokens(
     identifier VARCHAR(128) NOT NULL,
     clientId VARCHAR(128),
     scope VARCHAR(512) NOT NULL,
-    expires BIGINT NOT NULL,
+    expires BIGINT NOT NULL, // FIXME: make this a timestamp
     PRIMARY KEY(accessToken));
 
 CREATE TABLE IF NOT EXISTS clients(
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS authcodes(
     authCode VARCHAR(128) NOT NULL UNIQUE,
     userId VARCHAR(128) NOT NULL,
     clientId VARCHAR(128) NOT NULL,
-    expiresAt BIGINT NOT NULL,
+    expiresAt BIGINT NOT NULL, // ## FIXME: make this a timestamp
     PRIMARY KEY(authCode));
 
 CREATE TABLE IF NOT EXISTS settings(
