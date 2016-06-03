@@ -450,7 +450,7 @@ function setPassword(userId, newPassword, callback) {
                     var token = tokendb.generateToken();
                     var expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
-                    tokendb.add(token, tokendb.PREFIX_USER + user.id, result.id, expiresAt, '*', function (error) {
+                    tokendb.add(token, user.id, result.id, expiresAt, '*', function (error) {
                         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                         callback(null, { token: token, expiresAt: expiresAt });
