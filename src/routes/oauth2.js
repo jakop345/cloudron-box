@@ -457,7 +457,7 @@ var token = [
 ];
 
 // tests if all requestedScopes are attached to the request
-function hasRequestedScopes(req, requestedScopes) {
+function validateRequestedScopes(req, requestedScopes) {
     assert.strictEqual(typeof req, 'object');
     assert(Array.isArray(requestedScopes));
 
@@ -494,7 +494,7 @@ function scope(requestedScope) {
     return [
         passport.authenticate(['bearer'], { session: false }),
         function (req, res, next) {
-            var error = hasRequestedScopes(req, requestedScopes);
+            var error = validateRequestedScopes(req, requestedScopes);
             if (error) return next(new HttpError(401, error.message));
 
             next();
@@ -526,7 +526,7 @@ exports = module.exports = {
     accountSetup: accountSetup,
     authorization: authorization,
     token: token,
-    hasRequestedScopes: hasRequestedScopes,
+    validateRequestedScopes: validateRequestedScopes,
     scope: scope,
     csrf: csrf
 };

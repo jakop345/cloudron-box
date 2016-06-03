@@ -17,6 +17,7 @@ var assert = require('assert'),
     groups = require('../groups.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
+    oauth2 = require('./oauth2.js'),
     user = require('../user.js'),
     tokendb = require('../tokendb.js'),
     UserError = user.UserError,
@@ -135,8 +136,9 @@ function remove(req, res, next) {
 function verifyPassword(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
-    // developers are allowed through without password
-    if (req.user.tokenType === tokendb.TYPE_DEV) return next();
+    // using an 'sdk' token we skip password checks
+    var error = oauth2.validateRequestedScopes(req, ['sdk']);
+    if (!error) return next();
 
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires user password'));
 
