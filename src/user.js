@@ -24,6 +24,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     clientdb = require('./clientdb.js'),
+    clients = require('./clients.js'),
     crypto = require('crypto'),
     debug = require('debug')('box:user'),
     DatabaseError = require('./databaseerror.js'),
@@ -444,7 +445,7 @@ function setPassword(userId, newPassword, callback) {
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 // Also generate a token so the new user can get logged in immediately
-                clientdb.getByAppIdAndType('webadmin', clientdb.TYPE_ADMIN, function (error, result) {
+                clients.getByAppIdAndType('webadmin', clientdb.TYPE_ADMIN, function (error, result) {
                     if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                     var token = tokendb.generateToken();

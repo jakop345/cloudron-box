@@ -7,6 +7,7 @@ exports = module.exports = {
     get: get,
     del: del,
     getAllWithDetailsByUserId: getAllWithDetailsByUserId,
+    getByAppIdAndType: getByAppIdAndType,
     getClientTokensByUserId: getClientTokensByUserId,
     delClientTokensByUserId: delClientTokensByUserId,
 
@@ -167,6 +168,17 @@ function getAllWithDetailsByUserId(userId, callback) {
             if (error) return callback(error);
             callback(null, tmp);
         });
+    });
+}
+
+function getByAppIdAndType(appId, type, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    clientdb.getByAppIdAndType(appId, type, function (error, result) {
+        if (error) return callback(error);
+        callback(null, result);
     });
 }
 

@@ -31,6 +31,7 @@ var apps = require('./apps.js'),
     async = require('async'),
     backups = require('./backups.js'),
     clientdb = require('./clientdb.js'),
+    clients = require('./clients.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
     debug = require('debug')('box:cloudron'),
@@ -230,7 +231,7 @@ function activate(username, password, email, displayName, ip, auditSource, callb
         if (error && error.reason === UserError.BAD_FIELD) return callback(new CloudronError(CloudronError.BAD_FIELD, error.message));
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        clientdb.getByAppIdAndType('webadmin', clientdb.TYPE_ADMIN, function (error, result) {
+        clients.getByAppIdAndType('webadmin', clientdb.TYPE_ADMIN, function (error, result) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             // Also generate a token so the admin creation can also act as a login

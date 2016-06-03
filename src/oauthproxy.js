@@ -8,6 +8,7 @@ exports = module.exports = {
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     clientdb = require('./clientdb.js'),
+    clients = require('./clients.js'),
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:proxy'),
@@ -124,7 +125,7 @@ function authenticate(req, res, next) {
                 return res.send(500, 'Unknown app.');
             }
 
-            clientdb.getByAppIdAndType(result.id, clientdb.TYPE_PROXY, function (error, result) {
+            clients.getByAppIdAndType(result.id, clientdb.TYPE_PROXY, function (error, result) {
                 if (error) {
                     console.error('Unknown OAuth client.', error);
                     return res.send(500, 'Unknown OAuth client.');
