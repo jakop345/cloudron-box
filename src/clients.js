@@ -22,7 +22,14 @@ exports = module.exports = {
 
     // roles are handled just like the above scopes, they are parallel to scopes
     // scopes enclose API groups, roles specify the usage role
-    SCOPE_ROLE_SDK: 'roleSdk'
+    SCOPE_ROLE_SDK: 'roleSdk',
+
+    // client type enums
+    TYPE_EXTERNAL: 'external',
+    TYPE_OAUTH: 'addon-oauth',
+    TYPE_SIMPLE_AUTH: 'addon-simpleauth',
+    TYPE_PROXY: 'addon-proxy',
+    TYPE_ADMIN: 'admin'
 };
 
 var assert = require('assert'),

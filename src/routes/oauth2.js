@@ -4,7 +4,6 @@ var appdb = require('../appdb'),
     apps = require('../apps'),
     assert = require('assert'),
     authcodedb = require('../authcodedb'),
-    clientdb = require('../clientdb'),
     clients = require('../clients'),
     config = require('../config.js'),
     constants = require('../constants.js'),
@@ -207,9 +206,9 @@ function loginForm(req, res) {
         if (error) return sendError(req, res, 'Unknown OAuth client');
 
         switch (result.type) {
-            case clientdb.TYPE_ADMIN: return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
-            case clientdb.TYPE_EXTERNAL: return render('External Application', '/api/v1/cloudron/avatar');
-            case clientdb.TYPE_SIMPLE_AUTH: return sendError(req, res, 'Unknown OAuth client');
+            case clients.TYPE_ADMIN: return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
+            case clients.TYPE_EXTERNAL: return render('External Application', '/api/v1/cloudron/avatar');
+            case clients.TYPE_SIMPLE_AUTH: return sendError(req, res, 'Unknown OAuth client');
             default: break;
         }
 
@@ -420,12 +419,12 @@ var authorization = [
         // Handle our different types of oauth clients
         var type = req.oauth2.client.type;
 
-        if (type === clientdb.TYPE_ADMIN) {
+        if (type === clients.TYPE_ADMIN) {
             eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req, 'admin'), { userId: req.oauth2.user.id });
             return next();
         }
-        if (type === clientdb.TYPE_EXTERNAL) return next();
-        if (type === clientdb.TYPE_SIMPLE_AUTH) return sendError(req, res, 'Unknown OAuth client.');
+        if (type === clients.TYPE_EXTERNAL) return next();
+        if (type === clients.TYPE_SIMPLE_AUTH) return sendError(req, res, 'Unknown OAuth client.');
 
         appdb.get(req.oauth2.client.appId, function (error, appObject) {
             if (error) return sendErrorPageOrRedirect(req, res, 'Invalid request. Unknown app for this client_id.');

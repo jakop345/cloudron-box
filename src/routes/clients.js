@@ -10,7 +10,6 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    clientdb = require('../clientdb.js'),
     clients = require('../clients.js'),
     ClientsError = clients.ClientsError,
     DatabaseError = require('../databaseerror.js'),
@@ -27,7 +26,7 @@ function add(req, res, next) {
     if (typeof data.scope !== 'string' || !data.scope) return next(new HttpError(400, 'scope is required'));
     if (!validUrl.isWebUri(data.redirectURI)) return next(new HttpError(400, 'redirectURI must be a valid uri'));
 
-    clients.add(data.appId, clientdb.TYPE_EXTERNAL, data.redirectURI, data.scope, function (error, result) {
+    clients.add(data.appId, clients.TYPE_EXTERNAL, data.redirectURI, data.scope, function (error, result) {
         if (error && error.reason === ClientsError.INVALID_SCOPE) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(201, result));

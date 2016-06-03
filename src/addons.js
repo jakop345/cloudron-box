@@ -19,7 +19,6 @@ exports = module.exports = {
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
-    clientdb = require('./clientdb.js'),
     clients = require('./clients.js'),
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -288,10 +287,10 @@ function setupOauth(app, options, callback) {
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
 
-    clients.delByAppIdAndType(appId, clientdb.TYPE_OAUTH, function (error) { // remove existing creds
+    clients.delByAppIdAndType(appId, clients.TYPE_OAUTH, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clients.add(appId, clientdb.TYPE_OAUTH, clientSecret, redirectURI, scope, function (error, result) {
+        clients.add(appId, clients.TYPE_OAUTH, clientSecret, redirectURI, scope, function (error, result) {
             if (error) return callback(error);
 
             var env = [
@@ -314,7 +313,7 @@ function teardownOauth(app, options, callback) {
 
     debugApp(app, 'teardownOauth');
 
-    clients.delByAppIdAndType(app.id, clientdb.TYPE_OAUTH, function (error) {
+    clients.delByAppIdAndType(app.id, clients.TYPE_OAUTH, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
@@ -329,10 +328,10 @@ function setupSimpleAuth(app, options, callback) {
     var appId = app.id;
     var scope = 'profile';
 
-    clients.delByAppIdAndType(app.id, clientdb.TYPE_SIMPLE_AUTH, function (error) { // remove existing creds
+    clients.delByAppIdAndType(app.id, clients.TYPE_SIMPLE_AUTH, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clients.add(appId, clientdb.TYPE_SIMPLE_AUTH, '', '', scope, function (error, result) {
+        clients.add(appId, clients.TYPE_SIMPLE_AUTH, '', '', scope, function (error, result) {
             if (error) return callback(error);
 
             var env = [
@@ -357,7 +356,7 @@ function teardownSimpleAuth(app, options, callback) {
 
     debugApp(app, 'teardownSimpleAuth');
 
-    clients.delByAppIdAndType(app.id, clientdb.TYPE_SIMPLE_AUTH, function (error) {
+    clients.delByAppIdAndType(app.id, clients.TYPE_SIMPLE_AUTH, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'simpleauth', callback);

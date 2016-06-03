@@ -36,7 +36,6 @@ var addons = require('./addons.js'),
     async = require('async'),
     backups = require('./backups.js'),
     certificates = require('./certificates.js'),
-    clientdb = require('./clientdb.js'),
     clients = require('./clients.js'),
     config = require('./config.js'),
     database = require('./database.js'),
@@ -167,14 +166,14 @@ function allocateOAuthProxyCredentials(app, callback) {
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
 
-    clients.add(app.id, clientdb.TYPE_PROXY, clientSecret, redirectURI, scope, callback);
+    clients.add(app.id, clients.TYPE_PROXY, clientSecret, redirectURI, scope, callback);
 }
 
 function removeOAuthProxyCredentials(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    clients.delByAppIdAndType(app.id, clientdb.TYPE_PROXY, function (error) {
+    clients.delByAppIdAndType(app.id, clients.TYPE_PROXY, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) {
             debugApp(app, 'Error removing OAuth client id', error);
             return callback(error);

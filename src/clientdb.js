@@ -14,13 +14,7 @@ exports = module.exports = {
     delByAppId: delByAppId,
     delByAppIdAndType: delByAppIdAndType,
 
-    _clear: clear,
-
-    TYPE_EXTERNAL: 'external',
-    TYPE_OAUTH: 'addon-oauth',
-    TYPE_SIMPLE_AUTH: 'addon-simpleauth',
-    TYPE_PROXY: 'addon-proxy',
-    TYPE_ADMIN: 'admin'
+    _clear: clear
 };
 
 var assert = require('assert'),

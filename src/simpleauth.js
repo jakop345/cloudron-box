@@ -8,7 +8,6 @@ exports = module.exports = {
 var apps = require('./apps.js'),
     AppsError = apps.AppsError,
     assert = require('assert'),
-    clientdb = require('./clientdb.js'),
     clients = require('./clients.js'),
     ClientsError = clients.ClientsError,
     config = require('./config.js'),
@@ -38,7 +37,7 @@ function loginLogic(clientId, username, password, callback) {
         if (error) return callback(error);
 
         // only allow simple auth clients
-        if (clientObject.type !== clientdb.TYPE_SIMPLE_AUTH) return callback(new ClientsError(ClientsError.INVALID_CLIENT));
+        if (clientObject.type !== clients.TYPE_SIMPLE_AUTH) return callback(new ClientsError(ClientsError.INVALID_CLIENT));
 
         var authFunction = (username.indexOf('@') === -1) ? user.verifyWithUsername : user.verifyWithEmail;
         authFunction(username, password, function (error, userObject) {
