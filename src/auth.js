@@ -101,22 +101,14 @@ function initialize(callback) {
             // scopes here can define what capabilities that token carries
             // passport put the 'info' object into req.authInfo, where we can further validate the scopes
             var info = { scope: token.scope };
-            var tokenType;
 
             if (token.identifier.indexOf(tokendb.PREFIX_USER) === 0) {
-                tokenType = tokendb.TYPE_USER;
                 token.identifier = token.identifier.slice(tokendb.PREFIX_USER.length);
-            } else {
-                // legacy tokens assuming a user access token
-                tokenType = tokendb.TYPE_USER;
             }
 
             userdb.get(token.identifier, function (error, user) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);
-
-                // amend the tokenType of the token owner
-                user.tokenType = tokenType;
 
                 // amend the admin flag
                 groups.isMember(groups.ADMIN_GROUP_ID, user.id, function (error, isAdmin) {
