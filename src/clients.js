@@ -146,7 +146,7 @@ function getAllWithDetailsByUserId(userId, callback) {
 
         var tmp = [];
         async.each(results, function (record, callback) {
-            if (record.type === clientdb.TYPE_ADMIN) {
+            if (record.type === exports.TYPE_ADMIN) {
                 record.name = constants.ADMIN_NAME;
                 record.location = constants.ADMIN_LOCATION;
 
@@ -161,10 +161,10 @@ function getAllWithDetailsByUserId(userId, callback) {
                     return callback(null);  // ignore error so we continue listing clients
                 }
 
-                if (record.type === clientdb.TYPE_PROXY) record.name = result.manifest.title + ' Website Proxy';
-                if (record.type === clientdb.TYPE_OAUTH) record.name = result.manifest.title + ' OAuth';
-                if (record.type === clientdb.TYPE_SIMPLE_AUTH) record.name = result.manifest.title + ' Simple Auth';
-                if (record.type === clientdb.TYPE_EXTERNAL) record.name = result.manifest.title + ' external';
+                if (record.type === exports.TYPE_PROXY) record.name = result.manifest.title + ' Website Proxy';
+                if (record.type === exports.TYPE_OAUTH) record.name = result.manifest.title + ' OAuth';
+                if (record.type === exports.TYPE_SIMPLE_AUTH) record.name = result.manifest.title + ' Simple Auth';
+                if (record.type === exports.TYPE_EXTERNAL) record.name = result.manifest.title + ' external';
 
                 record.location = result.location;
 

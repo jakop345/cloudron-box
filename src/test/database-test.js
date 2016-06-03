@@ -849,7 +849,7 @@ describe('database', function () {
         var CLIENT_0 = {
             id: 'cid-0',
             appId: 'someappid_0',
-            type: clientdb.TYPE_OAUTH,
+            type: 'typeisastring',
             clientSecret: 'secret-0',
             redirectURI: 'http://foo.bar',
             scope: '*'
@@ -858,7 +858,7 @@ describe('database', function () {
         var CLIENT_1 = {
             id: 'cid-1',
             appId: 'someappid_1',
-            type: clientdb.TYPE_OAUTH,
+            type: 'typeisastring',
             clientSecret: 'secret-',
             redirectURI: 'http://foo.bar',
             scope: '*'
