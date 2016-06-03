@@ -103,10 +103,7 @@ function initialize(callback) {
             var info = { scope: token.scope };
             var tokenType;
 
-            if (token.identifier.indexOf(tokendb.PREFIX_DEV) === 0) {
-                token.identifier = token.identifier.slice(tokendb.PREFIX_DEV.length);
-                tokenType = tokendb.TYPE_DEV;
-            } else if (token.identifier.indexOf(tokendb.PREFIX_USER) === 0) {
+            if (token.identifier.indexOf(tokendb.PREFIX_USER) === 0) {
                 tokenType = tokendb.TYPE_USER;
                 token.identifier = token.identifier.slice(tokendb.PREFIX_USER.length);
             } else {

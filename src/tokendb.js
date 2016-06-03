@@ -17,7 +17,6 @@ exports = module.exports = {
     TYPE_DEV: 'developer',
 
     PREFIX_USER: 'user-',
-    PREFIX_DEV: 'dev-',
 
     _clear: clear
 };
