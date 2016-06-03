@@ -67,7 +67,7 @@ function recreateJobs(unusedTimeZone, callback) {
         if (gBackupJob) gBackupJob.stop();
         gBackupJob = new CronJob({
             cronTime: '00 00 */4 * * *', // every 4 hours
-            onTick: backups.ensureBackup,
+            onTick: backups.ensureBackup.bind(null, AUDIT_SOURCE, NOOP_CALLBACK),
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });

@@ -433,8 +433,8 @@ function backup(auditSource, callback) {
     callback(null);
 }
 
-function ensureBackup(callback) {
-    callback = callback || NOOP_CALLBACK;
+function ensureBackup(auditSource, callback) {
+    assert.strictEqual(typeof auditSource, 'object');
 
     getPaged(1, 1, function (error, backups) {
         if (error) {
@@ -447,8 +447,7 @@ function ensureBackup(callback) {
             return callback(null);
         }
 
-        var eventSource = { userId: null, username: 'cron' };
-        backup(eventSource, callback);
+        backup(auditSource, callback);
     });
 }
 
