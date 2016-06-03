@@ -3,7 +3,7 @@
 exports = module.exports = {
     get: get,
     create: create,
-    download: download
+    createDownloadUrl: createDownloadUrl
 };
 
 var assert = require('assert'),
@@ -43,7 +43,7 @@ function create(req, res, next) {
     });
 }
 
-function download(req, res, next) {
+function createDownloadUrl(req, res, next) {
     assert.strictEqual(typeof req.params.backupId, 'string');
 
     backups.getRestoreUrl(req.params.backupId, function (error, result) {
