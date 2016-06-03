@@ -12,7 +12,6 @@ exports = module.exports = {
     sendHeartbeat: sendHeartbeat,
 
     updateToLatest: updateToLatest,
-    update: update,
     reboot: reboot,
     retire: retire,
 
