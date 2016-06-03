@@ -13,6 +13,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     config = require('./config.js'),
+    clients = require('./clients.js'),
     debug = require('debug')('box:developer'),
     eventlog = require('./eventlog.js'),
     tokendb = require('./tokendb.js'),
@@ -72,8 +73,9 @@ function issueDeveloperToken(user, auditSource, callback) {
 
     var token = tokendb.generateToken();
     var expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+    var scopes = '*,' + clients.SCOPE_ROLE_SDK;
 
-    tokendb.add(token, tokendb.PREFIX_DEV + user.id, '', expiresAt, '*', function (error) {
+    tokendb.add(token, tokendb.PREFIX_DEV + user.id, '', expiresAt, scopes, function (error) {
         if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
 
         eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource, { authType: 'cli', userId: user.id, username: user.username });
