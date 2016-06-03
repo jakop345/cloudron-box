@@ -1,4 +1,3 @@
-/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
@@ -310,6 +309,22 @@ describe('User API', function () {
         });
     });
 
+    it('list groupIds when listing users', function (done) {
+        superagent.get(SERVER_URL + '/api/v1/users')
+        .query({ access_token: token })
+        .end(function (error, res) {
+            expect(error).to.be(null);
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.users).to.be.an('array');
+
+            res.body.users.forEach(function (user) {
+                expect(user.admin).to.be(true);
+                expect(user.groupIds).to.eql([ groups.ADMIN_GROUP_ID ]);
+            });
+            done();
+        });
+    });
+
     it('remove itself from admins fails', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id + '/groups')
                .query({ access_token: token })
@@ -461,6 +476,8 @@ describe('User API', function () {
                 expect(user.email).to.be.ok();
                 expect(user.password).to.not.be.ok();
                 expect(user.salt).to.not.be.ok();
+                expect(user.groupIds).to.be.an(Array);
+                expect(user.admin).to.be.a('boolean');
             });
 
             done();
