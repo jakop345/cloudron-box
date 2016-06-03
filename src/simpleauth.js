@@ -54,7 +54,7 @@ function loginLogic(clientId, username, password, callback) {
                     var accessToken = tokendb.generateToken();
                     var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
-                    tokendb.add(accessToken, tokendb.PREFIX_USER + userObject.id, clientId, expires, clientObject.scope, function (error) {
+                    tokendb.add(accessToken, userObject.id, clientId, expires, clientObject.scope, function (error) {
                         if (error) return callback(error);
 
                         debug('login: new access token for client %s and user %s: %s', clientId, username, accessToken);

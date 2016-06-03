@@ -78,7 +78,7 @@ gServer.grant(oauth2orize.grant.token({ scopeSeparator: ',' }, function (client,
     var token = tokendb.generateToken();
     var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
-    tokendb.add(token, tokendb.PREFIX_USER + user.id, client.id, expires, client.scope, function (error) {
+    tokendb.add(token, user.id, client.id, expires, client.scope, function (error) {
         if (error) return callback(error);
 
         debug('grant token: new access token for client %s token %s', client.id, token);
@@ -108,7 +108,7 @@ gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, 
             var token = tokendb.generateToken();
             var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
-            tokendb.add(token, tokendb.PREFIX_USER + authCode.userId, authCode.clientId, expires, client.scope, function (error) {
+            tokendb.add(token, authCode.userId, authCode.clientId, expires, client.scope, function (error) {
                 if (error) return callback(error);
 
                 debug('exchange: new access token for client %s token %s', client.id, token);
