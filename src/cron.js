@@ -30,6 +30,7 @@ var gAutoupdaterJob = null,
     gCheckDiskSpaceJob = null;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
+var AUDIT_SOURCE = { userId: null, username: 'cron' };
 
 // cron format
 // Seconds: 0-59
@@ -154,7 +155,7 @@ function autoupdatePatternChanged(pattern) {
             var updateInfo = updateChecker.getUpdateInfo();
             if (updateInfo.box) {
                 debug('Starting autoupdate to %j', updateInfo.box);
-                cloudron.update(updateInfo.box, NOOP_CALLBACK);
+                cloudron.updateToLatest(AUDIT_SOURCE, NOOP_CALLBACK);
             } else if (updateInfo.apps) {
                 debug('Starting app update to %j', updateInfo.apps);
                 apps.autoupdateApps(updateInfo.apps, NOOP_CALLBACK);
