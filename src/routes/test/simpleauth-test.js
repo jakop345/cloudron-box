@@ -6,9 +6,10 @@
 
 'use strict';
 
-var clientdb = require('../../clientdb.js'),
-    appdb = require('../../appdb.js'),
+var appdb = require('../../appdb.js'),
     async = require('async'),
+    clientdb = require('../../clientdb.js'),
+    clients = require('../../clients.js'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
@@ -70,7 +71,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_0 = {
         id: 'someclientid',
         appId: 'someappid',
-        type: clientdb.TYPE_SIMPLE_AUTH,
+        type: clients.TYPE_SIMPLE_AUTH,
         clientSecret: 'someclientsecret',
         redirectURI: '',
         scope: 'user,profile'
@@ -79,7 +80,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_1 = {
         id: 'someclientid1',
         appId: APP_0.id,
-        type: clientdb.TYPE_SIMPLE_AUTH,
+        type: clients.TYPE_SIMPLE_AUTH,
         clientSecret: 'someclientsecret1',
         redirectURI: '',
         scope: 'user,profile'
@@ -88,7 +89,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_2 = {
         id: 'someclientid2',
         appId: APP_1.id,
-        type: clientdb.TYPE_SIMPLE_AUTH,
+        type: clients.TYPE_SIMPLE_AUTH,
         clientSecret: 'someclientsecret2',
         redirectURI: '',
         scope: 'user,profile'
@@ -97,7 +98,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_3 = {
         id: 'someclientid3',
         appId: APP_2.id,
-        type: clientdb.TYPE_SIMPLE_AUTH,
+        type: clients.TYPE_SIMPLE_AUTH,
         clientSecret: 'someclientsecret3',
         redirectURI: '',
         scope: 'user,profile'
@@ -106,7 +107,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_4 = {
         id: 'someclientid4',
         appId: APP_2.id,
-        type: clientdb.TYPE_OAUTH,
+        type: clients.TYPE_OAUTH,
         clientSecret: 'someclientsecret4',
         redirectURI: '',
         scope: 'user,profile'
@@ -115,7 +116,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_5 = {
         id: 'someclientid5',
         appId: APP_3.id,
-        type: clientdb.TYPE_SIMPLE_AUTH,
+        type: clients.TYPE_SIMPLE_AUTH,
         clientSecret: 'someclientsecret5',
         redirectURI: '',
         scope: 'user,profile'

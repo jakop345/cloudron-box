@@ -8,7 +8,7 @@
 
 var async = require('async'),
     config = require('../../config.js'),
-    clientdb = require('../../clientdb.js'),
+    clients = require('../../clients.js'),
     database = require('../../database.js'),
     oauth2 = require('../oauth2.js'),
     expect = require('expect.js'),
@@ -174,7 +174,7 @@ describe('OAuth Clients API', function () {
                     expect(result.body.redirectURI).to.be.a('string');
                     expect(result.body.clientSecret).to.be.a('string');
                     expect(result.body.scope).to.be.a('string');
-                    expect(result.body.type).to.equal(clientdb.TYPE_EXTERNAL);
+                    expect(result.body.type).to.equal(clients.TYPE_EXTERNAL);
 
                     done();
                 });

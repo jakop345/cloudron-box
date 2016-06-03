@@ -12,7 +12,6 @@ var appdb = require('../../appdb.js'),
     path = require('path'),
     async = require('async'),
     child_process = require('child_process'),
-    clientdb = require('../../clientdb.js'),
     clients = require('../../clients.js'),
     config = require('../../config.js'),
     constants = require('../../constants.js'),
@@ -710,7 +709,7 @@ describe('Apps', function () {
             appContainer.inspect(function (error, data) {
                 expect(error).to.not.be.ok();
 
-                clients.getByAppIdAndType(APP_ID, clientdb.TYPE_OAUTH, function (error, client) {
+                clients.getByAppIdAndType(APP_ID, clients.TYPE_OAUTH, function (error, client) {
                     expect(error).to.not.be.ok();
                     expect(client.id.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
                     expect(client.clientSecret.length).to.be(64); // 32 hex chars (256 bits)

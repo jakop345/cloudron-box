@@ -18,6 +18,7 @@ var expect = require('expect.js'),
     querystring = require('querystring'),
     database = require('../../database.js'),
     clientdb = require('../../clientdb.js'),
+    clients = require('../../clients.js'),
     userdb = require('../../userdb.js'),
     user = require('../../user.js'),
     appdb = require('../../appdb.js'),
@@ -197,7 +198,7 @@ describe('OAuth2', function () {
         var CLIENT_0 = {
             id: 'cid-client0',
             appId: 'appid-app0',
-            type: clientdb.TYPE_OAUTH,
+            type: clients.TYPE_OAUTH,
             clientSecret: 'secret0',
             redirectURI: 'http://redirect0',
             scope: 'profile'
@@ -207,7 +208,7 @@ describe('OAuth2', function () {
         var CLIENT_1 = {
             id: 'cid-client1',
             appId: 'appid-app1',
-            type: clientdb.TYPE_OAUTH,
+            type: clients.TYPE_OAUTH,
             clientSecret: 'secret1',
             redirectURI: 'http://redirect1',
             scope: 'profile'
@@ -217,7 +218,7 @@ describe('OAuth2', function () {
         var CLIENT_2 = {
             id: 'cid-client2',
             appId: APP_0.id,
-            type: clientdb.TYPE_OAUTH,
+            type: clients.TYPE_OAUTH,
             clientSecret: 'secret2',
             redirectURI: 'http://redirect2',
             scope: 'profile'
@@ -227,7 +228,7 @@ describe('OAuth2', function () {
         var CLIENT_3 = {
             id: 'cid-client3',
             appId: APP_0.id,
-            type: clientdb.TYPE_OAUTH,
+            type: clients.TYPE_OAUTH,
             clientSecret: 'secret3',
             redirectURI: 'http://redirect1',
             scope: 'profile'
@@ -237,7 +238,7 @@ describe('OAuth2', function () {
         var CLIENT_4 = {
             id: 'cid-client4',
             appId: 'appid-app4',
-            type: clientdb.TYPE_PROXY,
+            type: clients.TYPE_PROXY,
             clientSecret: 'secret4',
             redirectURI: 'http://redirect4',
             scope: 'profile'
@@ -247,7 +248,7 @@ describe('OAuth2', function () {
         var CLIENT_5 = {
             id: 'cid-client5',
             appId: APP_0.id,
-            type: clientdb.TYPE_PROXY,
+            type: clients.TYPE_PROXY,
             clientSecret: 'secret5',
             redirectURI: 'http://redirect5',
             scope: 'profile'
@@ -257,7 +258,7 @@ describe('OAuth2', function () {
         var CLIENT_6 = {
             id: 'cid-client6',
             appId: APP_1.id,
-            type: clientdb.TYPE_OAUTH,
+            type: clients.TYPE_OAUTH,
             clientSecret: 'secret6',
             redirectURI: 'http://redirect6',
             scope: 'profile'
@@ -267,7 +268,7 @@ describe('OAuth2', function () {
         var CLIENT_7 = {
             id: 'cid-client7',
             appId: APP_2.id,
-            type: clientdb.TYPE_OAUTH,
+            type: clients.TYPE_OAUTH,
             clientSecret: 'secret7',
             redirectURI: 'http://redirect7',
             scope: 'profile'
@@ -277,7 +278,7 @@ describe('OAuth2', function () {
         var CLIENT_8 = {
             id: 'cid-client8',
             appId: APP_2.id,
-            type: clientdb.TYPE_SIMPLE_AUTH,
+            type: clients.TYPE_SIMPLE_AUTH,
             clientSecret: 'secret8',
             redirectURI: 'http://redirect8',
             scope: 'profile'
@@ -287,7 +288,7 @@ describe('OAuth2', function () {
         var CLIENT_9 = {
             id: 'cid-client9',
             appId: APP_3.id,
-            type: clientdb.TYPE_OAUTH,
+            type: clients.TYPE_OAUTH,
             clientSecret: 'secret9',
             redirectURI: 'http://redirect9',
             scope: 'profile'
