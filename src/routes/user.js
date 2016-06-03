@@ -19,7 +19,8 @@ var assert = require('assert'),
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     user = require('../user.js'),
     tokendb = require('../tokendb.js'),
-    UserError = user.UserError;
+    UserError = user.UserError,
+    _ = require('underscore');
 
 function auditSource(req) {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
@@ -81,9 +82,14 @@ function update(req, res, next) {
 }
 
 function list(req, res, next) {
-    user.list(function (error, result) {
+    user.list(function (error, results) {
         if (error) return next(new HttpError(500, error));
-        next(new HttpSuccess(200, { users: result }));
+
+        var users = results.map(function (result) {
+            return _.pick(result, 'id', 'username', 'email', 'displayName', 'groupIds', 'admin');
+        });
+
+        next(new HttpSuccess(200, { users: users }));
     });
 }
 

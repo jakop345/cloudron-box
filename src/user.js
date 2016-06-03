@@ -276,15 +276,13 @@ function removeUser(userId, auditSource, callback) {
 function listUsers(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.getAllWithGroupIds(function (error, result) {
+    userdb.getAllWithGroupIds(function (error, results) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        var allUsers = result.map(function (obj) {
-            var u = _.pick(obj, 'id', 'username', 'email', 'displayName', 'groupIds');
-            u.admin = u.groupIds.indexOf(groups.ADMIN_GROUP_ID) !== -1;
-            return u;
+        results.forEach(function (result) {
+            result.admin = result.groupIds.indexOf(groups.ADMIN_GROUP_ID) !== -1;
         });
-        return callback(null, allUsers);
+        return callback(null, results);
     });
 }
 
