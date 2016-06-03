@@ -97,17 +97,14 @@ function get(req, res, next) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
         if (error) return next(new HttpError(500, error));
 
-        groups.isMember(groups.ADMIN_GROUP_ID, req.params.userId, function (error, isAdmin) {
-            if (error) return next(new HttpError(500, error));
-
-            next(new HttpSuccess(200, {
-                id: result.id,
-                username: result.username,
-                email: result.email,
-                admin: isAdmin,
-                displayName: result.displayName
-            }));
-        });
+        next(new HttpSuccess(200, {
+            id: result.id,
+            username: result.username,
+            displayName: result.displayName,
+            email: result.email,
+            admin: result.admin,
+            groupIds: result.groupIds
+        }));
     });
 }
 

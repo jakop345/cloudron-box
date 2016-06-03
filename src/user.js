@@ -300,6 +300,7 @@ function getUser(userId, callback) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             result.groupIds = groupIds;
+            result.admin = groupIds.indexOf(groups.ADMIN_GROUP_ID) !== -1;
 
             return callback(null, result);
         });
