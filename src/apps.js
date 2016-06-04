@@ -108,14 +108,14 @@ AppsError.BAD_CERTIFICATE = 'Invalid certificate';
 function validateHostname(location, fqdn) {
     var RESERVED_LOCATIONS = [ constants.ADMIN_LOCATION, constants.API_LOCATION, constants.SMTP_LOCATION, constants.IMAP_LOCATION, constants.MAIL_LOCATION, constants.POSTMAN_LOCATION ];
 
-    if (RESERVED_LOCATIONS.indexOf(location) !== -1) return new Error(location + ' is reserved');
+    if (RESERVED_LOCATIONS.indexOf(location) !== -1) return new AppsError(AppsError.BAD_FIELD, location + ' is reserved');
 
     if (location === '') return null; // bare location
 
-    if ((location.length + 1 /*+ hyphen */ + fqdn.indexOf('.')) > 63) return new Error('Hostname length cannot be greater than 63');
-    if (location.match(/^[A-Za-z0-9-]+$/) === null) return new Error('Hostname can only contain alphanumerics and hyphen');
-    if (location[0] === '-' || location[location.length-1] === '-') return new Error('Hostname cannot start or end with hyphen');
-    if (location.length + 1 /* hyphen */ + fqdn.length > 253) return new Error('FQDN length exceeds 253 characters');
+    if ((location.length + 1 /*+ hyphen */ + fqdn.indexOf('.')) > 63) return new AppsError(AppsError.BAD_FIELD, 'Hostname length cannot be greater than 63');
+    if (location.match(/^[A-Za-z0-9-]+$/) === null) return new AppsError(AppsError.BAD_FIELD, 'Hostname can only contain alphanumerics and hyphen');
+    if (location[0] === '-' || location[location.length-1] === '-') return new AppsError(AppsError.BAD_FIELD, 'Hostname cannot start or end with hyphen');
+    if (location.length + 1 /* hyphen */ + fqdn.length > 253) return new AppsError(AppsError.BAD_FIELD, 'FQDN length exceeds 253 characters');
 
     return null;
 }
@@ -369,7 +369,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
 
     error = validateHostname(location, config.fqdn());
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+    if (error) return callback(error);
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(error);
@@ -437,7 +437,7 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
     assert.strictEqual(typeof callback, 'function');
 
     var error = validateHostname(location, config.fqdn());
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+    if (error) return callback(error);
 
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
