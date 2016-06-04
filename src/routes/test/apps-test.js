@@ -518,7 +518,7 @@ describe('Apps', function () {
                        .end(function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(200);
-                    expect(result.body.expiresAt).to.be.a('number');
+                    expect(new Date(result.body.expiresAt).toString()).to.not.be('Invalid Date');
                     expect(result.body.token).to.be.a('string');
 
                     // overwrite non dev token

@@ -327,7 +327,7 @@ describe('Developer API', function () {
                    .send({ username: USERNAME, password: PASSWORD })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(200);
-                expect(result.body.expiresAt).to.be.a('number');
+                expect(new Date(result.body.expiresAt).toString()).to.not.be('Invalid Date');
                 expect(result.body.token).to.be.a('string');
                 done();
             });
@@ -338,7 +338,7 @@ describe('Developer API', function () {
                    .send({ username: USERNAME.toUpperCase(), password: PASSWORD })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(200);
-                expect(result.body.expiresAt).to.be.a('number');
+                expect(new Date(result.body.expiresAt).toString()).to.not.be('Invalid Date');
                 expect(result.body.token).to.be.a('string');
                 done();
             });
@@ -349,7 +349,7 @@ describe('Developer API', function () {
                    .send({ username: EMAIL, password: PASSWORD })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(200);
-                expect(result.body.expiresAt).to.be.a('number');
+                expect(new Date(result.body.expiresAt).toString()).to.not.be('Invalid Date');
                 expect(result.body.token).to.be.a('string');
                 done();
             });
@@ -360,7 +360,7 @@ describe('Developer API', function () {
                    .send({ username: EMAIL.toUpperCase(), password: PASSWORD })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(200);
-                expect(result.body.expiresAt).to.be.a('number');
+                expect(new Date(result.body.expiresAt).toString()).to.not.be('Invalid Date');
                 expect(result.body.token).to.be.a('string');
                 done();
             });
@@ -394,7 +394,7 @@ describe('Developer API', function () {
                           .send({ username: USERNAME, password: PASSWORD })
                           .end(function (error, result) {
                             expect(result.statusCode).to.equal(200);
-                            expect(result.body.expiresAt).to.be.a('number');
+                            expect(new Date(result.body.expiresAt).toString()).to.not.be('Invalid Date');
                             expect(result.body.token).to.be.a('string');
 
                             token_sdk = result.body.token;
