@@ -347,20 +347,33 @@ function purchase(appStoreId, callback) {
     });
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, cert, key, memoryLimit, altDomain, auditSource, callback) {
+function install(appId, data, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
+    assert(data && typeof data === 'object');
+    assert.strictEqual(typeof auditSource, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var appStoreId = data.appStoreId,
+        manifest = data.manifest,
+        location = data.location,
+        portBindings = data.portBindings || null,
+        accessRestriction = data.accessRestriction || null,
+        icon = data.icon || null,
+        cert = data.cert || null,
+        key = data.key || null,
+        memoryLimit = data.memoryLimit || 0,
+        altDomain = data.altDomain || null;
+
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
     assert.strictEqual(typeof accessRestriction, 'object');
-    assert(!icon || typeof icon === 'string');
+    assert(icon === null || typeof icon === 'string');
     assert(cert === null || typeof cert === 'string');
     assert(key === null || typeof key === 'string');
     assert.strictEqual(typeof memoryLimit, 'number');
     assert(altDomain === null || typeof altDomain === 'string');
-    assert.strictEqual(typeof auditSource, 'object');
-    assert.strictEqual(typeof callback, 'function');
 
     var error = manifestFormat.parse(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error: ' + error.message));

@@ -667,10 +667,15 @@ function installAppBundle(callback) {
 
             debug('autoInstall: installing %s at %s', appstoreId, appInfo.location);
 
-            apps.install(uuid.v4(), appstoreId, result.body.manifest, appInfo.location,
-                appInfo.portBindings || null, appInfo.accessRestriction || null,
-                null /* icon */, null /* cert */, null /* key */, 0 /* default mem limit */,
-                null /* altDomain */, { userId: null, username: 'autoinstaller' }, iteratorCallback);
+            var data = {
+                appStoreId: appstoreId,
+                manifest: result.body.manifest,
+                location: appInfo.location,
+                portBindings: appInfo.portBindings || null,
+                accessRestriction: appInfo.accessRestriction || null,
+            };
+
+            apps.install(uuid.v4(), data, { userId: null, username: 'autoinstaller' }, iteratorCallback);
         });
     }, function (error) {
         if (error) debug('autoInstallApps: ', error);

@@ -95,11 +95,14 @@ function installApp(req, res, next) {
 
     var data = req.body;
 
+    // required
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
     if (typeof data.appStoreId !== 'string') return next(new HttpError(400, 'appStoreId is required'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
-    if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'object') return next(new HttpError(400, 'accessRestriction is required'));
+
+    // optional
+    if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
     if (data.cert && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
     if (data.key && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
@@ -111,9 +114,9 @@ function installApp(req, res, next) {
     // allow tests to provide an appId for testing
     var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
-    debug('Installing app id:%s storeid:%s loc:%s port:%j accessRestriction:%j memoryLimit:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.memoryLimit, data.manifest);
+    debug('Installing app id:%s data:%j', appId, data);
 
-    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.icon || null, data.cert || null, data.key || null, data.memoryLimit || 0, data.altDomain || null, auditSource(req), function (error) {
+    apps.install(appId, data, auditSource(req), function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
