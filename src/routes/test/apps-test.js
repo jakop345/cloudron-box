@@ -355,7 +355,7 @@ describe('Apps', function () {
                    .query({ access_token: token })
                    .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: { users: [ 'someuser' ], groups: [] } })
                    .end(function (err, res) {
-                expect(res.statusCode).to.equal(503);
+                expect(res.statusCode).to.equal(400);
                 expect(fake.isDone()).to.be.ok();
                 done();
             });
