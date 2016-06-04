@@ -95,9 +95,12 @@ function installApp(req, res, next) {
 
     var data = req.body;
 
+    // atleast one
+    if ('manifest' in data && typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
+    if ('appStoreId' in data && typeof data.appStoreId !== 'string') return next(new HttpError(400, 'appStoreId is required'));
+    if (!data.manifest && !data.appStoreId) return next(new HttpError(400, 'appStoreId or manifest is required'));
+
     // required
-    if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
-    if (typeof data.appStoreId !== 'string') return next(new HttpError(400, 'appStoreId is required'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (typeof data.accessRestriction !== 'object') return next(new HttpError(400, 'accessRestriction is required'));
 
@@ -125,6 +128,7 @@ function installApp(req, res, next) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_CERTIFICATE) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.USER_REQUIRED) return next(new HttpError(400, 'accessRestriction must specify one user'));
+        if (error && error.reason === AppsError.EXTERNAL_ERROR) return next(new HttpError(503, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, { id: appId } ));

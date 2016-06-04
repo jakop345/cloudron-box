@@ -655,28 +655,16 @@ function installAppBundle(callback) {
     }
 
     async.eachSeries(bundle, function (appInfo, iteratorCallback) {
-        var appstoreId = appInfo.appstoreId;
-        var parts = appstoreId.split('@');
+        debug('autoInstall: installing %s at %s', appInfo.appstoreId, appInfo.location);
 
-        var url = config.apiServerOrigin() + '/api/v1/apps/' + parts[0] + (parts[1] ? '/versions/' + parts[1] : '');
+        var data = {
+            appStoreId: appInfo.appstoreId,
+            location: appInfo.location,
+            portBindings: appInfo.portBindings || null,
+            accessRestriction: appInfo.accessRestriction || null,
+        };
 
-        superagent.get(url).end(function (error, result) {
-            if (error && !error.response) return iteratorCallback(new Error('Network error: ' + error.message));
-
-            if (result.statusCode !== 200) return iteratorCallback(util.format('Failed to get app info from store.', result.statusCode, result.text));
-
-            debug('autoInstall: installing %s at %s', appstoreId, appInfo.location);
-
-            var data = {
-                appStoreId: appstoreId,
-                manifest: result.body.manifest,
-                location: appInfo.location,
-                portBindings: appInfo.portBindings || null,
-                accessRestriction: appInfo.accessRestriction || null,
-            };
-
-            apps.install(uuid.v4(), data, { userId: null, username: 'autoinstaller' }, iteratorCallback);
-        });
+        apps.install(uuid.v4(), data, { userId: null, username: 'autoinstaller' }, iteratorCallback);
     }, function (error) {
         if (error) debug('autoInstallApps: ', error);
 

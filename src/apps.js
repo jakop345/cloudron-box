@@ -347,15 +347,31 @@ function purchase(appStoreId, callback) {
     });
 }
 
+function downloadManifest(appStoreId, manifest, callback) {
+    if (!appStoreId) return callback(null, '', manifest);
+
+    var parts = appStoreId.split('@');
+
+    var url = config.apiServerOrigin() + '/api/v1/apps/' + parts[0] + (parts[1] ? '/versions/' + parts[1] : '');
+
+    debug('downloading manifest from %s', url);
+
+    superagent.get(url).end(function (error, result) {
+        if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, 'Network error downloading manifest:' + error.message));
+
+        if (result.statusCode !== 200) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('Failed to get app info from store.', result.statusCode, result.text)));
+
+        callback(null, parts[0], result.body.manifest);
+    });
+}
+
 function install(appId, data, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert(data && typeof data === 'object');
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var appStoreId = data.appStoreId || '',
-        manifest = data.manifest,
-        location = data.location.toLowerCase(),
+    var location = data.location.toLowerCase(),
         portBindings = data.portBindings || null,
         accessRestriction = data.accessRestriction || null,
         icon = data.icon || null,
@@ -364,75 +380,70 @@ function install(appId, data, auditSource, callback) {
         memoryLimit = data.memoryLimit || 0,
         altDomain = data.altDomain || null;
 
-    assert.strictEqual(typeof appStoreId, 'string');
-    assert(manifest && typeof manifest === 'object');
-    assert.strictEqual(typeof location, 'string');
-    assert.strictEqual(typeof portBindings, 'object');
-    assert.strictEqual(typeof accessRestriction, 'object');
-    assert(icon === null || typeof icon === 'string');
-    assert(cert === null || typeof cert === 'string');
-    assert(key === null || typeof key === 'string');
-    assert.strictEqual(typeof memoryLimit, 'number');
-    assert(altDomain === null || typeof altDomain === 'string');
+    assert(data.appStoreId || data.manifest); // atleast one of them is required
 
-    var error = manifestFormat.parse(manifest);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error: ' + error.message));
-
-    error = checkManifestConstraints(manifest);
-    if (error) return callback(error);
-
-    error = validateHostname(location, config.fqdn());
-    if (error) return callback(error);
-
-    error = validatePortBindings(portBindings, manifest.tcpPorts);
-    if (error) return callback(error);
-
-    error = validateAccessRestriction(accessRestriction);
-    if (error) return callback(error);
-
-    error = validateMemoryLimit(manifest, memoryLimit);
-    if (error) return callback(error);
-
-    // memoryLimit might come in as 0 if not specified
-    memoryLimit = memoryLimit || manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
-
-    if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
-
-    // singleUser mode requires accessRestriction to contain exactly one user
-    if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
-    if (manifest.singleUser && accessRestriction.users.length !== 1) return callback(new AppsError(AppsError.USER_REQUIRED));
-
-    if (icon) {
-        if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
-
-        if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, appId + '.png'), new Buffer(icon, 'base64'))) {
-            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving icon:' + safe.error.message));
-        }
-    }
-
-    error = certificates.validateCertificate(cert, key, config.appFqdn(location));
-    if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
-
-    debug('Will install app with id : ' + appId);
-
-    purchase(appStoreId, function (error) {
+    downloadManifest(data.appStoreId, data.manifest, function (error, appStoreId, manifest) {
         if (error) return callback(error);
 
-        appdb.add(appId, appStoreId, manifest, location, portBindings, accessRestriction, memoryLimit, altDomain, function (error) {
-            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location, portBindings, error));
-            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+        error = manifestFormat.parse(manifest);
+        if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error: ' + error.message));
 
-            // save cert to data/box/certs
-            if (cert && key) {
-                if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.cert'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
-                if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.key'), key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
+        error = checkManifestConstraints(manifest);
+        if (error) return callback(error);
+
+        error = validateHostname(location, config.fqdn());
+        if (error) return callback(error);
+
+        error = validatePortBindings(portBindings, manifest.tcpPorts);
+        if (error) return callback(error);
+
+        error = validateAccessRestriction(accessRestriction);
+        if (error) return callback(error);
+
+        error = validateMemoryLimit(manifest, memoryLimit);
+        if (error) return callback(error);
+
+        // memoryLimit might come in as 0 if not specified
+        memoryLimit = memoryLimit || manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
+
+        if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
+
+        // singleUser mode requires accessRestriction to contain exactly one user
+        if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
+        if (manifest.singleUser && accessRestriction.users.length !== 1) return callback(new AppsError(AppsError.USER_REQUIRED));
+
+        if (icon) {
+            if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
+
+            if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, appId + '.png'), new Buffer(icon, 'base64'))) {
+                return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving icon:' + safe.error.message));
             }
+        }
 
-            taskmanager.restartAppTask(appId);
+        error = certificates.validateCertificate(cert, key, config.appFqdn(location));
+        if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
 
-            eventlog.add(eventlog.ACTION_APP_INSTALL, auditSource, { appId: appId, location: location, manifest: manifest });
+        debug('Will install app with id : ' + appId);
 
-            callback(null);
+        purchase(appStoreId, function (error) {
+            if (error) return callback(error);
+
+            appdb.add(appId, appStoreId, manifest, location, portBindings, accessRestriction, memoryLimit, altDomain, function (error) {
+                if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location, portBindings, error));
+                if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+                // save cert to data/box/certs
+                if (cert && key) {
+                    if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.cert'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
+                    if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.key'), key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
+                }
+
+                taskmanager.restartAppTask(appId);
+
+                eventlog.add(eventlog.ACTION_APP_INSTALL, auditSource, { appId: appId, location: location, manifest: manifest });
+
+                callback(null);
+            });
         });
     });
 }

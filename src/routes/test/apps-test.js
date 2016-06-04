@@ -221,26 +221,15 @@ describe('Apps', function () {
         it('app install fails - missing manifest', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, password: PASSWORD })
+                   .send({ password: PASSWORD })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
-                expect(res.body.message).to.eql('manifest is required');
+                expect(res.body.message).to.eql('appStoreId or manifest is required');
                 done();
             });
         });
 
-        it('app install fails - missing appId', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/apps/install')
-                   .query({ access_token: token })
-                   .send({ manifest: APP_MANIFEST, password: PASSWORD })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(400);
-                expect(res.body.message).to.eql('appStoreId is required');
-                done();
-            });
-        });
-
-        it('app install fails - invalid json', function (done) {
+       it('app install fails - invalid json', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
                    .send('garbage')
@@ -253,7 +242,7 @@ describe('Apps', function () {
         it('app install fails - invalid location', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: '!awesome', accessRestriction: null })
+                   .send({ manifest: APP_MANIFEST, password: PASSWORD, location: '!awesome', accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql('Hostname can only contain alphanumerics and hyphen');
@@ -264,7 +253,7 @@ describe('Apps', function () {
         it('app install fails - invalid location type', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: 42, accessRestriction: null })
+                   .send({ manifest: APP_MANIFEST, password: PASSWORD, location: 42, accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql('location is required');
@@ -275,7 +264,7 @@ describe('Apps', function () {
         it('app install fails - reserved admin location', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: constants.ADMIN_LOCATION, accessRestriction: null })
+                   .send({ manifest: APP_MANIFEST, password: PASSWORD, location: constants.ADMIN_LOCATION, accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql(constants.ADMIN_LOCATION + ' is reserved');
@@ -286,7 +275,7 @@ describe('Apps', function () {
         it('app install fails - reserved api location', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: constants.API_LOCATION, accessRestriction: null })
+                   .send({ manifest: APP_MANIFEST, password: PASSWORD, location: constants.API_LOCATION, accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql(constants.API_LOCATION + ' is reserved');
@@ -297,7 +286,7 @@ describe('Apps', function () {
         it('app install fails - portBindings must be object', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: 23, accessRestriction: null })
+                   .send({ manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: 23, accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql('portBindings must be an object');
@@ -308,7 +297,7 @@ describe('Apps', function () {
         it('app install fails - accessRestriction is required', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: {} })
+                   .send({ manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: {} })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql('accessRestriction is required');
@@ -319,7 +308,7 @@ describe('Apps', function () {
         it('app install fails - accessRestriction type is wrong', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: '' })
+                   .send({ manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: '' })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql('accessRestriction is required');
@@ -330,7 +319,7 @@ describe('Apps', function () {
         it('app install fails - accessRestriction no users not allowed', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: null })
+                   .send({ manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql('accessRestriction must specify one user');
@@ -341,7 +330,7 @@ describe('Apps', function () {
         it('app install fails - accessRestriction too many users not allowed', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: { users: [ 'one', 'two' ] } })
+                   .send({ manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: { users: [ 'one', 'two' ] } })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql('accessRestriction must specify one user');
@@ -352,50 +341,64 @@ describe('Apps', function () {
         it('app install fails for non admin', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token_1 })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
+                   .send({ manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(403);
                 done();
             });
         });
 
-        it('app install fails due to purchase failure', function (done) {
-            var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(402, {});
+        it('app install fails because manifest download fails', function (done) {
+            var fake = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(404, {});
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
+                   .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: { users: [ 'someuser' ], groups: [] } })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(503);
+                expect(fake.isDone()).to.be.ok();
+                done();
+            });
+        });
+
+        it('app install fails due to purchase failure', function (done) {
+            var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
+            var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(402, {});
+
+            superagent.post(SERVER_URL + '/api/v1/apps/install')
+                   .query({ access_token: token })
+                   .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(402);
-                expect(fake.isDone()).to.be.ok();
+                expect(fake1.isDone()).to.be.ok();
+                expect(fake2.isDone()).to.be.ok();
                 done();
             });
         });
 
         it('app install succeeds with purchase', function (done) {
-            var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
+            var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
+            var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: { users: [ 'someuser' ], groups: [] } })
+                   .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: { users: [ 'someuser' ], groups: [] } })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 expect(res.body.id).to.be.a('string');
                 APP_ID = res.body.id;
-                expect(fake.isDone()).to.be.ok();
+                expect(fake1.isDone()).to.be.ok();
+                expect(fake2.isDone()).to.be.ok();
                 done();
             });
         });
 
         it('app install fails because of conflicting location', function (done) {
-            var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
-
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
+                   .send({ manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(409);
-                expect(fake.isDone()).to.be.ok();
                 done();
             });
         });
@@ -493,23 +496,23 @@ describe('Apps', function () {
         });
 
         it('app install succeeds already purchased', function (done) {
-            var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(200, {});
+            var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
+            var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(200, {});
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION_2, portBindings: null, accessRestriction: null })
+                   .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION_2, portBindings: null, accessRestriction: null })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 expect(res.body.id).to.be.a('string');
                 APP_ID = res.body.id;
-                expect(fake.isDone()).to.be.ok();
+                expect(fake1.isDone()).to.be.ok();
+                expect(fake2.isDone()).to.be.ok();
                 done();
             });
         });
 
         it('app install succeeds without password but developer token', function (done) {
-            var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
-
             settings.setDeveloperMode(true, function (error) {
                 expect(error).to.be(null);
 
@@ -526,11 +529,10 @@ describe('Apps', function () {
 
                     superagent.post(SERVER_URL + '/api/v1/apps/install')
                            .query({ access_token: token })
-                           .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, location: APP_LOCATION+APP_LOCATION, portBindings: null, accessRestriction: null })
+                           .send({ manifest: APP_MANIFEST, location: APP_LOCATION+APP_LOCATION, portBindings: null, accessRestriction: null })
                            .end(function (err, res) {
                         expect(res.statusCode).to.equal(202);
                         expect(res.body.id).to.be.a('string');
-                        expect(fake.isDone()).to.be.ok();
                         APP_ID = res.body.id;
                         done();
                     });
@@ -597,7 +599,8 @@ describe('Apps', function () {
         var appResult = null /* the json response */, appEntry = null /* entry from database */;
 
         it('can install test app', function (done) {
-            var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
+            var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
+            var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(200, {});
 
             var count = 0;
             function checkInstallStatus() {
@@ -614,10 +617,11 @@ describe('Apps', function () {
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
+                  .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
-                expect(fake.isDone()).to.be.ok();
+                expect(fake1.isDone()).to.be.ok();
+                expect(fake2.isDone()).to.be.ok();
                 expect(res.body.id).to.be.a('string');
                 expect(res.body.id).to.be.eql(APP_ID);
                 checkInstallStatus();
@@ -1038,7 +1042,8 @@ describe('Apps', function () {
         var appResult = null, appEntry = null;
 
         it('can install test app', function (done) {
-            var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
+            var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
+            var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
             var count = 0;
             function checkInstallStatus() {
@@ -1055,10 +1060,11 @@ describe('Apps', function () {
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: { ECHO_SERVER_PORT: 7171 }, accessRestriction: null })
+                  .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { ECHO_SERVER_PORT: 7171 }, accessRestriction: null })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
-                expect(fake.isDone()).to.be.ok();
+                expect(fake1.isDone()).to.be.ok();
+                expect(fake2.isDone()).to.be.ok();
                 expect(res.body.id).to.equal(APP_ID);
                 checkInstallStatus();
             });
