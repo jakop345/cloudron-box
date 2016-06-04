@@ -478,7 +478,7 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
                 accessRestriction: app.accessRestriction,
                 portBindings: app.portBindings,
                 memoryLimit: app.memoryLimit,
-                altDomain: altDomain
+                altDomain: app.altDomain
             }
         };
 
