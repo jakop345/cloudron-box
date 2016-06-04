@@ -107,12 +107,12 @@ function installApp(req, res, next) {
     // optional
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
-    if (data.cert && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
-    if (data.key && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
+    if ('cert' in data && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
+    if ('key' in data && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
     if (data.cert && !data.key) return next(new HttpError(400, 'key must be provided'));
     if (!data.cert && data.key) return next(new HttpError(400, 'cert must be provided'));
     if ('memoryLimit' in data && typeof data.memoryLimit !== 'number') return next(new HttpError(400, 'memoryLimit is not a number'));
-    if (data.altDomain && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
+    if ('altDomain' in data && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
 
     // allow tests to provide an appId for testing
     var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
