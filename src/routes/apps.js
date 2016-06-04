@@ -90,16 +90,6 @@ function getAppIcon(req, res, next) {
     });
 }
 
-/*
- * Installs an app
- * @bodyparam {string} appStoreId The id of the app to be installed
- * @bodyparam {manifest} manifest The app manifest
- * @bodyparam {string} password The user's password
- * @bodyparam {string} location The subdomain where the app is to be installed
- * @bodyparam {object} portBindings map from environment variable name to (public) host port. can be null.
-                       If a value in manifest.tcpPorts is missing in portBindings, the port/service is disabled
- * @bodyparam {icon} icon Base64 encoded image
- */
 function installApp(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
@@ -139,13 +129,6 @@ function installApp(req, res, next) {
     });
 }
 
-/*
- * Configure an app
- * @bodyparam {string} password The user's password
- * @bodyparam {string} location The subdomain where the app is to be installed
- * @bodyparam {object} portBindings map from env to (public) host port. can be null.
-                       If a value in manifest.tcpPorts is missing in portBindings, the port/service is disabled
- */
 function configureApp(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
     assert.strictEqual(typeof req.params.id, 'string');
@@ -209,10 +192,6 @@ function backupApp(req, res, next) {
     });
 }
 
-/*
- * Uninstalls an app
- * @bodyparam {string} id The id of the app to be uninstalled
- */
 function uninstallApp(req, res, next) {
     assert.strictEqual(typeof req.params.id, 'string');
 
