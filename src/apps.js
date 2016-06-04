@@ -359,7 +359,7 @@ function downloadManifest(appStoreId, manifest, callback) {
     superagent.get(url).end(function (error, result) {
         if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, 'Network error downloading manifest:' + error.message));
 
-        if (result.statusCode !== 200) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('Failed to get app info from store.', result.statusCode, result.text)));
+        if (result.statusCode !== 200) return callback(new AppsError(AppsError.BAD_FIELD, util.format('Failed to get app info from store.', result.statusCode, result.text)));
 
         callback(null, parts[0], result.body.manifest);
     });
