@@ -155,8 +155,8 @@ function validatePortBindings(portBindings, tcpPorts) {
     for (env in portBindings) {
         if (!/^[a-zA-Z0-9_]+$/.test(env)) return new AppsError(AppsError.BAD_FIELD, env + ' is not valid environment variable');
 
-        if (!Number.isInteger(portBindings[env])) return new Error(portBindings[env] + ' is not an integer');
-        if (portBindings[env] <= 0 || portBindings[env] > 65535) return new Error(portBindings[env] + ' is out of range');
+        if (!Number.isInteger(portBindings[env])) return new AppsError(AppsError.BAD_FIELD, portBindings[env] + ' is not an integer');
+        if (portBindings[env] <= 0 || portBindings[env] > 65535) return new AppsError(AppsError.BAD_FIELD, portBindings[env] + ' is out of range');
 
         if (RESERVED_PORTS.indexOf(portBindings[env]) !== -1) return new AppsError(AppsError.PORT_RESERVED, String(portBindings[env]));
     }
@@ -452,7 +452,7 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         error = validatePortBindings(portBindings, app.manifest.tcpPorts);
-        if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+        if (error) return callback(error);
 
         error = validateMemoryLimit(app.manifest, memoryLimit);
         if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
@@ -516,7 +516,7 @@ function update(appId, force, manifest, portBindings, icon, auditSource, callbac
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed:' + error.message));
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+    if (error) return callback(error);
 
     if (icon) {
         if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
