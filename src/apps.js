@@ -366,7 +366,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error: ' + error.message));
 
     error = checkManifestConstraints(manifest);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
+    if (error) return callback(error);
 
     error = validateHostname(location, config.fqdn());
     if (error) return callback(error);
@@ -513,7 +513,7 @@ function update(appId, force, manifest, portBindings, icon, auditSource, callbac
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error:' + error.message));
 
     error = checkManifestConstraints(manifest);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed:' + error.message));
+    if (error) return callback(error);
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(error);
@@ -634,7 +634,7 @@ function restore(appId, auditSource, callback) {
             // re-validate because this new box version may not accept old configs.
             // if we restore location, it should be validated here as well
             error = checkManifestConstraints(restoreConfig.manifest);
-            if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
+            if (error) return callback(error);
 
             error = validatePortBindings(restoreConfig.portBindings, restoreConfig.manifest.tcpPorts); // maybe new ports got reserved now
             if (error) return callback(error);
@@ -721,14 +721,14 @@ function stop(appId, callback) {
 }
 
 function checkManifestConstraints(manifest) {
-    if (!manifest.dockerImage) return new Error('Missing dockerImage'); // dockerImage is optional in manifest
+    if (!manifest.dockerImage) return new AppsError(AppsError.BAD_FIELD, 'Missing dockerImage'); // dockerImage is optional in manifest
 
     if (semver.valid(manifest.maxBoxVersion) && semver.gt(config.version(), manifest.maxBoxVersion)) {
-        return new Error('Box version exceeds Apps maxBoxVersion');
+        return new AppsError(AppsError.BAD_FIELD, 'Box version exceeds Apps maxBoxVersion');
     }
 
     if (semver.valid(manifest.minBoxVersion) && semver.gt(manifest.minBoxVersion, config.version())) {
-        return new Error('minBoxVersion exceeds Box version');
+        return new AppsError(AppsError.BAD_FIELD, 'minBoxVersion exceeds Box version');
     }
 
     return null;
