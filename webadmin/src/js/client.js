@@ -245,8 +245,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.installApp = function (id, manifest, title, config, callback) {
         var that = this;
         var data = {
-            appStoreId: id,
-            manifest: manifest,
+            appStoreId: id + '@' + manifest.version,
             location: config.location,
             portBindings: config.portBindings,
             accessRestriction: config.accessRestriction,
