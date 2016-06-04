@@ -192,6 +192,7 @@ function validateAccessRestriction(accessRestriction) {
 
     if (noUsers && noGroups) return new AppsError(AppsError.BAD_FIELD, 'users and groups array cannot both be empty');
 
+    // TODO: maybe validate if the users and groups actually exist
     return null;
 }
 
