@@ -95,7 +95,6 @@ function installApp(req, res, next) {
 
     var data = req.body;
 
-    if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
     if (typeof data.appStoreId !== 'string') return next(new HttpError(400, 'appStoreId is required'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
@@ -135,7 +134,6 @@ function configureApp(req, res, next) {
 
     var data = req.body;
 
-    if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'object') return next(new HttpError(400, 'accessRestriction is required'));
@@ -239,7 +237,6 @@ function updateApp(req, res, next) {
 
     var data = req.body;
 
-    if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
