@@ -450,17 +450,19 @@ function install(data, auditSource, callback) {
     });
 }
 
-function configure(appId, location, portBindings, accessRestriction, cert, key, memoryLimit, altDomain, auditSource, callback) {
+function configure(appId, data, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
-    assert.strictEqual(typeof location, 'string');
-    assert.strictEqual(typeof portBindings, 'object');
-    assert.strictEqual(typeof accessRestriction, 'object');
-    assert(cert === null || typeof cert === 'string');
-    assert(key === null || typeof key === 'string');
-    assert.strictEqual(typeof memoryLimit, 'number');
-    assert(altDomain === null || typeof altDomain === 'string');
+    assert(data && typeof data === 'object');
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
+
+    var location = data.location.toLowerCase(),
+        portBindings = data.portBindings || null,
+        accessRestriction = data.accessRestriction || null,
+        cert = data.cert || null,
+        key = data.key || null,
+        memoryLimit = data.memoryLimit || 0,
+        altDomain = data.altDomain || null;
 
     var error = validateHostname(location, config.fqdn());
     if (error) return callback(error);
