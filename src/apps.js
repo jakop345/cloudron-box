@@ -353,7 +353,7 @@ function install(appId, data, auditSource, callback) {
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var appStoreId = data.appStoreId,
+    var appStoreId = data.appStoreId || '',
         manifest = data.manifest,
         location = data.location.toLowerCase(),
         portBindings = data.portBindings || null,
