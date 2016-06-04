@@ -179,18 +179,18 @@ function validateAccessRestriction(accessRestriction) {
     var noUsers = true, noGroups = true;
 
     if (accessRestriction.users) {
-        if (!Array.isArray(accessRestriction.users)) return new Error('users array property required');
-        if (!accessRestriction.users.every(function (e) { return typeof e === 'string'; })) return new Error('All users have to be strings');
+        if (!Array.isArray(accessRestriction.users)) return new AppsError(AppsError.BAD_FIELD, 'users array property required');
+        if (!accessRestriction.users.every(function (e) { return typeof e === 'string'; })) return new AppsError(AppsError.BAD_FIELD, 'All users have to be strings');
         noUsers = accessRestriction.users.length === 0;
     }
 
     if (accessRestriction.groups) {
-        if (!Array.isArray(accessRestriction.groups)) return new Error('groups array property required');
-        if (!accessRestriction.groups.every(function (e) { return typeof e === 'string'; })) return new Error('All groups have to be strings');
+        if (!Array.isArray(accessRestriction.groups)) return new AppsError(AppsError.BAD_FIELD, 'groups array property required');
+        if (!accessRestriction.groups.every(function (e) { return typeof e === 'string'; })) return new AppsError(AppsError.BAD_FIELD, 'All groups have to be strings');
         noGroups = accessRestriction.groups.length === 0;
     }
 
-    if (noUsers && noGroups) return new Error('users and groups array cannot both be empty');
+    if (noUsers && noGroups) return new AppsError(AppsError.BAD_FIELD, 'users and groups array cannot both be empty');
 
     return null;
 }
@@ -206,8 +206,8 @@ function validateMemoryLimit(manifest, memoryLimit) {
     // this is needed so an app update can change the value in the manifest, and if not set by the user, the new value should be used
     if (memoryLimit === 0) return null;
 
-    if (memoryLimit < min) return new Error('memoryLimit too small');
-    if (memoryLimit > max) return new Error('memoryLimit too large');
+    if (memoryLimit < min) return new AppsError(AppsError.BAD_FIELD, 'memoryLimit too small');
+    if (memoryLimit > max) return new AppsError(AppsError.BAD_FIELD, 'memoryLimit too large');
 
     return null;
 }
@@ -375,10 +375,10 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     if (error) return callback(error);
 
     error = validateAccessRestriction(accessRestriction);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+    if (error) return callback(error);
 
     error = validateMemoryLimit(manifest, memoryLimit);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+    if (error) return callback(error);
 
     // memoryLimit might come in as 0 if not specified
     memoryLimit = memoryLimit || manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
@@ -440,7 +440,7 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
     if (error) return callback(error);
 
     error = validateAccessRestriction(accessRestriction);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+    if (error) return callback(error);
 
     error = certificates.validateCertificate(cert, key, config.appFqdn(location));
     if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
@@ -455,7 +455,7 @@ function configure(appId, location, portBindings, accessRestriction, cert, key, 
         if (error) return callback(error);
 
         error = validateMemoryLimit(app.manifest, memoryLimit);
-        if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+        if (error) return callback(error);
 
         // memoryLimit might come in as 0 if not specified
         memoryLimit = memoryLimit || app.memoryLimit || app.manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
