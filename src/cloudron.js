@@ -664,7 +664,7 @@ function installAppBundle(callback) {
             accessRestriction: appInfo.accessRestriction || null,
         };
 
-        apps.install(uuid.v4(), data, { userId: null, username: 'autoinstaller' }, iteratorCallback);
+        apps.install(data, { userId: null, username: 'autoinstaller' }, iteratorCallback);
     }, function (error) {
         if (error) debug('autoInstallApps: ', error);
 

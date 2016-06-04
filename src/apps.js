@@ -65,6 +65,7 @@ var addons = require('./addons.js'),
     superagent = require('superagent'),
     taskmanager = require('./taskmanager.js'),
     util = require('util'),
+    uuid = require('node-uuid'),
     validator = require('validator');
 
 // http://dustinsenos.com/articles/customErrorsInNode
@@ -366,8 +367,7 @@ function downloadManifest(appStoreId, manifest, callback) {
     });
 }
 
-function install(appId, data, auditSource, callback) {
-    assert.strictEqual(typeof appId, 'string');
+function install(data, auditSource, callback) {
     assert(data && typeof data === 'object');
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
@@ -424,6 +424,7 @@ function install(appId, data, auditSource, callback) {
         error = certificates.validateCertificate(cert, key, config.appFqdn(location));
         if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
 
+        var appId = uuid.v4();
         debug('Will install app with id : ' + appId);
 
         purchase(appStoreId, function (error) {
@@ -443,7 +444,7 @@ function install(appId, data, auditSource, callback) {
 
                 eventlog.add(eventlog.ACTION_APP_INSTALL, auditSource, { appId: appId, location: location, manifest: manifest });
 
-                callback(null);
+                callback(null, { id : appId });
             });
         });
     });

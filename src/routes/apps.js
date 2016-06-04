@@ -114,12 +114,9 @@ function installApp(req, res, next) {
     if ('memoryLimit' in data && typeof data.memoryLimit !== 'number') return next(new HttpError(400, 'memoryLimit is not a number'));
     if ('altDomain' in data && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
 
-    // allow tests to provide an appId for testing
-    var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
+    debug('Installing app id:%s data:%j', data);
 
-    debug('Installing app id:%s data:%j', appId, data);
-
-    apps.install(appId, data, auditSource(req), function (error) {
+    apps.install(data, auditSource(req), function (error, app) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
@@ -130,7 +127,7 @@ function installApp(req, res, next) {
         if (error && error.reason === AppsError.EXTERNAL_ERROR) return next(new HttpError(503, error.message));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(202, { id: appId } ));
+        next(new HttpSuccess(202, app));
     });
 }
 

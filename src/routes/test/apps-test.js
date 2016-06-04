@@ -617,13 +617,13 @@ describe('Apps', function () {
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
+                  .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 expect(fake1.isDone()).to.be.ok();
                 expect(fake2.isDone()).to.be.ok();
                 expect(res.body.id).to.be.a('string');
-                expect(res.body.id).to.be.eql(APP_ID);
+                APP_ID = res.body.id;
                 checkInstallStatus();
             });
         });
@@ -1060,12 +1060,12 @@ describe('Apps', function () {
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { ECHO_SERVER_PORT: 7171 }, accessRestriction: null })
+                  .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { ECHO_SERVER_PORT: 7171 }, accessRestriction: null })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 expect(fake1.isDone()).to.be.ok();
                 expect(fake2.isDone()).to.be.ok();
-                expect(res.body.id).to.equal(APP_ID);
+                APP_ID = res.body.id;
                 checkInstallStatus();
             });
         });
@@ -1221,7 +1221,7 @@ describe('Apps', function () {
         it('cannot reconfigure app with missing location', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, password: PASSWORD, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null })
+                  .send({ password: PASSWORD, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 done();
@@ -1231,7 +1231,7 @@ describe('Apps', function () {
         it('cannot reconfigure app with missing accessRestriction', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 } })
+                  .send({ password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 } })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 done();
@@ -1241,7 +1241,7 @@ describe('Apps', function () {
         it('cannot reconfigure app with only the cert, no key', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, cert: validCert1 })
+                  .send({ password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, cert: validCert1 })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 done();
@@ -1251,7 +1251,7 @@ describe('Apps', function () {
         it('cannot reconfigure app with only the key, no cert', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, key: validKey1 })
+                  .send({ password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, key: validKey1 })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 done();
@@ -1261,7 +1261,7 @@ describe('Apps', function () {
         it('cannot reconfigure app with cert not bein a string', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, cert: 1234, key: validKey1 })
+                  .send({ password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, cert: 1234, key: validKey1 })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 done();
@@ -1271,7 +1271,7 @@ describe('Apps', function () {
         it('cannot reconfigure app with key not bein a string', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, cert: validCert1, key: 1234 })
+                  .send({ password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, cert: validCert1, key: 1234 })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 done();
@@ -1281,7 +1281,7 @@ describe('Apps', function () {
         it('non admin cannot reconfigure app', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
                   .query({ access_token: token_1 })
-                  .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null })
+                  .send({ password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(403);
                 done();
@@ -1291,7 +1291,7 @@ describe('Apps', function () {
         it('can reconfigure app', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null })
+                  .send({ password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 checkConfigureStatus(0, done);
@@ -1359,7 +1359,7 @@ describe('Apps', function () {
         it('can reconfigure app with custom certificate', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
                   .query({ access_token: token })
-                  .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, cert: validCert1, key: validKey1 })
+                  .send({ password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, cert: validCert1, key: validKey1 })
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 checkConfigureStatus(0, done);
