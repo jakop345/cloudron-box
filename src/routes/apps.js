@@ -137,7 +137,7 @@ function configureApp(req, res, next) {
 
     var data = req.body;
 
-    if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
+    if ('location' in data && typeof data.location !== 'string') return next(new HttpError(400, 'location must be string'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if ('accessRestriction' in data && typeof data.accessRestriction !== 'object') return next(new HttpError(400, 'accessRestriction must be an object'));
     if ('cert' in data && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
@@ -147,7 +147,7 @@ function configureApp(req, res, next) {
     if ('memoryLimit' in data && typeof data.memoryLimit !== 'number') return next(new HttpError(400, 'memoryLimit is not a number'));
     if ('altDomain' in data && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
 
-    debug('Configuring app id:%s location:%s bindings:%j accessRestriction:%j memoryLimit:%s', req.params.id, data.location, data.portBindings, data.accessRestriction, data.memoryLimit);
+    debug('Configuring app id:%s data:%j', req.params.id, data);
 
     apps.configure(req.params.id, data, auditSource(req), function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));

@@ -456,64 +456,70 @@ function configure(appId, data, auditSource, callback) {
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var location = data.location.toLowerCase(),
-        portBindings = data.portBindings || null,
-        accessRestriction = data.accessRestriction || null,
-        cert = data.cert || null,
-        key = data.key || null,
-        memoryLimit = data.memoryLimit || 0,
-        altDomain = data.altDomain || null;
-
-    var error = validateHostname(location, config.fqdn());
-    if (error) return callback(error);
-
-    error = validateAccessRestriction(accessRestriction);
-    if (error) return callback(error);
-
-    error = certificates.validateCertificate(cert, key, config.appFqdn(location));
-    if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
-
-    if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
+console.dir(data);
 
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        error = validatePortBindings(portBindings, app.manifest.tcpPorts);
-        if (error) return callback(error);
-
-        error = validateMemoryLimit(app.manifest, memoryLimit);
-        if (error) return callback(error);
-
-        // memoryLimit might come in as 0 if not specified
-        memoryLimit = memoryLimit || app.memoryLimit || app.manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
-
-        // save cert to data/box/certs
-        if (cert && key) {
-            if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.cert'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
-            if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.key'), key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
+        var location, portBindings, values = { };
+        if ('location' in data) {
+            location = values.location = data.location.toLowerCase();
+            error = validateHostname(values.location, config.fqdn());
+            if (error) return callback(error);
+        } else {
+            location = app.location;
         }
 
-        var values = {
-            location: location.toLowerCase(),
-            accessRestriction: accessRestriction,
-            portBindings: portBindings,
-            memoryLimit: memoryLimit,
-            altDomain: altDomain,
+        if ('accessRestriction' in data) {
+            values.accessRestriction = data.accessRestriction;
+            error = validateAccessRestriction(values.accessRestriction);
+            if (error) return callback(error);
+        }
 
-            oldConfig: {
-                location: app.location,
-                accessRestriction: app.accessRestriction,
-                portBindings: app.portBindings,
-                memoryLimit: app.memoryLimit,
-                altDomain: app.altDomain
-            }
+        if ('altDomain' in data) {
+            values.altDomain = data.altDomain;
+            if (values.altDomain !== null && !validator.isFQDN(values.altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
+        }
+
+        if ('portBindings' in data) {
+            portBindings = values.portBindings = data.portBindings;
+            error = validatePortBindings(values.portBindings, app.manifest.tcpPorts);
+            if (error) return callback(error);
+        } else {
+            portBindings = app.portBindings;
+        }
+
+        if ('memoryLimit' in data) {
+            values.memoryLimit = data.memoryLimit;
+            error = validateMemoryLimit(app.manifest, values.memoryLimit);
+            if (error) return callback(error);
+
+            // memoryLimit might come in as 0 if not specified
+            values.memoryLimit = values.memoryLimit || app.memoryLimit || app.manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
+        }
+
+        // save cert to data/box/certs. TODO: move this to apptask when we have a real task queue
+        if ('cert' in data && 'key' in data) {
+            error = certificates.validateCertificate(data.cert, data.key, config.appFqdn(location));
+            if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
+
+            if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.cert'), data.cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
+            if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.key'), data.key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
+        }
+
+        values.oldConfig = {
+            location: app.location,
+            accessRestriction: app.accessRestriction,
+            portBindings: app.portBindings,
+            memoryLimit: app.memoryLimit,
+            altDomain: app.altDomain
         };
 
         debug('Will configure app with id:%s values:%j', appId, values);
 
         appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_CONFIGURE, values, function (error) {
-            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
+            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location, portBindings, error));
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
