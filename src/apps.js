@@ -543,70 +543,73 @@ function update(appId, data, auditSource, callback) {
 
     debug('Will update app with id:%s', appId);
 
-    var manifest = data.manifest,
-        force = data.force || false,
-        portBindings = data.portBindings || null,
-        icon = data.icon || null;
+    downloadManifest(data.appStoreId, data.manifest, function (error, appStoreId, manifest) {
+        if (error) return callback(error);
 
-    var error = manifestFormat.parse(manifest);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error:' + error.message));
+        var values = { };
 
-    error = checkManifestConstraints(manifest);
-    if (error) return callback(error);
+        error = manifestFormat.parse(manifest);
+        if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error:' + error.message));
 
-    error = validatePortBindings(portBindings, manifest.tcpPorts);
-    if (error) return callback(error);
+        error = checkManifestConstraints(manifest);
+        if (error) return callback(error);
 
-    if (icon) {
-        if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
+        values.manifest = manifest;
 
-        if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, appId + '.png'), new Buffer(icon, 'base64'))) {
-            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving icon:' + safe.error.message));
-        }
-    }
-
-    appdb.get(appId, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-        var appStoreId = app.appStoreId;
-
-        // prevent user from installing a app with different manifest id over an existing app
-        // this allows cloudron install -f --app <appid> for an app installed from the appStore
-        if (app.manifest.id !== manifest.id) {
-            if (!force) return callback(new AppsError(AppsError.BAD_FIELD, 'manifest id does not match. force to override'));
-            // clear appStoreId so that this app does not get updates anymore. this will mark is a dev app
-            appStoreId = '';
+        if ('portBindings' in data) {
+            values.portBindings = data.portBindings;
+            error = validatePortBindings(data.portBindings, values.manifest.tcpPorts);
+            if (error) return callback(error);
         }
 
-        // Ensure we update the memory limit in case the new app requires more memory as a minimum
-        var memoryLimit = manifest.memoryLimit ? (app.memoryLimit < manifest.memoryLimit ? manifest.memoryLimit : app.memoryLimit) : app.memoryLimit;
+        if ('icon' in data) {
+            if (data.icon) {
+                if (!validator.isBase64(data.icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
 
-        var values = {
-            appStoreId: appStoreId,
-            manifest: manifest,
-            portBindings: portBindings,
-            memoryLimit: memoryLimit,
+                if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, appId + '.png'), new Buffer(data.icon, 'base64'))) {
+                    return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving icon:' + safe.error.message));
+                }
+            } else {
+                safe.fs.unlinkSync(path.join(paths.APPICONS_DIR, appId + '.png'));
+            }
+        }
 
-            oldConfig: {
+        appdb.get(appId, function (error, app) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            // prevent user from installing a app with different manifest id over an existing app
+            // this allows cloudron install -f --app <appid> for an app installed from the appStore
+            if (app.manifest.id !== values.manifest.id) {
+                if (!data.force) return callback(new AppsError(AppsError.BAD_FIELD, 'manifest id does not match. force to override'));
+                // clear appStoreId so that this app does not get updates anymore. this will mark it as a dev app
+                values.appStoreId = '';
+            }
+
+            // Ensure we update the memory limit in case the new app requires more memory as a minimum
+            if (values.manifest.memoryLimit && app.memoryLimit < values.manifest.memoryLimit) {
+                values.memoryLimit = values.manifest.memoryLimit;
+            }
+
+            values.oldConfig = {
                 manifest: app.manifest,
                 portBindings: app.portBindings,
                 accessRestriction: app.accessRestriction,
                 memoryLimit: app.memoryLimit,
                 altDomain: app.altDomain
-            }
-        };
+            };
 
-        appdb.setInstallationCommand(appId, force ? appdb.ISTATE_PENDING_FORCE_UPDATE : appdb.ISTATE_PENDING_UPDATE, values, function (error) {
-            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
-            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails('' /* location cannot conflict */, portBindings, error));
-            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+            appdb.setInstallationCommand(appId, data.force ? appdb.ISTATE_PENDING_FORCE_UPDATE : appdb.ISTATE_PENDING_UPDATE, values, function (error) {
+                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
+                if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails('' /* location cannot conflict */, values.portBindings, error));
+                if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            taskmanager.restartAppTask(appId);
+                taskmanager.restartAppTask(appId);
 
-            eventlog.add(eventlog.ACTION_APP_UPDATE, auditSource, { appId: appId, toManifest: manifest, fromManifest: app.manifest });
+                eventlog.add(eventlog.ACTION_APP_UPDATE, auditSource, { appId: appId, toManifest: manifest, fromManifest: app.manifest });
 
-            callback(null);
+                callback(null);
+            });
         });
     });
 }
@@ -869,10 +872,7 @@ function updateApps(updateInfo, auditSource, callback) { // updateInfo is { appI
             }
 
             var data = {
-                force: false,
-                manifest: updateInfo[appId].manifest,
-                portBindings: app.portBindings,
-                icon: null
+                manifest: updateInfo[appId].manifest
             };
 
             update(appId, data, auditSource, function (error) {
