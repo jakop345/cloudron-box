@@ -28,8 +28,7 @@ var apps = require('../apps.js'),
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     paths = require('../paths.js'),
     safe = require('safetydance'),
-    util = require('util'),
-    uuid = require('node-uuid');
+    util = require('util');
 
 function auditSource(req) {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
