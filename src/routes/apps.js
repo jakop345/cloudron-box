@@ -107,12 +107,17 @@ function installApp(req, res, next) {
     // optional
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
-    if ('cert' in data && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
-    if ('key' in data && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
+
+    // falsy values in cert and key unset the cert
+    if (data.key && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
+    if (data.cert && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
     if (data.cert && !data.key) return next(new HttpError(400, 'key must be provided'));
     if (!data.cert && data.key) return next(new HttpError(400, 'cert must be provided'));
+
     if ('memoryLimit' in data && typeof data.memoryLimit !== 'number') return next(new HttpError(400, 'memoryLimit is not a number'));
-    if ('altDomain' in data && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
+
+    // falsy value in altDomain unsets it
+    if (data.altDomain && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
 
     debug('Installing app id:%s data:%j', data);
 
@@ -138,14 +143,17 @@ function configureApp(req, res, next) {
     var data = req.body;
 
     if ('location' in data && typeof data.location !== 'string') return next(new HttpError(400, 'location must be string'));
-    if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
+    if ('portBindings' in data && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if ('accessRestriction' in data && typeof data.accessRestriction !== 'object') return next(new HttpError(400, 'accessRestriction must be an object'));
-    if ('cert' in data && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
-    if ('key' in data && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
+
+    // falsy values in cert and key unset the cert
+    if (data.key && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
+    if (data.cert && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
     if (data.cert && !data.key) return next(new HttpError(400, 'key must be provided'));
     if (!data.cert && data.key) return next(new HttpError(400, 'cert must be provided'));
+
     if ('memoryLimit' in data && typeof data.memoryLimit !== 'number') return next(new HttpError(400, 'memoryLimit is not a number'));
-    if ('altDomain' in data && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
+    if (data.altDomain && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
 
     debug('Configuring app id:%s data:%j', req.params.id, data);
 

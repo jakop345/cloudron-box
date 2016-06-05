@@ -456,8 +456,6 @@ function configure(appId, data, auditSource, callback) {
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-console.dir(data);
-
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
@@ -501,11 +499,16 @@ console.dir(data);
 
         // save cert to data/box/certs. TODO: move this to apptask when we have a real task queue
         if ('cert' in data && 'key' in data) {
-            error = certificates.validateCertificate(data.cert, data.key, config.appFqdn(location));
-            if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
+            if (data.cert && data.key) {
+                error = certificates.validateCertificate(data.cert, data.key, config.appFqdn(location));
+                if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
 
-            if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.cert'), data.cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
-            if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.key'), data.key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
+                if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.cert'), data.cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
+                if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.key'), data.key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
+            } else { // remove existing cert/key
+                if (!safe.fs.unlinkSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.cert'))) debug('Error removing cert: ' + safe.error.message);
+                if (!safe.fs.unlinkSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.key'))) debug('Error removing key: ' + safe.error.message);
+            }
         }
 
         values.oldConfig = {
