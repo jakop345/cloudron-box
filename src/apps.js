@@ -535,16 +535,18 @@ function configure(appId, data, auditSource, callback) {
     });
 }
 
-function update(appId, force, manifest, portBindings, icon, auditSource, callback) {
+function update(appId, data, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
-    assert.strictEqual(typeof force, 'boolean');
-    assert(manifest && typeof manifest === 'object');
-    assert(typeof portBindings === 'object'); // can be null
-    assert(!icon || typeof icon === 'string');
+    assert(data && typeof data === 'object');
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debug('Will update app with id:%s', appId);
+
+    var manifest = data.manifest,
+        force = data.force || false,
+        portBindings = data.portBindings || null,
+        icon = data.icon || null;
 
     var error = manifestFormat.parse(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error:' + error.message));
@@ -866,8 +868,14 @@ function updateApps(updateInfo, auditSource, callback) { // updateInfo is { appI
                 return iteratorDone();
             }
 
-           update(appId, false /* force */, updateInfo[appId].manifest, app.portBindings,
-                  null /* icon */, auditSource, function (error) {
+            var data = {
+                force: false,
+                manifest: updateInfo[appId].manifest,
+                portBindings: app.portBindings,
+                icon: null
+            };
+
+            update(appId, data, auditSource, function (error) {
                 if (error) debug('Error initiating autoupdate of %s. %s', appId, error.message);
 
                 iteratorDone(null);
