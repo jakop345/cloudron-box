@@ -350,6 +350,8 @@ function purchase(appStoreId, callback) {
 }
 
 function downloadManifest(appStoreId, manifest, callback) {
+    if (!appStoreId && !manifest) return callback(new AppsError(AppsError.BAD_FIELD, 'Neither manifest nor appStoreId provided'));
+
     if (!appStoreId) return callback(null, '', manifest);
 
     var parts = appStoreId.split('@');
