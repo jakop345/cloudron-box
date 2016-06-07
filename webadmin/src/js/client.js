@@ -529,7 +529,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.addOAuthClient = function (appId, scope, redirectURI, callback) {
+    Client.prototype.createOAuthClient = function (appId, scope, redirectURI, callback) {
         var data = {
             appId: appId,
             scope: scope,
