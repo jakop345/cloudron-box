@@ -369,9 +369,14 @@ html {
     margin-bottom: 0;
 }
 
+.section-header {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
 .card {
     background-color: white;
-    max-width: 600px;
+    max-width: 720px;
     margin: 0 auto;
     padding: 10px 15px;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
