@@ -231,6 +231,14 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
             if (error) return console.error(error);
 
             $scope.activeClients = activeClients;
+
+            $scope.activeClients.forEach(function (client) {
+                Client.getTokensByClientId(client.id, function (error, result) {
+                    if (error) console.error(error);
+
+                    client.activeTokens = result || [];
+                });
+            });
         });
     }
 
