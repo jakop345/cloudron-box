@@ -6,7 +6,7 @@ exports = module.exports = {
     add: add,
     get: get,
     del: del,
-    getAllWithDetails: getAllWithDetails,
+    getAll: getAll,
     getAllWithDetailsByUserId: getAllWithDetailsByUserId,
     getByAppIdAndType: getByAppIdAndType,
     getClientTokensByUserId: getClientTokensByUserId,
@@ -137,10 +137,10 @@ function del(id, callback) {
     });
 }
 
-function getAllWithDetails(callback) {
+function getAll(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    clientdb.getAllWithTokenCount(function (error, results) {
+    clientdb.getAll(function (error, results) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, []);
         if (error) return callback(error);
 

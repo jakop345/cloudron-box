@@ -145,7 +145,7 @@ function initializeExpressSync() {
     // oauth2 routes
     router.get ('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
     router.post('/api/v1/oauth/token', routes.oauth2.token);
-    router.get ('/api/v1/oauth/clients', settingsScope, routes.clients.getAllByUserId);
+    router.get ('/api/v1/oauth/clients', settingsScope, routes.clients.getAll);
     router.post('/api/v1/oauth/clients', routes.developer.enabled, settingsScope, routes.clients.add);
     router.get ('/api/v1/oauth/clients/:clientId', routes.developer.enabled, settingsScope, routes.clients.get);
     router.post('/api/v1/oauth/clients/:clientId', routes.developer.enabled, settingsScope, routes.clients.add);

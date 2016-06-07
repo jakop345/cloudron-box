@@ -4,7 +4,7 @@ exports = module.exports = {
     add: add,
     get: get,
     del: del,
-    getAllByUserId: getAllByUserId,
+    getAll: getAll,
     getClientTokens: getClientTokens,
     delClientTokens: delClientTokens
 };
@@ -53,20 +53,11 @@ function del(req, res, next) {
     });
 }
 
-function getAllByUserId(req, res, next) {
-
-    // TODO only make available for admins
-    if (req.query.all) {
-        clients.getAllWithDetails(function (error, result) {
-            if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
-            next(new HttpSuccess(200, { clients: result }));
-        });
-    } else {
-        clients.getAllWithDetailsByUserId(req.user.id, function (error, result) {
-            if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
-            next(new HttpSuccess(200, { clients: result }));
-        });
-    }
+function getAll(req, res, next) {
+    clients.getAll(function (error, result) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
+        next(new HttpSuccess(200, { clients: result }));
+    });
 }
 
 function getClientTokens(req, res, next) {
