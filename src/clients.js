@@ -6,6 +6,7 @@ exports = module.exports = {
     add: add,
     get: get,
     del: del,
+    getAllWithDetails: getAllWithDetails,
     getAllWithDetailsByUserId: getAllWithDetailsByUserId,
     getByAppIdAndType: getByAppIdAndType,
     getClientTokensByUserId: getClientTokensByUserId,
@@ -133,6 +134,48 @@ function del(id, callback) {
     clientdb.del(id, function (error, result) {
         if (error) return callback(error);
         callback(null, result);
+    });
+}
+
+function getAllWithDetails(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    clientdb.getAllWithTokenCount(function (error, results) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, []);
+        if (error) return callback(error);
+
+        var tmp = [];
+        async.each(results, function (record, callback) {
+            if (record.type === exports.TYPE_ADMIN) {
+                record.name = constants.ADMIN_NAME;
+                record.location = constants.ADMIN_LOCATION;
+
+                tmp.push(record);
+
+                return callback(null);
+            }
+
+            appdb.get(record.appId, function (error, result) {
+                if (error) {
+                    console.error('Failed to get app details for oauth client', result, error);
+                    return callback(null);  // ignore error so we continue listing clients
+                }
+
+                if (record.type === exports.TYPE_PROXY) record.name = result.manifest.title + ' Website Proxy';
+                if (record.type === exports.TYPE_OAUTH) record.name = result.manifest.title + ' OAuth';
+                if (record.type === exports.TYPE_SIMPLE_AUTH) record.name = result.manifest.title + ' Simple Auth';
+                if (record.type === exports.TYPE_EXTERNAL) record.name = result.manifest.title + ' external';
+
+                record.location = result.location;
+
+                tmp.push(record);
+
+                callback(null);
+            });
+        }, function (error) {
+            if (error) return callback(error);
+            callback(null, tmp);
+        });
     });
 }
 
