@@ -838,7 +838,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
-    }
+    };
 
     client = new Client();
     return client;
