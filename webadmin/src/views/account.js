@@ -191,8 +191,12 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                         $scope.clientAdd.error.redirectURI = error.message;
                         $scope.clientAddForm.redirectURI.$setPristine();
                         $('#clientAddRedirectURI').focus();
+                    } else if (error.message.indexOf('Invalid scope') === 0) {
+                        $scope.clientAdd.error.scope = error.message;
+                        $scope.clientAddForm.scope.$setPristine();
+                        $('#clientAddScope').focus();
                     } else {
-                        // TODO scope checking
+                        console.error(error);
                     }
                     return;
                 }
