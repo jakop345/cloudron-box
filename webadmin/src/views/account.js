@@ -239,7 +239,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
     });
 
     // setup all the dialog focus handling
-    ['passwordChangeModal', 'emailChangeModal', 'displayNameChangeModal'].forEach(function (id) {
+    ['passwordChangeModal', 'emailChangeModal', 'displayNameChangeModal', 'clientAddModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
