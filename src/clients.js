@@ -153,6 +153,13 @@ function getAllWithDetails(callback) {
                 tmp.push(record);
 
                 return callback(null);
+            } else if (record.type === exports.TYPE_EXTERNAL) {
+                record.name = record.appId;
+                record.location = 'external';
+
+                tmp.push(record);
+
+                return callback(null);
             }
 
             appdb.get(record.appId, function (error, result) {
@@ -164,7 +171,6 @@ function getAllWithDetails(callback) {
                 if (record.type === exports.TYPE_PROXY) record.name = result.manifest.title + ' Website Proxy';
                 if (record.type === exports.TYPE_OAUTH) record.name = result.manifest.title + ' OAuth';
                 if (record.type === exports.TYPE_SIMPLE_AUTH) record.name = result.manifest.title + ' Simple Auth';
-                if (record.type === exports.TYPE_EXTERNAL) record.name = result.manifest.title + ' external';
 
                 record.location = result.location;
 
@@ -192,6 +198,13 @@ function getAllWithDetailsByUserId(userId, callback) {
             if (record.type === exports.TYPE_ADMIN) {
                 record.name = constants.ADMIN_NAME;
                 record.location = constants.ADMIN_LOCATION;
+
+                tmp.push(record);
+
+                return callback(null);
+            } else if (record.type === exports.TYPE_EXTERNAL) {
+                record.name = record.appId;
+                record.location = 'external';
 
                 tmp.push(record);
 
