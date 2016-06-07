@@ -122,7 +122,7 @@
                             <small ng-show="clientAddForm.scope.$error.required">A scope is required</small>
                             <small ng-show="!clientAddForm.scope.$dirty && clientAdd.error.scope">{{ clientAdd.error.scope }}</small>
                         </div>
-                        <input type="text" class="form-control" ng-model="clientAdd.scope" name="scope" id="clientAddScope" required>
+                        <input type="text" class="form-control" ng-model="clientAdd.scope" name="scope" id="clientAddScope" placeholder="Specify any number of scope separated by a comma ','" required>
                     </div>
                     <div class="form-group" ng-class="{ 'has-error': (clientAddForm.redirectURI.$dirty && clientAddForm.redirectURI.$invalid) || (!clientAddForm.redirectURI.$dirty && clientAdd.error.redirectURI) }">
                         <label class="control-label">Redirect URI</label>
