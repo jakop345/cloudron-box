@@ -129,7 +129,7 @@
                         <div class="control-label" ng-show="!clientAddForm.redirectURI.$dirty && clientAdd.error.redirectURI">
                             <small ng-show="!clientAddForm.redirectURI.$dirty && clientAdd.error.redirectURI">{{ clientAdd.error.redirectURI }}</small>
                         </div>
-                        <input type="text" class="form-control" ng-model="clientAdd.redirectURI" name="redirectURI" placeholder="Only required if OAuth logins are used">
+                        <input type="text" class="form-control" ng-model="clientAdd.redirectURI" name="redirectURI" id="clientAddRedirectURI" placeholder="Only required if OAuth logins are used">
                     </div>
                     <input class="hide" type="submit" ng-disabled="clientAddForm.$invalid || clientAdd.busy"/>
                 </form>
@@ -194,7 +194,7 @@
 <br/>
 
 <!-- we will always at least have the webadmin token here, so activeClients always will have one entry with at least one token -->
-<div class="card" ng-repeat="client in activeClients" style="margin-bottom: 15px;" ng-hide="client.tokenCount === 0">
+<div class="card" ng-repeat="client in activeClients">
     <div class="grid-item-top">
         <div class="row">
             <div class="col-xs-12">
