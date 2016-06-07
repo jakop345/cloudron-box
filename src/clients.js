@@ -248,16 +248,16 @@ function delByAppIdAndType(appId, type, callback) {
     });
 }
 
-function addClientTokenByUserId(clientId, userId, callback) {
+function addClientTokenByUserId(clientId, userId, expiresAt, callback) {
     assert.strictEqual(typeof clientId, 'string');
     assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof expiresAt, 'number');
     assert.strictEqual(typeof callback, 'function');
 
     get(clientId, function (error, result) {
         if (error) return callback(error);
 
         var token = tokendb.generateToken();
-        var expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
         tokendb.add(token, userId, result.id, expiresAt, result.scope, function (error) {
             if (error) return callback(new ClientsError(ClientsError.INTERNAL_ERROR, error));

@@ -66,7 +66,10 @@ function addClientToken(req, res, next) {
     assert.strictEqual(typeof req.params.clientId, 'string');
     assert.strictEqual(typeof req.user, 'object');
 
-    clients.addClientTokenByUserId(req.params.clientId, req.user.id, function (error, result) {
+    var expiresAt = req.query.expiresAt ? parseInt(req.query.expiresAt, 10) : Date.now() + 24 * 60 * 60 * 1000; // default 1 day;
+    if (isNaN(expiresAt) || expiresAt <= Date.now()) return next(new HttpError(400, 'expiresAt must be a timestamp in the future'));
+
+    clients.addClientTokenByUserId(req.params.clientId, req.user.id, expiresAt, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(201, { token: result }));
