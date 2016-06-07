@@ -5,6 +5,7 @@
 exports = module.exports = {
     get: get,
     getAll: getAll,
+    getAllWithTokenCount: getAllWithTokenCount,
     getAllWithTokenCountByIdentifier: getAllWithTokenCountByIdentifier,
     add: add,
     del: del,
@@ -40,6 +41,16 @@ function getAll(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + CLIENTS_FIELDS + ' FROM clients ORDER BY appId', function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null, results);
+    });
+}
+
+function getAllWithTokenCount(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', [], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, results);
