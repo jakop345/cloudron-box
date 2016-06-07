@@ -156,6 +156,54 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         }
     };
 
+    $scope.clientAdd = {
+        busy: false,
+        error: {},
+        name: '',
+        scope: '',
+        redirectURI: '',
+
+        show: function () {
+            $scope.clientAdd.busy = false;
+
+            $scope.clientAdd.error = {};
+            $scope.clientAdd.name = '';
+            $scope.clientAdd.scope = '*';
+            $scope.clientAdd.redirectURI = '';
+
+            $scope.clientAddForm.$setUntouched();
+            $scope.clientAddForm.$setPristine();
+
+            $('#clientAddModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.groupAdd.busy = true;
+            $scope.groupAdd.error = {};
+
+            Client.createGroup($scope.groupAdd.name, function (error) {
+                $scope.groupAdd.busy = false;
+
+                if (error && error.statusCode === 409) {
+                    $scope.groupAdd.error.name = 'Name already taken';
+                    $scope.groupAddForm.name.$setPristine();
+                    $('#groupAddName').focus();
+                    return;
+                }
+                if (error && error.statusCode === 400) {
+                    $scope.groupAdd.error.name = error.message;
+                    $scope.groupAddForm.name.$setPristine();
+                    $('#groupAddName').focus();
+                    return;
+                }
+                if (error) return console.error('Unable to create group.', error.statusCode, error.message);
+
+                refresh();
+                $('#groupAddModal').modal('hide');
+            });
+        }
+    };
+
     $scope.removeAccessTokens = function (client) {
         client.busy = true;
 

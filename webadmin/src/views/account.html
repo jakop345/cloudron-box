@@ -99,6 +99,49 @@
     </div>
 </div>
 
+<!-- Modal add client -->
+<div class="modal fade" id="clientAddModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add API Client</h4>
+            </div>
+            <div class="modal-body">
+                <form name="clientAddForm" role="form" novalidate ng-submit="clientAdd.submit()" autocomplete="off">
+                    <div class="form-group" ng-class="{ 'has-error': (clientAddForm.name.$dirty && clientAddForm.name.$invalid) || (!clientAddForm.name.$dirty && clientAdd.error.name) }">
+                        <label class="control-label">Name</label>
+                        <div class="control-label" ng-show="(!clientAddForm.name.$dirty && clientAdd.error.name) || (clientAddForm.name.$dirty && clientAddForm.name.$invalid)">
+                            <small ng-show="clientAddForm.name.$error.required">A name is required</small>
+                            <small ng-show="!clientAddForm.name.$dirty && clientAdd.error.name">{{ clientAdd.error.name }}</small>
+                        </div>
+                        <input type="text" class="form-control" ng-model="clientAdd.name" name="name" required autofocus>
+                    </div>
+                    <div class="form-group" ng-class="{ 'has-error': (clientAddForm.scope.$dirty && clientAddForm.scope.$invalid) || (!clientAddForm.scope.$dirty && clientAdd.error.scope) }">
+                        <label class="control-label">Scope</label>
+                        <div class="control-label" ng-show="(!clientAddForm.scope.$dirty && clientAdd.error.scope) || (clientAddForm.scope.$dirty && clientAddForm.scope.$invalid)">
+                            <small ng-show="clientAddForm.scope.$error.required">A scope is required</small>
+                            <small ng-show="!clientAddForm.scope.$dirty && clientAdd.error.scope">{{ clientAdd.error.scope }}</small>
+                        </div>
+                        <input type="text" class="form-control" ng-model="clientAdd.scope" name="scope" required>
+                    </div>
+                    <div class="form-group" ng-class="{ 'has-error': (clientAddForm.redirectURI.$dirty && clientAddForm.redirectURI.$invalid) || (!clientAddForm.redirectURI.$dirty && clientAdd.error.redirectURI) }">
+                        <label class="control-label">Redirect URI</label>
+                        <div class="control-label" ng-show="!clientAddForm.redirectURI.$dirty && clientAdd.error.redirectURI">
+                            <small ng-show="!clientAddForm.redirectURI.$dirty && clientAdd.error.redirectURI">{{ clientAdd.error.redirectURI }}</small>
+                        </div>
+                        <input type="text" class="form-control" ng-model="clientAdd.redirectURI" name="redirectURI" placeholder="Only required if OAuth logins are used">
+                    </div>
+                    <input class="hide" type="submit" ng-disabled="clientAddForm.$invalid || clientAdd.busy"/>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="clientAdd.submit()" ng-disabled="clientAddForm.$invalid || clientAdd.busy"><i class="fa fa-spinner fa-pulse" ng-show="clientAdd.busy"></i> Add API Client</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <br/>
 
 <div class="section-header">
@@ -140,11 +183,15 @@
     </div>
 </div>
 
+<br/>
+
 <div class="section-header">
     <div class="text-left">
-        <h3>Application Access</h3>
+        <h3>Application and API Access <button class="btn btn-primary btn-outline pull-right" ng-click="clientAdd.show()"><i class="fa fa-plus"></i> New API Client</button></h3>
     </div>
 </div>
+
+<br/>
 
 <!-- we will always at least have the webadmin token here, so activeClients always will have one entry with at least one token -->
 <div class="card" ng-repeat="client in activeClients" style="margin-bottom: 15px;" ng-hide="client.tokenCount === 0">
