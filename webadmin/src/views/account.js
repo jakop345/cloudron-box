@@ -231,6 +231,27 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         }
     };
 
+    $scope.tokenAdd = {
+        busy: false,
+        token: {},
+
+        show: function (client) {
+            $scope.tokenAdd.busy = true;
+            $scope.tokenAdd.token = {};
+
+            Client.createTokenByClientId(client.id, function (error, result) {
+                if (error) console.error(error);
+
+                $scope.tokenAdd.busy = false;
+                $scope.tokenAdd.token = result;
+
+                $('#tokenAddModal').modal('show');
+
+                // refresh token list
+            });
+        }
+    };
+
     $scope.removeAccessTokens = function (client) {
         client.busy = true;
 

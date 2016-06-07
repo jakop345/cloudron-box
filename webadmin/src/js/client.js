@@ -549,6 +549,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.createTokenByClientId = function (id, callback) {
+        $http.post(client.apiOrigin + '/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
+            if (status !== 201) return callback(new ClientError(status, data));
+            callback(null, data.token);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.getTokensByClientId = function (id, callback) {
         $http.get(client.apiOrigin + '/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
