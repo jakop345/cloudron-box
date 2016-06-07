@@ -205,6 +205,25 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         }
     };
 
+    $scope.clientRemove = {
+        busy: false,
+        client: {},
+
+        show: function (client) {
+            $scope.clientRemove.busy = true;
+            $scope.clientRemove.client = client;
+            $('#clientRemoveModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.clientRemove.busy = true;
+
+            $scope.clientRemove.busy = false;
+
+            $('#clientRemoveModal').modal('hide');
+        }
+    };
+
     $scope.removeAccessTokens = function (client) {
         client.busy = true;
 

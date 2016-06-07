@@ -142,6 +142,24 @@
     </div>
 </div>
 
+<!-- Modal remove client -->
+<div class="modal fade" id="clientRemoveModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Remove API Client</h4>
+            </div>
+            <div class="modal-body">
+                Removing API client {{ clientRemove.appId }} will also remove all access from scripts and apps using those credentials.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="clientRemove.submit()" ng-disabled="clientRemove.busy"><i class="fa fa-spinner fa-pulse" ng-show="clientRemove.busy"></i> Remove API Client</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <br/>
 
 <div class="section-header">
@@ -198,7 +216,9 @@
     <div class="grid-item-top">
         <div class="row">
             <div class="col-xs-12">
-                <h4 class="text-muted">{{client.name}} <span ng-show="client.location !== 'external'">on {{client.location}}{{ config.isCustomDomain ? '.' : '-' }}{{config.fqdn}}</span></h4>
+                <h4 class="text-muted">
+                    {{client.name}} <span ng-show="client.location !== 'external'">on {{client.location}}{{ config.isCustomDomain ? '.' : '-' }}{{config.fqdn}}</span>
+                </h4>
             </div>
         </div>
         <div class="row">
@@ -212,9 +232,10 @@
                         <div id="collapse{{client.id}}" class="panel-collapse collapse">
                             <div class="panel-body">
                                 <h4 class="text-muted">Credentials</h4>
-                                <p>Permissions: <b>{{ client.scope }}</b></p>
+                                <p>Scope: <b>{{ client.scope }}</b></p>
                                 <p>Client ID: <b>{{ client.id }}</b></p>
                                 <p ng-show="client.clientSecret">Client Secret: <b>{{ client.clientSecret }}</b></p>
+                                <button class="btn btn-xs btn-danger pull-right" ng-click="clientRemove.show(client)" title="Remove API Client" ng-show="client.location === 'external'"><i class="fa fa-trash-o"></i> Remove API Client</button>
                             </div>
                         </div>
                     </div>
