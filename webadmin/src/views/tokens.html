@@ -108,7 +108,7 @@
                         <b>{{ client.activeTokens.length }}</b> tokens are active for this application.
                         <button class="btn btn-xs btn-default pull-right" ng-click="removeAccessTokens(client)" ng-disabled="!client.activeTokens.length || client.busy"><i class="fa fa-spinner fa-pulse" ng-show="client.busy"></i> Revoke access</button>
                         <br/>
-                        <a href="" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.id}}" ng-show="user.admin">Advanced</a>
+                        <a href="" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.id}}">Advanced</a>
                         <div id="collapse{{client.id}}" class="panel-collapse collapse">
                             <div class="panel-body">
                                 <hr/>
