@@ -7,7 +7,8 @@ exports = module.exports = {
     getAll: getAll,
     addClientToken: addClientToken,
     getClientTokens: getClientTokens,
-    delClientTokens: delClientTokens
+    delClientTokens: delClientTokens,
+    delToken: delToken
 };
 
 var assert = require('assert'),
@@ -90,6 +91,20 @@ function delClientTokens(req, res, next) {
     clients.delClientTokensByUserId(req.params.clientId, req.user.id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
         if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(204));
+    });
+}
+
+function delToken(req, res, next) {
+    assert.strictEqual(typeof req.params.clientId, 'string');
+    assert.strictEqual(typeof req.params.tokenId, 'string');
+    assert.strictEqual(typeof req.user, 'object');
+
+    clients.delToken(req.params.clientId, req.params.tokenId, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
+        if (error && error.reason === ClientsError.INVALID_TOKEN) return next(new HttpError(404, 'no such token'));
+        if (error) return next(new HttpError(500, error));
+
         next(new HttpSuccess(204));
     });
 }
