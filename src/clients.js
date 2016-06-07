@@ -275,7 +275,7 @@ function addClientTokenByUserId(clientId, userId, callback) {
 
 function delToken(clientId, tokenId, callback) {
     assert.strictEqual(typeof clientId, 'string');
-    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof tokenId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     get(clientId, function (error, result) {
