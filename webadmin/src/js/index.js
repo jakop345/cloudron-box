@@ -54,6 +54,9 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/support', {
         controller: 'SupportController',
         templateUrl: 'views/support.html'
+    }).when('/tokens', {
+        controller: 'TokensController',
+        templateUrl: 'views/tokens.html'
     }).otherwise({ redirectTo: '/'});
 }]);
 
