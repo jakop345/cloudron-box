@@ -529,6 +529,19 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.addOAuthClient = function (appId, scope, redirectURI, callback) {
+        var data = {
+            appId: appId,
+            scope: scope,
+            redirectURI: redirectURI
+        };
+
+        $http.post(client.apiOrigin + '/api/v1/oauth/clients', data).success(function(data, status) {
+            if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null, data.clients);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.delTokensByClientId = function (id, callback) {
         $http.delete(client.apiOrigin + '/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
