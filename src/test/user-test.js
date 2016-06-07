@@ -578,6 +578,19 @@ describe('User', function () {
         });
     });
 
+    describe('count', function () {
+        before(createOwner);
+        after(cleanupUsers);
+
+        it('succeeds', function (done) {
+            user.count(function (error, count) {
+                expect(error).to.not.be.ok();
+                expect(count).to.be(1);
+                done();
+            });
+        });
+    });
+
     describe('set password', function () {
         before(createOwner);
         after(cleanupUsers);

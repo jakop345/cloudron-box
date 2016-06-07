@@ -5,6 +5,7 @@ exports = module.exports = {
 
     list: listUsers,
     create: createUser,
+    count: count,
     verify: verify,
     verifyWithUsername: verifyWithUsername,
     verifyWithEmail: verifyWithEmail,
@@ -283,6 +284,16 @@ function listUsers(callback) {
             result.admin = result.groupIds.indexOf(groups.ADMIN_GROUP_ID) !== -1;
         });
         return callback(null, results);
+    });
+}
+
+function count(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    userdb.count(function (error, count) {
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        callback(null, count);
     });
 }
 

@@ -53,9 +53,8 @@ var apps = require('./apps.js'),
     updateChecker = require('./updatechecker.js'),
     user = require('./user.js'),
     UserError = user.UserError,
-    userdb = require('./userdb.js'),
-    util = require('util'),
-    uuid = require('node-uuid');
+    user = require('./user.js'),
+    util = require('util');
 
 var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update',
@@ -254,7 +253,7 @@ function activate(username, password, email, displayName, ip, auditSource, callb
 function getStatus(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.count(function (error, count) {
+    user.count(function (error, count) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         settings.getCloudronName(function (error, cloudronName) {
