@@ -254,7 +254,8 @@
                             <div class="panel-body">
                                 <hr/>
                                 <h4 class="text-muted">Credentials <button class="btn btn-xs btn-danger pull-right" ng-click="clientRemove.show(client)" title="Remove API Client" ng-show="client.location === 'external'">Remove API Client</button></h4>
-                                <p>Scope: <b>{{ client.scope }}</b></p>
+                                <p>Scope: <b ng-click-select>{{ client.scope }}</b></p>
+                                <p>RedirectURI: <b ng-click-select>{{ client.redirectURI }}</b></p>
                                 <p>Client ID: <b ng-click-select>{{ client.id }}</b></p>
                                 <p ng-show="client.clientSecret">Client Secret: <b ng-click-select>{{ client.clientSecret }}</b></p>
 
