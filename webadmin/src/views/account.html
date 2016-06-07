@@ -261,7 +261,7 @@
 
                                 <h4 class="text-muted">Your Tokens <button class="btn btn-xs btn-primary btn-outline pull-right" ng-click="tokenAdd.show(client)"><i class="fa fa-plus"></i> New Token</button></h4>
                                 <p ng-repeat="token in client.activeTokens">
-                                    <b ng-click-select>{{ token.accessToken }}</b> <button class="btn btn-xs btn-danger pull-right" ng-click="" title="Revoke Token"><i class="fa fa-trash-o"></i></button>
+                                    <b ng-click-select>{{ token.accessToken }}</b> <button class="btn btn-xs btn-danger pull-right" ng-click="removeToken(client, token)" title="Revoke Token"><i class="fa fa-trash-o"></i></button>
                                 </p>
                             </div>
                         </div>

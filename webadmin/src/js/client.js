@@ -570,6 +570,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.delToken = function (clientId, tokenId, callback) {
+        $http.delete(client.apiOrigin + '/api/v1/oauth/clients/' + clientId + '/tokens/' + tokenId).success(function(data, status) {
+            if (status !== 204) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.update = function (password, callback) {
         $http.post(client.apiOrigin + '/api/v1/cloudron/update', { password: password }).success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));

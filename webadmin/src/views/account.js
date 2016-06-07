@@ -252,6 +252,14 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         }
     };
 
+    $scope.removeToken = function (client, token) {
+        Client.delToken(client.id, token.accessToken, function (error) {
+            if (error) console.error(error);
+
+            refreshClientTokens(client);
+        });
+    };
+
     $scope.removeAccessTokens = function (client) {
         client.busy = true;
 
