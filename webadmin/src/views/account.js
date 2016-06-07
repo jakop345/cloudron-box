@@ -239,7 +239,9 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
             $scope.tokenAdd.busy = true;
             $scope.tokenAdd.token = {};
 
-            Client.createTokenByClientId(client.id, function (error, result) {
+            var expiresAt = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;   // ~100 years from now
+
+            Client.createTokenByClientId(client.id, expiresAt, function (error, result) {
                 if (error) console.error(error);
 
                 $scope.tokenAdd.busy = false;
