@@ -52,8 +52,8 @@ function getAllWithTokenCountByIdentifier(identifier, callback) {
 
     database.query('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId WHERE tokens.identifier=? GROUP BY clients.id', [ identifier ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        callback(null, results);
 
+        callback(null, results);
     });
 }
 
@@ -65,7 +65,7 @@ function getByAppId(appId, callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        return callback(null, result[0]);
+        callback(null, result[0]);
     });
 }
 
@@ -78,7 +78,7 @@ function getByAppIdAndType(appId, type, callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        return callback(null, result[0]);
+        callback(null, result[0]);
     });
 }
 
@@ -121,7 +121,7 @@ function delByAppId(appId, callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        return callback(null);
+        callback(null);
     });
 }
 
@@ -134,7 +134,7 @@ function delByAppIdAndType(appId, type, callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        return callback(null);
+        callback(null);
     });
 }
 
@@ -144,7 +144,7 @@ function clear(callback) {
     database.query('DELETE FROM clients WHERE appId!="webadmin"', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        return callback(null);
+        callback(null);
     });
 }
 
