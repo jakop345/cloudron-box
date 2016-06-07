@@ -253,7 +253,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
     function refresh() {
         $scope.tokenInUse = Client._token;
 
-        Client.getOAuthClients(!!$scope.user.admin /* admins see all */, function (error, activeClients) {
+        Client.getOAuthClients(function (error, activeClients) {
             if (error) return console.error(error);
 
             $scope.activeClients = activeClients;
