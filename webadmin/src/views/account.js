@@ -210,7 +210,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         client: {},
 
         show: function (client) {
-            $scope.clientRemove.busy = true;
+            $scope.clientRemove.busy = false;
             $scope.clientRemove.client = client;
             $('#clientRemoveModal').modal('show');
         },
@@ -218,9 +218,16 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         submit: function () {
             $scope.clientRemove.busy = true;
 
-            $scope.clientRemove.busy = false;
+            Client.delOAuthClient($scope.clientRemove.client.id, function (error) {
+                if (error) console.error(error);
 
-            $('#clientRemoveModal').modal('hide');
+                $scope.clientRemove.busy = false;
+                $scope.clientRemove.client = {};
+
+                refresh();
+
+                $('#clientRemoveModal').modal('hide');
+            });
         }
     };
 

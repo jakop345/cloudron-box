@@ -150,11 +150,14 @@
                 <h4 class="modal-title">Remove API Client</h4>
             </div>
             <div class="modal-body">
-                Removing API client {{ clientRemove.appId }} will also remove all access from scripts and apps using those credentials.
+                <p>
+                    Removing client <b>{{ clientRemove.client.appId }}</b> will also remove all access from scripts and apps using those credentials.
+                    You may want to consult the other Cloudron admins first.
+                </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="clientRemove.submit()" ng-disabled="clientRemove.busy"><i class="fa fa-spinner fa-pulse" ng-show="clientRemove.busy"></i> Remove API Client</button>
+                <button type="button" class="btn btn-danger" ng-click="clientRemove.submit()" ng-disabled="clientRemove.busy"><i class="fa fa-spinner fa-pulse" ng-show="clientRemove.busy"></i> Remove API Client</button>
             </div>
         </div>
     </div>
