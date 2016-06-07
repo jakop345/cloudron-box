@@ -20,7 +20,6 @@ var assert = require('assert'),
     passport = require('passport'),
     tokendb = require('./tokendb'),
     user = require('./user'),
-    userdb = require('./userdb'),
     UserError = user.UserError,
     _ = require('underscore');
 
@@ -32,7 +31,7 @@ function initialize(callback) {
     });
 
     passport.deserializeUser(function(userId, callback) {
-        userdb.get(userId, function (error, result) {
+        user.get(userId, function (error, result) {
             if (error) return callback(error);
 
             var md5 = crypto.createHash('md5').update(result.email.toLowerCase()).digest('hex');
@@ -102,18 +101,11 @@ function initialize(callback) {
             // passport put the 'info' object into req.authInfo, where we can further validate the scopes
             var info = { scope: token.scope };
 
-            userdb.get(token.identifier, function (error, user) {
+            user.get(token.identifier, function (error, user) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);
 
-                // amend the admin flag
-                groups.isMember(groups.ADMIN_GROUP_ID, user.id, function (error, isAdmin) {
-                    if (error) return callback(error);
-
-                    user.admin = isAdmin;
-
-                    callback(null, user, info);
-                });
+                callback(null, user, info);
             });
         });
     }));
