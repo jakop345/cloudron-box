@@ -167,7 +167,7 @@ function getAll(callback) {
 
             appdb.get(record.appId, function (error, result) {
                 if (error) {
-                    console.error('Failed to get app details for oauth client', result, error);
+                    console.error('Failed to get app details for oauth client', record.appId, error);
                     return callback(null);  // ignore error so we continue listing clients
                 }
 
