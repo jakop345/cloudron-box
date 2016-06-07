@@ -260,13 +260,13 @@ function addClientTokenByUserId(clientId, userId, callback) {
         tokendb.add(token, userId, result.id, expiresAt, result.scope, function (error) {
             if (error) return callback(new ClientsError(ClientsError.INTERNAL_ERROR, error));
 
-            callback(null, { token: {
+            callback(null, {
                 accessToken: token,
                 identifier: userId,
                 clientId: result.id,
                 scope: result.id,
                 expires: expiresAt
-            }});
+            });
         });
     });
 }
