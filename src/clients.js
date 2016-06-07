@@ -11,6 +11,7 @@ exports = module.exports = {
     getClientTokensByUserId: getClientTokensByUserId,
     delClientTokensByUserId: delClientTokensByUserId,
     delByAppIdAndType: delByAppIdAndType,
+    addClientTokenByUserId: addClientTokenByUserId,
 
     // keep this in sync with start.sh ADMIN_SCOPES that generates the cid-webadmin
     SCOPE_APPS: 'apps',
@@ -64,6 +65,7 @@ function ClientsError(reason, errorOrMessage) {
 util.inherits(ClientsError, Error);
 ClientsError.INVALID_SCOPE = 'Invalid scope';
 ClientsError.INVALID_CLIENT = 'Invalid client';
+ClientsError.INTERNAL_ERROR = 'Internal Error';
 
 function validateScope(scope) {
     assert.strictEqual(typeof scope, 'string');
@@ -241,5 +243,30 @@ function delByAppIdAndType(appId, type, callback) {
     clientdb.delByAppIdAndType(appId, type, function (error) {
         if (error) return callback(error);
         callback(null);
+    });
+}
+
+function addClientTokenByUserId(clientId, userId, callback) {
+    assert.strictEqual(typeof clientId, 'string');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    get(clientId, function (error, result) {
+        if (error) return callback(error);
+
+        var token = tokendb.generateToken();
+        var expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+
+        tokendb.add(token, userId, result.id, expiresAt, result.scope, function (error) {
+            if (error) return callback(new ClientsError(ClientsError.INTERNAL_ERROR, error));
+
+            callback(null, { token: {
+                accessToken: token,
+                identifier: userId,
+                clientId: result.id,
+                scope: result.id,
+                expires: expiresAt
+            }});
+        });
     });
 }
