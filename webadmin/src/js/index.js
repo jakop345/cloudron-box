@@ -94,6 +94,12 @@ app.filter('installSuccess', function () {
     };
 });
 
+app.filter('activeOAuthClients', function () {
+    return function (clients, user) {
+        return clients.filter(function (c) { return user.admin || (c.activeTokens && c.activeTokens.length > 0); });
+    };
+});
+
 app.filter('installationActive', function () {
     return function(app) {
         if (app.installationState === ISTATES.ERROR) return false;
