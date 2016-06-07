@@ -98,11 +98,15 @@ function add(appId, type, redirectURI, scope, callback) {
     assert.strictEqual(typeof scope, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    // allow whitespace
+    scope = scope.split(',').map(function (s) { return s.trim(); }).join(',');
+
     var error = validateScope(scope);
     if (error) return callback(error);
 
     var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);
+
 
     clientdb.add(id, appId, type, clientSecret, redirectURI, scope, function (error) {
         if (error) return callback(error);
