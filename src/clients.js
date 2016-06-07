@@ -7,7 +7,6 @@ exports = module.exports = {
     get: get,
     del: del,
     getAll: getAll,
-    getAllWithDetailsByUserId: getAllWithDetailsByUserId,
     getByAppIdAndType: getByAppIdAndType,
     getClientTokensByUserId: getClientTokensByUserId,
     delClientTokensByUserId: delClientTokensByUserId,
@@ -171,56 +170,6 @@ function getAll(callback) {
                 if (record.type === exports.TYPE_PROXY) record.name = result.manifest.title + ' Website Proxy';
                 if (record.type === exports.TYPE_OAUTH) record.name = result.manifest.title + ' OAuth';
                 if (record.type === exports.TYPE_SIMPLE_AUTH) record.name = result.manifest.title + ' Simple Auth';
-
-                record.location = result.location;
-
-                tmp.push(record);
-
-                callback(null);
-            });
-        }, function (error) {
-            if (error) return callback(error);
-            callback(null, tmp);
-        });
-    });
-}
-
-function getAllWithDetailsByUserId(userId, callback) {
-    assert.strictEqual(typeof userId, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    clientdb.getAllWithTokenCountByIdentifier(userId, function (error, results) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, []);
-        if (error) return callback(error);
-
-        var tmp = [];
-        async.each(results, function (record, callback) {
-            if (record.type === exports.TYPE_ADMIN) {
-                record.name = constants.ADMIN_NAME;
-                record.location = constants.ADMIN_LOCATION;
-
-                tmp.push(record);
-
-                return callback(null);
-            } else if (record.type === exports.TYPE_EXTERNAL) {
-                record.name = record.appId;
-                record.location = 'external';
-
-                tmp.push(record);
-
-                return callback(null);
-            }
-
-            appdb.get(record.appId, function (error, result) {
-                if (error) {
-                    console.error('Failed to get app details for oauth client', result, error);
-                    return callback(null);  // ignore error so we continue listing clients
-                }
-
-                if (record.type === exports.TYPE_PROXY) record.name = result.manifest.title + ' Website Proxy';
-                if (record.type === exports.TYPE_OAUTH) record.name = result.manifest.title + ' OAuth';
-                if (record.type === exports.TYPE_SIMPLE_AUTH) record.name = result.manifest.title + ' Simple Auth';
-                if (record.type === exports.TYPE_EXTERNAL) record.name = result.manifest.title + ' external';
 
                 record.location = result.location;
 
