@@ -247,7 +247,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
 
                 $('#tokenAddModal').modal('show');
 
-                // refresh token list
+                refreshClientTokens(client);
             });
         }
     };
@@ -260,7 +260,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
 
             client.busy = false;
 
-            refresh();
+            refreshClientTokens(client);
         });
     };
 
@@ -271,6 +271,14 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         });
     };
 
+    function refreshClientTokens(client) {
+        Client.getTokensByClientId(client.id, function (error, result) {
+            if (error) console.error(error);
+
+            client.activeTokens = result || [];
+        });
+    }
+
     function refresh() {
         $scope.tokenInUse = Client._token;
 
@@ -279,13 +287,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
 
             $scope.activeClients = activeClients;
 
-            $scope.activeClients.forEach(function (client) {
-                Client.getTokensByClientId(client.id, function (error, result) {
-                    if (error) console.error(error);
-
-                    client.activeTokens = result || [];
-                });
-            });
+            $scope.activeClients.forEach(refreshClientTokens);
         });
     }
 
