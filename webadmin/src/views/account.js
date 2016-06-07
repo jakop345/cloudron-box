@@ -178,28 +178,29 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         },
 
         submit: function () {
-            $scope.groupAdd.busy = true;
-            $scope.groupAdd.error = {};
+            $scope.clientAdd.busy = true;
+            $scope.clientAdd.error = {};
 
-            Client.createGroup($scope.groupAdd.name, function (error) {
-                $scope.groupAdd.busy = false;
+            var CLIENT_REDIRECT_URI_FALLBACK = Client.apiOrigin;
 
-                if (error && error.statusCode === 409) {
-                    $scope.groupAdd.error.name = 'Name already taken';
-                    $scope.groupAddForm.name.$setPristine();
-                    $('#groupAddName').focus();
-                    return;
-                }
+            Client.createOAuthClient($scope.clientAdd.name, $scope.clientAdd.scope, $scope.clientAdd.redirectURI || CLIENT_REDIRECT_URI_FALLBACK, function (error) {
+                $scope.clientAdd.busy = false;
+
                 if (error && error.statusCode === 400) {
-                    $scope.groupAdd.error.name = error.message;
-                    $scope.groupAddForm.name.$setPristine();
-                    $('#groupAddName').focus();
+                    if (error.message.indexOf('redirectURI must be a valid uri') === 0) {
+                        $scope.clientAdd.error.redirectURI = error.message;
+                        $scope.clientAddForm.redirectURI.$setPristine();
+                        $('#clientAddRedirectURI').focus();
+                    } else {
+                        // TODO scope checking
+                    }
                     return;
                 }
-                if (error) return console.error('Unable to create group.', error.statusCode, error.message);
+                if (error) return console.error('Unable to create API client.', error.statusCode, error.message);
 
                 refresh();
-                $('#groupAddModal').modal('hide');
+
+                $('#clientAddModal').modal('hide');
             });
         }
     };
@@ -212,12 +213,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
 
             client.busy = false;
 
-            // update the list
-            Client.getOAuthClients(function (error, activeClients) {
-                if (error) return console.error(error);
-
-                $scope.activeClients = activeClients;
-            });
+            refresh();
         });
     };
 
@@ -228,15 +224,17 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         });
     };
 
-    Client.onReady(function () {
+    function refresh() {
         $scope.tokenInUse = Client._token;
 
-        Client.getOAuthClients(function (error, activeClients) {
+        Client.getOAuthClients(!!$scope.user.admin /* admins see all */, function (error, activeClients) {
             if (error) return console.error(error);
 
             $scope.activeClients = activeClients;
         });
-    });
+    }
+
+    Client.onReady(refresh);
 
     // setup all the dialog focus handling
     ['passwordChangeModal', 'emailChangeModal', 'displayNameChangeModal', 'clientAddModal'].forEach(function (id) {
