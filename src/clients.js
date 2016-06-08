@@ -158,7 +158,7 @@ function getAll(callback) {
         var tmp = [];
         async.each(results, function (record, callback) {
             if (record.type === exports.TYPE_ADMIN || record.type === exports.TYPE_SDK || record.type === exports.TYPE_CLI) {
-                record.name = record.appid;
+                record.name = record.appId;
                 record.location = constants.ADMIN_LOCATION;
 
                 tmp.push(record);
