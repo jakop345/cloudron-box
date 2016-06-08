@@ -178,7 +178,7 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
         })();
     }
 
-    function revokeTokenByClient(client, callback) {
+    function revokeTokensByClient(client, callback) {
         Client.delTokensByClientId(client.id, function (error) {
             if (error) console.error(error);
             callback();
@@ -186,8 +186,14 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
     }
 
     $scope.revokeTokens = function () {
-        asyncForEach($scope.activeClients, revokeTokenByClient, function () {
-            console.log('done');
+        asyncForEach($scope.activeClients, revokeTokensByClient, function () {
+
+            // now kill this session if exists
+            if (!$scope.webadminClient || !$scope.webadminClient.id) return;
+
+            revokeTokensByClient($scope.webadminClient, function () {
+                // we should be logged out by now
+            });
         });
     };
 
