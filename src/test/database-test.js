@@ -920,9 +920,9 @@ describe('database', function () {
             clientdb.getAll(function (error, result) {
                 expect(error).to.be(null);
                 expect(result).to.be.an(Array);
-                expect(result.length).to.equal(3); // one of them is webadmin
-                expect(result[0]).to.eql(CLIENT_0);
-                expect(result[1]).to.eql(CLIENT_1);
+                expect(result.length).to.equal(5); // three built-in clients
+                expect(result[3]).to.eql(CLIENT_0);
+                expect(result[4]).to.eql(CLIENT_1);
                 done();
             });
         });
