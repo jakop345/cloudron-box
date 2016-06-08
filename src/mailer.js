@@ -114,7 +114,7 @@ function getTxtRecords(callback) {
 function checkDns() {
     getTxtRecords(function (error, records) {
         if (error || !records) {
-            debug('checkDns: DNS error or no records looking up TXT records for %s %s', config.adminFqdn(), error, records);
+            debug('checkDns: DNS error or no records looking up TXT records for %s %s', config.fqdn(), error, records);
             gCheckDnsTimerId = setTimeout(checkDns, 60000);
             return;
         }
