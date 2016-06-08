@@ -181,7 +181,7 @@ function authenticateUser(req, res, next) {
         var parts = commonName.split('@');
         if (parts[1] === config.fqdn()) { // internal email, verify with username
             commonName = parts[0];
-            api = user.verify;
+            api = user.verifyWithUsername;
         } else { // external email
             api = user.verifyWithEmail;
         }
