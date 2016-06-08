@@ -843,18 +843,19 @@ function updateApps(updateInfo, auditSource, callback) { // updateInfo is { appI
     assert.strictEqual(typeof callback, 'function');
 
     function canAutoupdateApp(app, newManifest) {
-        var tcpPorts = newManifest.tcpPorts || { };
+        var newTcpPorts = newManifest.newTcpPorts || { };
+        var oldTcpPorts = app.manifest.tcpPorts || { };
         var portBindings = app.portBindings; // this is never null
 
-        if (Object.keys(tcpPorts).length === 0 && Object.keys(portBindings).length === 0) return null;
-        if (Object.keys(tcpPorts).length === 0) return new Error('tcpPorts is now empty but portBindings is not');
-        if (Object.keys(portBindings).length === 0) return new Error('portBindings is now empty but tcpPorts is not');
-
-        for (var env in tcpPorts) {
-            if (!(env in portBindings)) return new Error(env + ' is required from user');
+        for (var env in newTcpPorts) {
+            if (!(env in oldTcpPorts)) return new Error(env + ' is required from user');
         }
 
-        // it's fine if one or more keys got removed
+        for (env in portBindings) {
+            if (!(env in newTcpPorts)) return new Error(env + ' was in use but new update removes it');
+        }
+
+        // it's fine if one or more (unused) keys got removed
         return null;
     }
 
