@@ -4,6 +4,10 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
 
+    $scope.activeTokens = 0;
+    $scope.activeClients = [];
+    $scope.webadminClient = {};
+
     $scope.passwordchange = {
         busy: false,
         error: {},
@@ -159,6 +163,58 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
             $scope.$parent.startTutorial();
         });
     };
+
+    // poor man's async
+    function asyncForEach(items, handler, callback) {
+        var cur = 0;
+
+        (function iterator() {
+            handler(items[cur], function () {
+                if (cur >= items.length-1) return callback();
+                ++cur;
+
+                iterator();
+            });
+        })();
+    }
+
+    function revokeTokenByClient(client, callback) {
+        Client.delTokensByClientId(client.id, function (error) {
+            if (error) console.error(error);
+            callback();
+        });
+    }
+
+    $scope.revokeTokens = function () {
+        asyncForEach($scope.activeClients, revokeTokenByClient, function () {
+            console.log('done');
+        });
+    };
+
+    function refreshClientTokens(client, callback) {
+        Client.getTokensByClientId(client.id, function (error, result) {
+            if (error) console.error(error);
+
+            client.activeTokens = result || [];
+
+            callback();
+        });
+    }
+
+    Client.onReady(function () {
+        Client.getOAuthClients(function (error, activeClients) {
+            if (error) return console.error(error);
+
+            asyncForEach(activeClients, refreshClientTokens, function () {
+                activeClients = activeClients.filter(function (c) { return c.activeTokens.length > 0; });
+
+                $scope.activeTokenCount = activeClients.reduce(function (prev, cur) { return prev + cur.activeTokens.length; }, 0);
+
+                $scope.activeClients = activeClients.filter(function (c) { return c.id !== 'cid-sdk' && c.id !== 'cid-webadmin'; });
+                $scope.webadminClient = activeClients.filter(function (c) { return c.id === 'cid-webadmin'; })[0];
+            });
+        });
+    });
 
     // setup all the dialog focus handling
     ['passwordChangeModal', 'emailChangeModal', 'displayNameChangeModal'].forEach(function (id) {

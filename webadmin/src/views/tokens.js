@@ -144,9 +144,7 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
         Client.getOAuthClients(function (error, activeClients) {
             if (error) return console.error(error);
 
-            $scope.activeClients = activeClients;
-
-            $scope.activeClients.forEach(refreshClientTokens);
+            activeClients.forEach(refreshClientTokens);
 
             $scope.activeClients = activeClients.filter(function (c) { return c.id !== 'cid-sdk'; });
             $scope.apiClient = activeClients.filter(function (c) { return c.id === 'cid-sdk'; })[0];

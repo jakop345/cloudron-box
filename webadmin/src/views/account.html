@@ -140,5 +140,28 @@
     </div>
 </div>
 
+<br/>
+
+<div class="section-header">
+    <div class="text-left">
+        <h3>Sessions</h3>
+    </div>
+</div>
+
+<div class="card">
+    <div class="grid-item-top">
+        <div class="row">
+            <div class="col-xs-12">
+                <p>You are logged {{ activeTokenCount }} times into applications, including this session.</p>
+                <hr/>
+                <h4>Active Applications:</h4>
+                <p ng-repeat="client in activeClients"><b>{{ client.name }} ({{client.activeTokens.length}} times)</b></p>
+                <hr/>
+                <button class="btn btn-outline btn-xs btn-danger pull-right" ng-click="revokeTokens()">Revoke access to all</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Offset the footer -->
 <br/><br/>
