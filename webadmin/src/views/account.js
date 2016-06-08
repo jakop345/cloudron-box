@@ -168,6 +168,8 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
     function asyncForEach(items, handler, callback) {
         var cur = 0;
 
+        if (items.length === 0) return callback();
+
         (function iterator() {
             handler(items[cur], function () {
                 if (cur >= items.length-1) return callback();
