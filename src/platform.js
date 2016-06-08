@@ -86,7 +86,7 @@ function startAddons(callback) {
     certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
         if (error) return callback(error);
 
-        shell.sudo('seutp_infra', [ SETUP_INFRA_CMD, paths.DATA_DIR, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath ], function (error) {
+        shell.sudo('setup_infra', [ SETUP_INFRA_CMD, paths.DATA_DIR, config.fqdn(), config.adminFqdn(), certFilePath, keyFilePath ], function (error) {
             callback(error);
         });
     });
