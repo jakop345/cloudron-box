@@ -30,10 +30,7 @@ exports = module.exports = {
     TYPE_EXTERNAL: 'external',
     TYPE_OAUTH: 'addon-oauth',
     TYPE_SIMPLE_AUTH: 'addon-simpleauth',
-    TYPE_PROXY: 'addon-proxy',
-    TYPE_ADMIN: 'admin',
-    TYPE_SDK: 'sdk',
-    TYPE_CLI: 'cli'
+    TYPE_PROXY: 'addon-proxy'
 };
 
 var assert = require('assert'),
@@ -157,16 +154,9 @@ function getAll(callback) {
 
         var tmp = [];
         async.each(results, function (record, callback) {
-            if (record.type === exports.TYPE_ADMIN || record.type === exports.TYPE_SDK || record.type === exports.TYPE_CLI) {
+            if (record.type === exports.TYPE_EXTERNAL) {
+                // the appId in this case holds the name
                 record.name = record.appId;
-                record.location = constants.ADMIN_LOCATION;
-
-                tmp.push(record);
-
-                return callback(null);
-            } else if (record.type === exports.TYPE_EXTERNAL) {
-                record.name = record.appId;
-                record.location = 'external';
 
                 tmp.push(record);
 

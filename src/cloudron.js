@@ -229,7 +229,7 @@ function activate(username, password, email, displayName, ip, auditSource, callb
         if (error && error.reason === UserError.BAD_FIELD) return callback(new CloudronError(CloudronError.BAD_FIELD, error.message));
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        clients.getByAppIdAndType('webadmin', clients.TYPE_ADMIN, function (error, result) {
+        clients.get('cid-webadmin', function (error, result) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             // Also generate a token so the admin creation can also act as a login

@@ -193,15 +193,15 @@ fi
 echo "Add webadmin api cient"
 readonly ADMIN_SCOPES="cloudron,developer,profile,users,apps,settings"
 mysql -u root -p${mysql_root_password} \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"Settings\", \"admin\", \"secret-webadmin\", \"${admin_origin}\", \"${ADMIN_SCOPES}\")" box
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"Settings\", \"external\", \"secret-webadmin\", \"${admin_origin}\", \"${ADMIN_SCOPES}\")" box
 
 echo "Add SDK api client"
 mysql -u root -p${mysql_root_password} \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-sdk\", \"SDK\", \"sdk\", \"secret-sdk\", \"${admin_origin}\", \"*,roleSdk\")" box
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-sdk\", \"SDK\", \"external\", \"secret-sdk\", \"${admin_origin}\", \"*,roleSdk\")" box
 
 echo "Add cli api client"
 mysql -u root -p${mysql_root_password} \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-cli\", \"Cloudron Tool\", \"cli\", \"secret-cli\", \"${admin_origin}\", \"*,roleSdk\")" box
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-cli\", \"Cloudron Tool\", \"external\", \"secret-cli\", \"${admin_origin}\", \"*,roleSdk\")" box
 
 set_progress "80" "Starting Cloudron"
 systemctl start cloudron.target
