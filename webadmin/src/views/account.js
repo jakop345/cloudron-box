@@ -214,10 +214,11 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
             asyncForEach(activeClients, refreshClientTokens, function () {
                 activeClients = activeClients.filter(function (c) { return c.activeTokens.length > 0; });
 
-                $scope.activeTokenCount = activeClients.reduce(function (prev, cur) { return prev + cur.activeTokens.length; }, 0);
-
                 $scope.activeClients = activeClients.filter(function (c) { return c.id !== 'cid-sdk' && c.id !== 'cid-webadmin'; });
                 $scope.webadminClient = activeClients.filter(function (c) { return c.id === 'cid-webadmin'; })[0];
+
+                $scope.activeTokenCount = $scope.activeClients.reduce(function (prev, cur) { return prev + cur.activeTokens.length; }, 0);
+                $scope.activeTokenCount += $scope.webadminClient ? $scope.webadminClient.activeTokens.length : 0;
             });
         });
     });
