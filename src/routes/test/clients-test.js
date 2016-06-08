@@ -505,7 +505,7 @@ describe('Clients', function () {
             .end(function (error, result) {
                 expect(result.statusCode).to.equal(200);
 
-                expect(result.body.clients.length).to.eql(1);
+                expect(result.body.clients.length).to.eql(3);
 
                 done();
             });
