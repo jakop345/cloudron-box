@@ -23,7 +23,7 @@ var assert = require('assert'),
     progress = require('../progress.js'),
     mailer = require('../mailer.js'),
     superagent = require('superagent'),
-    updateChecker = require('./updatechecker.js');
+    updateChecker = require('../updatechecker.js');
 
 function auditSource(req) {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
