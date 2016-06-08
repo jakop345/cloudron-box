@@ -60,7 +60,7 @@ function removeOldImages(callback) {
 
     for (var imageName in infra.images) {
         var image = infra.images[imageName];
-        debug('cleaning up images of %s', image);
+        debug('cleaning up images of %j', image);
         var cmd = 'docker images "%s" | tail -n +2 | awk \'{ print $1 ":" $2 }\' | grep -v "%s" | xargs --no-run-if-empty docker rmi';
         shell.execSync('removeOldImagesSync', util.format(cmd, image.repo, image.tag));
     }
