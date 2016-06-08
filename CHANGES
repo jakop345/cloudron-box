@@ -527,3 +527,6 @@
 - Allow admins to optionally set the username and displayName on user creation
 - Fix app autoupdate logic to detect if one or more in-use port bindings was removed
 
+[0.15.1]
+- Fix mail connectivity from IPv6 clients
+
