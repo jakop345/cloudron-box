@@ -18,6 +18,15 @@ openssl req -x509 -newkey rsa:2048 -keyout data/nginx/cert/host.key -out data/ng
 
 webadmin_scopes="cloudron,profile,users,apps,settings"
 webadmin_origin="https://${ADMIN_LOCATION}-localhost"
-mysql --user=root --password="" \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"admin\", \"secret-webadmin\", \"${webadmin_origin}\", \"${webadmin_scopes}\")" boxtest
 
+echo "Add webadmin api client"
+mysql --user=root --password="" \
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"Settings\", \"external\", \"secret-webadmin\", \"${webadmin_origin}\", \"${webadmin_scopes}\")" boxtest
+
+echo "Add SDK api client"
+mysql --user=root --password="" \
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-sdk\", \"SDK\", \"external\", \"secret-sdk\", \"${webadmin_origin}\", \"*,roleSdk\")" boxtest
+
+echo "Add cli api client"
+mysql --user=root --password="" \
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-cli\", \"Cloudron Tool\", \"external\", \"secret-cli\", \"${webadmin_origin}\", \"*,roleSdk\")" boxtest
