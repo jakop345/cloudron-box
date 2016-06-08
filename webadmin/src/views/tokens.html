@@ -85,7 +85,35 @@
 
 <div class="section-header">
     <div class="text-left">
-        <h3>Application and API Access <button class="btn btn-primary btn-outline pull-right" ng-click="clientAdd.show()"><i class="fa fa-plus"></i> New API Client</button></h3>
+        <h3>API tokens</h3>
+    </div>
+</div>
+
+<!-- we will always at least have the webadmin token here, so activeClients always will have one entry with at least one token -->
+<div class="card">
+    <div class="grid-item-top">
+        <div class="row">
+            <div class="col-xs-12">
+                Use those tokens are for working with <a href="https://cloudron.io/references/api.html" target="_blank">https://cloudron.io/references/api.html</a>.<br/>
+                They have the <b>admin</b> <a href="https://cloudron.io/references/api.html#scopes" target="_blank">scope</a> attached and will not expire.
+                They are issued explicitly for the user who creates them, so they will return that users profile.
+                <br/>
+                <br/>
+                <h4 class="text-muted">Active Tokens <button class="btn btn-xs btn-primary btn-outline pull-right" ng-click="tokenAdd.show(apiClient)"><i class="fa fa-plus"></i> New Token</button></h4>
+                <hr/>
+                <p ng-repeat="token in apiClient.activeTokens">
+                    <b ng-click-select>{{ token.accessToken }}</b> <button class="btn btn-xs btn-danger pull-right" ng-click="removeToken(apiClient, token)" title="Revoke Token"><i class="fa fa-trash-o"></i></button>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br/>
+
+<div class="section-header">
+    <div class="text-left">
+        <h3>Application and other API Access <button class="btn btn-xs btn-primary btn-outline pull-right" ng-click="clientAdd.show()"><i class="fa fa-plus"></i> New API Client</button></h3>
     </div>
 </div>
 

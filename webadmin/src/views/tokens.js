@@ -5,6 +5,7 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
     $scope.config = Client.getConfig();
 
     $scope.activeClients = [];
+    $scope.apiClient = {};
     $scope.tokenInUse = null;
 
     $scope.clientAdd = {
@@ -146,6 +147,9 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
             $scope.activeClients = activeClients;
 
             $scope.activeClients.forEach(refreshClientTokens);
+
+            $scope.activeClients = activeClients.filter(function (c) { return c.id !== 'cid-sdk'; });
+            $scope.apiClient = activeClients.filter(function (c) { return c.id === 'cid-sdk'; })[0];
         });
     }
 
