@@ -68,11 +68,6 @@ function removeOldImages(callback) {
     callback();
 }
 
-function removeImagesSync() {
-    debug('removing existing images');
-    shell.execSync('removeImagesSync', 'docker images -q | xargs --no-run-if-empty docker rmi -f');
-}
-
 function stopContainers(callback) {
     // TODO: be nice and stop addons cleanly (example, shutdown commands)
     debug('stopping existing containers');
