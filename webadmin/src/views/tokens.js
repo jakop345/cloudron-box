@@ -33,7 +33,7 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
             $scope.clientAdd.busy = true;
             $scope.clientAdd.error = {};
 
-            var CLIENT_REDIRECT_URI_FALLBACK = Client.apiOrigin;
+            var CLIENT_REDIRECT_URI_FALLBACK = Client.apiOrigin || location.origin;
 
             Client.createOAuthClient($scope.clientAdd.name, $scope.clientAdd.scope, $scope.clientAdd.redirectURI || CLIENT_REDIRECT_URI_FALLBACK, function (error) {
                 $scope.clientAdd.busy = false;
