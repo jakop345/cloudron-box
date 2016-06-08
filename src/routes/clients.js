@@ -50,6 +50,7 @@ function del(req, res, next) {
 
     clients.del(req.params.clientId, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
+        if (error && error.reason === ClientsError.NOT_ALLOWED) return next(new HttpError(405, error.message));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(204, result));
     });

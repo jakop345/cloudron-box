@@ -70,6 +70,7 @@ ClientsError.INVALID_SCOPE = 'Invalid scope';
 ClientsError.INVALID_CLIENT = 'Invalid client';
 ClientsError.INVALID_TOKEN = 'Invalid token';
 ClientsError.INTERNAL_ERROR = 'Internal Error';
+ClientsError.NOT_ALLOWED = 'Not allowed to remove this client';
 
 function validateScope(scope) {
     assert.strictEqual(typeof scope, 'string');
@@ -109,7 +110,6 @@ function add(appId, type, redirectURI, scope, callback) {
     var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);
 
-
     clientdb.add(id, appId, type, clientSecret, redirectURI, scope, function (error) {
         if (error) return callback(error);
 
@@ -139,6 +139,8 @@ function get(id, callback) {
 function del(id, callback) {
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof callback, 'function');
+
+    if (id === 'cid-webadmin' || id === 'cid-sdk' || id === 'cid-cli') return callback(new ClientsError(ClientsError.NOT_ALLOWED));
 
     clientdb.del(id, function (error, result) {
         if (error) return callback(error);
