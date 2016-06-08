@@ -54,8 +54,7 @@ var apps = require('./apps.js'),
     user = require('./user.js'),
     UserError = user.UserError,
     userdb = require('./userdb.js'),
-    util = require('util'),
-    uuid = require('node-uuid');
+    util = require('util');
 
 var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update',

@@ -8,10 +8,12 @@ exports = module.exports = {
     getProgress: getProgress,
     getConfig: getConfig,
     update: update,
-    feedback: feedback
+    feedback: feedback,
+    checkForUpdates: checkForUpdates
 };
 
 var assert = require('assert'),
+    async = require('async'),
     cloudron = require('../cloudron.js'),
     CloudronError = cloudron.CloudronError,
     config = require('../config.js'),
@@ -20,7 +22,8 @@ var assert = require('assert'),
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     progress = require('../progress.js'),
     mailer = require('../mailer.js'),
-    superagent = require('superagent');
+    superagent = require('superagent'),
+    updateChecker = require('./updatechecker.js');
 
 function auditSource(req) {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
@@ -126,6 +129,15 @@ function update(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));
+    });
+}
+
+function checkForUpdates(req, res, next) {
+    async.series([
+        updateChecker.checkAppUpdates,
+        updateChecker.checkBoxUpdates
+    ], function () {
+        next(new HttpSuccess(200, { update: updateChecker.getUpdateInfo() }));
     });
 }
 
