@@ -72,7 +72,6 @@
             </div>
             <div class="modal-body">
                 <p><b ng-click-select>{{ tokenAdd.token.accessToken }}</b></p>
-                <p>This token will not expire. It can only be revoked.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
@@ -85,7 +84,7 @@
 
 <div class="section-header">
     <div class="text-left">
-        <h3>API tokens</h3>
+        <h3>Personal access tokens <button class="btn btn-xs btn-primary btn-outline pull-right" ng-click="tokenAdd.show(apiClient)"><i class="fa fa-plus"></i> New Token</button> </h3>
     </div>
 </div>
 
@@ -94,12 +93,9 @@
     <div class="grid-item-top">
         <div class="row">
             <div class="col-xs-12">
-                Use those tokens are for working with <a href="https://cloudron.io/references/api.html" target="_blank">https://cloudron.io/references/api.html</a>.<br/>
-                They have the <b>admin</b> <a href="https://cloudron.io/references/api.html#scopes" target="_blank">scope</a> attached and will not expire.
-                They are issued explicitly for the user who creates them, so they will return that users profile.
+                <p>Tokens you generated that can be used to access the <a href="https://cloudron.io/references/api.html" target="_blank">Cloudron API</a>. They have the <b>admin</b> <a href="https://cloudron.io/references/api.html#scopes" target="_blank">scope</a> and will not expire.</p>
                 <br/>
-                <br/>
-                <h4 class="text-muted">Active Tokens <button class="btn btn-xs btn-primary btn-outline pull-right" ng-click="tokenAdd.show(apiClient)"><i class="fa fa-plus"></i> New Token</button></h4>
+                <h4 class="text-muted">Active Tokens</h4>
                 <hr/>
                 <p ng-repeat="token in apiClient.activeTokens">
                     <b ng-click-select>{{ token.accessToken }}</b> <button class="btn btn-xs btn-danger pull-right" ng-click="removeToken(apiClient, token)" title="Revoke Token"><i class="fa fa-trash-o"></i></button>
@@ -148,7 +144,7 @@
 
                                 <hr/>
 
-                                <h4 class="text-muted">Your Tokens <button class="btn btn-xs btn-primary btn-outline pull-right" ng-click="tokenAdd.show(client)"><i class="fa fa-plus"></i> New Token</button></h4>
+                                <h4 class="text-muted">Tokens <button class="btn btn-xs btn-primary btn-outline pull-right" ng-click="tokenAdd.show(client)"><i class="fa fa-plus"></i> New Token</button></h4>
                                 <p ng-repeat="token in client.activeTokens">
                                     <b ng-click-select>{{ token.accessToken }}</b> <button class="btn btn-xs btn-danger pull-right" ng-click="removeToken(client, token)" title="Revoke Token"><i class="fa fa-trash-o"></i></button>
                                 </p>
