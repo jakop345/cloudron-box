@@ -524,5 +524,5 @@
 - [REST API](https://cloudron.io/references/api.html) is now in public beta
 - Enable Developer mode by default for new Cloudrons
 - Reverse proxy fixes for apps exposing a WebDav server
-- Allow admins to optionall set the username and displayName on user creation
+- Allow admins to optionally set the username and displayName on user creation
 
