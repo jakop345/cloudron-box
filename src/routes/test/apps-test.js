@@ -229,6 +229,39 @@ describe('Apps', function () {
             });
         });
 
+        it('app install fails - null manifest', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/apps/install')
+                   .query({ access_token: token })
+                   .send({ manifest: null, password: PASSWORD })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.eql('appStoreId or manifest is required');
+                done();
+            });
+        });
+
+        it('app install fails - bad manifest format', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/apps/install')
+                   .query({ access_token: token })
+                   .send({ manifest: 'epic', password: PASSWORD })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.eql('manifest must be an object');
+                done();
+            });
+        });
+
+        it('app install fails - empty appStoreId format', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/apps/install')
+                   .query({ access_token: token })
+                   .send({ manifest: null, appStoreId: '', password: PASSWORD })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.eql('appStoreId or manifest is required');
+                done();
+            });
+        });
+
        it('app install fails - invalid json', function (done) {
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
