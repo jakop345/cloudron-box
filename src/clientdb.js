@@ -152,7 +152,7 @@ function delByAppIdAndType(appId, type, callback) {
 function clear(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('DELETE FROM clients WHERE appId!="webadmin"', function (error) {
+    database.query('DELETE FROM clients WHERE id!="cid-webadmin" AND id!="cid-sdk" AND id!="cid-cli"', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
