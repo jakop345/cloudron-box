@@ -387,6 +387,22 @@ describe('OAuth Clients API', function () {
                    });
                 });
             });
+
+            it('fails for cid-webadmin', function (done) {
+                superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin')
+                       .query({ access_token: token })
+                       .end(function (error, result) {
+                    expect(result.statusCode).to.equal(405);
+
+                    superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin')
+                           .query({ access_token: token })
+                           .end(function (error, result) {
+                        expect(result.statusCode).to.equal(200);
+
+                        done();
+                   });
+                });
+            });
         });
     });
 });
@@ -490,7 +506,6 @@ describe('Clients', function () {
                 expect(result.statusCode).to.equal(200);
 
                 expect(result.body.clients.length).to.eql(1);
-                expect(result.body.clients[0].tokenCount).to.eql(1);
 
                 done();
             });
