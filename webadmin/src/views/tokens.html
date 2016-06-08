@@ -93,8 +93,7 @@
     <div class="grid-item-top">
         <div class="row">
             <div class="col-xs-12">
-                <p>Tokens you generated that can be used to access the <a href="https://cloudron.io/references/api.html" target="_blank">Cloudron API</a>. They have the <b>admin</b> <a href="https://cloudron.io/references/api.html#scopes" target="_blank">scope</a> and will not expire.</p>
-                <br/>
+                <p>These tokens can be used to access the <a href="https://cloudron.io/references/api.html" target="_blank">Cloudron API</a>. They have the <b>admin</b> <a href="https://cloudron.io/references/api.html#scopes" target="_blank">scope</a> and do not expire.</p>
                 <h4 class="text-muted">Active Tokens</h4>
                 <hr/>
                 <p ng-repeat="token in apiClient.activeTokens">
@@ -130,21 +129,28 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <b>{{ client.activeTokens.length }}</b> active token(s).
-                        <button class="btn btn-xs btn-default pull-right" ng-click="removeAccessTokens(client)" ng-disabled="!client.activeTokens.length || client.busy"><i class="fa fa-spinner fa-pulse" ng-show="client.busy"></i> Revoke access</button>
                         <br/>
                         <a href="" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.id}}">Advanced</a>
                         <div id="collapse{{client.id}}" class="panel-collapse collapse">
                             <div class="panel-body">
-                                <hr/>
                                 <h4 class="text-muted">Credentials <button class="btn btn-xs btn-danger pull-right" ng-click="clientRemove.show(client)" title="Remove API Client" ng-show="client.location === 'external'">Remove API Client</button></h4>
+                                <hr/>
                                 <p>Scope: <b ng-click-select>{{ client.scope }}</b></p>
                                 <p>RedirectURI: <b ng-click-select>{{ client.redirectURI }}</b></p>
                                 <p>Client ID: <b ng-click-select>{{ client.id }}</b></p>
                                 <p ng-show="client.clientSecret">Client Secret: <b ng-click-select>{{ client.clientSecret }}</b></p>
 
+                                <br/>
+
+                                <h4 class="text-muted">Tokens
+                                    <div class="pull-right">
+                                        <button class="btn btn-xs btn-default" ng-click="removeAccessTokens(client)" ng-disabled="!client.activeTokens.length || client.busy"><i class="fa fa-spinner fa-pulse" ng-show="client.busy"></i> Revoke All</button>
+                                        <button class="btn btn-xs btn-primary btn-outline" ng-click="tokenAdd.show(client)"><i class="fa fa-plus"></i> New Token</button>
+                                    </div>
+                                </h4>
+
                                 <hr/>
 
-                                <h4 class="text-muted">Tokens <button class="btn btn-xs btn-primary btn-outline pull-right" ng-click="tokenAdd.show(client)"><i class="fa fa-plus"></i> New Token</button></h4>
                                 <p ng-repeat="token in client.activeTokens">
                                     <b ng-click-select>{{ token.accessToken }}</b> <button class="btn btn-xs btn-danger pull-right" ng-click="removeToken(client, token)" title="Revoke Token"><i class="fa fa-trash-o"></i></button>
                                 </p>
