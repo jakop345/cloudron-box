@@ -152,14 +152,14 @@
     <div class="grid-item-top">
         <div class="row">
             <div class="col-xs-12">
-                <p>You are logged {{ activeTokenCount }} times into applications, including this session.</p>
+                <p>You are logged into {{ activeClients.length + 1 }} app(s), including this session.</p>
                 <span ng-show="activeTokenCount > 1">
                     <hr/>
                     <h4>Active Applications:</h4>
-                    <p ng-repeat="client in activeClients"><b>{{ client.name }} ({{client.activeTokens.length}} times)</b></p>
+                    <p ng-repeat="client in activeClients"><b>{{ client.name }} - {{client.activeTokens.length}} time(s)</b></p>
                     <hr/>
                 </span>
-                <button class="btn btn-outline btn-xs btn-danger pull-right" ng-click="revokeTokens()">Revoke access to all</button>
+                <button class="btn btn-outline btn-xs btn-danger pull-right" ng-click="revokeTokens()">Logout From All</button>
             </div>
         </div>
     </div>
