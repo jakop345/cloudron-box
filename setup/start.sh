@@ -188,13 +188,20 @@ if [[ ! -z "${arg_tls_config}" ]]; then
         -e "REPLACE INTO settings (name, value) VALUES (\"tls_config\", '$arg_tls_config')" box
 fi
 
-# Add webadmin oauth client
 # The domain might have changed, therefor we have to update the record
 # !!! This needs to be in sync with the webadmin, specifically login_callback.js
-echo "Add webadmin oauth cient"
+echo "Add webadmin api cient"
 readonly ADMIN_SCOPES="cloudron,developer,profile,users,apps,settings"
 mysql -u root -p${mysql_root_password} \
     -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"admin\", \"secret-webadmin\", \"${admin_origin}\", \"${ADMIN_SCOPES}\")" box
+
+echo "Add SDK api client"
+mysql -u root -p${mysql_root_password} \
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-sdk\", \"SDK\", \"sdk\", \"secret-sdk\", \"${admin_origin}\", \"*,roleSdk\")" box
+
+echo "Add cli api client"
+mysql -u root -p${mysql_root_password} \
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-cli\", \"Cloudron cli tool\", \"cli\", \"secret-cli\", \"${admin_origin}\", \"*,roleSdk\")" box
 
 set_progress "80" "Starting Cloudron"
 systemctl start cloudron.target

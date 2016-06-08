@@ -31,7 +31,9 @@ exports = module.exports = {
     TYPE_OAUTH: 'addon-oauth',
     TYPE_SIMPLE_AUTH: 'addon-simpleauth',
     TYPE_PROXY: 'addon-proxy',
-    TYPE_ADMIN: 'admin'
+    TYPE_ADMIN: 'admin',
+    TYPE_SDK: 'sdk',
+    TYPE_CLI: 'cli'
 };
 
 var assert = require('assert'),
