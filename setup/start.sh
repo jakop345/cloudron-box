@@ -193,7 +193,7 @@ fi
 echo "Add webadmin api cient"
 readonly ADMIN_SCOPES="cloudron,developer,profile,users,apps,settings"
 mysql -u root -p${mysql_root_password} \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"admin\", \"secret-webadmin\", \"${admin_origin}\", \"${ADMIN_SCOPES}\")" box
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"Settings\", \"admin\", \"secret-webadmin\", \"${admin_origin}\", \"${ADMIN_SCOPES}\")" box
 
 echo "Add SDK api client"
 mysql -u root -p${mysql_root_password} \
@@ -201,7 +201,7 @@ mysql -u root -p${mysql_root_password} \
 
 echo "Add cli api client"
 mysql -u root -p${mysql_root_password} \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-cli\", \"Cloudron cli tool\", \"cli\", \"secret-cli\", \"${admin_origin}\", \"*,roleSdk\")" box
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-cli\", \"Cloudron Tool\", \"cli\", \"secret-cli\", \"${admin_origin}\", \"*,roleSdk\")" box
 
 set_progress "80" "Starting Cloudron"
 systemctl start cloudron.target
