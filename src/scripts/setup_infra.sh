@@ -66,7 +66,7 @@ echo "Mail container id: ${mail_container_id}"
 # mysql
 readonly mysql_image=$(node -e "console.log(require('${infra_version}').images.mysql.tag);")
 mysql_addon_root_password=$(pwgen -1 -s)
-docker0_ip=$(/sbin/ifconfig docker0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')
+docker0_ip=$(/sbin/ifconfig docker0 | grep "inet " | awk -F: '{print $2}' | awk '{print $1}')
 cat > "${data_dir}/addons/mysql_vars.sh" <<EOF
 MYSQL_ROOT_PASSWORD='${mysql_addon_root_password}'
 MYSQL_ROOT_HOST='${docker0_ip}'
