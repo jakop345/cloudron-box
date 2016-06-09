@@ -206,6 +206,7 @@ function loginForm(req, res) {
         if (error) return sendError(req, res, 'Unknown OAuth client');
 
         switch (result.type) {
+            case clients.TYPE_BUILT_IN: return render(result.appId, '/api/v1/cloudron/avatar');
             case clients.TYPE_EXTERNAL: return render(result.appId, '/api/v1/cloudron/avatar');
             case clients.TYPE_SIMPLE_AUTH: return sendError(req, res, 'Unknown OAuth client');
             default: break;
@@ -418,7 +419,7 @@ var authorization = [
         // Handle our different types of oauth clients
         var type = req.oauth2.client.type;
 
-        if (type === clients.TYPE_EXTERNAL) {
+        if (type === clients.TYPE_EXTERNAL || type === clients.TYPE_BUILT_IN) {
             eventlog.add(eventlog.ACTION_USER_LOGIN, auditSource(req, req.oauth2.client.appId), { userId: req.oauth2.user.id });
             return next();
         } else if (type === clients.TYPE_SIMPLE_AUTH) {

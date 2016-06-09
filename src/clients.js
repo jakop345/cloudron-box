@@ -28,6 +28,7 @@ exports = module.exports = {
 
     // client type enums
     TYPE_EXTERNAL: 'external',
+    TYPE_BUILT_IN: 'built-in',
     TYPE_OAUTH: 'addon-oauth',
     TYPE_SIMPLE_AUTH: 'addon-simpleauth',
     TYPE_PROXY: 'addon-proxy'
@@ -154,7 +155,7 @@ function getAll(callback) {
 
         var tmp = [];
         async.each(results, function (record, callback) {
-            if (record.type === exports.TYPE_EXTERNAL) {
+            if (record.type === exports.TYPE_EXTERNAL || record.type === exports.TYPE_BUILT_IN) {
                 // the appId in this case holds the name
                 record.name = record.appId;
 
