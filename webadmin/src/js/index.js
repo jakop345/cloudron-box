@@ -370,8 +370,7 @@ app.directive('tagInput', function () {
                 }
             });
             element.bind('keydown', function (e) {
-                var key;
-                key = e.which;
+                var key = e.which;
                 if (key === 9 || key === 13) {
                     e.preventDefault();
                 }
@@ -380,14 +379,20 @@ app.directive('tagInput', function () {
                 }
             });
             return element.bind('keyup', function (e) {
-                var key;
-                key = e.which;
+                var key = e.which;
                 if (key === 9 || key === 13 || key === 188) {
                     e.preventDefault();
                     return $scope.$apply('addTag()');
                 }
             });
         },
-        template: '<div class=\'tag-input-ctn\'><div class=\'input-tag\' data-ng-repeat="tag in tagArray()">{{tag}}<div class=\'delete-tag\' data-ng-click=\'deleteTag($index)\'>&times;</div></div><input type=\'text\' data-ng-style=\'{width: inputWidth}\' data-ng-model=\'tagText\' placeholder=\'{{placeholder}}\'/></div>'
+        template:
+            '<div class="tag-input-ctn">' +
+                '<div class="input-tag" data-ng-repeat="tag in tagArray()">' +
+                    '{{tag}}' +
+                    '<div class="delete-tag" data-ng-click="deleteTag($index)">&times;</div>' +
+                '</div>' +
+                '<input type="text" data-ng-style="{width: inputWidth}" data-ng-model="tagText" placeholder="{{placeholder}}"/>' +
+            '</div>'
     };
 });
