@@ -48,11 +48,19 @@ function get(req, res, next) {
 function del(req, res, next) {
     assert.strictEqual(typeof req.params.clientId, 'string');
 
-    clients.del(req.params.clientId, function (error, result) {
+    clients.get(req.params.clientId, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
-        if (error && error.reason === ClientsError.NOT_ALLOWED) return next(new HttpError(405, error.message));
         if (error) return next(new HttpError(500, error));
-        next(new HttpSuccess(204, result));
+
+        // we do not allow to use the REST API to delete addon clients
+        if (result.type !== clients.TYPE_EXTERNAL) return next(new HttpError(405, 'Deleting app addon clients is not allowed.'));
+
+        clients.del(req.params.clientId, function (error, result) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
+            if (error && error.reason === ClientsError.NOT_ALLOWED) return next(new HttpError(405, error.message));
+            if (error) return next(new HttpError(500, error));
+            next(new HttpSuccess(204, result));
+        });
     });
 }
 
