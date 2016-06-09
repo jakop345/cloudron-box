@@ -137,8 +137,6 @@ function del(id, callback) {
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (id === 'cid-webadmin' || id === 'cid-sdk' || id === 'cid-cli') return callback(new ClientsError(ClientsError.NOT_ALLOWED));
-
     clientdb.del(id, function (error, result) {
         if (error) return callback(error);
         callback(null, result);
