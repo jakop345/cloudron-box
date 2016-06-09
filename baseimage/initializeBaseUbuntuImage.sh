@@ -160,10 +160,10 @@ apt-get install -y python   # Install python which is required for npm rebuild
 [[ "$(python --version 2>&1)" == "Python 2.7."* ]] || die "Expecting python version to be 2.7.x"
 
 echo "==== Downloading docker images ===="
-images=$(node -e "var i = require('${SOURCE_DIR}/infra_version.js'); console.log(i.baseImage); console.log(Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join('\n'));")
+images=$(node -e "var i = require('${SOURCE_DIR}/infra_version.js'); console.log(i.baseImage, Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join(' '));")
 
 echo "Pulling images: ${images}"
-for image in images; do
+for image in ${images}; do
     docker pull "${image}"
 done
 
