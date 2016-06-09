@@ -1,0 +1,74 @@
+#!/bin/bash
+
+set -eu -o pipefail
+
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
+export JSON="${SOURCE_DIR}/node_modules/.bin/json"
+
+provider="digitalocean"
+installer_revision=$(git rev-parse HEAD)
+box_name=""
+server_id=""
+server_ip=""
+destroy_server="yes"
+
+ami_id="ami-f9e30f96"
+region="eu-central-1"
+aws_credentials="testing"
+security_group="sg-b9a473d1"
+instance_type="t2.micro"
+subnet_id="subnet-801402e9"
+key_pair_name="id_rsa_yellowtent"
+
+# Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
+# brew install gnu-getopt to get the GNU getopt on OS X
+[[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
+readonly GNU_GETOPT
+
+args=$(${GNU_GETOPT} -o "" -l "revision:,name:,server-ip:,no-destroy" -n "$0" -- "$@")
+eval set -- "${args}"
+
+while true; do
+    case "$1" in
+    --revision) installer_revision="$2"; shift 2;;
+    --server-ip) server_ip="$2"; shift 2;;
+    --name) box_name="$2"; destroy_server="no"; shift 2;;
+    --no-destroy) destroy_server="no"; shift 2;;
+    --) break;;
+    *) echo "Unknown option $1"; exit 1;;
+    esac
+done
+
+readonly ssh_keys="${HOME}/.ssh/id_rsa_yellowtent"
+readonly scp22="scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly ssh22="ssh -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+
+echo "Creating EC2 instance"
+server_id=$(aws ec2 run-instances --image-id ${ami_id} --region ${region} --profile ${aws_credentials} --security-group-ids ${security_group} --instance-type ${instance_type} --key-name ${key_pair_name} --subnet-id ${subnet_id} --associate-public-ip-address | $JSON Instances[0].InstanceId)
+echo "Got InstanceId: ${server_id}"
+
+server_ip=$(aws ec2 describe-instances --instance-id ${server_id} --region ${region} --profile ${aws_credentials} | $JSON Reservations[0].Instances[0].PublicIpAddress)
+echo "Server IP is: ${server_ip}"
+
+while true; do
+    echo "Trying to copy init script to server"
+    if $scp22 "${SCRIPT_DIR}/initializeBaseUbuntuImage.sh" ubuntu@${server_ip}:.; then
+        break
+    fi
+    echo "Timedout, trying again in 30 seconds"
+    sleep 30
+done
+
+echo "Copying infra_version.js"
+$scp22 "${SCRIPT_DIR}/../src/infra_version.js" ubuntu@${server_ip}:.
+
+echo "Copying box source"
+cd "${SOURCE_DIR}"
+git archive --format=tar HEAD | $ssh22 "ubuntu@${server_ip}" "cat - > /tmp/box.tar.gz"
+
+echo "Executing init script"
+if ! $ssh22 "ubuntu@${server_ip}" "sudo /bin/bash /home/ubuntu/initializeBaseUbuntuImage.sh ${installer_revision}"; then
+    echo "Init script failed"
+    exit 1
+fi
