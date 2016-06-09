@@ -322,52 +322,12 @@ app.directive('tagInput', function () {
     return {
         restrict: 'E',
         scope: {
-            inputTags: '=taglist',
-            autocomplete: '=autocomplete'
+            inputTags: '=taglist'
         },
         link: function ($scope, element, attrs) {
             $scope.defaultWidth = 200;
             $scope.tagText = '';
             $scope.placeholder = attrs.placeholder;
-            if ($scope.autocomplete) {
-                $scope.autocompleteFocus = function (event, ui) {
-                    $(element).find('input').val(ui.item.value);
-                    return false;
-                };
-                $scope.autocompleteSelect = function (event, ui) {
-                    $scope.$apply('tagText=\'' + ui.item.value + '\'');
-                    $scope.$apply('addTag()');
-                    return false;
-                };
-                $(element).find('input').autocomplete({
-                    minLength: 0,
-                    source: function (request, response) {
-                        var item;
-                        return response(function () {
-                            var i, len, ref, results;
-                            ref = $scope.autocomplete;
-                            results = [];
-                            for (i = 0, len = ref.length; i < len; i++) {
-                                if (window.CP.shouldStopExecution(1)) {
-                                    break;
-                                }
-                                item = ref[i];
-                                if (item.toLowerCase().indexOf(request.term.toLowerCase()) !== -1) {
-                                    results.push(item);
-                                }
-                            }
-                            window.CP.exitedLoop(1);
-                            return results;
-                        }());
-                    },
-                    focus: function (event, ui) {
-                        return $scope.autocompleteFocus(event, ui);
-                    },
-                    select: function (event, ui) {
-                        return $scope.autocompleteSelect(event, ui);
-                    }
-                });
-            }
             $scope.tagArray = function () {
                 if ($scope.inputTags === undefined) {
                     return [];
