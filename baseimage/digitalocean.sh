@@ -51,7 +51,7 @@ function get_droplet_id() {
     local droplet_name="$1"
     id=$($CURL "https://api.digitalocean.com/v2/droplets?per_page=200" | $JSON "droplets" | $JSON -c "this.name === '${droplet_name}'" | $JSON "[0].id")
     [[ -z "$id" ]] && exit 1
-    echo "$id"  
+    echo "$id"
 }
 
 function power_off_droplet() {
