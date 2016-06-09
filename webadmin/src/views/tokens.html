@@ -120,7 +120,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <h4 class="text-muted">
-                    {{client.name}} <span ng-show="client.location !== 'external'">on {{client.location}}{{ config.isCustomDomain ? '.' : '-' }}{{config.fqdn}}</span>
+                    {{client.name}} <span ng-show="client.type !== 'external' && client.type !== 'built-in'">on {{client.location}}{{ config.isCustomDomain ? '.' : '-' }}{{config.fqdn}}</span>
                 </h4>
             </div>
         </div>
@@ -133,7 +133,7 @@
                         <a href="" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.id}}">Advanced</a>
                         <div id="collapse{{client.id}}" class="panel-collapse collapse">
                             <div class="panel-body">
-                                <h4 class="text-muted">Credentials <button class="btn btn-xs btn-danger pull-right" ng-click="clientRemove.show(client)" title="Remove API Client" ng-show="client.location === 'external'">Remove API Client</button></h4>
+                                <h4 class="text-muted">Credentials <button class="btn btn-xs btn-danger pull-right" ng-click="clientRemove.show(client)" title="Remove API Client" ng-show="client.type === 'external'">Remove API Client</button></h4>
                                 <hr/>
                                 <p>Scope: <b ng-click-select>{{ client.scope }}</b></p>
                                 <p>RedirectURI: <b ng-click-select>{{ client.redirectURI }}</b></p>
