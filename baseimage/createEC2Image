@@ -121,4 +121,12 @@ while true; do
     sleep 10
 done
 
-echo "Done. New image id is: ${image_id}"
+echo "Terminating instance"
+aws ec2 terminate-instances --region ${region} --profile ${aws_credentials} --instance-ids ${instance_id}
+
+echo "Done."
+echo ""
+echo "--------------------------------------------------"
+echo "New image id is: ${image_id}"
+echo "--------------------------------------------------"
+echo ""
