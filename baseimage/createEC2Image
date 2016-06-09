@@ -40,12 +40,44 @@ while true; do
 done
 
 readonly ssh_keys="${HOME}/.ssh/id_rsa_yellowtent"
+readonly scp202="scp -P 202 -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
 readonly scp22="scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+
+readonly ssh202="ssh -p 202 -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
 readonly ssh22="ssh -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+
+if [[ ! -f "${ssh_keys}" ]]; then
+    echo "caas ssh key is missing at ${ssh_keys} (pick it up from secrets repo)"
+    exit 1
+fi
+
+function debug() {
+    echo "$@" >&2
+}
+
+function get_pretty_revision() {
+    local git_rev="$1"
+    local sha1=$(git rev-parse --short "${git_rev}" 2>/dev/null)
+
+    echo "${sha1}"
+}
+
+now=$(date "+%Y-%m-%d-%H%M%S")
+pretty_revision=$(get_pretty_revision "${installer_revision}")
 
 echo "Creating EC2 instance"
 instance_id=$(aws ec2 run-instances --image-id ${ami_id} --region ${region} --profile ${aws_credentials} --security-group-ids ${security_group} --instance-type ${instance_type} --key-name ${key_pair_name} --subnet-id ${subnet_id} --associate-public-ip-address | $JSON Instances[0].InstanceId)
 echo "Got InstanceId: ${instance_id}"
+
+echo "Waiting for instance to be running..."
+while true; do
+    event_status=`aws ec2 describe-instances --instance-id ${instance_id} --region ${region} --profile ${aws_credentials} | $JSON Reservations[0].Instances[0].State.Name`
+    if [[ "${event_status}" == "running" ]]; then
+        break
+    fi
+    debug -n "."
+    sleep 10
+done
 
 server_ip=$(aws ec2 describe-instances --instance-id ${instance_id} --region ${region} --profile ${aws_credentials} | $JSON Reservations[0].Instances[0].PublicIpAddress)
 echo "Server IP is: ${server_ip}"
@@ -72,7 +104,7 @@ if ! $ssh22 "ubuntu@${server_ip}" "sudo /bin/bash /home/ubuntu/initializeBaseUbu
     exit 1
 fi
 
-snapshot_name="box-${deploy_env}-${pretty_revision}-${now}"
+snapshot_name="cloudron-${pretty_revision}-${now}"
 
 echo "Creating ami image ${snapshot_name}"
 image_id=$(aws ec2 create-image --region ${region} --profile ${aws_credentials} --instance-id ${instance_id} --name ${snapshot_name} | $JSON ImageId)
@@ -81,7 +113,7 @@ echo "Image creation started for image id: ${image_id}"
 
 echo "Waiting for image creation to finish..."
 while true; do
-    local event_status=`aws ec2 describe-images --region ${region} --profile ${aws_credentials} --image-id ${image_id} | $JSON Images[0].State`
+    event_status=`aws ec2 describe-images --region ${region} --profile ${aws_credentials} --image-id ${image_id} | $JSON Images[0].State`
     if [[ "${event_status}" == "available" ]]; then
         break
     fi
