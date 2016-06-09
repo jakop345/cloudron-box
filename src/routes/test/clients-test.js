@@ -291,6 +291,14 @@ describe('OAuth Clients API', function () {
             scope: 'profile'
         };
 
+        var CLIENT_1 = {
+            id: '',
+            appId: 'someAppId-1',
+            redirectURI: 'http://some.callback1',
+            scope: 'profile',
+            type: clients.TYPE_OAUTH
+        };
+
         before(function (done) {
             async.series([
                 server.start.bind(null),
@@ -401,6 +409,28 @@ describe('OAuth Clients API', function () {
 
                         done();
                    });
+                });
+            });
+
+            it('fails for addon auth client', function (done) {
+                clients.add(CLIENT_1.appId, CLIENT_1.type, CLIENT_1.redirectURI, CLIENT_1.scope, function (error, result) {
+                    expect(error).to.equal(null);
+
+                    CLIENT_1.id = result.id;
+
+                    superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_1.id)
+                           .query({ access_token: token })
+                           .end(function (error, result) {
+                        expect(result.statusCode).to.equal(405);
+
+                        superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_1.id)
+                               .query({ access_token: token })
+                               .end(function (error, result) {
+                            expect(result.statusCode).to.equal(200);
+
+                            done();
+                       });
+                    });
                 });
             });
         });
