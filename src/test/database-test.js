@@ -507,16 +507,30 @@ describe('database', function () {
         it('delByIdentifierAndClientId succeeds', function (done) {
             tokendb.delByIdentifierAndClientId(TOKEN_0.identifier, TOKEN_0.clientId, function (error) {
                 expect(error).to.be(null);
-                done();
+
+                tokendb.get(TOKEN_0.accessToken, function (error, result) {
+                    expect(error).to.be.a(DatabaseError);
+                    expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                    expect(result).to.not.be.ok();
+                    done();
+                });
             });
         });
 
-        it('get of previously deleted token fails', function (done) {
-            tokendb.get(TOKEN_0.accessToken, function (error, result) {
-                expect(error).to.be.a(DatabaseError);
-                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
-                expect(result).to.not.be.ok();
-                done();
+        it('delByClientId succeeds', function (done) {
+            tokendb.add(TOKEN_0.accessToken, TOKEN_0.identifier, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
+                expect(error).to.be(null);
+
+                tokendb.delByClientId(TOKEN_0.clientId, function (error, result) {
+                    expect(error).to.not.be.ok();
+
+                    tokendb.get(TOKEN_0.accessToken, function (error, result) {
+                        expect(error).to.be.a(DatabaseError);
+                        expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                        expect(result).to.not.be.ok();
+                        done();
+                    });
+                });
             });
         });
     });
