@@ -529,4 +529,6 @@
 
 [0.15.1]
 - Fix mail connectivity from IPv6 clients
+- Add API token management UI
+- Improved UI to enter email aliases
 
