@@ -226,12 +226,13 @@ EOF
 
 # Allocate swap files
 # https://bbs.archlinux.org/viewtopic.php?id=194792 ensures this runs after do-resize.service
+# On ubuntu ec2 we use cloud-init https://wiki.archlinux.org/index.php/Cloud-init
 echo "==== Install box-setup systemd script ===="
 cat > /etc/systemd/system/box-setup.service <<EOF
 [Unit]
 Description=Box Setup
 Before=docker.service collectd.service mysql.service
-After=do-resize.service
+After=do-resize.service cloud-init.service
 
 [Service]
 Type=oneshot
