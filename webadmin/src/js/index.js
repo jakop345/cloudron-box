@@ -326,7 +326,7 @@ app.directive('tagInput', function () {
         },
         link: function ($scope, element, attrs) {
             $scope.defaultWidth = 200;
-            $scope.tagText = '';
+            $scope.tagText = ''; // current tag being edited
             $scope.placeholder = attrs.placeholder;
             $scope.tagArray = function () {
                 if ($scope.inputTags === undefined) {
@@ -387,12 +387,12 @@ app.directive('tagInput', function () {
             });
         },
         template:
-            '<div class="tag-input-ctn">' +
+            '<div class="tag-input-container">' +
                 '<div class="input-tag" data-ng-repeat="tag in tagArray()">' +
                     '{{tag}}' +
                     '<div class="delete-tag" data-ng-click="deleteTag($index)">&times;</div>' +
                 '</div>' +
-                '<input type="text" data-ng-style="{width: inputWidth}" data-ng-model="tagText" placeholder="{{placeholder}}"/>' +
+                '<input type="text" data-ng-model="tagText" placeholder="{{placeholder}}"/>' +
             '</div>'
     };
 });

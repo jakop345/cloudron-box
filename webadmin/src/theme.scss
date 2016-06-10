@@ -1060,14 +1060,7 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
 // ----------------------------
 // https://codepen.io/webmatze/pen/isuHh
 
-.tag-input-ctn {
-    border: 1px solid #ccc;
-    padding: 2px 3px;
-    display: inline-block;
-    width: 500px;
-    border-radius: 3px;
-    box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.075);
-  
+.tag-input-container {
     input {
         display: inline-block;
         float: left;
@@ -1077,7 +1070,7 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
         line-height: 18px;
         color: black;
         border: 0px;
-        margin: 2px;
+        margin: 1px;
         &:focus {
             outline: 0;
             box-shadow: 0px;
