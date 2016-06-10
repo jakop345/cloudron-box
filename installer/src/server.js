@@ -16,6 +16,7 @@ var assert = require('assert'),
     json = require('body-parser').json,
     lastMile = require('connect-lastmile'),
     morgan = require('morgan'),
+    request = require('request'),
     superagent = require('superagent');
 
 exports = module.exports = {
@@ -29,15 +30,36 @@ var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
 var gHttpServer = null; // update server; used for updates
 
 function provisionDigitalOcean(callback) {
-    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
-
     superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
         if (error || result.statusCode !== 200) {
             console.error('Error getting metadata', error);
             return callback(new Error('Error getting metadata'));
         }
 
-        var userData = JSON.parse(result.body.user_data);
+        callback(null, JSON.parse(result.body.user_data));
+    });
+}
+
+function provisionEC2(callback) {
+    // need to use request, since octet-stream data
+    request('http://169.254.169.254/latest/user-data', function (error, response, body) {
+        if (error || response.statusCode !== 200) {
+            console.error('Error getting metadata', error);
+            return callback(new Error('Error getting metadata'));
+        }
+
+        callback(null, JSON.parse(body));
+    });
+}
+
+function provision(callback) {
+    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
+
+    // check if DO or EC2
+    var func = false ? provisionDigitalOcean : provisionEC2;
+
+    func(function (error, userData) {
+        if (error) return callback(error);
 
         installer.provision(userData, callback);
     });
@@ -122,7 +144,7 @@ function start(callback) {
 
         actions = [
             startUpdateServer,
-            provisionDigitalOcean
+            provision
         ];
     }
 
