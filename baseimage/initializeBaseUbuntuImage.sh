@@ -6,7 +6,6 @@ readonly USER=yellowtent
 readonly USER_HOME="/home/${USER}"
 readonly INSTALLER_SOURCE_DIR="${USER_HOME}/installer"
 readonly INSTALLER_REVISION="$1"
-readonly SELFHOSTED=$(( $# > 1 ? 1 : 0 ))
 readonly USER_DATA_FILE="/root/user_data.img"
 readonly USER_DATA_DIR="/home/yellowtent/data"
 
@@ -18,12 +17,6 @@ function die {
 }
 
 [[ "$(systemd --version 2>&1)" == *"systemd 229"* ]] || die "Expecting systemd to be 229"
-
-if [ ${SELFHOSTED} == 0 ]; then
-    echo "!! Initializing Ubuntu image for CaaS"
-else
-    echo "!! Initializing Ubuntu image for Selfhosting"
-fi
 
 echo "==== Create User ${USER} ===="
 if ! id "${USER}"; then
@@ -60,11 +53,7 @@ iptables -P OUTPUT ACCEPT
 # NOTE: keep these in sync with src/apps.js validatePortBindings
 # allow ssh, http, https, ping, dns
 iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-if [ ${SELFHOSTED} == 0 ]; then
-    iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,202,443,587,993,4190 -j ACCEPT
-else
-    iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,22,443,587,993,4190 -j ACCEPT
-fi
+iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,202,443,587,993,4190 -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
 iptables -A INPUT -p udp --sport 53 -j ACCEPT
@@ -201,11 +190,6 @@ cd "${INSTALLER_SOURCE_DIR}" && npm install --production
 chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
 echo "==== Install installer systemd script ===="
-provisionEnv="PROVISION=digitalocean"
-if [ ${SELFHOSTED} == 1 ]; then
-    provisionEnv="PROVISION=local"
-fi
-
 cat > /etc/systemd/system/cloudron-installer.service <<EOF
 [Unit]
 Description=Cloudron Installer
@@ -215,7 +199,7 @@ BindsTo=systemd-journald.service
 [Service]
 Type=idle
 ExecStart="${INSTALLER_SOURCE_DIR}/src/server.js"
-Environment="DEBUG=installer*,connect-lastmile" ${provisionEnv}
+Environment="DEBUG=installer*,connect-lastmile"
 ; kill any child (installer.sh) as well
 KillMode=control-group
 Restart=on-failure
@@ -288,16 +272,14 @@ chown root:systemd-journal /var/log/journal
 systemctl restart systemd-journald
 setfacl -n -m u:${USER}:r /var/log/journal/*/system.journal
 
-if [ ${SELFHOSTED} == 0 ]; then
-    echo "==== Install ssh ==="
-    apt-get -y install openssh-server
-    # https://stackoverflow.com/questions/4348166/using-with-sed on why ? must be escaped
-    sed -e 's/^#\?Port .*/Port 202/g' \
-        -e 's/^#\?PermitRootLogin .*/PermitRootLogin without-password/g' \
-        -e 's/^#\?PermitEmptyPasswords .*/PermitEmptyPasswords no/g' \
-        -e 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/g' \
-        -i /etc/ssh/sshd_config
+echo "==== Install ssh ==="
+apt-get -y install openssh-server
+# https://stackoverflow.com/questions/4348166/using-with-sed on why ? must be escaped
+sed -e 's/^#\?Port .*/Port 202/g' \
+    -e 's/^#\?PermitRootLogin .*/PermitRootLogin without-password/g' \
+    -e 's/^#\?PermitEmptyPasswords .*/PermitEmptyPasswords no/g' \
+    -e 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/g' \
+    -i /etc/ssh/sshd_config
 
-    # required so we can connect to this machine since port 22 is blocked by iptables by now
-    systemctl reload sshd
-fi
+# required so we can connect to this machine since port 22 is blocked by iptables by now
+systemctl reload sshd
