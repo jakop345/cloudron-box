@@ -378,7 +378,7 @@ app.directive('tagInput', function () {
                     return $scope.$apply('deleteTag()');
                 }
             });
-            return element.bind('keyup', function (e) {
+            element.bind('keyup', function (e) {
                 var key = e.which;
                 if (key === 9 || key === 13 || key === 188) {
                     e.preventDefault();
@@ -392,7 +392,7 @@ app.directive('tagInput', function () {
                     '{{tag}}' +
                     '<div class="delete-tag" data-ng-click="deleteTag($index)">&times;</div>' +
                 '</div>' +
-                '<input type="text" data-ng-model="tagText" placeholder="{{placeholder}}"/>' +
+                '<input type="text" data-ng-model="tagText" ng-blur="addTag()" placeholder="{{placeholder}}"/>' +
             '</div>'
     };
 });
