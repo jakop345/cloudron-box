@@ -125,8 +125,8 @@ echo "Terminating instance"
 aws ec2 terminate-instances --region ${region} --profile ${aws_credentials} --instance-ids ${instance_id}
 
 echo "Copy image to other regions"
-aws ec2 copy-image --region us-west-2 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
-aws ec2 copy-image --region ap-southeast-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
+# aws ec2 copy-image --region us-west-2 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
+# aws ec2 copy-image --region ap-southeast-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
 
 echo "Done."
 echo ""
