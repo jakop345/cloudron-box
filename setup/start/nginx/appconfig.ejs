@@ -44,6 +44,18 @@ server {
         return 307 <%= adminOrigin %>/appstatus.html?referrer=https://$host$request_uri;
     }
 
+<% if ( endpoint === 'app' ) { %>
+    # For some reason putting this webdav block inside location does not work
+    # http://serverfault.com/questions/121766/webdav-rename-fails-on-an-apache-mod-dav-install-behind-nginx
+    if ($request_method ~ ^(COPY|MOVE)$) {
+        set $destination $http_destination;
+    }
+    if ($destination ~* ^https(.+)$) {
+        set $destination http$1;
+    }
+    proxy_set_header Destination $destination;
+<% } %>
+
     location / {
         # increase the proxy buffer sizes to not run into buffer issues (http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffers)
         proxy_buffer_size       128k;
@@ -80,14 +92,6 @@ server {
         proxy_pass http://127.0.0.1:3003;
         proxy_set_header   X-Cloudron-Proxy-Port   <%= port %>;
 <% } else if ( endpoint === 'app' ) { %>
-
-        # http://serverfault.com/questions/121766/webdav-rename-fails-on-an-apache-mod-dav-install-behind-nginx
-        set $destination $http_destination;
-        if ($destination ~* ^https(.+)$) {
-            set $destination http$1;
-        }
-        proxy_set_header Destination $destination;
-
         proxy_pass http://127.0.0.1:<%= port %>;
 <% } else if ( endpoint === 'splash' ) { %>
         root   <%= sourceDir %>;
