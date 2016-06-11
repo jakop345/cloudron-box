@@ -5,7 +5,7 @@
 // Do not require anything here!
 
 exports = module.exports = {
-    'version': 35,
+    'version': 36,
 
     'baseImage': 'cloudron/base:0.8.1',
 
