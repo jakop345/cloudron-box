@@ -17,7 +17,7 @@ exports = module.exports = {
 };
 
 var HEALTHCHECK_INTERVAL = 10 * 1000; // every 10 seconds. this needs to be small since the UI makes only healthy apps clickable
-var UNHEALTHY_THRESHOLD = 3 * 60 * 1000; // 3 minutes
+var UNHEALTHY_THRESHOLD = 10 * 60 * 1000; // 10 minutes
 var gHealthInfo = { }; // { time, emailSent }
 var gRunTimeout = null;
 var gDockerEventStream = null;
