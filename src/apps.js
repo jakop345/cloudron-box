@@ -661,8 +661,9 @@ function getLogs(appId, lines, follow, callback) {
     });
 }
 
-function restore(appId, auditSource, callback) {
+function restore(appId, data, auditSource, callback) {
     assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof data, 'object');
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 

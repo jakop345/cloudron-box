@@ -171,11 +171,14 @@ function configureApp(req, res, next) {
 }
 
 function restoreApp(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
     assert.strictEqual(typeof req.params.id, 'string');
+
+    var data = req.body;
 
     debug('Restore app id:%s', req.params.id);
 
-    apps.restore(req.params.id, auditSource(req), function (error) {
+    apps.restore(req.params.id, data, auditSource(req), function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
