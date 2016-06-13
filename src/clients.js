@@ -207,7 +207,7 @@ function getClientTokensByUserId(clientId, userId, callback) {
     tokendb.getByIdentifierAndClientId(userId, clientId, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) {
             // this can mean either that there are no tokens or the clientId is actually unknown
-            clientdb.get(clientId, function (error/*, result*/) {
+            get(clientId, function (error/*, result*/) {
                 if (error) return callback(error);
                 callback(null, []);
             });
