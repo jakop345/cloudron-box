@@ -22,12 +22,12 @@ webadmin_origin="https://${ADMIN_LOCATION}-localhost"
 # !!!!!! check clientdb.js clear() to not nuke those entries
 echo "Add webadmin api client"
 mysql --user=root --password="" \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"Settings\", \"external\", \"secret-webadmin\", \"${webadmin_origin}\", \"${webadmin_scopes}\")" boxtest
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"Settings\", \"built-in\", \"secret-webadmin\", \"${webadmin_origin}\", \"${webadmin_scopes}\")" boxtest
 
 echo "Add SDK api client"
 mysql --user=root --password="" \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-sdk\", \"SDK\", \"external\", \"secret-sdk\", \"${webadmin_origin}\", \"*,roleSdk\")" boxtest
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-sdk\", \"SDK\", \"built-in\", \"secret-sdk\", \"${webadmin_origin}\", \"*,roleSdk\")" boxtest
 
 echo "Add cli api client"
 mysql --user=root --password="" \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-cli\", \"Cloudron Tool\", \"external\", \"secret-cli\", \"${webadmin_origin}\", \"*,roleSdk\")" boxtest
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-cli\", \"Cloudron Tool\", \"built-in\", \"secret-cli\", \"${webadmin_origin}\", \"*,roleSdk\")" boxtest
