@@ -66,6 +66,7 @@ util.inherits(ClientsError, Error);
 ClientsError.INVALID_SCOPE = 'Invalid scope';
 ClientsError.INVALID_CLIENT = 'Invalid client';
 ClientsError.INVALID_TOKEN = 'Invalid token';
+ClientsError.NOT_FOUND = 'Not found';
 ClientsError.INTERNAL_ERROR = 'Internal Error';
 ClientsError.NOT_ALLOWED = 'Not allowed to remove this client';
 
@@ -128,6 +129,7 @@ function get(id, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     clientdb.get(id, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new ClientsError(ClientsError.NOT_FOUND, 'No such client'));
         if (error) return callback(error);
         callback(null, result);
     });
@@ -138,6 +140,7 @@ function del(id, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     clientdb.del(id, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new ClientsError(ClientsError.NOT_FOUND, 'No such client'));
         if (error) return callback(error);
         callback(null, result);
     });
@@ -190,6 +193,7 @@ function getByAppIdAndType(appId, type, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     clientdb.getByAppIdAndType(appId, type, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new ClientsError(ClientsError.NOT_FOUND, 'No such client'));
         if (error) return callback(error);
         callback(null, result);
     });
@@ -222,7 +226,7 @@ function delClientTokensByUserId(clientId, userId, callback) {
     tokendb.delByIdentifierAndClientId(userId, clientId, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) {
             // this can mean either that there are no tokens or the clientId is actually unknown
-            clientdb.get(clientId, function (error/*, result*/) {
+            get(clientId, function (error/*, result*/) {
                 if (error) return callback(error);
                 callback(null);
             });
@@ -239,6 +243,7 @@ function delByAppIdAndType(appId, type, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     clientdb.delByAppIdAndType(appId, type, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new ClientsError(ClientsError.NOT_FOUND, 'No such client'));
         if (error) return callback(error);
         callback(null);
     });
@@ -278,7 +283,7 @@ function delToken(clientId, tokenId, callback) {
         if (error) return callback(error);
 
         tokendb.del(tokenId, function (error) {
-            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new ClientsError(ClientsError.INVALID_TOKEN));
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new ClientsError(ClientsError.INVALID_TOKEN, 'Invalid token'));
             if (error) return callback(new ClientsError(ClientsError.INTERNAL_ERROR, error));
 
             callback(null);
