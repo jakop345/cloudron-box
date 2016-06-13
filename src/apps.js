@@ -35,6 +35,8 @@ exports = module.exports = {
     restoreInstalledApps: restoreInstalledApps,
     configureInstalledApps: configureInstalledApps,
 
+    getAppConfig: getAppConfig,
+
     // exported for testing
     _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings,

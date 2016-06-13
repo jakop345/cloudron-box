@@ -365,14 +365,7 @@ function backupApp(app, addonsToBackup, callback) {
         appConfig = app.lastBackupConfig;
         backupFunction = reuseOldAppBackup.bind(null, app);
     } else {
-        appConfig = {
-            manifest: app.manifest,
-            location: app.location,
-            portBindings: app.portBindings,
-            accessRestriction: app.accessRestriction,
-            memoryLimit: app.memoryLimit,
-            altDomain: app.altDomain
-        };
+        appConfig = apps.getAppConfig(app);
         backupFunction = createNewAppBackup.bind(null, app, addonsToBackup);
 
         if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(appConfig), 'utf8')) {
