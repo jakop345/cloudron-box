@@ -669,6 +669,8 @@ function restore(appId, data, auditSource, callback) {
 
     debug('Will restore app with id:%s', appId);
 
+    if (!data.backupId) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid backup id'));
+
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
@@ -686,6 +688,7 @@ function restore(appId, data, auditSource, callback) {
 
             // ## should probably query new location, access restriction from user
             values = {
+                lastBackupId: data.backupId,
                 manifest: restoreConfig.manifest,
                 portBindings: restoreConfig.portBindings,
                 memoryLimit: restoreConfig.memoryLimit,

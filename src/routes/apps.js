@@ -178,6 +178,8 @@ function restoreApp(req, res, next) {
 
     debug('Restore app id:%s', req.params.id);
 
+    if ('backupId' in data && typeof data.backupId !== 'string') return next(new HttpError(400, 'backupId must be string'));
+
     apps.restore(req.params.id, data, auditSource(req), function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));

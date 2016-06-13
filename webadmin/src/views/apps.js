@@ -274,7 +274,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appRestore.busy = true;
         $scope.appRestore.error.password = null;
 
-        Client.restoreApp($scope.appRestore.app.id, $scope.appRestore.password, function (error) {
+        Client.restoreApp($scope.appRestore.app.id, $scope.appRestore.app.lastBackupId, $scope.appRestore.password, function (error) {
             if (error && error.statusCode === 403) {
                 $scope.appRestore.password = '';
                 $scope.appRestore.error.password = true;
