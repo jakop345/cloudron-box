@@ -345,7 +345,8 @@ function backupApp(app, addonsToBackup, callback) {
             location: app.location,
             portBindings: app.portBindings,
             accessRestriction: app.accessRestriction,
-            memoryLimit: app.memoryLimit
+            memoryLimit: app.memoryLimit,
+            altDomain: app.altDomain
         };
         backupFunction = createNewAppBackup.bind(null, app, addonsToBackup);
 
