@@ -7,6 +7,7 @@ exports = module.exports = {
     getByAppIdPaged: getByAppIdPaged,
 
     getRestoreUrl: getRestoreUrl,
+    getRestoreConfig: getRestoreConfig,
 
     ensureBackup: ensureBackup,
 
@@ -36,6 +37,7 @@ var addons = require('./addons.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
     settings = require('./settings.js'),
+    superagent = require('superagent'),
     util = require('util'),
     webhooks = require('./webhooks.js');
 
@@ -157,6 +159,29 @@ function getAppBackupCredentials(app, callback) {
             debug('getAppBackupCredentials: %j', result);
 
             callback(null, result);
+        });
+    });
+}
+
+// backupId is the s3 filename. appbackup_%s_%s-v%s.tar.gz
+function getRestoreConfig(backupId, callback) {
+    assert.strictEqual(typeof backupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var configFile = backupId.replace(/\.tar\.gz$/, '.json');
+
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        api(backupConfig.provider).getRestoreUrl(backupConfig, configFile, function (error, result) {
+            if (error) return callback(error);
+
+            superagent.get(result.url, function (error, response) {
+                if (error && !error.response) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error.message));
+                if (response.statusCode !== 200) return callback(new Error('Invalid response code when getting config.json : ' + response.statusCode));
+
+                return callback(null, response.body);
+            });
         });
     });
 }
