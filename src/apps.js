@@ -236,6 +236,17 @@ function getDuplicateErrorDetails(location, portBindings, error) {
     return new AppsError(AppsError.ALREADY_EXISTS);
 }
 
+function getAppConfig(app) {
+    return {
+        manifest: app.manifest,
+        location: app.location,
+        accessRestriction: app.accessRestriction,
+        portBindings: app.portBindings,
+        memoryLimit: app.memoryLimit,
+        altDomain: app.altDomain
+    };
+}
+
 function getIconUrlSync(app) {
     var iconPath = paths.APPICONS_DIR + '/' + app.id + '.png';
     return fs.existsSync(iconPath) ? '/api/v1/apps/' + app.id + '/icon' : null;
@@ -513,13 +524,7 @@ function configure(appId, data, auditSource, callback) {
             }
         }
 
-        values.oldConfig = {
-            location: app.location,
-            accessRestriction: app.accessRestriction,
-            portBindings: app.portBindings,
-            memoryLimit: app.memoryLimit,
-            altDomain: app.altDomain
-        };
+        values.oldConfig = getAppConfig(app);
 
         debug('Will configure app with id:%s values:%j', appId, values);
 
@@ -593,13 +598,7 @@ function update(appId, data, auditSource, callback) {
                 values.memoryLimit = values.manifest.memoryLimit;
             }
 
-            values.oldConfig = {
-                manifest: app.manifest,
-                portBindings: app.portBindings,
-                accessRestriction: app.accessRestriction,
-                memoryLimit: app.memoryLimit,
-                altDomain: app.altDomain
-            };
+            values.oldConfig = getAppConfig(app);
 
             appdb.setInstallationCommand(appId, data.force ? appdb.ISTATE_PENDING_FORCE_UPDATE : appdb.ISTATE_PENDING_UPDATE, values, function (error) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
@@ -693,14 +692,7 @@ function restore(appId, data, auditSource, callback) {
                 portBindings: restoreConfig.portBindings,
                 memoryLimit: restoreConfig.memoryLimit,
 
-                oldConfig: {
-                    location: app.location,
-                    accessRestriction: app.accessRestriction,
-                    portBindings: app.portBindings,
-                    memoryLimit: app.memoryLimit,
-                    manifest: app.manifest,
-                    altDomain: app.altDomain
-                }
+                oldConfig: getAppConfig(app)
             };
         }
 
