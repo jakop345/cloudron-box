@@ -670,43 +670,38 @@ function restore(appId, data, auditSource, callback) {
 
     debug('Will restore app with id:%s', appId);
 
-    if (!data.backupId) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid backup id'));
-
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        // restore without a backup is the same as re-install
-        var restoreConfig = app.lastBackupConfig, values = { };
-        if (restoreConfig) {
-            // re-validate because this new box version may not accept old configs.
-            // if we restore location, it should be validated here as well
+        // for empty or null backupId, use existing manifest to mimic a reinstall
+        var func = data.backupId ? backups.getRestoreConfig.bind(null, data.backupId) : function (next) { return next(null, app.manifest); };
+
+        func(function (error, restoreConfig) {
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+            if (!restoreConfig) callback(new AppsError(AppsError.EXTERNAL_ERROR, 'Could not get restore config'));
+
+            // re-validate because this new box version may not accept old configs
             error = checkManifestConstraints(restoreConfig.manifest);
             if (error) return callback(error);
 
-            error = validatePortBindings(restoreConfig.portBindings, restoreConfig.manifest.tcpPorts); // maybe new ports got reserved now
-            if (error) return callback(error);
-
-            // ## should probably query new location, access restriction from user
-            values = {
-                lastBackupId: data.backupId,
+            var values = {
+                lastBackupId: data.backupId || null, // when null, apptask simply reinstalls
                 manifest: restoreConfig.manifest,
-                portBindings: restoreConfig.portBindings,
-                memoryLimit: restoreConfig.memoryLimit,
 
                 oldConfig: getAppConfig(app)
             };
-        }
 
-        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_RESTORE, values, function (error) {
-            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
-            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+            appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_RESTORE, values, function (error) {
+                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
+                if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            taskmanager.restartAppTask(appId);
+                taskmanager.restartAppTask(appId);
 
-            eventlog.add(eventlog.ACTION_APP_RESTORE, auditSource, { appId: appId });
+                eventlog.add(eventlog.ACTION_APP_RESTORE, auditSource, { appId: appId });
 
-            callback(null);
+                callback(null);
+            });
         });
     });
 }
