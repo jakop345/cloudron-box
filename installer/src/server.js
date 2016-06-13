@@ -55,13 +55,17 @@ function provisionEC2(callback) {
 function provision(callback) {
     if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
 
-    // check if DO or EC2
-    var func = false ? provisionDigitalOcean : provisionEC2;
+    // try first digitalocean, then ec2
+    provisionDigitalOcean(function (error, userData) {
+        if (!error) return installer.provision(userData, callback);
 
-    func(function (error, userData) {
-        if (error) return callback(error);
+        provisionEC2(function (error, userData) {
+            if (!error) return installer.provision(userData, callback);
 
-        installer.provision(userData, callback);
+            console.error('Unable to get meta data', error);
+
+            callback(new Error('Error getting metadata'));
+        });
     });
 }
 
