@@ -21,7 +21,7 @@ var appdb = require('./appdb.js'),
     async = require('async'),
     clients = require('./clients.js'),
     config = require('./config.js'),
-    DatabaseError = require('./databaseerror.js'),
+    ClientsError = clients.ClientsError,
     debug = require('debug')('box:addons'),
     docker = require('./docker.js'),
     dockerConnection = docker.connection,
@@ -287,7 +287,7 @@ function setupOauth(app, options, callback) {
     var scope = 'profile';
 
     clients.delByAppIdAndType(appId, clients.TYPE_OAUTH, function (error) { // remove existing creds
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
+        if (error && error.reason !== ClientsError.NOT_FOUND) return callback(error);
 
         clients.add(appId, clients.TYPE_OAUTH, redirectURI, scope, function (error, result) {
             if (error) return callback(error);
@@ -313,7 +313,7 @@ function teardownOauth(app, options, callback) {
     debugApp(app, 'teardownOauth');
 
     clients.delByAppIdAndType(app.id, clients.TYPE_OAUTH, function (error) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
+        if (error && error.reason !== ClientsError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
     });
@@ -328,7 +328,7 @@ function setupSimpleAuth(app, options, callback) {
     var scope = 'profile';
 
     clients.delByAppIdAndType(app.id, clients.TYPE_SIMPLE_AUTH, function (error) { // remove existing creds
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
+        if (error && error.reason !== ClientsError.NOT_FOUND) return callback(error);
 
         clients.add(appId, clients.TYPE_SIMPLE_AUTH, '', scope, function (error, result) {
             if (error) return callback(error);
@@ -356,7 +356,7 @@ function teardownSimpleAuth(app, options, callback) {
     debugApp(app, 'teardownSimpleAuth');
 
     clients.delByAppIdAndType(app.id, clients.TYPE_SIMPLE_AUTH, function (error) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
+        if (error && error.reason !== ClientsError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'simpleauth', callback);
     });

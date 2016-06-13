@@ -86,7 +86,7 @@ function login(req, res, next) {
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password is required'));
 
     loginLogic(req.body.clientId, req.body.username, req.body.password, function (error, result) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(401, 'Unknown client'));
+        if (error && error.reason === ClientsError.NOT_FOUND) return next(new HttpError(401, 'Unknown client'));
         if (error && error.reason === ClientsError.INVALID_CLIENT) return next(new HttpError(401, 'Unkown client'));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(401, 'Forbidden'));
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(401, 'Unkown app'));

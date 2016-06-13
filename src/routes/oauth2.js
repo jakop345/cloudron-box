@@ -5,8 +5,8 @@ var appdb = require('../appdb'),
     assert = require('assert'),
     authcodedb = require('../authcodedb'),
     clients = require('../clients'),
+    ClientsError = clients.ClientsError,
     config = require('../config.js'),
-    constants = require('../constants.js'),
     DatabaseError = require('../databaseerror'),
     debug = require('debug')('box:routes/oauth2'),
     eventlog = require('../eventlog.js'),
@@ -405,7 +405,7 @@ var authorization = [
         debug('authorization: client %s with callback to %s.', clientId, redirectURI);
 
         clients.get(clientId, function (error, client) {
-            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
+            if (error && error.reason === ClientsError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
 
             // ignore the origin passed into form the client, but use the one from the clientdb

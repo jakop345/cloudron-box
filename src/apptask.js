@@ -38,8 +38,8 @@ var addons = require('./addons.js'),
     certificates = require('./certificates.js'),
     clients = require('./clients.js'),
     config = require('./config.js'),
+    ClientsError = clients.ClientsError,
     database = require('./database.js'),
-    DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apptask'),
     docker = require('./docker.js'),
     ejs = require('ejs'),
@@ -172,7 +172,7 @@ function removeOAuthProxyCredentials(app, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     clients.delByAppIdAndType(app.id, clients.TYPE_PROXY, function (error) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) {
+        if (error && error.reason !== ClientsError.NOT_FOUND) {
             debugApp(app, 'Error removing OAuth client id', error);
             return callback(error);
         }

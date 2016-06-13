@@ -12,11 +12,11 @@ var assert = require('assert'),
     BearerStrategy = require('passport-http-bearer').Strategy,
     clients = require('./clients'),
     ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
+    ClientsError = clients.ClientsError,
     DatabaseError = require('./databaseerror'),
     debug = require('debug')('box:auth'),
     LocalStrategy = require('passport-local').Strategy,
     crypto = require('crypto'),
-    groups = require('./groups'),
     passport = require('passport'),
     tokendb = require('./tokendb'),
     user = require('./user'),
@@ -67,7 +67,7 @@ function initialize(callback) {
             // username is actually client id here
             // password is client secret
             clients.get(username, function (error, client) {
-                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
+                if (error && error.reason === ClientsError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);
                 if (client.clientSecret != password) return callback(null, false);
                 return callback(null, client);
@@ -85,7 +85,7 @@ function initialize(callback) {
 
     passport.use(new ClientPasswordStrategy(function (clientId, clientSecret, callback) {
         clients.get(clientId, function(error, client) {
-            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
+            if (error && error.reason === ClientsError.NOT_FOUND) return callback(null, false);
             if (error) { return callback(error); }
             if (client.clientSecret != clientSecret) { return callback(null, false); }
             return callback(null, client);
