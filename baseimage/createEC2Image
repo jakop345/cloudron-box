@@ -124,6 +124,9 @@ done
 echo "Terminating instance"
 aws ec2 terminate-instances --region ${region} --profile ${aws_credentials} --instance-ids ${instance_id}
 
+echo "Make image public"
+# aws ec2 modify-image-attribute --region ${region} --profile ${aws_credentials} --image-id ${instance_id} --launch-permission "{\"Add\":[{\"Group\":\"all\"}]}"
+
 echo "Copy image to other regions"
 # aws ec2 copy-image --region us-west-2 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
 # aws ec2 copy-image --region ap-southeast-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
