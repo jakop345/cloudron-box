@@ -12,8 +12,8 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [ $# -lt 8 ]; then
-    echo "Usage: backupapp.sh <appid> <s3 config url> <s3 data url> <access key id> <access key> <session token> <region> <password>"
+if [ $# -lt 7 ]; then
+    echo "Usage: backupapp.sh <appid> <s3 config url> <s3 data url> <access key id> <access key> <region> <password> [session token]"
     exit 1
 fi
 
@@ -25,9 +25,12 @@ readonly s3_config_url="$2"
 readonly s3_data_url="$3"
 export AWS_ACCESS_KEY_ID="$4"
 export AWS_SECRET_ACCESS_KEY="$5"
-export AWS_SESSION_TOKEN="$6"
-export AWS_DEFAULT_REGION="$7"
-readonly password="$8"
+export AWS_DEFAULT_REGION="$6"
+readonly password="$7"
+
+if [ $# -gt 7 ]; then
+    export AWS_SESSION_TOKEN="$8"
+fi
 
 readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
 readonly app_data_dir="${DATA_DIR}/${app_id}"

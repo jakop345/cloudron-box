@@ -255,7 +255,8 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 
         debug('backupBoxWithAppBackupIds:  %j', result);
 
-        var args = [ result.s3Url, result.accessKeyId, result.secretAccessKey, result.sessionToken, result.region, result.backupKey ];
+        var args = [ result.s3Url, result.accessKeyId, result.secretAccessKey, result.region, result.backupKey ];
+        if (result.sessionToken) args.push(result.sessionToken);
 
         shell.sudo('backupBox', [ BACKUP_BOX_CMD ].concat(args), function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
@@ -321,8 +322,8 @@ function createNewAppBackup(app, manifest, callback) {
 
         debugApp(app, 'createNewAppBackup: backup url:%s backup config url:%s', result.s3DataUrl, result.s3ConfigUrl);
 
-        var args = [ app.id, result.s3ConfigUrl, result.s3DataUrl, result.accessKeyId, result.secretAccessKey,
-                     result.sessionToken, result.region, result.backupKey ];
+        var args = [ app.id, result.s3ConfigUrl, result.s3DataUrl, result.accessKeyId, result.secretAccessKey, result.region, result.backupKey ];
+        if (result.sessionToken) args.push(result.sessionToken);
 
         async.series([
             addons.backupAddons.bind(null, app, manifest.addons),

@@ -12,8 +12,8 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [ $# -lt 6 ]; then
-    echo "Usage: backupbox.sh <s3 url> <access key id> <access key> <session token> <region> <password>"
+if [ $# -lt 5 ]; then
+    echo "Usage: backupbox.sh <s3 url> <access key id> <access key> <region> <password> [session token]"
     exit 1
 fi
 
@@ -21,9 +21,13 @@ fi
 s3_url="$1"
 export AWS_ACCESS_KEY_ID="$2"
 export AWS_SECRET_ACCESS_KEY="$3"
-export AWS_SESSION_TOKEN="$4"
-export AWS_DEFAULT_REGION="$5"
-password="$6"
+export AWS_DEFAULT_REGION="$4"
+password="$5"
+
+if [ $# -gt 5 ]; then
+    export AWS_SESSION_TOKEN="$6"
+fi
+
 now=$(date "+%Y-%m-%dT%H:%M:%S")
 BOX_DATA_DIR="${HOME}/data/box"
 box_snapshot_dir="${HOME}/data/snapshots/box-${now}"
