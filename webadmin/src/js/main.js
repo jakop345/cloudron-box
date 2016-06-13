@@ -188,21 +188,21 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
 
     // wait till the view has loaded until showing a modal dialog
     Client.onConfig(function (config) {
-        if (!config.billing) {
-            setTimeout(function () {
-                $('.upgrade')[0].classList.remove('hide');
+        // if (!config.billing) {
+        //     setTimeout(function () {
+        //         $('.upgrade')[0].classList.remove('hide');
 
-                $('.upgrade .trigger').hover(function () {
-                    $('.upgrade .content')[0].classList.add('active');
-                    $('.upgrade .trigger')[0].classList.add('active');
-                });
+        //         $('.upgrade .trigger').hover(function () {
+        //             $('.upgrade .content')[0].classList.add('active');
+        //             $('.upgrade .trigger')[0].classList.add('active');
+        //         });
 
-                $('.upgrade').hover(function () {}, function () {
-                    $('.upgrade .content')[0].classList.remove('active');
-                    $('.upgrade .trigger')[0].classList.remove('active');
-                });
-            }, 2000);
-        }
+        //         $('.upgrade').hover(function () {}, function () {
+        //             $('.upgrade .content')[0].classList.remove('active');
+        //             $('.upgrade .trigger')[0].classList.remove('active');
+        //         });
+        //     }, 2000);
+        // }
 
         // check if we are actually updating
         if (config.progress.update && config.progress.update.percent !== -1) {
