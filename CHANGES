@@ -535,3 +535,5 @@
 [0.15.2]
 - Allow restoring apps from any previous backup
 
+[0.15.3]
+- Show installation progress in a tooltip
