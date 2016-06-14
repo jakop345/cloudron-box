@@ -11,7 +11,6 @@ sudo -k || sudo --reset-timestamp
 # checks if all scripts are sudo access
 scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
          "${SOURCE_DIR}/src/scripts/createappdir.sh" \
-         "${SOURCE_DIR}/src/scripts/setup_infra.sh" \
          "${SOURCE_DIR}/src/scripts/reloadnginx.sh" \
          "${SOURCE_DIR}/src/scripts/backupbox.sh" \
          "${SOURCE_DIR}/src/scripts/backupapp.sh" \
@@ -32,12 +31,6 @@ for script in "${scripts[@]}"; do
         exit 1
     fi
 done
-
-# setup_infra requires node to be in path for the root user
-if ! test -x /usr/bin/node 2>/dev/null; then
-    echo "node is not in PATH for the root user. Create a symlink to /usr/bin/node possibly"
-    exit 1
-fi
 
 image_missing=""
 

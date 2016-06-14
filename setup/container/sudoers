@@ -31,6 +31,3 @@ yellowtent ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/collectlogs.sh
 Defaults!/home/yellowtent/box/src/scripts/retire.sh env_keep="HOME BOX_ENV"
 yellowtent ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/retire.sh
 
-Defaults!/home/yellowtent/box/src/scripts/setup_infra.sh env_keep="HOME BOX_ENV"
-yellowtent ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/setup_infra.sh
-
