@@ -625,7 +625,6 @@ function update(app, callback) {
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
         deleteContainers.bind(null, app),
-        addons.teardownAddons.bind(null, app, unusedAddons),
         function deleteImageIfChanged(done) {
              if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
 
@@ -641,6 +640,9 @@ function update(app, callback) {
                 backups.backupApp.bind(null, app, app.oldConfig.manifest)
             ], next);
         },
+
+        // only delete unused addons after backup
+        addons.teardownAddons.bind(null, app, unusedAddons),
 
         updateApp.bind(null, app, { installationProgress: '45, Downloading icon' }),
         downloadIcon.bind(null, app),
