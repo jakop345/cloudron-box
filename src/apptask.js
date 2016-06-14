@@ -794,6 +794,11 @@ if (require.main === module) {
 
     debug('Apptask for %s', process.argv[2]);
 
+    process.on('SIGTERM', function () {
+        debug('taskmanager sent SIGTERM since it got a new task for this app');
+        process.exit(0);
+    });
+
     initialize(function (error) {
         if (error) throw error;
 
