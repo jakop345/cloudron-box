@@ -532,3 +532,6 @@
 - Add API token management UI
 - Improved UI to enter email aliases
 
+[0.15.2]
+- Allow restoring apps from any previous backup
+
