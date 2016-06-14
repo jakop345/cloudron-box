@@ -477,4 +477,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             $(this).find("[autofocus]:first").focus();
         });
     });
+
+    // setup tooltips (opt-in)
+    $('[data-toggle="tooltip"]').tooltip();
 }]);

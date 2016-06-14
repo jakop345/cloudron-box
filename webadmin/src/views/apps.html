@@ -304,7 +304,7 @@
 
     <div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
         <div class="col-sm-1 grid-item" ng-repeat="app in installedApps | orderBy:'location'">
-            <div style="background-color: white;" class="highlight grid-item-content">
+            <div style="background-color: white;" class="highlight grid-item-content" data-toggle="tooltip" data-placement="bottom" title="{{ app.message }}">
                 <a ng-href="{{app | applicationLink}}" ng-click="(app | installError) === true && showError(app)" target="_blank">
                     <div class="grid-item-top">
                         <div class="row">

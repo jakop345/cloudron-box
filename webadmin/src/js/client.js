@@ -760,6 +760,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var progress = parseInt(installationProgress.split(',')[0], 10);
         if (isNaN(progress)) progress = 0;
         app.progress = progress;
+        app.message = installationProgress.replace(/.*, /,'');
 
         return app;
     };
