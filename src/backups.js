@@ -137,12 +137,13 @@ function getBoxBackupCredentials(appBackupIds, callback) {
     });
 }
 
-function getAppBackupCredentials(app, callback) {
+function getAppBackupCredentials(app, manifest, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var now = new Date();
-    var filebase = util.format('appbackup_%s_%s-v%s', app.id, now.toISOString(), app.manifest.version);
+    var filebase = util.format('appbackup_%s_%s-v%s', app.id, now.toISOString(), manifest.version);
     var configFilename = filebase + '.json', dataFilename = filebase + '.tar.gz';
 
     settings.getBackupConfig(function (error, backupConfig) {
@@ -213,14 +214,15 @@ function getRestoreUrl(backupId, callback) {
     });
 }
 
-function copyLastBackup(app, callback) {
+function copyLastBackup(app, manifest, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof app.lastBackupId, 'string');
+    assert(manifest && typeof manifeset === 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var now = new Date();
-    var toFilenameArchive = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, now.toISOString(), app.manifest.version);
-    var toFilenameConfig = util.format('appbackup_%s_%s-v%s.json', app.id, now.toISOString(), app.manifest.version);
+    var toFilenameArchive = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, now.toISOString(), manifest.version);
+    var toFilenameConfig = util.format('appbackup_%s_%s-v%s.json', app.id, now.toISOString(), manifest.version);
 
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
@@ -295,11 +297,12 @@ function canBackupApp(app) {
 
 // set the 'creation' date of lastBackup so that the backup persists across time based archival rules
 // s3 does not allow changing creation time, so copying the last backup is easy way out for now
-function reuseOldAppBackup(app, callback) {
+function reuseOldAppBackup(app, manifest, callback) {
     assert.strictEqual(typeof app.lastBackupId, 'string');
+    assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    copyLastBackup(app, function (error, newBackupId) {
+    copyLastBackup(app, manifest, function (error, newBackupId) {
         if (error) return callback(error);
 
         debugApp(app, 'reuseOldAppBackup: reused old backup %s as %s', app.lastBackupId, newBackupId);
@@ -308,12 +311,12 @@ function reuseOldAppBackup(app, callback) {
     });
 }
 
-function createNewAppBackup(app, addonsToBackup, callback) {
+function createNewAppBackup(app, manifest, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert(!addonsToBackup || typeof addonsToBackup, 'object');
+    assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    getAppBackupCredentials(app, function (error, result) {
+    getAppBackupCredentials(app, manifest, function (error, result) {
         if (error) return callback(error);
 
         debugApp(app, 'createNewAppBackup: backup url:%s backup config url:%s', result.s3DataUrl, result.s3ConfigUrl);
@@ -322,14 +325,14 @@ function createNewAppBackup(app, addonsToBackup, callback) {
                      result.sessionToken, result.region, result.backupKey ];
 
         async.series([
-            addons.backupAddons.bind(null, app, addonsToBackup),
+            addons.backupAddons.bind(null, app, manifest.addons),
             shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD ].concat(args))
         ], function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
             debugApp(app, 'createNewAppBackup: %s done', result.id);
 
-            backupdb.add({ id: result.id, version: app.manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+            backupdb.add({ id: result.id, version: manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                 callback(null, result.id);
@@ -351,9 +354,9 @@ function setRestorePoint(appId, lastBackupId, callback) {
     });
 }
 
-function backupApp(app, addonsToBackup, callback) {
+function backupApp(app, manifest, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert(!addonsToBackup || typeof addonsToBackup, 'object');
+    assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var backupFunction;
@@ -364,10 +367,11 @@ function backupApp(app, addonsToBackup, callback) {
             return callback(new BackupsError(BackupsError.BAD_STATE, 'App not healthy and never backed up previously'));
         }
 
-        backupFunction = reuseOldAppBackup.bind(null, app);
+        backupFunction = reuseOldAppBackup.bind(null, app, manifest);
     } else {
         var appConfig = apps.getAppConfig(app);
-        backupFunction = createNewAppBackup.bind(null, app, addonsToBackup);
+        app.manifest = manifest;
+        backupFunction = createNewAppBackup.bind(null, app, manifest);
 
         if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(appConfig), 'utf8')) {
             return callback(safe.error);
