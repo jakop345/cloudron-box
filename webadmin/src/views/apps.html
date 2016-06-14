@@ -334,7 +334,7 @@
                                     <i class="fa fa-undo scale"></i>
                                 </a>
 
-                                <a href="" ng-click="showConfigure(app)" ng-show="(app | installSuccess) == true">
+                                <a href="" ng-click="showConfigure(app)" ng-show="app.installationState === 'installed' || app.installationState === 'pending_configure' || (app | installError)">
                                     <i class="fa fa-wrench scale"></i>
                                 </a>
                             </div>
@@ -355,7 +355,7 @@
                             <a href="" ng-click="showRestore(app)" title="Restore App"><i class="fa fa-undo scale"></i></a>
                         </div>
 
-                        <div ng-show="(app | installSuccess) == true">
+                        <div ng-show="app.installationState === 'installed' || app.installationState === 'pending_configure' || (app | installError)">
                             <a href="" ng-click="showConfigure(app)" title="Configure App"><i class="fa fa-wrench scale"></i></a>
                         </div>
                     </div>
