@@ -48,6 +48,7 @@ var addons = require('./addons.js'),
     assert = require('assert'),
     async = require('async'),
     backups = require('./backups.js'),
+    BackupsError = backups.BackupsError,
     certificates = require('./certificates.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
@@ -678,7 +679,9 @@ function restore(appId, data, auditSource, callback) {
         var func = data.backupId ? backups.getRestoreConfig.bind(null, data.backupId) : function (next) { return next(null, { manifest: app.manifest }); };
 
         func(function (error, restoreConfig) {
+            if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
             if (!restoreConfig) callback(new AppsError(AppsError.EXTERNAL_ERROR, 'Could not get restore config'));
 
             // re-validate because this new box version may not accept old configs
