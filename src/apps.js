@@ -675,7 +675,7 @@ function restore(appId, data, auditSource, callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         // for empty or null backupId, use existing manifest to mimic a reinstall
-        var func = data.backupId ? backups.getRestoreConfig.bind(null, data.backupId) : function (next) { return next(null, app.manifest); };
+        var func = data.backupId ? backups.getRestoreConfig.bind(null, data.backupId) : function (next) { return next(null, { manifest: app.manifest }); };
 
         func(function (error, restoreConfig) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
