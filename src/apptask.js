@@ -413,7 +413,7 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: '85, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '90, Waiting for Alt Domain DNS propagation' }),
+        updateApp.bind(null, app, { installationProgress: '90, Waiting for External Domain CNAME setup' }),
         exports._waitForAltDomainDnsPropagation.bind(null, app), // required when restoring and !lastBackupId
 
         updateApp.bind(null, app, { installationProgress: '95, Configure nginx' }),
@@ -517,7 +517,7 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '85, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '90, Waiting for Alt Domain DNS propagation' }),
+        updateApp.bind(null, app, { installationProgress: '90, Waiting for External Domain CNAME setup' }),
         exports._waitForAltDomainDnsPropagation.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '95, Configuring Nginx' }),
@@ -579,7 +579,7 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: '80, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '85, Waiting for Alt Domain DNS propagation' }),
+        updateApp.bind(null, app, { installationProgress: '85, Waiting for External Domain CNAME setup' }),
         exports._waitForAltDomainDnsPropagation.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '90, Configuring Nginx' }),
