@@ -757,7 +757,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
         // extract progress percentage
         var installationProgress = app.installationProgress || '';
-        var progress = parseInt(installationProgress.split(',')[0]);
+        var progress = parseInt(installationProgress.split(',')[0], 10);
         if (isNaN(progress)) progress = 0;
         app.progress = progress;
 
