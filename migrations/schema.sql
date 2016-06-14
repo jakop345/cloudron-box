@@ -68,10 +68,9 @@ CREATE TABLE IF NOT EXISTS apps(
     memoryLimit BIGINT DEFAULT 0,
     altDomain VARCHAR(256),
 
-    lastBackupId VARCHAR(128),
-    lastBackupConfigJson TEXT, // used for appstore and non-appstore installs. it's here so it's easy to do REST validation
+    lastBackupId VARCHAR(128), // tracks last valid backup, can be removed
 
-    oldConfigJson TEXT, // used to pass old config for apptask
+    oldConfigJson TEXT, // used to pass old config for apptask, can be removed when we use a queue
 
     PRIMARY KEY(id));
 

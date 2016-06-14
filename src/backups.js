@@ -338,13 +338,12 @@ function createNewAppBackup(app, addonsToBackup, callback) {
     });
 }
 
-function setRestorePoint(appId, lastBackupId, lastBackupConfig, callback) {
+function setRestorePoint(appId, lastBackupId, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof lastBackupId, 'string');
-    assert.strictEqual(typeof lastBackupConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    appdb.update(appId, { lastBackupId: lastBackupId, lastBackupConfig: lastBackupConfig }, function (error) {
+    appdb.update(appId, { lastBackupId: lastBackupId }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new BackupsError(BackupsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
@@ -357,7 +356,7 @@ function backupApp(app, addonsToBackup, callback) {
     assert(!addonsToBackup || typeof addonsToBackup, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var appConfig = null, backupFunction;
+    var backupFunction;
 
     if (!canBackupApp(app)) {
         if (!app.lastBackupId) {
@@ -365,10 +364,9 @@ function backupApp(app, addonsToBackup, callback) {
             return callback(new BackupsError(BackupsError.BAD_STATE, 'App not healthy and never backed up previously'));
         }
 
-        appConfig = app.lastBackupConfig;
         backupFunction = reuseOldAppBackup.bind(null, app);
     } else {
-        appConfig = apps.getAppConfig(app);
+        var appConfig = apps.getAppConfig(app);
         backupFunction = createNewAppBackup.bind(null, app, addonsToBackup);
 
         if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(appConfig), 'utf8')) {
@@ -381,7 +379,7 @@ function backupApp(app, addonsToBackup, callback) {
 
         debugApp(app, 'backupApp: successful id:%s', backupId);
 
-        setRestorePoint(app.id, backupId, appConfig, function (error) {
+        setRestorePoint(app.id, backupId, function (error) {
             if (error) return callback(error);
 
             return callback(null, backupId);

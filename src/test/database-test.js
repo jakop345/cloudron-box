@@ -551,7 +551,6 @@ describe('database', function () {
             health: null,
             accessRestriction: null,
             lastBackupId: null,
-            lastBackupConfig: null,
             oldConfig: null,
             memoryLimit: 4294967296,
             altDomain: null
@@ -571,7 +570,6 @@ describe('database', function () {
             health: null,
             accessRestriction: { users: [ 'foobar' ] },
             lastBackupId: null,
-            lastBackupConfig: null,
             oldConfig: null,
             memoryLimit: 0,
             altDomain: null

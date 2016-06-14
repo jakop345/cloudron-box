@@ -53,7 +53,6 @@ var APP_0 = {
     health: null,
     accessRestriction: null,
     lastBackupId: null,
-    lastBackupConfig: null,
     oldConfig: null,
     memoryLimit: 4294967296
 };
