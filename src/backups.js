@@ -370,7 +370,7 @@ function backupApp(app, manifest, callback) {
         backupFunction = reuseOldAppBackup.bind(null, app, manifest);
     } else {
         var appConfig = apps.getAppConfig(app);
-        app.manifest = manifest;
+        appConfig.manifest = manifest;
         backupFunction = createNewAppBackup.bind(null, app, manifest);
 
         if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(appConfig), 'utf8')) {
