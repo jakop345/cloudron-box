@@ -410,7 +410,7 @@ function backupBoxAndApps(auditSource, callback) {
         async.mapSeries(allApps, function iterator(app, iteratorCallback) {
             ++processed;
 
-            backupApp(app, app.manifest.addons, function (error, backupId) {
+            backupApp(app, app.manifest, function (error, backupId) {
                 if (error && error.reason !== BackupsError.BAD_STATE) {
                     debugApp(app, 'Unable to backup', error);
                     return iteratorCallback(error);
