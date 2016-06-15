@@ -44,6 +44,7 @@ function initialize(callback) {
 
     async.series([
         stopContainers,
+        createDockerNetwork,
         startAddons,
         removeOldImages,
         existingInfra.version === 'none' ? apps.restoreInstalledApps : apps.configureInstalledApps,
@@ -71,6 +72,10 @@ function stopContainers(callback) {
     debug('stopping existing containers');
     shell.execSync('stopContainersSync', 'docker ps -qa | xargs --no-run-if-empty docker rm -f');
     callback();
+}
+
+function createDockerNetwork(callback) {
+    shell.execSync('createDockerNetwork', 'docker network create --subnet=172.18.0.0/16 cloudron || true', callback);
 }
 
 function startGraphite(callback) {
