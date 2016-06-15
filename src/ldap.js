@@ -265,7 +265,7 @@ function start(callback) {
         res.end();
     });
 
-    gServer.listen(config.get('ldapPort'), callback);
+    gServer.listen(config.get('ldapPort'), '0.0.0.0', callback);
 }
 
 function stop(callback) {

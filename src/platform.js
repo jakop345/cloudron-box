@@ -83,6 +83,8 @@ function startGraphite(callback) {
     const dataDir = paths.DATA_DIR;
 
     const cmd = `docker run --restart=always -d --name="graphite" \
+                --net cloudron \
+                --net-alias graphite \
                 -m 75m \
                 --memory-swap 150m \
                 -p 127.0.0.1:2003:2003 \
@@ -101,12 +103,14 @@ function startMysql(callback) {
     const dataDir = paths.DATA_DIR;
     const rootPassword = hat(256);
 
-    if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh',
-            'MYSQL_ROOT_PASSWORD=' + rootPassword +'\nMYSQL_ROOT_HOST=172.17.0.1', 'utf8')) {
+    if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh', 
+            'MYSQL_ROOT_PASSWORD=' + rootPassword +'\nMYSQL_ROOT_HOST=172.18.0.1', 'utf8')) {
         return callback(new Error('Could not create mysql var file:' + safe.error.message));
     }
 
     const cmd = `docker run --restart=always -d --name="mysql" \
+                --net cloudron \
+                --net-alias mysql \
                 -m 256m \
                 --memory-swap 512m \
                 -v "${dataDir}/mysql:/var/lib/mysql" \
@@ -128,6 +132,8 @@ function startPostgresql(callback) {
     }
 
     const cmd = `docker run --restart=always -d --name="postgresql" \
+                --net cloudron \
+                --net-alias postgresql \
                 -m 100m \
                 --memory-swap 200m \
                 -v "${dataDir}/postgresql:/var/lib/postgresql" \
@@ -149,6 +155,8 @@ function startMongodb(callback) {
     }
 
     const cmd = `docker run --restart=always -d --name="mongodb" \
+                --net cloudron \
+                --net-alias mongodb \
                 -m 100m \
                 --memory-swap 200m \
                 -v "${dataDir}/mongodb:/var/lib/mongodb" \
@@ -181,6 +189,8 @@ function startMail(callback) {
         if (error) return callback(error);
 
         const cmd = `docker run --restart=always -d --name="mail" \
+                    --net cloudron \
+                    --net-alias mail \
                     -m 75m \
                     --memory-swap 150m \
                     -e "MAIL_DOMAIN=${fqdn}" \

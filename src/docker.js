@@ -133,7 +133,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var docker = exports.connection,
-        isAppContainer = !cmd;
+        isAppContainer = !cmd; // non app-containers are like scheduler containers
 
     var manifest = app.manifest;
     var developmentMode = !!manifest.developmentMode;
@@ -172,18 +172,14 @@ function createSubcontainer(app, name, cmd, options, callback) {
     // developerMode does not restrict memory usage
     memoryLimit = developmentMode ? 0 : memoryLimit;
 
-    // for subcontainers, this should ideally be false. but docker does not allow network sharing if the app container is not running
-    // this means cloudron exec does not work
-    var isolatedNetworkNs = true;
-
     addons.getEnvironment(app, function (error, addonEnv) {
         if (error) return callback(new Error('Error getting addon environment : ' + error));
 
         var containerOptions = {
             name: name, // used for filtering logs
             // do _not_ set hostname to app fqdn. doing so sets up the dns name to look up the internal docker ip. this makes curl from within container fail
-            // for subcontainers, this should not be set because we already share the network namespace with app container
-            Hostname: isolatedNetworkNs ? (semver.gte(targetBoxVersion(app.manifest), '0.0.77') ? app.location : config.appFqdn(app.location)) : null,
+            // Note that Hostname has no effect on DNS. We have to use the --net-alias for dns. Hostname cannot be set with container NetworkMode
+            Hostname: isAppContainer ? app.location : null,
             Tty: isAppContainer,
             Image: app.manifest.dockerImage,
             Cmd: (isAppContainer && developmentMode) ? [ '/bin/bash', '-c', 'echo "Development mode. Use cloudron exec to debug. Sleeping" && sleep infinity' ] : cmd,
@@ -211,8 +207,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
                 },
                 CpuShares: 512, // relative to 1024 for system processes
                 VolumesFrom: isAppContainer ? null : [ app.containerId + ":rw" ],
-                NetworkMode: isolatedNetworkNs ? 'default' : ('container:' + app.containerId), // share network namespace with parent
-                Links: isolatedNetworkNs ? addons.getLinksSync(app, app.manifest.addons) : null, // links is redundant with --net=container
+                NetworkMode: isAppContainer ? 'cloudron' : ('container:' + app.containerId), // share network namespace with parent
                 SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
             }
         };

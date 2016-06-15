@@ -68,7 +68,7 @@ fi
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
 iptables -A INPUT -p udp --sport 53 -j ACCEPT
-iptables -A INPUT -s 172.17.0.0/16 -j ACCEPT # required to accept any connections from apps to our IP:<public port>
+iptables -A INPUT -s 172.18.0.0/16 -j ACCEPT # required to accept any connections from apps to our IP:<public port>
 
 # loopback
 iptables -A INPUT -i lo -j ACCEPT

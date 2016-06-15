@@ -7,7 +7,6 @@ exports = module.exports = {
     restoreAddons: restoreAddons,
 
     getEnvironment: getEnvironment,
-    getLinksSync: getLinksSync,
     getBindsSync: getBindsSync,
     getContainerNamesSync: getContainerNamesSync,
 
@@ -209,34 +208,6 @@ function getEnvironment(app, callback) {
     appdb.getAddonConfigByAppId(app.id, callback);
 }
 
-function getLinksSync(app, addons) {
-    assert.strictEqual(typeof app, 'object');
-    assert(!addons || typeof addons === 'object');
-
-    var links = [ ];
-
-    if (!addons) return links;
-
-    var addMail = false;
-
-    for (var addon in addons) {
-        switch (addon) {
-        case 'mysql': links.push('mysql:mysql'); break;
-        case 'postgresql': links.push('postgresql:postgresql'); break;
-        case 'sendmail': addMail = true; break;
-        case 'recvmail': addMail = true; break;
-        case 'email': addMail = true; break;
-        case 'redis': links.push('redis-' + app.id + ':redis-' + app.id); break;
-        case 'mongodb': links.push('mongodb:mongodb'); break;
-        default: break;
-        }
-    }
-
-    if (addMail) links.push('mail:mail');
-
-    return links;
-}
-
 function getBindsSync(app, addons) {
     assert.strictEqual(typeof app, 'object');
     assert(!addons || typeof addons === 'object');
@@ -334,10 +305,10 @@ function setupSimpleAuth(app, options, callback) {
             if (error) return callback(error);
 
             var env = [
-                'SIMPLE_AUTH_SERVER=172.17.0.1',
+                'SIMPLE_AUTH_SERVER=172.18.0.1',
                 'SIMPLE_AUTH_PORT=' + config.get('simpleAuthPort'),
-                'SIMPLE_AUTH_URL=http://172.17.0.1:' + config.get('simpleAuthPort'), // obsolete, remove
-                'SIMPLE_AUTH_ORIGIN=http://172.17.0.1:' + config.get('simpleAuthPort'),
+                'SIMPLE_AUTH_URL=http://172.18.0.1:' + config.get('simpleAuthPort'), // obsolete, remove
+                'SIMPLE_AUTH_ORIGIN=http://172.18.0.1:' + config.get('simpleAuthPort'),
                 'SIMPLE_AUTH_CLIENT_ID=' + result.id
             ];
 
@@ -399,9 +370,9 @@ function setupLdap(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var env = [
-        'LDAP_SERVER=172.17.0.1',
+        'LDAP_SERVER=172.18.0.1',
         'LDAP_PORT=' + config.get('ldapPort'),
-        'LDAP_URL=ldap://172.17.0.1:' + config.get('ldapPort'),
+        'LDAP_URL=ldap://172.18.0.1:' + config.get('ldapPort'),
         'LDAP_USERS_BASE_DN=ou=users,dc=cloudron',
         'LDAP_GROUPS_BASE_DN=ou=groups,dc=cloudron',
         'LDAP_BIND_DN=cn='+ app.id + ',ou=apps,dc=cloudron',
@@ -706,14 +677,15 @@ function setupRedis(app, options, callback) {
     if (!safe.fs.mkdirSync(redisDataDir) && safe.error.code !== 'EEXIST') return callback(new Error('Error creating redis data dir:' + safe.error));
 
     const tag = infra.images.redis.tag, redisName = 'redis-' + app.id;
-    const cmd = `docker run --restart=always -d --name="${redisName}" \
-                --hostname redis-${app.location}, \
+    const cmd = `docker run --restart=always -d --name=${redisName} \
+                --net cloudron \
+                --net-alias ${redisName} \
                 -m 100m \
                 --memory-swap 150m \
                 -p 6379:6379 \
                 -v ${redisVarsFile}:/etc/redis/redis_vars.sh:ro \
                 -v ${redisDataDir}:/var/lib/redis:rw \
-                --read-only -v /tmp -v /run "${tag}"`;
+                --read-only -v /tmp -v /run ${tag}`;
 
     var env = [
         'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id,
@@ -723,6 +695,7 @@ function setupRedis(app, options, callback) {
     ];
 
     async.series([
+        // stop so that redis can flush itself with SIGTERM
         shell.execSync.bind(null, 'stopRedis', `docker stop --time=10 ${redisName} 2>/dev/null || true`),
         shell.execSync.bind(null, 'stopRedis', `docker rm --volumes ${redisName} 2>/dev/null || true`),
         shell.execSync.bind(null, 'startRedis', cmd),

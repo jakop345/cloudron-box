@@ -109,7 +109,7 @@ function setup(done) {
                     IPAM: {
                         Driver: "default",
                         Config: [{
-                            Subnet: "172.17.0.0/16"
+                            Subnet: "172.18.0.0/16"
                         }]
                     },
                     "Containers": {
