@@ -689,20 +689,6 @@ function restoreMongoDb(app, options, callback) {
     });
 }
 
-function forwardRedisPort(appId, callback) {
-    assert.strictEqual(typeof appId, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    dockerConnection.getContainer('redis-' + appId).inspect(function (error, data) {
-        if (error) return callback(new Error('Unable to inspect container:' + error));
-
-        var redisPort = parseInt(safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort'), 10);
-        if (!Number.isInteger(redisPort)) return callback(new Error('Unable to get container port mapping'));
-
-        return callback(null);
-    });
-}
-
 // Ensures that app's addon redis container is running. Can be called when named container already exists/running
 function setupRedis(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
@@ -770,11 +756,7 @@ function setupRedis(app, options, callback) {
         redisContainer.start(function (error) {
             if (error && error.statusCode !== 304) return callback(error); // if not already running
 
-            appdb.setAddonConfig(app.id, 'redis', env, function (error) {
-                if (error) return callback(error);
-
-                forwardRedisPort(app.id, callback);
-            });
+            appdb.setAddonConfig(app.id, 'redis', env, callback);
         });
     });
 }
