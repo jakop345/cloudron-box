@@ -19,8 +19,13 @@ function execSync(tag, cmd, callback) {
     assert.strictEqual(typeof cmd, 'string');
 
     debug(cmd);
-    child_process.execSync(cmd, { stdio: 'inherit' });
-    if (callback) return callback();
+    try {
+        child_process.execSync(cmd, { stdio: 'inherit' });
+    } catch (e) {
+        if (callback) return callback(e);
+        throw e;
+    }
+    if (callback) callback();
 }
 
 function exec(tag, file, args, callback) {

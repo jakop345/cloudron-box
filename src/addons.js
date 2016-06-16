@@ -705,34 +705,15 @@ function setupRedis(app, options, callback) {
 
     if (!safe.fs.mkdirSync(redisDataDir) && safe.error.code !== 'EEXIST') return callback(new Error('Error creating redis data dir:' + safe.error));
 
-    var createOptions = {
-        name: 'redis-' + app.id,
-        Hostname: 'redis-' + app.location,
-        Tty: true,
-        Image: infra.images.redis.tag,
-        Cmd: null,
-        Volumes: {
-            '/tmp': {},
-            '/run': {}
-        },
-        VolumesFrom: [],
-        HostConfig: {
-            Binds: [
-                redisVarsFile + ':/etc/redis/redis_vars.sh:ro',
-                redisDataDir + ':/var/lib/redis:rw'
-            ],
-            Memory: 1024 * 1024 * 75, // 100mb
-            MemorySwap: 1024 * 1024 * 75 * 2, // 150mb
-            PortBindings: {
-                '6379/tcp': [{ HostPort: '0', HostIp: '127.0.0.1' }]
-            },
-            ReadonlyRootfs: true,
-            RestartPolicy: {
-                'Name': 'always',
-                'MaximumRetryCount': 0
-            }
-        }
-    };
+    const tag = infra.images.redis.tag, redisName = 'redis-' + app.id;
+    const cmd = `docker run --restart=always -d --name="${redisName}" \
+                --hostname redis-${app.location}, \
+                -m 100m \
+                --memory-swap 150m \
+                -p 6379:6379 \
+                -v ${redisVarsFile}:/etc/redis/redis_vars.sh:ro \
+                -v ${redisDataDir}:/var/lib/redis:rw \
+                --read-only -v /tmp -v /run "${tag}"`;
 
     var env = [
         'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id,
@@ -741,23 +722,14 @@ function setupRedis(app, options, callback) {
         'REDIS_PORT=6379'
     ];
 
-    var redisContainer = dockerConnection.getContainer(createOptions.name);
-
-    try {
-        shell.execSync('stopRedis', 'docker stop --time=10 ' + createOptions.name + ' 2>/dev/null || true');
-        shell.execSync('stopRedis', 'docker rm --volumes ' + createOptions.name + ' 2>/dev/null || true');
-    } catch (e) {
-        console.log('IGNORE EXCEPTIOn', e);
-    }
-
-    dockerConnection.createContainer(createOptions, function (error) {
-        if (error && error.statusCode !== 409) return callback(error); // if not already created
-
-        redisContainer.start(function (error) {
-            if (error && error.statusCode !== 304) return callback(error); // if not already running
-
-            appdb.setAddonConfig(app.id, 'redis', env, callback);
-        });
+    async.series([
+        shell.execSync.bind(null, 'stopRedis', `docker stop --time=10 ${redisName} 2>/dev/null || true`),
+        shell.execSync.bind(null, 'stopRedis', `docker rm --volumes ${redisName} 2>/dev/null || true`),
+        shell.execSync.bind(null, 'startRedis', cmd),
+        appdb.setAddonConfig.bind(null, app.id, 'redis', env)
+    ], function (error) {
+        if (error) debug('Error setting up redis: ', error);
+        callback(error);
     });
 }
 
