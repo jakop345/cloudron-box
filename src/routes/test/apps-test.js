@@ -117,13 +117,10 @@ function checkAddons(appEntry, done) {
             delete res.body.recvmail; // unclear why dovecot mail delivery won't work
             delete res.body.stdenv; // cannot access APP_ORIGIN
 
-console.dir(res.body);
-
             for (var key in res.body) {
                 if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
             }
 
-console.log('that worked out!');
             callback();
         });
     }, done);
