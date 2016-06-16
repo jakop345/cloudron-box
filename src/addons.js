@@ -703,24 +703,6 @@ function forwardRedisPort(appId, callback) {
     });
 }
 
-function stopAndRemoveRedis(container, callback) {
-    function ignoreError(func) {
-        return function (callback) {
-            func(function (error) {
-                if (error) debug('stopAndRemoveRedis: Ignored error:', error);
-                callback();
-            });
-        };
-    }
-
-    // stopping redis with SIGTERM makes it commit the database to disk
-    async.series([
-        ignoreError(container.stop.bind(container, { t: 10 })),
-        ignoreError(container.wait.bind(container)),
-        ignoreError(container.remove.bind(container, { force: true, v: true }))
-    ], callback);
-}
-
 // Ensures that app's addon redis container is running. Can be called when named container already exists/running
 function setupRedis(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
@@ -774,18 +756,24 @@ function setupRedis(app, options, callback) {
     ];
 
     var redisContainer = dockerConnection.getContainer(createOptions.name);
-    stopAndRemoveRedis(redisContainer, function () {
-        dockerConnection.createContainer(createOptions, function (error) {
-            if (error && error.statusCode !== 409) return callback(error); // if not already created
 
-            redisContainer.start(function (error) {
-                if (error && error.statusCode !== 304) return callback(error); // if not already running
+    try {
+        shell.execSync('stopRedis', 'docker stop --time=10 ' + createOptions.name + ' 2>/dev/null || true');
+        shell.execSync('stopRedis', 'docker rm --volumes ' + createOptions.name + ' 2>/dev/null || true');
+    } catch (e) {
+        console.log('IGNORE EXCEPTIOn', e);
+    }
 
-                appdb.setAddonConfig(app.id, 'redis', env, function (error) {
-                    if (error) return callback(error);
+    dockerConnection.createContainer(createOptions, function (error) {
+        if (error && error.statusCode !== 409) return callback(error); // if not already created
 
-                    forwardRedisPort(app.id, callback);
-                });
+        redisContainer.start(function (error) {
+            if (error && error.statusCode !== 304) return callback(error); // if not already running
+
+            appdb.setAddonConfig(app.id, 'redis', env, function (error) {
+                if (error) return callback(error);
+
+                forwardRedisPort(app.id, callback);
             });
         });
     });
