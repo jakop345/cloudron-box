@@ -369,7 +369,7 @@ describe('Apps', function () {
                 apps.getAll(function (error, apps) {
                     expect(apps[0].installationState).to.be(appdb.ISTATE_PENDING_RESTORE);
                     expect(apps[0].oldConfig).to.be(null);
-                    expect(apps[1].installationState).to.be(appdb.ISTATE_ERROR);
+                    expect(apps[1].installationState).to.be(appdb.ISTATE_PENDING_RESTORE);
                     expect(apps[2].installationState).to.be(appdb.ISTATE_PENDING_RESTORE);
                     expect(apps[2].oldConfig).to.be(null);
 

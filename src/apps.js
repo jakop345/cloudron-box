@@ -931,11 +931,13 @@ function restoreInstalledApps(callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         async.map(apps, function (app, iteratorDone) {
-            if (app.installationState !== appdb.ISTATE_INSTALLED) return iteratorDone();
-
             debug('marking %s for restore', app.location || app.id);
 
-            appdb.setInstallationCommand(app.id, appdb.ISTATE_PENDING_RESTORE, { oldConfig: null }, iteratorDone);
+            appdb.setInstallationCommand(app.id, appdb.ISTATE_PENDING_RESTORE, { oldConfig: null }, function (error) {
+                if (error) debug('did not mark %s for restore', app.location || app.id, error);
+
+                iteratorDone(); // always succeed
+            });
         }, callback);
     });
 }
@@ -947,11 +949,13 @@ function configureInstalledApps(callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         async.map(apps, function (app, iteratorDone) {
-            if (app.installationState !== appdb.ISTATE_INSTALLED) return iteratorDone();
-
             debug('marking %s for reconfigure', app.location || app.id);
 
-            appdb.setInstallationCommand(app.id, appdb.ISTATE_PENDING_CONFIGURE, { oldConfig: null }, iteratorDone);
+            appdb.setInstallationCommand(app.id, appdb.ISTATE_PENDING_CONFIGURE, { oldConfig: null }, function (error) {
+                if (error) debug('did not mark %s for reconfigure', app.location || app.id, error);
+
+                iteratorDone(); // always succeed
+            });
         }, callback);
     });
 }
