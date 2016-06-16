@@ -105,14 +105,12 @@ function startDockerProxy(interceptor, callback) {
 }
 
 function checkAddons(appEntry, done) {
-    console.log('checking addons');
-
     async.retry({ times: 15, interval: 6000 }, function (callback) {
         superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
             .query({ username: USERNAME, password: PASSWORD })
             .end(function (err, res) {
-            expect(!err).to.be.ok();
-            expect(res.statusCode).to.equal(200);
+            if (err) return callback(err);
+            if (res.statusCode !== 200) return callback('app returned non-200 status : ' + res.statusCode);
 
             delete res.body.recvmail; // unclear why dovecot mail delivery won't work
             delete res.body.stdenv; // cannot access APP_ORIGIN
