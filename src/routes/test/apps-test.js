@@ -1,7 +1,7 @@
 'use strict';
 
-/* jslint node:true */
 /* global it:false */
+/* global xit:false */
 /* global describe:false */
 /* global before:false */
 /* global after:false */
@@ -42,7 +42,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 
 // Test image information
 var TEST_IMAGE_REPO = 'cloudron/test';
-var TEST_IMAGE_TAG = '15.0.0';
+var TEST_IMAGE_TAG = '16.0.0';
 var TEST_IMAGE = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
 // var TEST_IMAGE_ID = child_process.execSync('docker inspect --format={{.Id}} ' + TEST_IMAGE).toString('utf8').trim();
 
@@ -59,7 +59,7 @@ APP_MANIFEST_1.dockerImage = TEST_IMAGE;
 APP_MANIFEST_1.singleUser = true;
 
 var USERNAME = 'superadmin', PASSWORD = 'Foobar?1337', EMAIL ='admin@me.com';
-var USER_1_ID = null, USERNAME_1 = 'user', PASSWORD_1 = 'Foobar?1338', EMAIL_1 ='user@me.com';
+var USER_1_ID = null, USERNAME_1 = 'user', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
 var token_1 = null;
 
@@ -102,6 +102,31 @@ function startDockerProxy(interceptor, callback) {
         }
 
     }).listen(5687, callback);
+}
+
+function checkAddons(appEntry, done) {
+    console.log('checking addons');
+
+    async.retry({ times: 15, interval: 6000 }, function (callback) {
+        superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
+            .query({ username: USERNAME, password: PASSWORD })
+            .end(function (err, res) {
+            expect(!err).to.be.ok();
+            expect(res.statusCode).to.equal(200);
+
+            delete res.body.recvmail; // unclear why dovecot mail delivery won't work
+            delete res.body.stdenv; // cannot access APP_ORIGIN
+
+console.dir(res.body);
+
+            for (var key in res.body) {
+                if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
+            }
+
+console.log('that worked out!');
+            callback();
+        });
+    }, done);
 }
 
 describe('Apps', function () {
@@ -191,8 +216,8 @@ describe('Apps', function () {
         ], function (error) {
             if (error) return done(error);
 
-            console.log('This test can take ~30 seconds to start as it waits for infra to be ready');
-            setTimeout(done, 30000);
+            console.log('This test can take ~40 seconds to start as it waits for infra to be ready');
+            setTimeout(done, 40000);
         });
     });
 
@@ -769,26 +794,8 @@ describe('Apps', function () {
         });
 
         it('installation - app can check addons', function (done) {
-            console.log('This test can take a while as it waits for scheduler addon to tick');
-
-            async.retry({ times: 15, interval: 6000 }, function (callback) {
-                superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
-                    .query({ username: USERNAME, password: PASSWORD })
-                    .end(function (err, res) {
-
-                    expect(!err).to.be.ok();
-                    expect(res.statusCode).to.equal(200);
-
-                    delete res.body.recvmail; // unclear why dovecot mail delivery won't work
-                    delete res.body.stdenv; // cannot access APP_ORIGIN
-
-                    for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
-                    }
-
-                    callback();
-                });
-            }, done);
+            console.log('This test can take a while as it waits for scheduler addon to tick 1');
+            checkAddons(appEntry, done);
         });
 
         var redisIp, exportedRedisPort;
@@ -929,23 +936,7 @@ describe('Apps', function () {
 
         it('installation - app can check addons', function (done) {
             this.timeout(120000);
-            async.retry({ times: 15, interval: 6000 }, function (callback) {
-                superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
-                    .query({ username: USERNAME, password: PASSWORD })
-                    .end(function (err, res) {
-                    expect(!err).to.be.ok();
-                    expect(res.statusCode).to.equal(200);
-
-                    delete res.body.recvmail; // unclear why dovecot mail delivery won't work
-                    delete res.body.stdenv; // cannot access APP_ORIGIN
-
-                    for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
-                    }
-
-                    callback();
-                });
-            }, done);
+            checkAddons(appEntry, done);
         });
 
         it('can uninstall app', function (done) {
@@ -1200,23 +1191,7 @@ describe('Apps', function () {
 
         it('installation - app can check addons', function (done) {
             this.timeout(120000);
-            async.retry({ times: 15, interval: 6000 }, function (callback) {
-                superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
-                    .query({ username: USERNAME, password: PASSWORD })
-                    .end(function (err, res) {
-                    expect(!err).to.be.ok();
-                    expect(res.statusCode).to.equal(200);
-
-                    delete res.body.recvmail; // unclear why dovecot mail delivery won't work
-                    delete res.body.stdenv; // cannot access APP_ORIGIN
-
-                    for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
-                    }
-
-                    callback();
-                });
-            }, done);
+            checkAddons(appEntry, done);
         });
 
         var redisIp, exportedRedisPort;
