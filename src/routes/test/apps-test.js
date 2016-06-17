@@ -769,7 +769,7 @@ describe('Apps', function () {
                 clients.getByAppIdAndType(APP_ID, clients.TYPE_OAUTH, function (error, client) {
                     expect(error).to.not.be.ok();
                     expect(client.id.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
-                    expect(client.clientSecret.length).to.be(64); // 32 hex chars (256 bits)
+                    expect(client.clientSecret.length).to.be(256); // 32 hex chars (8 * 256 bits)
                     expect(data.Config.Env).to.contain('OAUTH_CLIENT_ID=' + client.id);
                     expect(data.Config.Env).to.contain('OAUTH_CLIENT_SECRET=' + client.clientSecret);
                     done();
