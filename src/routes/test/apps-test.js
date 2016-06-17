@@ -105,22 +105,30 @@ function startDockerProxy(interceptor, callback) {
 }
 
 function checkAddons(appEntry, done) {
-    async.retry({ times: 15, interval: 6000 }, function (callback) {
-        superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
-            .query({ username: USERNAME, password: PASSWORD })
-            .end(function (err, res) {
-            if (err) return callback(err);
+    async.retry({ times: 15, interval: 3000 }, function (callback) {
+        // this was previously written with superagent but it was getting sporadic EPIPE
+        var req = http.get({ hostname: 'localhost', port: appEntry.httpPort, path: '/check_addons?username=' + USERNAME + '&password=' + PASSWORD });
+        req.on('error', callback);
+        req.on('response', function (res) {
             if (res.statusCode !== 200) return callback('app returned non-200 status : ' + res.statusCode);
 
-            delete res.body.recvmail; // unclear why dovecot mail delivery won't work
-            delete res.body.stdenv; // cannot access APP_ORIGIN
+            var d = '';
+            res.on('data', function (chunk) { d += chunk.toString('utf8'); });
+            res.on('end', function () {
+                var body = JSON.parse(d);
 
-            for (var key in res.body) {
-                if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
-            }
+                delete body.recvmail; // unclear why dovecot mail delivery won't work
+                delete body.stdenv; // cannot access APP_ORIGIN
 
-            callback();
+                for (var key in body) {
+                    if (body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(body));
+                }
+
+                callback();
+            });
         });
+
+        req.end();
     }, done);
 }
 
@@ -789,6 +797,7 @@ describe('Apps', function () {
         });
 
         it('installation - app can check addons', function (done) {
+            this.timeout(120000);
             console.log('This test can take a while as it waits for scheduler addon to tick 1');
             checkAddons(appEntry, done);
         });
@@ -931,6 +940,7 @@ describe('Apps', function () {
 
         it('installation - app can check addons', function (done) {
             this.timeout(120000);
+            console.log('This test can take a while as it waits for scheduler addon to tick 2');
             checkAddons(appEntry, done);
         });
 
@@ -1186,6 +1196,7 @@ describe('Apps', function () {
 
         it('installation - app can check addons', function (done) {
             this.timeout(120000);
+            console.log('This test can take a while as it waits for scheduler addon to tick 3');
             checkAddons(appEntry, done);
         });
 
@@ -1340,23 +1351,8 @@ describe('Apps', function () {
 
         it('installation - app can check addons', function (done) {
             this.timeout(120000);
-            async.retry({ times: 15, interval: 6000 }, function (callback) {
-                superagent.get('http://localhost:' + appEntry.httpPort + '/check_addons')
-                    .query({ username: USERNAME, password: PASSWORD })
-                    .end(function (err, res) {
-                    expect(!err).to.be.ok();
-                    expect(res.statusCode).to.equal(200);
-
-                    delete res.body.recvmail; // unclear why dovecot mail delivery won't work
-                    delete res.body.stdenv; // cannot access APP_ORIGIN
-
-                    for (var key in res.body) {
-                        if (res.body[key] !== 'OK') return callback('Not done yet: ' + JSON.stringify(res.body));
-                    }
-
-                    callback();
-                });
-            }, done);
+            console.log('This test can take a while as it waits for scheduler addon to tick 4');
+            checkAddons(appEntry, done);
         });
 
         it('can reconfigure app with custom certificate', function (done) {
