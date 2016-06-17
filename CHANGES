@@ -537,3 +537,8 @@
 
 [0.15.3]
 - Show installation progress in a tooltip
+
+[0.16.0]
+- Allow apps to be configured in configuring state
+- Improved platform architecture that allows incremental infrastructure updates
+
