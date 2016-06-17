@@ -26,6 +26,7 @@ exports = module.exports = {
 
     // installation codes (keep in sync in UI)
     ISTATE_PENDING_INSTALL: 'pending_install', // installs and fresh reinstalls
+    ISTATE_PENDING_CLONE: 'pending_clone', // clone
     ISTATE_PENDING_CONFIGURE: 'pending_configure', // config (location, port) changes and on infra update
     ISTATE_PENDING_UNINSTALL: 'pending_uninstall', // uninstallation
     ISTATE_PENDING_RESTORE: 'pending_restore', // restore to previous backup or on upgrade
@@ -171,15 +172,15 @@ function add(id, appStoreId, manifest, location, portBindings, data, callback) {
     var manifestJson = JSON.stringify(manifest);
 
     var accessRestriction = data.accessRestriction || null;
+    var accessRestrictionJson = JSON.stringify(accessRestriction);
     var memoryLimit = data.memoryLimit || 0;
     var altDomain = data.altDomain || null;
-
-    var accessRestrictionJson = JSON.stringify(accessRestriction);
+    var installationState = data.installationState || exports.ISTATE_PENDING_INSTALL;
 
     var queries = [ ];
     queries.push({
         query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestrictionJson, memoryLimit, altDomain ]
+        args: [ id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain ]
     });
 
     Object.keys(portBindings).forEach(function (env) {
