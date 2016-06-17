@@ -760,7 +760,8 @@ function clone(appId, data, auditSource, callback) {
                 var data = {
                     installationState: appdb.ISTATE_PENDING_CLONE,
                     memoryLimit: app.memoryLimit,
-                    accessRestriction: app.accessRestriction
+                    accessRestriction: app.accessRestriction,
+                    lastBackupId: backupId
                 };
 
                 appdb.add(newAppId, appStoreId, manifest, location, portBindings, data, function (error) {

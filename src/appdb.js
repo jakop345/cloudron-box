@@ -176,11 +176,12 @@ function add(id, appStoreId, manifest, location, portBindings, data, callback) {
     var memoryLimit = data.memoryLimit || 0;
     var altDomain = data.altDomain || null;
     var installationState = data.installationState || exports.ISTATE_PENDING_INSTALL;
+    var lastBackupId = data.lastBackupId || null; // used when cloning
 
     var queries = [ ];
     queries.push({
-        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        args: [ id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain ]
+        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain, lastBackupId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        args: [ id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain, lastBackupId ]
     });
 
     Object.keys(portBindings).forEach(function (env) {
