@@ -37,8 +37,11 @@ function getAppByRequest(req, callback) {
     if (sourceIp.split('.').length !== 4) return callback(new ldap.InsufficientAccessRightsError('Missing source identifier'));
 
     apps.getByIpAddress(sourceIp, function (error, app) {
-        // we currently allow access in case we can't find the source app
-        callback(null, app || null);
+        if (error) return callback(new ldap.OperationsError(error.message));
+
+        if (!app) return callback(new ldap.OperationsError('Could not detect app source'));
+
+        callback(null, app);
     });
 }
 
@@ -194,7 +197,7 @@ function authenticateUser(req, res, next) {
     api(commonName, req.credentials || '', function (error, user) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error && error.reason === UserError.WRONG_PASSWORD) return next(new ldap.InvalidCredentialsError(req.dn.toString()));
-        if (error) return next(new ldap.OperationsError(error));
+        if (error) return next(new ldap.OperationsError(error.message));
 
         req.user = user;
 
@@ -205,14 +208,8 @@ function authenticateUser(req, res, next) {
 function authorizeUserForApp(req, res, next) {
     assert(req.user);
 
-    // We simply authorize the user to access a mailbox by his own name
     getAppByRequest(req, function (error, app) {
         if (error) return next(error);
-
-        if (!app) {
-            debug('no app found for this container, allow access');
-            return res.end();
-        }
 
         apps.hasAccessTo(app, req.user, function (error, result) {
             if (error) return next(new ldap.OperationsError(error.toString()));
@@ -230,9 +227,10 @@ function authorizeUserForApp(req, res, next) {
 function authorizeUserForMailbox(req, res, next) {
     assert(req.user);
 
+    // We simply authorize the user to access a mailbox by his own name
     mailboxes.get(req.user.username, function (error) {
         if (error && error.reason === MailboxError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
-        if (error) return next(new ldap.OperationsError(error));
+        if (error) return next(new ldap.OperationsError(error.message));
 
         eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', mailboxId: req.user.username }, { userId: req.user.username });
 
