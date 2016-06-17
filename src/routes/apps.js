@@ -16,7 +16,9 @@ exports = module.exports = {
 
     stopApp: stopApp,
     startApp: startApp,
-    exec: exec
+    exec: exec,
+
+    cloneApp: cloneApp
 };
 
 var apps = require('../apps.js'),
@@ -189,6 +191,29 @@ function restoreApp(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, { }));
+    });
+}
+
+function cloneApp(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+    assert.strictEqual(typeof req.params.id, 'string');
+
+    var data = req.body;
+
+    debug('Clone app id:%s', req.params.id);
+
+    if (typeof data.backupId !== 'string') return next(new HttpError(400, 'backupId must be a string'));
+    if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
+    if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
+
+    apps.clone(req.params.id, data, auditSource(req), function (error, result) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error && error.reason === AppsError.EXTERNAL_ERROR) return next(new HttpError(424, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(201, { id: result.id }));
     });
 }
 

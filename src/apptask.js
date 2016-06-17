@@ -778,6 +778,7 @@ function startTask(appId, callback) {
         case appdb.ISTATE_PENDING_BACKUP: return backup(app, callback);
         case appdb.ISTATE_INSTALLED: return handleRunCommand(app, callback);
         case appdb.ISTATE_PENDING_INSTALL: return install(app, callback);
+        case appdb.ISTATE_PENDING_CLONE: return restore(app, callback);
         case appdb.ISTATE_PENDING_FORCE_UPDATE: return update(app, callback);
         case appdb.ISTATE_ERROR:
             debugApp(app, 'Internal error. apptask launched with error status.');

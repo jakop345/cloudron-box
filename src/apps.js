@@ -15,6 +15,7 @@ exports = module.exports = {
     uninstall: uninstall,
 
     restore: restore,
+    clone: clone,
 
     update: update,
 
@@ -710,6 +711,68 @@ function restore(appId, data, auditSource, callback) {
                 eventlog.add(eventlog.ACTION_APP_RESTORE, auditSource, { appId: appId });
 
                 callback(null);
+            });
+        });
+    });
+}
+
+function clone(appId, data, auditSource, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof data, 'object');
+    assert.strictEqual(typeof auditSource, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    debug('Will clone app with id:%s', appId);
+
+    var location = data.location.toLowerCase(),
+        portBindings = data.portBindings || null,
+        backupId = data.backupId;
+
+    assert.strictEqual(typeof backupId, 'string');
+    assert.strictEqual(typeof location, 'string');
+    assert.strictEqual(typeof portBindings, 'object');
+
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        backups.getRestoreConfig(backupId, function (error, restoreConfig) {
+            if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            if (!restoreConfig) callback(new AppsError(AppsError.EXTERNAL_ERROR, 'Could not get restore config'));
+
+            // re-validate because this new box version may not accept old configs
+            error = checkManifestConstraints(restoreConfig.manifest);
+            if (error) return callback(error);
+
+            error = validateHostname(location, config.fqdn());
+            if (error) return callback(error);
+
+            error = validatePortBindings(portBindings, restoreConfig.manifest.tcpPorts);
+            if (error) return callback(error);
+
+            var newAppId = uuid.v4(), appStoreId = app.appStoreId, manifest = restoreConfig.manifest;
+
+            purchase(appStoreId, function (error) {
+                if (error) return callback(error);
+
+                var data = {
+                    installationState: appdb.ISTATE_PENDING_CLONE,
+                    memoryLimit: app.memoryLimit,
+                    accessRestriction: app.accessRestriction
+                };
+
+                appdb.add(newAppId, appStoreId, manifest, location, portBindings, data, function (error) {
+                    if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location, portBindings, error));
+                    if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+                    taskmanager.restartAppTask(newAppId);
+
+                    eventlog.add(eventlog.ACTION_APP_CLONE, auditSource, { appId: newAppId, oldAppId: appId, backupId: backupId, location: location, manifest: manifest });
+
+                    callback(null, { id : newAppId });
+                });
             });
         });
     });
