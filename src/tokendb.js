@@ -26,7 +26,7 @@ var assert = require('assert'),
 var TOKENS_FIELDS = [ 'accessToken', 'identifier', 'clientId', 'scope', 'expires' ].join(',');
 
 function generateToken() {
-    return hat(256);
+    return hat(8 * 64); // TODO: make this stronger
 }
 
 function get(accessToken, callback) {

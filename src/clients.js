@@ -106,7 +106,7 @@ function add(appId, type, redirectURI, scope, callback) {
     if (error) return callback(error);
 
     var id = 'cid-' + uuid.v4();
-    var clientSecret = hat(256);
+    var clientSecret = hat(8 * 128);
 
     clientdb.add(id, appId, type, clientSecret, redirectURI, scope, function (error) {
         if (error) return callback(error);

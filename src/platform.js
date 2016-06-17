@@ -101,7 +101,7 @@ function startGraphite(callback) {
 function startMysql(callback) {
     const tag = infra.images.mysql.tag;
     const dataDir = paths.DATA_DIR;
-    const rootPassword = hat(256);
+    const rootPassword = hat(8 * 128);
 
     if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh', 
             'MYSQL_ROOT_PASSWORD=' + rootPassword +'\nMYSQL_ROOT_HOST=172.18.0.1', 'utf8')) {
@@ -125,7 +125,7 @@ function startMysql(callback) {
 function startPostgresql(callback) {
     const tag = infra.images.postgresql.tag;
     const dataDir = paths.DATA_DIR;
-    const rootPassword = hat(256);
+    const rootPassword = hat(8 * 128);
 
     if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/postgresql_vars.sh', 'POSTGRESQL_ROOT_PASSWORD=' + rootPassword, 'utf8')) {
         return callback(new Error('Could not create postgresql var file:' + safe.error.message));
@@ -148,7 +148,7 @@ function startPostgresql(callback) {
 function startMongodb(callback) {
     const tag = infra.images.mongodb.tag;
     const dataDir = paths.DATA_DIR;
-    const rootPassword = hat(256);
+    const rootPassword = hat(8 * 128);
 
     if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/mongodb_vars.sh', 'MONGODB_ROOT_PASSWORD=' + rootPassword, 'utf8')) {
         return callback(new Error('Could not create mongodb var file:' + safe.error.message));
@@ -176,7 +176,7 @@ function startMail(callback) {
 
     const tag = infra.images.mail.tag;
     const dataDir = paths.DATA_DIR;
-    const rootPassword = hat(256);
+    const rootPassword = hat(8 * 128);
     const fqdn = config.fqdn();
     const mailFqdn = config.adminFqdn();
 
