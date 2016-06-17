@@ -102,7 +102,7 @@ function setup(done) {
                 answer = [{
                     Name: "irrelevant"
                 }, {
-                    Name: "bridge",
+                    Name: "cloudron",
                     Id: "f2de39df4171b0dc801e8002d1d999b77256983dfc63041c0f34030aa3977566",
                     Scope: "local",
                     Driver: "bridge",
