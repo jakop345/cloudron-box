@@ -370,10 +370,10 @@ function getContainerIdByIp(ip, callback) {
 
         var bridge;
         result.forEach(function (n) {
-            if (n.Name === 'bridge') bridge = n;
+            if (n.Name === 'cloudron') bridge = n;
         });
 
-        if (!bridge) return callback(new Error('Unable to find the bridge network'));
+        if (!bridge) return callback(new Error('Unable to find the cloudron network'));
 
         var containerId;
         for (var id in bridge.Containers) {
