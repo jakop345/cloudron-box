@@ -809,7 +809,7 @@ describe('Apps', function () {
                 expect(error).to.not.be.ok();
                 expect(data).to.be.ok();
 
-                redisIp = safe.query(data, 'NetworkSettings.IPAddress');
+                redisIp = safe.query(data, 'NetworkSettings.Networks.cloudron.IPAddress');
                 expect(redisIp).to.be.ok();
 
                 exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
@@ -1207,7 +1207,7 @@ describe('Apps', function () {
                 expect(error).to.not.be.ok();
                 expect(data).to.be.ok();
 
-                redisIp = safe.query(data, 'NetworkSettings.IPAddress');
+                redisIp = safe.query(data, 'NetworkSettings.Networks.cloudron.IPAddress');
                 expect(redisIp).to.be.ok();
 
                 exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
@@ -1318,7 +1318,7 @@ describe('Apps', function () {
                 expect(!error).to.be.ok();
                 expect(app).to.be.an('object');
                 appEntry = app;
-                expect(appEntry.containerid).to.not.be(oldContainerId);
+                expect(appEntry.containerId).to.not.be(oldContainerId);
                 done();
             });
         });
@@ -1339,7 +1339,7 @@ describe('Apps', function () {
                 expect(error).to.not.be.ok();
                 expect(data).to.be.ok();
 
-                redisIp = safe.query(data, 'NetworkSettings.IPAddress');
+                redisIp = safe.query(data, 'NetworkSettings.Networks.cloudron.IPAddress');
                 expect(redisIp).to.be.ok();
 
                 exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
