@@ -101,6 +101,7 @@ git archive --format=tar HEAD | $ssh22 "ubuntu@${server_ip}" "cat - > /tmp/box.t
 echo "Executing init script"
 if ! $ssh22 "ubuntu@${server_ip}" "sudo /bin/bash /home/ubuntu/initializeBaseUbuntuImage.sh ${installer_revision}"; then
     echo "Init script failed"
+    echo "Make sure to cleanup the ec2 instance ${instance_id}"
     exit 1
 fi
 
