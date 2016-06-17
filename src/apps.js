@@ -446,7 +446,13 @@ function install(data, auditSource, callback) {
         purchase(appStoreId, function (error) {
             if (error) return callback(error);
 
-            appdb.add(appId, appStoreId, manifest, location, portBindings, accessRestriction, memoryLimit, altDomain, function (error) {
+            var data = {
+                accessRestriction: accessRestriction,
+                memoryLimit: memoryLimit,
+                altDomain: altDomain
+            };
+
+            appdb.add(appId, appStoreId, manifest, location, portBindings, data, function (error) {
                 if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location, portBindings, error));
                 if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

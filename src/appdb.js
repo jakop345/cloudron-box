@@ -156,21 +156,24 @@ function getAll(callback) {
     });
 }
 
-function add(id, appStoreId, manifest, location, portBindings, accessRestriction, memoryLimit, altDomain, callback) {
+function add(id, appStoreId, manifest, location, portBindings, data, callback) {
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof manifest.version, 'string');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
-    assert.strictEqual(typeof accessRestriction, 'object');
-    assert.strictEqual(typeof memoryLimit, 'number');
-    assert(altDomain === null || typeof altDomain === 'string');
+    assert(data && typeof data === 'object');
     assert.strictEqual(typeof callback, 'function');
 
     portBindings = portBindings || { };
 
     var manifestJson = JSON.stringify(manifest);
+
+    var accessRestriction = data.accessRestriction || null;
+    var memoryLimit = data.memoryLimit || 0;
+    var altDomain = data.altDomain || null;
+
     var accessRestrictionJson = JSON.stringify(accessRestriction);
 
     var queries = [ ];
