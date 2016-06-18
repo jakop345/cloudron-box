@@ -175,11 +175,13 @@ function createSubcontainer(app, name, cmd, options, callback) {
     addons.getEnvironment(app, function (error, addonEnv) {
         if (error) return callback(new Error('Error getting addon environment : ' + error));
 
+        // do no set hostname of containers to location as it might conflict with addons names. for example, an app installed in mail
+        // location may not reach mail container anymore by DNS. We cannot set hostname to fqdn either as that sets up the dns
+        // name to look up the internal docker ip. this makes curl from within container fail
+        // Note that Hostname has no effect on DNS. We have to use the --net-alias for dns.
+        // Hostname cannot be set with container NetworkMode
         var containerOptions = {
             name: name, // used for filtering logs
-            // do _not_ set hostname to app fqdn. doing so sets up the dns name to look up the internal docker ip. this makes curl from within container fail
-            // Note that Hostname has no effect on DNS. We have to use the --net-alias for dns. Hostname cannot be set with container NetworkMode
-            Hostname: isAppContainer ? app.location : null,
             Tty: isAppContainer,
             Image: app.manifest.dockerImage,
             Cmd: (isAppContainer && developmentMode) ? [ '/bin/bash', '-c', 'echo "Development mode. Use cloudron exec to debug. Sleeping" && sleep infinity' ] : cmd,
