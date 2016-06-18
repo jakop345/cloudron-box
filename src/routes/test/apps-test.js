@@ -713,7 +713,8 @@ describe('Apps', function () {
                 expect(data.Config.Env).to.contain('CLOUDRON=1');
                 expect(data.Config.Env).to.contain('APP_ORIGIN=https://' + config.appFqdn(APP_LOCATION));
                 expect(data.Config.Env).to.contain('APP_DOMAIN=' + config.appFqdn(APP_LOCATION));
-                expect(data.Config.Hostname).to.be(APP_LOCATION);
+                // Hostname must not be set of app fqdn or app location!
+                expect(data.Config.Hostname).to.not.contain(APP_LOCATION);
                 done();
             });
         });
