@@ -49,7 +49,7 @@ function get_droplet_ip() {
 
 function get_droplet_id() {
     local droplet_name="$1"
-    id=$($CURL "https://api.digitalocean.com/v2/droplets?per_page=100" | $JSON "droplets" | $JSON -c "this.name === '${droplet_name}'" | $JSON "[0].id")
+    id=$($CURL "https://api.digitalocean.com/v2/droplets?per_page=200" | $JSON "droplets" | $JSON -c "this.name === '${droplet_name}'" | $JSON "[0].id")
     [[ -z "$id" ]] && exit 1
     echo "$id"  
 }
@@ -109,7 +109,7 @@ function get_image_id() {
     local snapshot_name="$1"
     local image_id=""
 
-    if ! response=$($CURL "https://api.digitalocean.com/v2/images?per_page=100"); then
+    if ! response=$($CURL "https://api.digitalocean.com/v2/images?per_page=200"); then
         echo "Failed to get image listing. ${response}"
         return 1
     fi
