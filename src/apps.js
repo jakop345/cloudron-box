@@ -617,7 +617,7 @@ function update(appId, data, auditSource, callback) {
 
                 taskmanager.restartAppTask(appId);
 
-                eventlog.add(eventlog.ACTION_APP_UPDATE, auditSource, { appId: appId, toManifest: manifest, fromManifest: app.manifest });
+                eventlog.add(eventlog.ACTION_APP_UPDATE, auditSource, { appId: appId, toManifest: manifest, fromManifest: app.manifest, force: data.force });
 
                 callback(null);
             });
@@ -943,7 +943,8 @@ function updateApps(updateInfo, auditSource, callback) { // updateInfo is { appI
             }
 
             var data = {
-                manifest: updateInfo[appId].manifest
+                manifest: updateInfo[appId].manifest,
+                force: false
             };
 
             update(appId, data, auditSource, function (error) {
