@@ -911,7 +911,7 @@ function updateApps(updateInfo, auditSource, callback) { // updateInfo is { appI
     assert.strictEqual(typeof callback, 'function');
 
     function canAutoupdateApp(app, newManifest) {
-        var newTcpPorts = newManifest.newTcpPorts || { };
+        var newTcpPorts = newManifest.tcpPorts || { };
         var oldTcpPorts = app.manifest.tcpPorts || { };
         var portBindings = app.portBindings; // this is never null
 
