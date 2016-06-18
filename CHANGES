@@ -541,4 +541,5 @@
 [0.16.0]
 - Allow apps to be configured in configuring state
 - Improved platform architecture that allows incremental infrastructure updates
+- Implement app clone
 
