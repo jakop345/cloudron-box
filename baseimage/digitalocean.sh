@@ -118,6 +118,7 @@ function get_image_id() {
        | $JSON images \
        | $JSON -c "this.name === \"${snapshot_name}\"" 0.id); then
         echo "Failed to parse curl response: ${response}"
+        return 1
     fi
 
     if [[ -z "${image_id}" ]]; then
