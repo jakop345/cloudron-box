@@ -543,3 +543,8 @@
 - Improved platform architecture that allows incremental infrastructure updates
 - Implement app clone
 
+[0.16.1]
+- Fix UI layout issue in tokens page
+- Resume app tasks only when configured and platform ready
+- Allow errored apps to be reconfigured
+
