@@ -192,7 +192,7 @@ function setupAliases(callback) {
 
                 pushAlias(mailbox.name, aliases, iteratorDone);
             });
-        }, callback)
+        }, callback);
     });
 }
 
