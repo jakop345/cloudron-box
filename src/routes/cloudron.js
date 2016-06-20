@@ -126,6 +126,7 @@ function update(req, res, next) {
     cloudron.updateToLatest(auditSource(req), function (error) {
         if (error && error.reason === CloudronError.ALREADY_UPTODATE) return next(new HttpError(422, error.message));
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error && error.reason === CloudronError.SELF_UPGRADE_NOT_SUPPORTED) return next(new HttpError(412, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));
