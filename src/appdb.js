@@ -350,10 +350,10 @@ function setInstallationCommand(appId, installationState, values, callback) {
         updateWithConstraints(appId, values, '', callback);
     } else if (installationState === exports.ISTATE_PENDING_RESTORE) {
         updateWithConstraints(appId, values, 'AND (installationState = "installed" OR installationState = "error")', callback);
-    } else if (installationState === exports.ISTATE_PENDING_UPDATE || installationState === exports.ISTATE_PENDING_BACKUP || installationState === exports.ISTATE_PENDING_CONFIGURE) {
+    } else if (installationState === exports.ISTATE_PENDING_UPDATE || installationState === exports.ISTATE_PENDING_BACKUP) {
         updateWithConstraints(appId, values, 'AND installationState = "installed"', callback);
     } else if (installationState === exports.ISTATE_PENDING_CONFIGURE) {
-        updateWithConstraints(appId, values, 'AND installationState = "installed" OR installationState = "pending_configure" OR installationState = "error"', callback);
+        updateWithConstraints(appId, values, 'AND (installationState = "installed" OR installationState = "pending_configure" OR installationState = "error")', callback);
     } else {
         callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, 'invalid installationState'));
     }
