@@ -690,7 +690,7 @@ function setupRedis(app, options, callback) {
     var env = [
         'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id,
         'REDIS_PASSWORD=' + redisPassword,
-        'REDIS_HOST=redis-' + app.id,
+        'REDIS_HOST=' + redisName,
         'REDIS_PORT=6379'
     ];
 
