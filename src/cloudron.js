@@ -93,6 +93,7 @@ CloudronError.ALREADY_PROVISIONED = 'Already Provisioned';
 CloudronError.BAD_STATE = 'Bad state';
 CloudronError.ALREADY_UPTODATE = 'No Update Available';
 CloudronError.NOT_FOUND = 'Not found';
+CloudronError.SELF_UPGRADE_NOT_SUPPORTED = 'Self upgrade not supported';
 
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -543,6 +544,8 @@ function updateToLatest(auditSource, callback) {
 
     var boxUpdateInfo = updateChecker.getUpdateInfo().box;
     if (!boxUpdateInfo) return callback(new CloudronError(CloudronError.ALREADY_UPTODATE, 'No update available'));
+
+    if (boxUpdateInfo.upgrade && config.provider() !== 'caas') return callback(new CloudronError(CloudronError.SELF_UPGRADE_NOT_SUPPORTED));
 
     update(boxUpdateInfo, auditSource, callback);
 }
