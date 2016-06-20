@@ -155,7 +155,7 @@ function sendMails(queue) {
     docker.getContainer('mail').inspect(function (error, data) {
         if (error) return console.error(error);
 
-        var mailServerIp = safe.query(data, 'NetworkSettings.IPAddress');
+        var mailServerIp = safe.query(data, 'NetworkSettings.Networks.cloudron.IPAddress');
         if (!mailServerIp) return debug('Error querying mail server IP');
 
         var transport = nodemailer.createTransport(smtpTransport({
