@@ -32,7 +32,7 @@ function initialize(callback) {
     var existingInfra = { version: 'none' };
     if (fs.existsSync(paths.INFRA_VERSION_FILE)) {
         existingInfra = safe.JSON.parse(fs.readFileSync(paths.INFRA_VERSION_FILE, 'utf8'));
-        if (!existingInfra) existingInfra = { version: 'legacy' };
+        if (!existingInfra) existingInfra = { version: 'corrupt' };
     }
 
     if (infra.version === existingInfra.version) {
