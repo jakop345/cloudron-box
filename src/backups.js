@@ -217,7 +217,7 @@ function getRestoreUrl(backupId, callback) {
 function copyLastBackup(app, manifest, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof app.lastBackupId, 'string');
-    assert(manifest && typeof manifeset === 'object');
+    assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var now = new Date();
