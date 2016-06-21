@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS apps(
     id VARCHAR(128) NOT NULL UNIQUE,
     appStoreId VARCHAR(128) NOT NULL,
     installationState VARCHAR(512) NOT NULL,
-    installationProgress VARCHAR(512),
+    installationProgress TEXT,
     runState VARCHAR(512),
     health VARCHAR(128),
     containerId VARCHAR(128),
