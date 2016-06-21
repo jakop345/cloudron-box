@@ -552,3 +552,6 @@
 - Fix assert when backing up apps in errored state
 - Fix bug where multiple redis installations caused an error
 
+[0.16.3]
+- Timeout in 10mins if app restore fails because of external domain CNAME setup
+
