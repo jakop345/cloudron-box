@@ -682,7 +682,6 @@ function setupRedis(app, options, callback) {
                 --net-alias ${redisName} \
                 -m 100m \
                 --memory-swap 150m \
-                -p 6379:6379 \
                 -v ${redisVarsFile}:/etc/redis/redis_vars.sh:ro \
                 -v ${redisDataDir}:/var/lib/redis:rw \
                 --read-only -v /tmp -v /run ${tag}`;
