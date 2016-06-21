@@ -85,6 +85,8 @@ function waitForPendingTasks(callback) {
 function resumeTasks(callback) {
     callback = callback || NOOP_CALLBACK;
 
+    debug('resuming tasks');
+
     appdb.getAll(function (error, apps) {
         if (error) return callback(error);
 
