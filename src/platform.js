@@ -2,6 +2,12 @@
 
 exports = module.exports = {
     initialize: initialize,
+    uninitialize: uninitialize,
+
+    events: new (require('events').EventEmitter)(),
+    EVENT_READY: 'ready',
+
+    isReadySync: isReadySync,
 
     mailConfig: mailConfig
 };
@@ -22,7 +28,8 @@ var apps = require('./apps.js'),
     shell = require('./shell.js'),
     util = require('util');
 
-var gAddonVars = null;
+var gAddonVars = null,
+    gPlatformReadyTimer = null;
 
 function initialize(callback) {
     if (process.env.BOX_ENV === 'test' && !process.env.CREATE_INFRA) return callback();
@@ -52,6 +59,24 @@ function initialize(callback) {
         mailboxes.setupAliases,
         fs.writeFile.bind(fs, paths.INFRA_VERSION_FILE, JSON.stringify(infra))
     ], callback);
+
+    // give 30 seconds for the platform to "settle". For example, mysql might still be initing the
+    // database dir and we cannot call service scripts until that's done.
+    // TODO: make this smarter to not wait for 30secs for the crash-restart case
+    gPlatformReadyTimer = setTimeout(function () {
+        gPlatformReadyTimer = null;
+        exports.events.emit(exports.EVENT_READY);
+    }, 30000);
+}
+
+function uninitialize(callback) {
+    clearTimeout(gPlatformReadyTimer);
+    gPlatformReadyTimer = null;
+    callback();
+}
+
+function isReadySync() {
+    return gPlatformReadyTimer === null;
 }
 
 function removeOldImages(callback) {

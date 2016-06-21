@@ -291,6 +291,7 @@ function stop(callback) {
         auth.uninitialize,
         cloudron.uninitialize,
         taskmanager.uninitialize,
+        platform.uninitialize,
         cron.uninitialize,
         mailer.uninitialize,
         database.uninitialize,

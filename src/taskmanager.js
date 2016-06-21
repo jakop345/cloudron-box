@@ -19,14 +19,13 @@ var appdb = require('./appdb.js'),
     cloudron = require('./cloudron.js'),
     debug = require('debug')('box:taskmanager'),
     locker = require('./locker.js'),
+    platform = require('./platform.js'),
     sendFailureLogs = require('./logcollector.js').sendFailureLogs,
     util = require('util'),
     _ = require('underscore');
 
 var gActiveTasks = { };
 var gPendingTasks = [ ];
-var gPlatformReady = false; // PaaS (addons) up and running
-var gPlatformReadyTimer = null;
 
 var TASK_CONCURRENCY = 5;
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
@@ -36,15 +35,7 @@ function initialize(callback) {
 
     locker.on('unlocked', startNextTask);
 
-    gPlatformReadyTimer = setTimeout(function () {
-        gPlatformReady = true;
-
-        if (cloudron.isConfiguredSync()) {
-            resumeTasks();
-        } else {
-            cloudron.events.on(cloudron.EVENT_CONFIGURED, resumeTasks);
-        }
-    }, 30000); // wait 30 seconds to signal platform ready
+    platform.events.on(platform.EVENT_READY, platformReady);
 
     callback();
 }
@@ -54,9 +45,9 @@ function uninitialize(callback) {
 
     gPendingTasks = [ ]; // clear this first, otherwise stopAppTask will resume them
 
-    clearTimeout(gPlatformReadyTimer);
-
     cloudron.events.removeListener(cloudron.EVENT_CONFIGURED, resumeTasks);
+    platform.events.removeListener(platform.EVENT_READY, platformReady);
+
     locker.removeListener('unlocked', startNextTask);
 
     async.eachSeries(Object.keys(gActiveTasks), stopAppTask, callback);
@@ -79,6 +70,14 @@ function waitForPendingTasks(callback) {
     }
 
     checkTasks();
+}
+
+function platformReady() {
+    if (cloudron.isConfiguredSync()) {
+        resumeTasks();
+    } else {
+        cloudron.events.on(cloudron.EVENT_CONFIGURED, resumeTasks);
+    }
 }
 
 // resume app installs and uninstalls
@@ -119,7 +118,7 @@ function startAppTask(appId, callback) {
         return callback(new Error(util.format('Task for %s is already active', appId)));
     }
 
-    if (!gPlatformReady) {
+    if (!platform.isReadySync()) {
         debug('Platform not ready yet, queueing task for %s', appId);
         gPendingTasks.push(appId);
         return callback();
