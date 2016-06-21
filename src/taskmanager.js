@@ -26,6 +26,7 @@ var appdb = require('./appdb.js'),
 var gActiveTasks = { };
 var gPendingTasks = [ ];
 var gPlatformReady = false; // PaaS (addons) up and running
+var gPlatformReadyTimer = null;
 
 var TASK_CONCURRENCY = 5;
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
@@ -35,7 +36,7 @@ function initialize(callback) {
 
     locker.on('unlocked', startNextTask);
 
-    setTimeout(function () {
+    gPlatformReadyTimer = setTimeout(function () {
         gPlatformReady = true;
 
         if (cloudron.isConfiguredSync()) {
@@ -52,6 +53,8 @@ function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     gPendingTasks = [ ]; // clear this first, otherwise stopAppTask will resume them
+
+    clearTimeout(gPlatformReadyTimer);
 
     cloudron.events.removeListener(cloudron.EVENT_CONFIGURED, resumeTasks);
     locker.removeListener('unlocked', startNextTask);
