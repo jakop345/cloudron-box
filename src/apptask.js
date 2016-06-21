@@ -331,7 +331,7 @@ function waitForDnsPropagation(app, callback) {
 function waitForAltDomainDnsPropagation(app, callback) {
     if (!app.altDomain) return callback(null);
 
-    waitForDns(app.altDomain, config.appFqdn(app.location), 'CNAME', callback); // waits forever
+    waitForDns(app.altDomain, config.appFqdn(app.location), 'CNAME', { interval: 5000, times: 50000 }, callback);
 }
 
 // updates the app object and the database

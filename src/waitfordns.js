@@ -64,17 +64,18 @@ function isChangeSynced(domain, value, type, nameserver, callback) {
  }
 
 // check if IP change has propagated to every nameserver
-function waitForDns(domain, value, type, callback) {
+function waitForDns(domain, value, type, options, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof value, 'string');
     assert(type === 'A' || type === 'CNAME');
+    assert(options && typeof options === 'object'); // { interval: 5000, times: 50000 }
     assert.strictEqual(typeof callback, 'function');
 
     var zoneName = tld.getDomain(domain);
     debug('waitForIp: domain %s to be %s in zone %s.', domain, value, zoneName);
 
     var attempt = 1;
-    async.retry({ interval: 5000, times: 50000 }, function (retryCallback) {
+    async.retry(options, function (retryCallback) {
         debug('waitForDNS: %s attempt %s.', domain, attempt++);
 
         dns.resolveNs(zoneName, function (error, nameservers) {

@@ -95,8 +95,8 @@ function installAdminCertificate(callback) {
         sysinfo.getIp(function (error, ip) {
             if (error) return callback(error);
 
-            waitForDns(config.adminFqdn(), ip, 'A', function (error) {
-                if (error) return callback(error); // this cannot happen because we retry forever
+            waitForDns(config.adminFqdn(), ip, 'A', { interval: 5000, times: 50000 }, function (error) {
+                if (error) return callback(error);
 
                 ensureCertificate({ location: constants.ADMIN_LOCATION }, function (error, certFilePath, keyFilePath) {
                     if (error) { // currently, this can never happen
