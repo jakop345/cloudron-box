@@ -449,7 +449,7 @@ function backup(auditSource, callback) {
     progress.set(progress.BACKUP, 0, 'Starting'); // ensure tools can 'wait' on progress
 
     backupBoxAndApps(auditSource, function (error) { // start the backup operation in the background
-        if (error) console.error('backup failed.', error);
+        if (error) debug('backup failed.', error);
 
         locker.unlock(locker.OP_FULL_BACKUP);
     });
