@@ -231,7 +231,7 @@ function startMail(callback) {
                     -p 25:2525 \
                     --read-only -v /tmp ${tag}`;
 
-        shell.execSync('startMongodb', cmd);
+        shell.execSync('startMail', cmd);
 
         callback();
     });
