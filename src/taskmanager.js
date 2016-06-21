@@ -80,7 +80,7 @@ function platformReady() {
     }
 }
 
-// resume app installs and uninstalls
+// resume app tasks when platform is ready or after a crash
 function resumeTasks(callback) {
     callback = callback || NOOP_CALLBACK;
 
@@ -95,7 +95,7 @@ function resumeTasks(callback) {
             if (app.installationState === appdb.ISTATE_ERROR) return;
 
             debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
-            startAppTask(app.id, NOOP_CALLBACK);
+            restartAppTask(app.id, NOOP_CALLBACK); // restart because the auto-installer could have queued up tasks already
         });
 
         callback(null);
