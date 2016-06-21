@@ -548,3 +548,7 @@
 - Resume app tasks only when configured and platform ready
 - Allow errored apps to be reconfigured
 
+[0.16.2]
+- Fix assert when backing up apps in errored state
+- Fix bug where multiple redis installations caused an error
+
