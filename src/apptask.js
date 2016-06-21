@@ -331,7 +331,9 @@ function waitForDnsPropagation(app, callback) {
 function waitForAltDomainDnsPropagation(app, callback) {
     if (!app.altDomain) return callback(null);
 
-    waitForDns(app.altDomain, config.appFqdn(app.location), 'CNAME', { interval: 5000, times: 50000 }, callback);
+    // try for 10 minutes before giving up. this allows the user to "reconfigure" the app in the case where
+    // an app has an external domain and cloudron is migrated to custom domain.
+    waitForDns(app.altDomain, config.appFqdn(app.location), 'CNAME', { interval: 10000, times: 60 }, callback);
 }
 
 // updates the app object and the database
