@@ -132,6 +132,23 @@ function checkAddons(appEntry, done) {
     }, done);
 }
 
+function checkRedis(containerId, done) {
+    var redisIp, exportedRedisPort;
+
+    docker.getContainer(containerId).inspect(function (error, data) {
+        expect(error).to.not.be.ok();
+        expect(data).to.be.ok();
+
+        redisIp = safe.query(data, 'NetworkSettings.Networks.cloudron.IPAddress');
+        expect(redisIp).to.be.ok();
+
+        exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp');
+        expect(exportedRedisPort).to.be(null);
+
+        done();
+    });
+}
+
 describe('Apps', function () {
     this.timeout(50000);
 
@@ -803,21 +820,8 @@ describe('Apps', function () {
             checkAddons(appEntry, done);
         });
 
-        var redisIp, exportedRedisPort;
-
         it('installation - redis addon created', function (done) {
-            docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
-                expect(error).to.not.be.ok();
-                expect(data).to.be.ok();
-
-                redisIp = safe.query(data, 'NetworkSettings.Networks.cloudron.IPAddress');
-                expect(redisIp).to.be.ok();
-
-                exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
-                expect(exportedRedisPort).to.be.ok();
-
-                done();
-            });
+            checkRedis('redis-' + APP_ID, done);
         });
 
         xit('logs - stdout and stderr', function (done) {
@@ -1201,21 +1205,8 @@ describe('Apps', function () {
             checkAddons(appEntry, done);
         });
 
-        var redisIp, exportedRedisPort;
-
         it('installation - redis addon created', function (done) {
-            docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
-                expect(error).to.not.be.ok();
-                expect(data).to.be.ok();
-
-                redisIp = safe.query(data, 'NetworkSettings.Networks.cloudron.IPAddress');
-                expect(redisIp).to.be.ok();
-
-                exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
-                expect(exportedRedisPort).to.be.ok();
-
-                done();
-            });
+            checkRedis('redis-' + APP_ID, done);
         });
 
         function checkConfigureStatus(count, done) {
@@ -1336,18 +1327,7 @@ describe('Apps', function () {
         });
 
         it('reconfiguration - redis addon recreated', function (done) {
-            docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
-                expect(error).to.not.be.ok();
-                expect(data).to.be.ok();
-
-                redisIp = safe.query(data, 'NetworkSettings.Networks.cloudron.IPAddress');
-                expect(redisIp).to.be.ok();
-
-                exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
-                expect(exportedRedisPort).to.be.ok();
-
-                done();
-            });
+            checkRedis('redis-' + APP_ID, done);
         });
 
         it('installation - app can check addons', function (done) {
