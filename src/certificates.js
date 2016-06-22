@@ -8,7 +8,10 @@ exports = module.exports = {
     CertificatesError: CertificatesError,
     validateCertificate: validateCertificate,
     ensureCertificate: ensureCertificate,
-    getAdminCertificatePath: getAdminCertificatePath
+    getAdminCertificatePath: getAdminCertificatePath,
+
+    // exported for testing
+    _getApi: getApi
 };
 
 var acme = require('./cert/acme.js'),
@@ -66,11 +69,15 @@ function getApi(app, callback) {
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
 
-        var api = !app.altDomain && tlsConfig.provider === 'caas' ? caas : acme;
+        // use acme if we have altDomain or the tlsConfig is not caas
+        var api = (app.altDomain || tlsConfig.provider) !== 'caas' ? acme : caas;
 
         var options = { };
-        // used by acme backend to determine the LE origin.
-        options.prod = (api === caas) ? !config.isDev() : tlsConfig.provider.match(/.*-prod/) !== null;
+        if (tlsConfig.provider === 'caas') {
+            options.prod = !config.isDev(); // with altDomain, we will choose acme setting based on this
+        } else { // acme
+            options.prod = tlsConfig.provider.match(/.*-prod/) !== null;
+        }
 
         // registering user with an email requires A or MX record (https://github.com/letsencrypt/boulder/issues/1197)
         // we cannot use admin@fqdn because the user might not have set it up.

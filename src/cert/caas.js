@@ -1,7 +1,10 @@
 'use strict';
 
 exports = module.exports = {
-    getCertificate: getCertificate
+    getCertificate: getCertificate,
+
+    // testing
+    _name: 'caas'
 };
 
 var assert = require('assert'),

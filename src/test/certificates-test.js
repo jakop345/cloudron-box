@@ -1,4 +1,3 @@
-/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
@@ -6,8 +5,23 @@
 
 'use strict';
 
-var certificates = require('../certificates.js'),
-    expect = require('expect.js');
+var async = require('async'),
+    certificates = require('../certificates.js'),
+    config = require('../config.js'),
+    database = require('../database.js'),
+    expect = require('expect.js'),
+    settings = require('../settings.js');
+
+function setup(done) {
+    async.series([
+        database.initialize,
+        database._clear
+    ], done);
+}
+
+function cleanup(done) {
+    database._clear(done);
+}
 
 describe('Certificates', function () {
     describe('validateCertificate', function () {
@@ -85,6 +99,149 @@ describe('Certificates', function () {
 
         it('does not allow invalid cert/key tuple', function () {
             expect(certificates.validateCertificate(validCert0, validKey1, 'foobar.com')).to.be.an(Error);
+        });
+    });
+
+    describe('getApi - caas', function () {
+        before(function (done) {
+            async.series([
+                setup,
+                settings.setTlsConfig.bind(null, { provider: 'caas' })
+            ], done);
+        });
+
+        after(cleanup);
+
+        it('returns prod caas for prod cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://prod/release.json');
+
+            certificates._getApi({ }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('caas');
+                expect(options.prod).to.be(true);
+                done();
+            });
+        });
+
+        it('returns non-prod caas for dev cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://dev/release.json');
+
+            certificates._getApi({ }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('caas');
+                expect(options.prod).to.be(false);
+                done();
+            });
+        });
+
+        it('returns prod-acme with altDomain in prod cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://prod/release.json');
+
+            certificates._getApi({ altDomain: 'foo.something.com' }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('acme');
+                expect(options.prod).to.be(true);
+                done();
+            });
+        });
+
+        it('returns non-prod acme with altDomain in dev cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://dev/release.json');
+
+            certificates._getApi({ altDomain: 'foo.something.com' }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('acme');
+                expect(options.prod).to.be(false);
+                done();
+            });
+        });
+    });
+
+    describe('getApi - le-prod', function () {
+        before(function (done) {
+            async.series([
+                setup,
+                settings.setTlsConfig.bind(null, { provider: 'le-prod' })
+            ], done);
+        });
+
+        after(cleanup);
+
+        it('returns prod acme in prod cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://prod/release.json');
+
+            certificates._getApi({ }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('acme');
+                expect(options.prod).to.be(true);
+                done();
+            });
+        });
+
+        it('returns prod acme with altDomain in prod cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://prod/release.json');
+
+            certificates._getApi({ altDomain: 'foo.bar.com' }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('acme');
+                expect(options.prod).to.be(true);
+                done();
+            });
+        });
+
+        it('returns prod acme in dev cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://dev/release.json');
+
+            certificates._getApi({ }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('acme');
+                expect(options.prod).to.be(true);
+                done();
+            });
+        });
+    });
+
+    describe('getApi - le-staging', function () {
+        before(function (done) {
+            async.series([
+                setup,
+                settings.setTlsConfig.bind(null, { provider: 'le-staging' })
+            ], done);
+        });
+
+        after(cleanup);
+
+        it('returns staging acme in prod cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://prod/release.json');
+
+            certificates._getApi({ }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('acme');
+                expect(options.prod).to.be(false);
+                done();
+            });
+        });
+
+        it('returns staging acme in dev cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://dev/release.json');
+
+            certificates._getApi({ }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('acme');
+                expect(options.prod).to.be(false);
+                done();
+            });
+        });
+
+        it('returns staging acme with altDomain in prod cloudron', function (done) {
+            config.set('boxVersionsUrl', 'http://prod/release.json');
+
+            certificates._getApi({ altDomain: 'foo.bar.com' }, function (error, api, options) {
+                expect(error).to.be(null);
+                expect(api._name).to.be('acme');
+                expect(options.prod).to.be(false);
+                done();
+            });
         });
     });
 });

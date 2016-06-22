@@ -19,7 +19,10 @@ var CA_PROD = 'https://acme-v01.api.letsencrypt.org',
     LE_AGREEMENT = 'https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf';
 
 exports = module.exports = {
-    getCertificate: getCertificate
+    getCertificate: getCertificate,
+
+    // testing
+    _name: 'acme'
 };
 
 function AcmeError(reason, errorOrMessage) {
