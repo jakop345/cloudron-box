@@ -95,8 +95,15 @@ echo "Copying box source"
 cd "${SOURCE_DIR}"
 git archive --format=tar HEAD | $ssh22 "ubuntu@${server_ip}" "cat - > /tmp/box.tar.gz"
 
+echo "Enabling root ssh access"
+if ! $ssh22 "ubuntu@${server_ip}" "sudo sed -e 's/.* \(ssh-rsa.*\)/\1/' -i /root/.ssh/authorized_keys"; then
+    echo "Unable to enable root access"
+    echo "Make sure to cleanup the ec2 instance ${instance_id}"
+    exit 1
+fi
+
 echo "Executing init script"
-if ! $ssh22 "ubuntu@${server_ip}" "sudo /bin/bash /home/ubuntu/initializeBaseUbuntuImage.sh ${installer_revision}"; then
+if ! $ssh22 "root@${server_ip}" "/bin/bash /home/ubuntu/initializeBaseUbuntuImage.sh ${installer_revision}"; then
     echo "Init script failed"
     echo "Make sure to cleanup the ec2 instance ${instance_id}"
     exit 1
