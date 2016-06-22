@@ -102,7 +102,7 @@ function installAdminCertificate(callback) {
         sysinfo.getIp(function (error, ip) {
             if (error) return callback(error);
 
-            waitForDns(config.adminFqdn(), ip, 'A', { interval: 5000, times: 50000 }, function (error) {
+            waitForDns(config.adminFqdn(), ip, 'A', { interval: 30000, times: 50000 }, function (error) {
                 if (error) return callback(error);
 
                 ensureCertificate({ location: constants.ADMIN_LOCATION }, function (error, certFilePath, keyFilePath) {
