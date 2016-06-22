@@ -44,6 +44,7 @@ function initialize(callback) {
 
     if (infra.version === existingInfra.version) {
         debug('platform is uptodate at version %s', infra.version);
+        process.nextTick(function () { exports.events.emit(exports.EVENT_READY); });
         return loadAddonVars(callback);
     }
 
