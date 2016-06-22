@@ -35,7 +35,11 @@ function initialize(callback) {
 
     locker.on('unlocked', startNextTask);
 
-    platform.events.on(platform.EVENT_READY, platformReady);
+    if (platform.isReadySync()) {
+        platformReady();
+    } else {
+        platform.events.on(platform.EVENT_READY, platformReady);
+    }
 
     callback();
 }
