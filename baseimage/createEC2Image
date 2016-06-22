@@ -6,9 +6,7 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 export JSON="${SOURCE_DIR}/node_modules/.bin/json"
 
-provider="digitalocean"
 installer_revision=$(git rev-parse HEAD)
-box_name=""
 instance_id=""
 server_ip=""
 destroy_server="yes"
@@ -26,13 +24,12 @@ key_pair_name="id_rsa_yellowtent"
 [[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 readonly GNU_GETOPT
 
-args=$(${GNU_GETOPT} -o "" -l "revision:,name:,no-destroy" -n "$0" -- "$@")
+args=$(${GNU_GETOPT} -o "" -l "revisio0n:,no-destroy" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
     --revision) installer_revision="$2"; shift 2;;
-    --name) box_name="$2"; destroy_server="no"; shift 2;;
     --no-destroy) destroy_server="no"; shift 2;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;

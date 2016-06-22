@@ -10,7 +10,6 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 export JSON="${SOURCE_DIR}/node_modules/.bin/json"
 
-provider="digitalocean"
 installer_revision=$(git rev-parse HEAD)
 box_name=""
 server_id=""
@@ -23,14 +22,13 @@ deploy_env="dev"
 [[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 readonly GNU_GETOPT
 
-args=$(${GNU_GETOPT} -o "" -l "provider:,revision:,regions:,size:,name:,no-destroy,env:" -n "$0" -- "$@")
+args=$(${GNU_GETOPT} -o "" -l "revision:,regions:,size:,name:,no-destroy,env:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
     --env) deploy_env="$2"; shift 2;;
     --revision) installer_revision="$2"; shift 2;;
-    --provider) provider="$2"; shift 2;;
     --name) box_name="$2"; destroy_server="no"; shift 2;;
     --no-destroy) destroy_server="no"; shift 2;;
     --) break;;
@@ -38,27 +36,22 @@ while true; do
     esac
 done
 
-echo "Creating image using ${provider}"
-if [[ "${provider}" == "digitalocean" ]]; then
-    if [[ "${deploy_env}" == "staging" ]]; then
-        assertNotEmpty DIGITAL_OCEAN_TOKEN_STAGING
-        export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_STAGING}"
-    elif [[ "${deploy_env}" == "dev" ]]; then
-        assertNotEmpty DIGITAL_OCEAN_TOKEN_DEV
-        export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_DEV}"
-    elif [[ "${deploy_env}" == "prod" ]]; then
-        assertNotEmpty DIGITAL_OCEAN_TOKEN_PROD
-        export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_PROD}"
-    else
-        echo "No such env ${deploy_env}."
-        exit 1
-    fi
-
-    vps="/bin/bash ${SCRIPT_DIR}/digitalocean.sh"
+echo "Creating digitalocean image"
+if [[ "${deploy_env}" == "staging" ]]; then
+    assertNotEmpty DIGITAL_OCEAN_TOKEN_STAGING
+    export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_STAGING}"
+elif [[ "${deploy_env}" == "dev" ]]; then
+    assertNotEmpty DIGITAL_OCEAN_TOKEN_DEV
+    export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_DEV}"
+elif [[ "${deploy_env}" == "prod" ]]; then
+    assertNotEmpty DIGITAL_OCEAN_TOKEN_PROD
+    export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_PROD}"
 else
-    echo "Unknown provider : ${provider}"
+    echo "No such env ${deploy_env}."
     exit 1
 fi
+
+vps="/bin/bash ${SCRIPT_DIR}/digitalocean.sh"
 
 readonly ssh_keys="${HOME}/.ssh/id_rsa_caas_${deploy_env}"
 readonly scp202="scp -P 202 -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
