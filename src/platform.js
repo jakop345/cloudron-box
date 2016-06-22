@@ -64,6 +64,7 @@ function initialize(callback) {
     // database dir and we cannot call service scripts until that's done.
     // TODO: make this smarter to not wait for 30secs for the crash-restart case
     gPlatformReadyTimer = setTimeout(function () {
+        debug('emitting platform ready');
         gPlatformReadyTimer = null;
         exports.events.emit(exports.EVENT_READY);
     }, 30000);

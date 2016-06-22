@@ -74,8 +74,10 @@ function waitForPendingTasks(callback) {
 
 function platformReady() {
     if (cloudron.isConfiguredSync()) {
+        debug('platformReady: configured, resuming tasks');
         resumeTasks();
     } else {
+        debug('platformReady: not configured yet. waiting for configured event');
         cloudron.events.on(cloudron.EVENT_CONFIGURED, resumeTasks);
     }
 }
