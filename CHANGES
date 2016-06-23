@@ -555,3 +555,6 @@
 [0.16.3]
 - Timeout in 10mins if app restore fails because of external domain CNAME setup
 
+[0.16.4]
+- Setup email aliases to only alias names for the Cloudron domain
+
