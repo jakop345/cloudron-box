@@ -8,7 +8,6 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    groups = require('../groups.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     user = require('../user.js'),
@@ -23,18 +22,14 @@ function auditSource(req) {
 function get(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
-        if (error) return next(new HttpError(500, error));
-
-        next(new HttpSuccess(200, {
-            id: req.user.id,
-            username: req.user.username,
-            email: req.user.email,
-            admin: isAdmin,
-            displayName: req.user.displayName,
-            showTutorial: req.user.showTutorial
-        }));
-    });
+    next(new HttpSuccess(200, {
+        id: req.user.id,
+        username: req.user.username,
+        email: req.user.email,
+        admin: req.user.admin,
+        displayName: req.user.displayName,
+        showTutorial: req.user.showTutorial
+    }));
 }
 
 function update(req, res, next) {
