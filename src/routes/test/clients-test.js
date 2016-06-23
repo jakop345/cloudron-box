@@ -163,6 +163,26 @@ describe('OAuth Clients API', function () {
                 });
             });
 
+            it('fails with invalid name', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: '$"$%^45asdfasdfadf.adf.', redirectURI: 'http://foobar.com', scope: 'profile' })
+                       .end(function (error, result) {
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
+
+            it('succeeds with dash', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: 'fo-1234-bar', redirectURI: 'http://foobar.com', scope: 'profile' })
+                       .end(function (error, result) {
+                    expect(result.statusCode).to.equal(201);
+                    done();
+                });
+            });
+
             it('succeeds', function (done) {
                 superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                        .query({ access_token: token })

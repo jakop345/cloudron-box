@@ -66,9 +66,21 @@ util.inherits(ClientsError, Error);
 ClientsError.INVALID_SCOPE = 'Invalid scope';
 ClientsError.INVALID_CLIENT = 'Invalid client';
 ClientsError.INVALID_TOKEN = 'Invalid token';
+ClientsError.BAD_FIELD = 'Bad field';
 ClientsError.NOT_FOUND = 'Not found';
 ClientsError.INTERNAL_ERROR = 'Internal Error';
 ClientsError.NOT_ALLOWED = 'Not allowed to remove this client';
+
+function validateName(name) {
+    assert.strictEqual(typeof name, 'string');
+
+    if (name.length < 1) return new ClientsError(ClientsError.BAD_FIELD, 'Name must be atleast 1 character');
+    if (name.length > 128) return new ClientsError(ClientsError.BAD_FIELD, 'Name too long');
+
+    if (/[^a-zA-Z0-9\-]/.test(name)) return new ClientsError(ClientsError.BAD_FIELD, 'Username can only contain alphanumerals and dash');
+
+    return null;
+}
 
 function validateScope(scope) {
     assert.strictEqual(typeof scope, 'string');
@@ -103,6 +115,10 @@ function add(appId, type, redirectURI, scope, callback) {
     scope = scope.split(',').map(function (s) { return s.trim(); }).join(',');
 
     var error = validateScope(scope);
+    if (error) return callback(error);
+
+    // appId is also client name
+    error = validateName(appId);
     if (error) return callback(error);
 
     var id = 'cid-' + uuid.v4();

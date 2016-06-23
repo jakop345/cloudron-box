@@ -29,6 +29,7 @@ function add(req, res, next) {
 
     clients.add(data.appId, clients.TYPE_EXTERNAL, data.redirectURI, data.scope, function (error, result) {
         if (error && error.reason === ClientsError.INVALID_SCOPE) return next(new HttpError(400, error.message));
+        if (error && error.reason === ClientsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(201, result));
     });
