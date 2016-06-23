@@ -43,6 +43,10 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
                         $scope.clientAdd.error.redirectURI = error.message;
                         $scope.clientAddForm.redirectURI.$setPristine();
                         $('#clientAddRedirectURI').focus();
+                    } else if (error.message.indexOf('Username can only contain alphanumerals and dash') === 0) {
+                        $scope.clientAdd.error.name = error.message;
+                        $scope.clientAddForm.name.$setPristine();
+                        $('#clientAddName').focus();
                     } else if (error.message.indexOf('Invalid scope') === 0) {
                         $scope.clientAdd.error.scope = error.message;
                         $scope.clientAddForm.scope.$setPristine();
