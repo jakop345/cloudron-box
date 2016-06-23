@@ -90,6 +90,7 @@ function pushAlias(name, aliases, callback) {
     if (process.env.BOX_ENV === 'test') return callback();
 
     // the alias is setup for the FQDN. otherwise, the mail alias plugin matches name@*
+    aliases = aliases.map(function (a) { return a + '@' + config.fqdn(); });
     var cmd = [ '/addons/mail/service.sh', 'set-alias', name + '@' + config.fqdn() ].concat(aliases);
 
     debug('pushing alias for %s : %j', name, aliases);
