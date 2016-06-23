@@ -15,6 +15,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     async = require('async'),
+    config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:mailboxes'),
     docker = require('./docker.js'),
@@ -88,7 +89,8 @@ function add(name, callback) {
 function pushAlias(name, aliases, callback) {
     if (process.env.BOX_ENV === 'test') return callback();
 
-    var cmd = [ '/addons/mail/service.sh', 'set-alias', name ].concat(aliases);
+    // the alias is setup for the FQDN. otherwise, the mail alias plugin matches name@*
+    var cmd = [ '/addons/mail/service.sh', 'set-alias', name + '@' + config.fqdn() ].concat(aliases);
 
     debug('pushing alias for %s : %j', name, aliases);
 
