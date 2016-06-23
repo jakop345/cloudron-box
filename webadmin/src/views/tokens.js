@@ -55,8 +55,14 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
                         console.error(error);
                     }
                     return;
-                }
-                if (error) return console.error('Unable to create API client.', error.statusCode, error.message);
+                } else if (error && error.statusCode === 412) {
+                    var actionScope = $scope.$new(true);
+                    actionScope.action = '/#/settings';
+
+                    Client.notify('Not allowed', 'You have to enable the external API in the settings.', false, 'error', actionScope);
+
+                    return;
+                } else if (error) return console.error('Unable to create API client.', error.statusCode, error.message);
 
                 refresh();
 
@@ -79,9 +85,19 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
             $scope.clientRemove.busy = true;
 
             Client.delOAuthClient($scope.clientRemove.client.id, function (error) {
-                if (error) console.error(error);
-
                 $scope.clientRemove.busy = false;
+
+                if (error && error.statusCode === 412) {
+                    var actionScope = $scope.$new(true);
+                    actionScope.action = '/#/settings';
+
+                    Client.notify('Not allowed', 'You have to enable the external API in the settings.', false, 'error', actionScope);
+
+                    return;
+                } else if (error) {
+                    return console.error(error);
+                }
+
                 $scope.clientRemove.client = {};
 
                 refresh();
@@ -102,7 +118,16 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
             var expiresAt = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;   // ~100 years from now
 
             Client.createTokenByClientId(client.id, expiresAt, function (error, result) {
-                if (error) console.error(error);
+                if (error && error.statusCode === 412) {
+                    var actionScope = $scope.$new(true);
+                    actionScope.action = '/#/settings';
+
+                    Client.notify('Not allowed', 'You have to enable the external API in the settings.', false, 'error', actionScope);
+
+                    return;
+                } else if (error) {
+                    return console.error(error);
+                }
 
                 $scope.tokenAdd.busy = false;
                 $scope.tokenAdd.token = result;
