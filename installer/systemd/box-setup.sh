@@ -16,6 +16,9 @@ if [[ -b "/dev/xvda1" ]]; then
     disk_device="/dev/xvda1"
 fi
 
+# allow root access over ssh
+sed -e 's/.* \(ssh-rsa.*\)/\1/' -i /root/.ssh/authorized_keys
+
 # all sizes are in mb
 readonly physical_memory=$(free -m | awk '/Mem:/ { print $2 }')
 readonly swap_size="${physical_memory}" # if you change this, fix enoughResourcesAvailable() in client.js
