@@ -558,3 +558,6 @@
 [0.16.4]
 - Setup email aliases to only alias names for the Cloudron domain
 
+[0.16.5]
+- Allow sending email with alias as the From
+
