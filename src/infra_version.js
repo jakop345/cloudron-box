@@ -5,7 +5,7 @@
 // Do not require anything here!
 
 exports = module.exports = {
-    'version': 37,
+    'version': 38,
 
     'baseImage': 'cloudron/base:0.8.1',
 
@@ -14,7 +14,7 @@ exports = module.exports = {
         'postgresql': { repo: 'cloudron/postgresql', tag: 'cloudron/postgresql:0.11.0' },
         'mongodb': { repo: 'cloudron/mongodb', tag: 'cloudron/mongodb:0.10.0' },
         'redis': { repo: 'cloudron/redis', tag: 'cloudron/redis:0.9.0' },
-        'mail': { repo: 'cloudron/mail', tag: 'cloudron/mail:0.14.0' },
+        'mail': { repo: 'cloudron/mail', tag: 'cloudron/mail:0.15.0' },
         'graphite': { repo: 'cloudron/graphite', tag: 'cloudron/graphite:0.9.0' }
     }
 };
