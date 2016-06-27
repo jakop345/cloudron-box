@@ -1,5 +1,3 @@
-/* jslint node:true */
-
 'use strict';
 
 exports = module.exports = {
@@ -118,4 +116,3 @@ function uninitialize(callback) {
 
     callback(null);
 }
-
