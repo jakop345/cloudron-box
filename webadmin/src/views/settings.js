@@ -22,7 +22,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     $scope.changePlan = {
         busy: false,
-        error: {}
+        error: {},
+        password: ''
     };
 
     $scope.developerModeChange = {
@@ -155,13 +156,21 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     };
 
     $scope.showChangePlan = function () {
-        $('#changePlanModal').modal('show');
+        $('#planChangeModal').modal('show');
     };
+
+    function changePlanReset() {
+        $scope.planChange.error.password = null;
+        $scope.planChange.password = '';
+
+        $scope.planChangeForm.$setPristine();
+        $scope.planChangeForm.$setUntouched();
+    }
 
     $scope.doChangePlan = function () {
         $scope.changePlan.busy = true;
 
-        Client.migrate($scope.requestedSize.slug, $scope.currentRegionSlug, $scope.plans.password, function (error) {
+        Client.migrate($scope.requestedSize.slug, $scope.currentRegionSlug, $scope.changePlan.password, function (error) {
             $scope.changePlan.busy = false;
 
             if (error) {
@@ -169,7 +178,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             }
 
             // we will get redirected at some point
-            $('#changePlanModal').modal('hide');
+            changePlanReset();
+            $('#planChangeModal').modal('hide');
             $scope.changePlan.busy = false;
         });
     };
@@ -329,7 +339,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     });
 
     // setup all the dialog focus handling
-    ['developerModeChangeModal'].forEach(function (id) {
+    ['developerModeChangeModal', 'planChangeModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });

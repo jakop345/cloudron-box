@@ -76,7 +76,7 @@
 </div>
 
 <!-- Modal plan change -->
-<div class="modal fade" id="changePlanModal" tabindex="-1" role="dialog">
+<div class="modal fade" id="planChangeModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -88,6 +88,20 @@
                 <br/>
                 <br/>
                 Your apps and data will be migrated to the new Cloudron and will take around 15 minutes.
+                <br/>
+                <form name="planChangeForm" role="form" novalidate ng-submit="doChangePlan(planChangeForm)" autocomplete="off">
+                    <fieldset>
+                        <div class="form-group" ng-class="{ 'has-error': (!planChangeForm.password.$dirty && planChange.error.password) || (planChangeForm.password.$dirty && planChangeForm.password.$invalid) }">
+                            <label class="control-label" for="inputDeveloperModeChangePassword">Give your password to verify that you are performing that action</label>
+                            <div class="control-label" ng-show="(!planChangeForm.password.$dirty && planChange.error.password) || (planChangeForm.password.$dirty && planChangeForm.password.$invalid)">
+                                <small ng-show=" planChangeForm.password.$dirty && planChangeForm.password.$invalid">A password is required</small>
+                                <small ng-show="!planChangeForm.password.$dirty && planChange.error.password">Wrong password</small>
+                            </div>
+                            <input type="password" class="form-control" ng-model="planChange.password" id="inputDeveloperModeChangePassword" name="password" required autofocus>
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="planChangeForm.$invalid"/>
+                    </fieldset>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
