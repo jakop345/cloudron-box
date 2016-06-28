@@ -719,16 +719,9 @@ function migrate(size, region, callback) {
     if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
 
     function unlock(error) {
-        if (error) {
-            debug('Failed to migrate', error);
-            locker.unlock(locker.OP_MIGRATE);
-            progress.set(progress.MIGRATE, -1, error.message);
-        } else {
-            debug('Migration initiated successfully');
-            // do not unlock; cloudron is migrating
-        }
-
-        return;
+        debug('Failed to migrate', error);
+        locker.unlock(locker.OP_MIGRATE);
+        progress.set(progress.MIGRATE, -1, error.message);
     }
 
     progress.set(progress.MIGRATE, 0, 'Started');
@@ -749,7 +742,7 @@ function migrate(size, region, callback) {
             if (result.statusCode === 404) return unlock(new CloudronError(CloudronError.NOT_FOUND));
             if (result.statusCode !== 202) return unlock(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
-            progress.set(progress.MIGRATE, 50, 'Migrating');
+            progress.set(progress.MIGRATE, 10, 'Migrating');
 
             retire();
         });
