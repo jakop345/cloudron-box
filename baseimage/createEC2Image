@@ -132,9 +132,20 @@ aws ec2 terminate-instances --region ${region} --profile ${aws_credentials} --in
 echo "Make image public"
 aws ec2 modify-image-attribute --region ${region} --profile ${aws_credentials} --image-id ${image_id} --launch-permission "{\"Add\":[{\"Group\":\"all\"}]}"
 
+
+# http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
+# Images are currently created in eu-central-1
 echo "Copy image to other regions"
+aws ec2 copy-image --region us-east-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
+aws ec2 copy-image --region us-west-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
 aws ec2 copy-image --region us-west-2 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
+aws ec2 copy-image --region ap-south-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
+aws ec2 copy-image --region ap-northeast-2 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
 aws ec2 copy-image --region ap-southeast-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
+aws ec2 copy-image --region ap-southeast-2 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
+aws ec2 copy-image --region ap-northeast-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
+aws ec2 copy-image --region eu-west-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
+aws ec2 copy-image --region sa-east-1 --profile ${aws_credentials} --source-image-id ${image_id} --source-region ${region} --name ${snapshot_name}
 
 echo "Done."
 echo ""
