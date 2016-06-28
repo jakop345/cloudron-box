@@ -147,7 +147,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 angular.copy(result, $scope.availableRegions);
 
                 $scope.currentRegionSlug = $scope.config.region;
-                $scope.currency = $scope.currentRegionSlug === 'ams3' ? '€' : '$';
+                $scope.currency = $scope.currentRegionSlug.match(/ams/) ? '€' : '$';
             });
         });
     }
