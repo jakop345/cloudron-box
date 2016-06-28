@@ -316,11 +316,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $('#appNotFoundModal').modal('show');
     };
 
-    $scope.showRequestUpgrade = function () {
-        $('#appInstallModal').modal('hide');
-        $('#upgradeModal').modal('show');
-    };
-
     $scope.gotoApp = function (app) {
         $location.path('/appstore/' + app.manifest.id, false).search({ version : app.manifest.version });
     };

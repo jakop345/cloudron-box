@@ -77,23 +77,6 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         window.location.href = '/error.html';
     };
 
-    $scope.requestUpgrade = function () {
-        $scope.upgradeRequest.busy = true;
-
-        var subject = 'User requested upgrade for ' + $scope.config.fqdn;
-        var description = 'User ' + $scope.user.email + ' requested an upgrade for ' + $scope.config.fqdn + '. Get back to him!!';
-
-        Client.feedback('upgrade_request', subject, description, function (error) {
-            $scope.upgradeRequest.busy = false;
-
-            if (error) return Client.notify('Error', error.message, false, 'error');
-
-            Client.notify('Success', 'We will get back to you as soon as possible for the upgrade.', true, 'success');
-
-            $('#upgradeModal').modal('hide');
-        });
-    };
-
     $scope.showUpdateModal = function (form) {
         $scope.update.error.password = null;
         $scope.update.password = '';

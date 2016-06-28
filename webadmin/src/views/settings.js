@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Application').controller('SettingsController', ['$scope', '$location', '$rootScope', 'Client', function ($scope, $location, $rootScope, Client) {
+angular.module('Application').controller('SettingsController', ['$scope', '$location', '$rootScope', 'Client', 'AppStore', function ($scope, $location, $rootScope, Client, AppStore) {
     Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
 
     $scope.client = Client;
@@ -10,6 +10,20 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     $scope.lastBackup = null;
     $scope.backups = [];
+
+    $scope.currency = true ? '€' : '$';
+
+    $scope.availableRegions = [];
+    $scope.currentRegionSlug = null;
+
+    $scope.availableSizes = [];
+    $scope.requestedSize = null;
+    $scope.currentSize = null;
+
+    $scope.changePlan = {
+        busy: false,
+        error: {}
+    };
 
     $scope.developerModeChange = {
         busy: false,
@@ -108,6 +122,57 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             }
         });
     }
+
+    function getSizes() {
+        AppStore.getSizes(function (error, result) {
+            if (error) return console.error(error);
+
+            // result array is ordered by size. only select higher sizes
+            var found = false;
+            result = result.filter(function (size) {
+                if (size.slug === $scope.config.size) {
+                    $scope.currentSize = $scope.requestedSize = size;
+                    found = true;
+                    return true;
+                } else {
+                    return found;
+                }
+            });
+            angular.copy(result, $scope.availableSizes);
+
+            AppStore.getRegions(function (error, result) {
+                if (error) return console.error(error);
+
+                angular.copy(result, $scope.availableRegions);
+
+                $scope.currentRegionSlug = $scope.config.region;
+            });
+        });
+    }
+
+    $scope.setRequestedPlan = function (plan) {
+        $scope.requestedSize = plan;
+    };
+
+    $scope.showChangePlan = function () {
+        $('#changePlanModal').modal('show');
+    };
+
+    $scope.doChangePlan = function () {
+        $scope.changePlan.busy = true;
+
+        Client.migrate($scope.requestedSize.slug, $scope.currentRegionSlug, $scope.plans.password, function (error) {
+            $scope.changePlan.busy = false;
+
+            if (error) {
+                return console.error(error);
+            }
+
+            // we will get redirected at some point
+            $('#changePlanModal').modal('hide');
+            $scope.changePlan.busy = false;
+        });
+    };
 
     function developerModeChangeReset () {
         $scope.developerModeChange.error.password = null;
@@ -260,6 +325,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     Client.onReady(function () {
         fetchBackups();
+        getSizes();
     });
 
     // setup all the dialog focus handling

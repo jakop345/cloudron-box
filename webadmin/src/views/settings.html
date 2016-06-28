@@ -75,6 +75,28 @@
     </div>
 </div>
 
+<!-- Modal plan change -->
+<div class="modal fade" id="changePlanModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Cloudron Change Plan</h4>
+            </div>
+            <div class="modal-body">
+                This will change your plan from <b>{{ currentSize.name }}</b> to <b>{{ requestedSize.name }}</b>.
+                <br/>
+                <br/>
+                Your apps and data will be migrated to the new Cloudron and will take around 15 minutes.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="doChangePlan()" ng-disabled="changePlan.busy"><i class="fa fa-spinner fa-pulse" ng-show="changePlan.busy"></i> Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <br/>
 
 <div class="section-header">
@@ -107,11 +129,32 @@
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.version }}</td>
                 </tr>
             </table>
-            <br/>
-            <br/>
-            <br/>
-            <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#upgradeModal">Upgrade</button>
         </div>
+    </div>
+</div>
+
+<div class="section-header" ng-show="user.admin">
+    <div class="text-left">
+        <h3>Plans</h3>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="btn-group" data-toggle="buttons">
+                  <label class="radio" ng-repeat="size in availableSizes">
+                        <input type="radio" name="options" autocomplete="off" checked ng-click="setRequestedPlan(size)">
+                            {{ size.name }} ({{ size.slug | uppercase }}) - {{ size.price/100 }}{{ currency }}/month
+                            <span ng-show="currentSize.slug === size.slug"> (current plan)
+                        </span>
+                  </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <button class="btn btn-primary pull-right" ng-disabled="requestedSize.name === currentSize.name" ng-click="showChangePlan()">Change Plan</button>
     </div>
 </div>
 
