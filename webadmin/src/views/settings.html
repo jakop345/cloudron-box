@@ -157,7 +157,7 @@
 
 <div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
     <div class="row">
-        <div class="col-xs-12">
+        <div class="col-xs-10 col-xs-offset-1">
             <div class="btn-group" data-toggle="buttons">
                   <label class="radio" ng-repeat="plan in availablePlans">
                         <input type="radio" name="options" autocomplete="off" checked ng-click="setRequestedPlan(plan)">
@@ -170,7 +170,9 @@
     </div>
 
     <div class="row">
-        <button class="btn btn-primary pull-right" ng-disabled="requestedPlan.name === currentPlan.name" ng-click="showChangePlan()">Change Plan</button>
+        <div class="col-xs-12">
+            <button class="btn btn-primary pull-right" ng-disabled="requestedPlan.name === currentPlan.name" ng-click="showChangePlan()">Change Plan</button>
+        </div>
     </div>
 </div>
 
