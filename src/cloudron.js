@@ -724,7 +724,7 @@ function migrate(size, region, callback) {
         progress.set(progress.MIGRATE, -1, error.message);
     }
 
-    progress.set(progress.MIGRATE, 0, 'Started');
+    progress.set(progress.MIGRATE, 10, 'Backing up for migration');
 
     // initiate the migration in the background
     backups.backupBoxAndApps({ userId: null, username: 'migrator' }, function (error, backupId) {
