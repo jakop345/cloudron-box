@@ -11,7 +11,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.lastBackup = null;
     $scope.backups = [];
 
-    $scope.currency = true ? '€' : '$';
+    $scope.currency = null;
 
     $scope.availableRegions = [];
     $scope.currentRegionSlug = null;
@@ -147,6 +147,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 angular.copy(result, $scope.availableRegions);
 
                 $scope.currentRegionSlug = $scope.config.region;
+                $scope.currency = $scope.currentRegionSlug === 'ams3' ? '€' : '$';
             });
         });
     }
