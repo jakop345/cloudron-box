@@ -160,7 +160,7 @@
         <div class="col-xs-10" style="margin-left: 20px">
             <div class="btn-group" data-toggle="buttons">
                   <label class="radio" ng-repeat="plan in availablePlans">
-                        <input type="radio" name="options" autocomplete="off" checked ng-click="setRequestedPlan(plan)">
+                        <input type="radio" name="options" autocomplete="off" ng-checked="currentPlan.slug === plan.slug" ng-click="setRequestedPlan(plan)">
                             {{ plan.name }} ({{ plan.slug | uppercase }}) - {{ plan.price/100 }}{{ currency }}/month
                             <span ng-show="currentPlan.slug === plan.slug"> (current plan)
                         </span>
