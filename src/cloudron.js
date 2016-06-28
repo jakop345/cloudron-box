@@ -722,6 +722,7 @@ function migrate(size, region, callback) {
         if (error) {
             debug('Failed to migrate', error);
             locker.unlock(locker.OP_MIGRATE);
+            progress.set(progress.MIGRATE, -1, error.message);
         } else {
             debug('Migration initiated successfully');
             // do not unlock; cloudron is migrating
@@ -729,6 +730,8 @@ function migrate(size, region, callback) {
 
         return;
     }
+
+    progress.set(progress.MIGRATE, 0, 'Started');
 
     // initiate the migration in the background
     backups.backupBoxAndApps({ userId: null, username: 'migrator' }, function (error, backupId) {

@@ -6,7 +6,8 @@ exports = module.exports = {
     get: get,
 
     UPDATE: 'update',
-    BACKUP: 'backup'
+    BACKUP: 'backup',
+    MIGRATE: 'migrate'
 };
 
 var assert = require('assert'),
