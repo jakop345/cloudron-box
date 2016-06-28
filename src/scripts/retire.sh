@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# This script is called once at the end of a cloudrons lifetime
-
 set -eu -o pipefail
 
 if [[ ${EUID} -ne 0 ]]; then
