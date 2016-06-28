@@ -186,6 +186,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 planChangeReset();
 
                 $('#planChangeModal').modal('hide');
+
+                window.location.href = '/update.html';
             }
 
             $scope.planChange.busy = false;
