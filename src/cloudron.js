@@ -749,7 +749,9 @@ function migrate(size, region, callback) {
             if (result.statusCode === 404) return unlock(new CloudronError(CloudronError.NOT_FOUND));
             if (result.statusCode !== 202) return unlock(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
-            unlock(null);
+            progress.set(progress.MIGRATE, 50, 'Migrating');
+
+            retire();
         });
     });
 
