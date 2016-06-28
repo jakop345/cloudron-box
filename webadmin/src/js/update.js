@@ -17,15 +17,26 @@ app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, 
         $http.get('/api/v1/cloudron/progress').success(function(data, status) {
             if (status === 404) return; // just wait until we create the progress.json on the server side
             if (status !== 200 || typeof data !== 'object') return console.error(status, data);
-            if (data.update === null) return $scope.loadWebadmin();
+            if (data.update === null && data.migrate === null) return $scope.loadWebadmin();
 
-            if (data.update.percent === -1) {
-                $scope.title = 'Update Error';
-                $scope.error = true;
-                $scope.message = data.update.message;
-            } else {
-                $scope.percent = data.update.percent;
-                $scope.message = data.update.message;
+            if (data.update) {
+                if (data.update.percent === -1) {
+                    $scope.title = 'Update Error';
+                    $scope.error = true;
+                    $scope.message = data.update.message;
+                } else {
+                    $scope.percent = data.update.percent;
+                    $scope.message = data.update.message;
+                }
+            } else { // migrating
+                if (data.migrate.percent === -1) {
+                    $scope.title = 'Migration Error';
+                    $scope.error = true;
+                    $scope.message = data.migrate.message;
+                } else {
+                    $scope.percent = data.migrate.percent;
+                    $scope.message = data.migrate.message;
+                }
             }
         }).error(function (data, status) {
             console.error(status, data);

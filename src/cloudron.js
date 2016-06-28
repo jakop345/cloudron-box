@@ -721,7 +721,7 @@ function migrate(size, region, callback) {
     function unlock(error) {
         debug('Failed to migrate', error);
         locker.unlock(locker.OP_MIGRATE);
-        progress.set(progress.MIGRATE, -1, error.message);
+        progress.set(progress.MIGRATE, -1, 'Backup failed: ' + error.message);
     }
 
     progress.set(progress.MIGRATE, 10, 'Backing up for migration');
