@@ -16,11 +16,11 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.availableRegions = [];
     $scope.currentRegionSlug = null;
 
-    $scope.availableSizes = [];
-    $scope.requestedSize = null;
-    $scope.currentSize = null;
+    $scope.availablePlans = [];
+    $scope.requestedPlan = null;
+    $scope.currentPlan = null;
 
-    $scope.changePlan = {
+    $scope.planChange = {
         busy: false,
         error: {},
         password: ''
@@ -124,7 +124,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     }
 
-    function getSizes() {
+    function getPlans() {
         AppStore.getSizes(function (error, result) {
             if (error) return console.error(error);
 
@@ -132,14 +132,14 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             var found = false;
             result = result.filter(function (size) {
                 if (size.slug === $scope.config.size) {
-                    $scope.currentSize = $scope.requestedSize = size;
+                    $scope.currentPlan = $scope.requestedPlan = size;
                     found = true;
                     return true;
                 } else {
                     return found;
                 }
             });
-            angular.copy(result, $scope.availableSizes);
+            angular.copy(result, $scope.availablePlans);
 
             AppStore.getRegions(function (error, result) {
                 if (error) return console.error(error);
@@ -152,14 +152,14 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     }
 
     $scope.setRequestedPlan = function (plan) {
-        $scope.requestedSize = plan;
+        $scope.requestedPlan = plan;
     };
 
     $scope.showChangePlan = function () {
         $('#planChangeModal').modal('show');
     };
 
-    function changePlanReset() {
+    function planChangeReset() {
         $scope.planChange.error.password = null;
         $scope.planChange.password = '';
 
@@ -168,19 +168,27 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     }
 
     $scope.doChangePlan = function () {
-        $scope.changePlan.busy = true;
+        $scope.planChange.busy = true;
 
-        Client.migrate($scope.requestedSize.slug, $scope.currentRegionSlug, $scope.changePlan.password, function (error) {
-            $scope.changePlan.busy = false;
+        Client.migrate($scope.requestedPlan.slug, $scope.currentRegionSlug, $scope.planChange.password, function (error) {
+            $scope.planChange.busy = false;
 
             if (error) {
-                return console.error(error);
+                if (error.statusCode === 403) {
+                    $scope.planChange.error.password = true;
+                    $scope.planChange.password = '';
+                    $scope.planChangeForm.password.$setPristine();
+                    $('#inputPlanChangePassword').focus();
+                } else {
+                    console.error('Unable to change plan.', error);
+                }
+            } else {
+                planChangeReset();
+
+                $('#planChangeModal').modal('hide');
             }
 
-            // we will get redirected at some point
-            changePlanReset();
-            $('#planChangeModal').modal('hide');
-            $scope.changePlan.busy = false;
+            $scope.planChange.busy = false;
         });
     };
 
@@ -335,7 +343,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     Client.onReady(function () {
         fetchBackups();
-        getSizes();
+        getPlans();
     });
 
     // setup all the dialog focus handling

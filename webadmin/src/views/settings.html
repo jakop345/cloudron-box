@@ -84,10 +84,12 @@
                 <h4 class="modal-title">Cloudron Change Plan</h4>
             </div>
             <div class="modal-body">
-                This will change your plan from <b>{{ currentSize.name }}</b> to <b>{{ requestedSize.name }}</b>.
+                This will change your plan from <b>{{ currentPlan.name }}</b> to <b>{{ requestedPlan.name }}</b>.
                 <br/>
                 <br/>
                 Your apps and data will be migrated to the new Cloudron and will take around 15 minutes.
+                <br/>
+                <br/>
                 <br/>
                 <form name="planChangeForm" role="form" novalidate ng-submit="doChangePlan(planChangeForm)" autocomplete="off">
                     <fieldset>
@@ -97,7 +99,7 @@
                                 <small ng-show=" planChangeForm.password.$dirty && planChangeForm.password.$invalid">A password is required</small>
                                 <small ng-show="!planChangeForm.password.$dirty && planChange.error.password">Wrong password</small>
                             </div>
-                            <input type="password" class="form-control" ng-model="planChange.password" id="inputDeveloperModeChangePassword" name="password" required autofocus>
+                            <input type="password" class="form-control" ng-model="planChange.password" id="inputPlanChangePassword" name="password" required autofocus>
                         </div>
                         <input class="ng-hide" type="submit" ng-disabled="planChangeForm.$invalid"/>
                     </fieldset>
@@ -105,7 +107,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doChangePlan()" ng-disabled="changePlan.busy"><i class="fa fa-spinner fa-pulse" ng-show="changePlan.busy"></i> Confirm</button>
+                <button type="button" class="btn btn-success" ng-click="doChangePlan()" ng-disabled="planChange.busy"><i class="fa fa-spinner fa-pulse" ng-show="planChange.busy"></i> Confirm</button>
             </div>
         </div>
     </div>
@@ -157,10 +159,10 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="btn-group" data-toggle="buttons">
-                  <label class="radio" ng-repeat="size in availableSizes">
-                        <input type="radio" name="options" autocomplete="off" checked ng-click="setRequestedPlan(size)">
-                            {{ size.name }} ({{ size.slug | uppercase }}) - {{ size.price/100 }}{{ currency }}/month
-                            <span ng-show="currentSize.slug === size.slug"> (current plan)
+                  <label class="radio" ng-repeat="plan in availablePlans">
+                        <input type="radio" name="options" autocomplete="off" checked ng-click="setRequestedPlan(plan)">
+                            {{ plan.name }} ({{ plan.slug | uppercase }}) - {{ plan.price/100 }}{{ currency }}/month
+                            <span ng-show="currentPlan.slug === plan.slug"> (current plan)
                         </span>
                   </label>
             </div>
@@ -168,7 +170,7 @@
     </div>
 
     <div class="row">
-        <button class="btn btn-primary pull-right" ng-disabled="requestedSize.name === currentSize.name" ng-click="showChangePlan()">Change Plan</button>
+        <button class="btn btn-primary pull-right" ng-disabled="requestedPlan.name === currentPlan.name" ng-click="showChangePlan()">Change Plan</button>
     </div>
 </div>
 
