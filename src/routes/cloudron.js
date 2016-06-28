@@ -5,6 +5,7 @@ exports = module.exports = {
     setupTokenAuth: setupTokenAuth,
     getStatus: getStatus,
     reboot: reboot,
+    migrate: migrate,
     getProgress: getProgress,
     getConfig: getConfig,
     update: update,
@@ -111,6 +112,20 @@ function reboot(req, res, next) {
     next(new HttpSuccess(202, {}));
 
     cloudron.reboot();
+}
+
+function migrate(req, res, next) {
+    if (typeof req.body.size !== 'string') return next(new HttpError(400, 'size must be string'));
+    if (typeof req.body.region !== 'string') return next(new HttpError(400, 'region must be string'));
+
+    debug('Migration requested', req.body.size, req.body.region);
+
+    cloudron.migrate(req.body.size, req.body.region, function (error) {
+        if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(202, {}));
+    });
 }
 
 function getConfig(req, res, next) {
