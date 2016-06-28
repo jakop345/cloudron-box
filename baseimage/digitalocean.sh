@@ -198,7 +198,7 @@ function transfer_image_to_all_regions() {
     local image_id="$1"
 
     xfer_events=()
-    image_regions=(ams3) ## sfo1 is where the image is created
+    image_regions=(ams2) ## sfo1 is where the image is created
     for image_region in ${image_regions[@]}; do
         xfer_event=$(transfer_image ${image_id} ${image_region})
         echo "Image transfer to ${image_region} initiated. Event id: ${xfer_event}"
