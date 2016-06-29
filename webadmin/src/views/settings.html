@@ -9,6 +9,7 @@
             <div class="modal-body">
                 <form name="developerModeChangeForm" role="form" novalidate ng-submit="doChangeDeveloperMode(developerModeChangeForm)" autocomplete="off">
                     <fieldset>
+                        <input type="password" style="display: none;">
                         <div class="form-group" ng-class="{ 'has-error': (!developerModeChangeForm.password.$dirty && developerModeChange.error.password) || (developerModeChangeForm.password.$dirty && developerModeChangeForm.password.$invalid) }">
                             <label class="control-label" for="inputDeveloperModeChangePassword">Give your password to verify that you are performing that action</label>
                             <div class="control-label" ng-show="(!developerModeChangeForm.password.$dirty && developerModeChange.error.password) || (developerModeChangeForm.password.$dirty && developerModeChangeForm.password.$invalid)">
