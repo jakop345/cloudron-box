@@ -159,12 +159,12 @@
 
 <div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
     <div class="row">
-        <div class="col-xs-10" style="margin-left: 20px">
+        <div class="col-xs-10 plans" style="margin-left: 20px">
             <div class="btn-group" data-toggle="buttons">
-                  <label class="radio" ng-repeat="plan in availablePlans" ng-style="{ 'font-weight': currentPlan.slug === plan.slug ? 'bold' : 'normal' }">
+                  <label class="radio" ng-repeat="plan in availablePlans">
                         <input type="radio" name="options" autocomplete="off" ng-checked="currentPlan.slug === plan.slug" ng-click="setRequestedPlan(plan)">
                             {{ plan.name }} ({{ plan.slug | uppercase }}) - {{ plan.price/100 }}{{ currency }}/month
-                            <span ng-show="currentPlan.slug === plan.slug"> (current plan)
+                            <span ng-show="currentPlan.slug === plan.slug" style="font-weight: bold"> (current plan)
                         </span>
                   </label>
             </div>
