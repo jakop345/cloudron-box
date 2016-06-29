@@ -93,6 +93,7 @@
                 <br/>
                 <form name="planChangeForm" role="form" novalidate ng-submit="doChangePlan(planChangeForm)" autocomplete="off">
                     <fieldset>
+                        <input type="password" style="display: none;">
                         <div class="form-group" ng-class="{ 'has-error': (!planChangeForm.password.$dirty && planChange.error.password) || (planChangeForm.password.$dirty && planChangeForm.password.$invalid) }">
                             <label class="control-label" for="inputDeveloperModeChangePassword">Give your password to verify that you are performing that action</label>
                             <div class="control-label" ng-show="(!planChangeForm.password.$dirty && planChange.error.password) || (planChangeForm.password.$dirty && planChangeForm.password.$invalid)">
