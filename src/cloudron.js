@@ -338,6 +338,7 @@ function getConfig(callback) {
                         region: result.region,
                         size: result.size,
                         billing: !!gAppstoreUserDetails.billing,
+                        plan: gCloudronDetails.plan,
                         memory: os.totalmem(),
                         provider: config.provider(),
                         cloudronName: cloudronName
