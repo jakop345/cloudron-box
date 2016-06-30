@@ -128,10 +128,10 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         AppStore.getSizes(function (error, result) {
             if (error) return console.error(error);
 
-            // result array is ordered by size. only select higher plans
+            // only show plans bigger than the current size
             var found = false;
             result = result.filter(function (size) {
-                if (size.name === $scope.config.plan.name) {
+                if (size.slug === $scope.config.plan.slug) {
                     found = true;
                     return true;
                 } else {
@@ -139,7 +139,13 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 }
             });
             angular.copy(result, $scope.availablePlans);
-            $scope.planChange.requestedPlan = $scope.availablePlans[0]; // need the reference
+
+            // prepend the 'custom' plan'
+            if ($scope.availablePlans.length === 0 || $scope.availablePlans[0].name !== $scope.config.plan.name) {
+                $scope.availablePlans.unshift($scope.config.plan);
+            }
+
+            $scope.planChange.requestedPlan = $scope.availablePlans[0]; // need the reference to preselect
 
             AppStore.getRegions(function (error, result) {
                 if (error) return console.error(error);
