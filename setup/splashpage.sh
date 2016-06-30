@@ -37,7 +37,7 @@ else
 fi
 
 if [[ "${arg_retire}" == "migrate" ]]; then
-    echo '{ "migrate": { "percent": "10", "message": "Migrating cloudron" }, "backup": null }' > "${SETUP_WEBSITE_DIR}/progress.json"
+    echo '{ "migrate": { "percent": "10", "message": "Migrating cloudron. This could take up to 15 minutes." }, "backup": null }' > "${SETUP_WEBSITE_DIR}/progress.json"
 else
     echo '{ "update": { "percent": "10", "message": "Updating cloudron software" }, "backup": null }' > "${SETUP_WEBSITE_DIR}/progress.json"
 fi
