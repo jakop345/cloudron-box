@@ -17,7 +17,8 @@ var assert = require('assert'),
 // otherwise no such operation is currently ongoing
 var progress = {
     update: null,
-    backup: null
+    backup: null,
+    migrate: null
 };
 
 // We use -1 for percentage to indicate errors

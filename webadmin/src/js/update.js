@@ -17,7 +17,7 @@ app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, 
         $http.get('/api/v1/cloudron/progress').success(function(data, status) {
             if (status === 404) return; // just wait until we create the progress.json on the server side
             if (status !== 200 || typeof data !== 'object') return console.error(status, data);
-            if (data.update === null && data.migrate === null) return $scope.loadWebadmin();
+            if (!data.update && !data.migrate) return $scope.loadWebadmin();
 
             if (data.update) {
                 if (data.update.percent === -1) {
