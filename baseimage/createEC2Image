@@ -166,7 +166,7 @@ while [ $i -lt ${#ec2_regions[*]} ]; do
     aws ec2 modify-image-attribute --region ${ec2_regions[$i]} --profile ${aws_credentials} --image-id ${ec2_amis[$i]} --launch-permission "{\"Add\":[{\"Group\":\"all\"}]}"
 
     # append to output string for release tool
-    region_string+=",${ec2_regions[$i]}:${ec2_amis[$i]}"
+    region_string+=",${ec2_regions[$i]}=${ec2_amis[$i]}"
 
     # inc the iteration counter
     i=$(( $i + 1));
