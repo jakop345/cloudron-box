@@ -236,7 +236,7 @@ function initializeSysadminExpressSync() {
     var httpServer = http.createServer(app);
 
     var QUERY_LIMIT = '1mb'; // max size for json and urlencoded queries
-    var REQUEST_TIMEOUT = 60000; // timeout for all requests 1 minute as stopping services may take long
+    var REQUEST_TIMEOUT = 10000; // timeout for all requests
 
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
