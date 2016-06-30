@@ -25,7 +25,7 @@ cp -r "${script_dir}/splash/website/"* "${SETUP_WEBSITE_DIR}"
 readonly current_infra=$(node -e "console.log(require('${script_dir}/../src/infra_version.js').version);")
 existing_infra="none"
 [[ -f "${DATA_DIR}/INFRA_VERSION" ]] && existing_infra=$(node -e "console.log(JSON.parse(require('fs').readFileSync('${DATA_DIR}/INFRA_VERSION', 'utf8')).version);")
-if [[ "${arg_retire}" == "true" || "${existing_infra}" != "${current_infra}" ]]; then
+if [[ "${arg_retire}" != "" || "${existing_infra}" != "${current_infra}" ]]; then
     echo "Showing progress bar on all subdomains in retired mode or infra update. retire: ${arg_retire} existing: ${existing_infra} current: ${current_infra}"
     rm -f ${DATA_DIR}/nginx/applications/*
     ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
@@ -36,6 +36,10 @@ else
         -O "{ \"vhost\": \"${admin_fqdn}\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"splash\", \"sourceDir\": \"${SETUP_WEBSITE_DIR}\", \"certFilePath\": \"cert/host.cert\", \"keyFilePath\": \"cert/host.key\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
 fi
 
-echo '{ "update": { "percent": "10", "message": "Updating cloudron software" }, "backup": null }' > "${SETUP_WEBSITE_DIR}/progress.json"
+if [[ "${arg_retire}" == "migrate" ]]; then
+    echo '{ "migrate": { "percent": "10", "message": "Migrating cloudron" }, "backup": null }' > "${SETUP_WEBSITE_DIR}/progress.json"
+else
+    echo '{ "update": { "percent": "10", "message": "Updating cloudron software" }, "backup": null }' > "${SETUP_WEBSITE_DIR}/progress.json"
+fi
 
 nginx -s reload

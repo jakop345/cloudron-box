@@ -587,7 +587,7 @@ function doUpgrade(boxUpdateInfo, callback) {
 
             // no need to unlock since this is the last thing we ever do on this box
             callback();
-            retire();
+            retire('upgrade');
         });
     });
 }
@@ -702,14 +702,15 @@ function checkDiskSpace(callback) {
     });
 }
 
-function retire(callback) {
+function retire(reason, callback) {
+    assert(reason === 'migrate' || reason === 'upgrade');
     callback = callback || NOOP_CALLBACK;
 
     var data = {
         isCustomDomain: config.isCustomDomain(),
         fqdn: config.fqdn()
     };
-    shell.sudo('retire', [ RETIRE_CMD, JSON.stringify(data) ], callback);
+    shell.sudo('retire', [ RETIRE_CMD, reason, JSON.stringify(data) ], callback);
 }
 
 function migrate(size, region, callback) {
@@ -746,7 +747,7 @@ function migrate(size, region, callback) {
 
             progress.set(progress.MIGRATE, 10, 'Migrating');
 
-            retire();
+            retire('migrate');
         });
     });
 

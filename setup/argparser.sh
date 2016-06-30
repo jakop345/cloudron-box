@@ -10,7 +10,7 @@ arg_fqdn=""
 arg_is_custom_domain="false"
 arg_restore_key=""
 arg_restore_url=""
-arg_retire="false"
+arg_retire=""
 arg_tls_config=""
 arg_tls_cert=""
 arg_tls_key=""
@@ -23,14 +23,14 @@ arg_update_config=""
 arg_provider=""
 arg_app_bundle=""
 
-args=$(getopt -o "" -l "data:,retire" -n "$0" -- "$@")
+args=$(getopt -o "" -l "data:,retire:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
     --retire)
-        arg_retire="true"
-        shift
+        arg_retire="$2"
+        shift 2
         ;;
     --data)
         # only read mandatory non-empty parameters here
