@@ -17,13 +17,13 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.currentRegionSlug = null;
 
     $scope.availablePlans = [];
-    $scope.requestedPlan = null;
     $scope.currentPlan = null;
 
     $scope.planChange = {
         busy: false,
         error: {},
-        password: ''
+        password: '',
+        requestedPlan: null
     };
 
     $scope.developerModeChange = {
@@ -128,11 +128,10 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         AppStore.getSizes(function (error, result) {
             if (error) return console.error(error);
 
-            // result array is ordered by size. only select higher sizes
+            // result array is ordered by size. only select higher plans
             var found = false;
             result = result.filter(function (size) {
-                if (size.slug === $scope.config.size) {
-                    $scope.currentPlan = $scope.requestedPlan = size;
+                if (size.name === $scope.config.plan.name) {
                     found = true;
                     return true;
                 } else {
@@ -140,6 +139,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 }
             });
             angular.copy(result, $scope.availablePlans);
+            $scope.planChange.requestedPlan = $scope.availablePlans[0]; // need the reference
 
             AppStore.getRegions(function (error, result) {
                 if (error) return console.error(error);
@@ -150,10 +150,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             });
         });
     }
-
-    $scope.setRequestedPlan = function (plan) {
-        $scope.requestedPlan = plan;
-    };
 
     $scope.showChangePlan = function () {
         $('#planChangeModal').modal('show');
@@ -346,6 +342,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     Client.onReady(function () {
         fetchBackups();
         getPlans();
+
+        $scope.currentPlan = $scope.config.plan;
     });
 
     // setup all the dialog focus handling
