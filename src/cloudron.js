@@ -611,6 +611,7 @@ function doUpdate(boxUpdateInfo, callback) {
 
             // this data is opaque to the installer
             data: {
+                provider: config.provider(),
                 token: config.token(),
                 apiServerOrigin: config.apiServerOrigin(),
                 webServerOrigin: config.webServerOrigin(),
