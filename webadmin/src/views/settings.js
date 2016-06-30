@@ -11,7 +11,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.lastBackup = null;
     $scope.backups = [];
 
-    $scope.currency = $scope.config.currency === 'eur' ? '€' : '$';
+    $scope.currency = null;
 
     $scope.availableRegions = [];
     $scope.currentRegionSlug = null;
@@ -350,6 +350,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         getPlans();
 
         $scope.currentPlan = $scope.config.plan;
+        $scope.currency = $scope.config.currency === 'eur' ? '€' : '$';
     });
 
     // setup all the dialog focus handling
