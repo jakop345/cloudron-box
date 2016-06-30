@@ -66,6 +66,9 @@ echo "Creating EC2 instance"
 instance_id=$(aws ec2 run-instances --image-id ${ami_id} --region ${region} --profile ${aws_credentials} --security-group-ids ${security_group} --instance-type ${instance_type} --key-name ${key_pair_name} --subnet-id ${subnet_id} --associate-public-ip-address | $JSON Instances[0].InstanceId)
 echo "Got InstanceId: ${instance_id}"
 
+# name the instance
+aws ec2 create-tags --profile ${aws_credentials} --resources ${instance_id} --tags "Key=Name,Value=baseimage-${pretty_revision}"
+
 echo "Waiting for instance to be running..."
 while true; do
     event_status=`aws ec2 describe-instances --instance-id ${instance_id} --region ${region} --profile ${aws_credentials} | $JSON Reservations[0].Instances[0].State.Name`
