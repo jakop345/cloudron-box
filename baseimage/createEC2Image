@@ -13,9 +13,9 @@ destroy_server="yes"
 
 ami_id="ami-f9e30f96"
 region="eu-central-1"
-aws_credentials="testing"
+aws_credentials="baseimage"
 security_group="sg-b9a473d1"
-instance_type="t2.micro"
+instance_type="t2.small"
 subnet_id="subnet-801402e9"
 key_pair_name="id_rsa_yellowtent"
 
