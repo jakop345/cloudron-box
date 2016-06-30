@@ -4,7 +4,7 @@
 var app = angular.module('Application', []);
 
 app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, $http, $interval) {
-    $scope.title = 'Update in progress...';
+    $scope.title = '';
     $scope.percent = 0;
     $scope.message = '';
     $scope.error = false;
@@ -25,6 +25,7 @@ app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, 
                     $scope.error = true;
                     $scope.message = data.update.message;
                 } else {
+                    $scope.title = 'Update in progress...';
                     $scope.percent = data.update.percent;
                     $scope.message = data.update.message;
                 }
@@ -34,6 +35,7 @@ app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, 
                     $scope.error = true;
                     $scope.message = data.migrate.message;
                 } else {
+                    $scope.title = 'Migration in progress...';
                     $scope.percent = data.migrate.percent;
                     $scope.message = data.migrate.message;
                 }
