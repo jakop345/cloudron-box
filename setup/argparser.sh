@@ -33,10 +33,16 @@ while true; do
         shift 2
         ;;
     --data)
-        # only read mandatory non-empty parameters here
-        read -r arg_api_server_origin arg_web_server_origin arg_fqdn arg_is_custom_domain arg_box_versions_url arg_version <<EOF
-        $(echo "$2" | $json apiServerOrigin webServerOrigin fqdn isCustomDomain boxVersionsUrl version | tr '\n' ' ')
-EOF
+        # these params must be valid in all cases
+        arg_fqdn=$(echo "$2" | $json fqdn)
+        arg_is_custom_domain=$(echo "$2" | $json isCustomDomain)
+
+        # only update/restore have this valid (but not migrate)
+        arg_api_server_origin=$(echo "$2" | $json apiServerOrigin)
+        arg_web_server_origin=$(echo "$2" | $json webServerOrigin)
+        arg_box_versions_url=$(echo "$2" | $json boxVersionsUrl)
+        arg_version=$(echo "$2" | $json version)
+
         # read possibly empty parameters here
         arg_app_bundle=$(echo "$2" | $json appBundle)
         [[ "${arg_app_bundle}" == "" ]] && arg_app_bundle="[]"
