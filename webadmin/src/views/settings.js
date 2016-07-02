@@ -172,7 +172,14 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.doChangePlan = function () {
         $scope.planChange.busy = true;
 
-        Client.migrate($scope.planChange.requestedPlan, $scope.currentRegionSlug, $scope.planChange.password, function (error) {
+        var options = {
+            size: $scope.planChange.requestedPlan.slug,
+            name: $scope.planChange.requestedPlan.name,
+            price: $scope.planChange.requestedPlan.price,
+            region: $scope.currentRegionSlug
+        };
+
+        Client.migrate(options, $scope.planChange.password, function (error) {
             $scope.planChange.busy = false;
 
             if (error) {
