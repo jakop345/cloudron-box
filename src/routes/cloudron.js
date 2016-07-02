@@ -24,7 +24,8 @@ var assert = require('assert'),
     progress = require('../progress.js'),
     mailer = require('../mailer.js'),
     superagent = require('superagent'),
-    updateChecker = require('../updatechecker.js');
+    updateChecker = require('../updatechecker.js'),
+    _ = require('underscore');
 
 function auditSource(req) {
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || null;
@@ -120,7 +121,9 @@ function migrate(req, res, next) {
 
     debug('Migration requested', req.body.size, req.body.region);
 
-    cloudron.migrate(config.fqdn(), req.body.size, req.body.region, function (error) {
+    var options = _.pick(req.body, 'domain', 'size', 'region');
+
+    cloudron.migrate(options, function (error) {
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
 

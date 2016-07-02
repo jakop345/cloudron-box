@@ -715,10 +715,8 @@ function retire(reason, callback) {
     shell.sudo('retire', [ RETIRE_CMD, reason, JSON.stringify(data) ], callback);
 }
 
-function migrate(domain, size, region, callback) {
-    assert.strictEqual(typeof domain, 'string');
-    assert.strictEqual(typeof size, 'string');
-    assert.strictEqual(typeof region, 'string');
+function migrate(options, callback) {
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var error = locker.lock(locker.OP_MIGRATE);
@@ -736,12 +734,14 @@ function migrate(domain, size, region, callback) {
     backups.backupBoxAndApps({ userId: null, username: 'migrator' }, function (error, backupId) {
         if (error) return unlock(error);
 
-        debug('migrate: domain: %s size %s region %s', domain, size, region);
+        debug('migrate: domain: %s size %s region %s', options.domain, options.size, options.region);
+
+        options.restoreKey = backupId;
 
         superagent
           .post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/migrate')
           .query({ token: config.token() })
-          .send({ domain: domain, size: size, region: region, restoreKey: backupId })
+          .send(options)
           .end(function (error, result) {
             if (error && !error.response) return unlock(error); // network error
             if (result.statusCode === 409) return unlock(new CloudronError(CloudronError.BAD_STATE));
