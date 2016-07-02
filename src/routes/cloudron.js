@@ -120,7 +120,7 @@ function migrate(req, res, next) {
 
     debug('Migration requested', req.body.size, req.body.region);
 
-    cloudron.migrate(req.body.size, req.body.region, function (error) {
+    cloudron.migrate(config.fqdn(), req.body.size, req.body.region, function (error) {
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
 
