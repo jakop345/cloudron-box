@@ -311,7 +311,8 @@ function getConfig(callback) {
             // set fallback values to avoid dependency on appstore
             result = {
                 region: result ? result.region : null,
-                size: result ? result.size : null
+                size: result ? result.size : null,
+                plan: result ? result.plan : null
             };
         }
 
@@ -338,7 +339,7 @@ function getConfig(callback) {
                         region: result.region,
                         size: result.size,
                         billing: !!gAppstoreUserDetails.billing,
-                        plan: gCloudronDetails.plan,
+                        plan: result.plan,
                         currency: gAppstoreUserDetails.currency,
                         memory: os.totalmem(),
                         provider: config.provider(),
