@@ -562,5 +562,6 @@
 - Allow sending email with alias as the From
 
 [0.16.6]
-- Support EC2 selfhosting
+- Add plan migration interface
+- Initial EC2 support
 
