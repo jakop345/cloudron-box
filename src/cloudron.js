@@ -273,7 +273,7 @@ function getStatus(callback) {
     });
 }
 
-function getCloudronDetails(callback) {
+function getBoxAndUserDetails(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     if (gCloudronDetails) return callback(null, gCloudronDetails);
@@ -304,7 +304,7 @@ function getCloudronDetails(callback) {
 function getConfig(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    getCloudronDetails(function (error, result) {
+    getBoxAndUserDetails(function (error, result) {
         if (error) {
             debug('Failed to fetch cloudron details.', error);
 
