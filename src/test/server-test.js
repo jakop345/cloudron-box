@@ -228,7 +228,7 @@ describe('Server', function () {
                 .set('Origin', 'http://localhost')
                 .end(function (error, res) {
                 expect(res.headers['access-control-allow-methods']).to.be('GET, PUT, DELETE, POST, OPTIONS');
-                expect(res.headers['access-control-allow-credentials']).to.be('true');
+                expect(res.headers['access-control-allow-credentials']).to.be('false');
                 expect(res.headers['access-control-allow-headers']).to.be('accept, origin, x-superagented-with'); // mirrored from superagent
                 expect(res.headers['access-control-allow-origin']).to.be('http://localhost'); // mirrors from superagent
                 done();
