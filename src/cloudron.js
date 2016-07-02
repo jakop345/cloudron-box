@@ -55,7 +55,8 @@ var apps = require('./apps.js'),
     user = require('./user.js'),
     UserError = user.UserError,
     user = require('./user.js'),
-    util = require('util');
+    util = require('util'),
+    _ = require('underscore');
 
 var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update',
@@ -63,9 +64,21 @@ var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
+// result to not depend on the appstore
+const BOX_AND_USER_TEMPLATE = {
+    box: {
+        region: null,
+        size: null,
+        plan: 'Custom Plan'
+    },
+    user: {
+        billing: false,
+        currency: ''
+    }
+};
+
 var gUpdatingDns = false,                // flag for dns update reentrancy
-    gCloudronDetails = null,             // cached cloudron details like region,size...
-    gAppstoreUserDetails = {},
+    gBoxAndUserDetails = null,         // cached cloudron details like region,size...
     gIsConfigured = null;                // cached configured state so that return value is synchronous. null means we are not initialized yet
 
 function CloudronError(reason, errorOrMessage) {
@@ -276,16 +289,9 @@ function getStatus(callback) {
 function getBoxAndUserDetails(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    if (gCloudronDetails) return callback(null, gCloudronDetails);
+    if (gBoxAndUserDetails) return callback(null, gBoxAndUserDetails);
 
-    if (!config.token()) {
-        gCloudronDetails = {
-            region: null,
-            size: null
-        };
-
-        return callback(null, gCloudronDetails);
-    }
+    if (!config.token()) return callback(new Error(CloudronError.EXTERNAL_ERROR, 'No appstore token'));
 
     superagent
         .get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn())
@@ -294,10 +300,9 @@ function getBoxAndUserDetails(callback) {
             if (error && !error.response) return callback(error);
             if (result.statusCode !== 200) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
-            gCloudronDetails = result.body.box;
-            gAppstoreUserDetails = result.body.user;
+            gBoxAndUserDetails = result.body;
 
-            return callback(null, gCloudronDetails);
+            return callback(null, gBoxAndUserDetails);
         });
 }
 
@@ -307,14 +312,9 @@ function getConfig(callback) {
     getBoxAndUserDetails(function (error, result) {
         if (error) {
             debug('Failed to fetch cloudron details.', error);
-
-            // set fallback values to avoid dependency on appstore
-            result = {
-                region: result ? result.region : null,
-                size: result ? result.size : null,
-                plan: result ? result.plan : null
-            };
         }
+
+        result = _.extend(BOX_AND_USER_TEMPLATE, result || { });
 
         settings.getCloudronName(function (error, cloudronName) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
@@ -336,11 +336,11 @@ function getConfig(callback) {
                         progress: progress.get(),
                         isCustomDomain: config.isCustomDomain(),
                         developerMode: developerMode,
-                        region: result.region,
-                        size: result.size,
-                        billing: !!gAppstoreUserDetails.billing,
-                        plan: result.plan,
-                        currency: gAppstoreUserDetails.currency,
+                        region: result.box.region,
+                        size: result.box.size,
+                        billing: !!result.user.billing,
+                        plan: result.box.plan,
+                        currency: result.user.currency,
                         memory: os.totalmem(),
                         provider: config.provider(),
                         cloudronName: cloudronName
