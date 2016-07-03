@@ -45,6 +45,8 @@
                             <input type="text" class="form-control" ng-model="dnsCredentials.secretAccessKey" id="dnsCredentialsSecretAccessKey" name="secretAccessKey" ng-disabled="dnsCredentials.busy" required>
                         </div>
 
+                        <a href="" class="pull-left" ng-click="hideDnsCredentialsForm()">Collapse</a>
+
                         <button type="submit" class="btn btn-outline btn-success pull-right" ng-disabled="dnsCredentialsForm.$invalid || busy"><i class="fa fa-spinner fa-pulse" ng-show="dnsCredentials.busy"></i> Save</button>
                     </fieldset>
                 </form>

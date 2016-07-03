@@ -93,6 +93,11 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         });
     };
 
+    $scope.hideDnsCredentialsForm = function () {
+        $('#collapseDnsCredentialsForm').collapse('hide');
+        $scope.dnsCredentials.formVisible = false;
+    };
+
     $scope.setDnsCredentials = function () {
         $scope.dnsCredentials.busy = true;
         $scope.dnsCredentials.error = null;
@@ -116,8 +121,7 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
                 $scope.dnsCredentials.accessKeyId = '';
                 $scope.dnsCredentials.secretAccessKey = '';
 
-                $('#collapseDnsCredentialsForm').collapse('hide');
-                $scope.dnsCredentials.formVisible = false;
+                $scope.hideDnsCredentialsForm();
 
                 // attempt to reload to make the browser get the new certs
                 window.location.reload(true);
