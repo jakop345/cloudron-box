@@ -26,12 +26,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         requestedPlan: null
     };
 
-    $scope.developerModeChange = {
-        busy: false,
-        error: {},
-        password: ''
-    };
-
     $scope.createBackup = {
         busy: false,
         percent: 100
@@ -203,38 +197,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     };
 
-    function developerModeChangeReset () {
-        $scope.developerModeChange.error.password = null;
-        $scope.developerModeChange.password = '';
-
-        $scope.developerModeChangeForm.$setPristine();
-        $scope.developerModeChangeForm.$setUntouched();
-    }
-
-    $scope.doChangeDeveloperMode = function () {
-        $scope.developerModeChange.error.password = null;
-        $scope.developerModeChange.busy = true;
-
-        Client.changeDeveloperMode(!$scope.config.developerMode, $scope.developerModeChange.password, function (error) {
-            if (error) {
-                if (error.statusCode === 403) {
-                    $scope.developerModeChange.error.password = true;
-                    $scope.developerModeChange.password = '';
-                    $scope.developerModeChangeForm.password.$setPristine();
-                    $('#inputDeveloperModeChangePassword').focus();
-                } else {
-                    console.error('Unable to change developer mode.', error);
-                }
-            } else {
-                developerModeChangeReset();
-
-                $('#developerModeChangeModal').modal('hide');
-            }
-
-            $scope.developerModeChange.busy = false;
-        });
-    };
-
     function getBlobFromImg(img, callback) {
         var size = 256;
 
@@ -278,7 +240,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         $scope.avatarChange.avatar.file = getBlobFromImg(img, function (blob) {
             Client.changeCloudronAvatar(blob, function (error) {
                 if (error) {
-                    console.error('Unable to change developer mode.', error);
+                    console.error('Unable to change cloudron avatar.', error);
                 } else {
                     Client.resetAvatar();
                 }
@@ -321,11 +283,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     };
 
-    $scope.showChangeDeveloperMode = function () {
-        developerModeChangeReset();
-        $('#developerModeChangeModal').modal('show');
-    };
-
     $scope.showCreateBackup = function () {
         $('#createBackupModal').modal('show');
     };
@@ -361,7 +318,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     });
 
     // setup all the dialog focus handling
-    ['developerModeChangeModal', 'planChangeModal'].forEach(function (id) {
+    ['planChangeModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
