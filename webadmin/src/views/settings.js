@@ -311,10 +311,13 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     Client.onReady(function () {
         fetchBackups();
-        getPlans();
 
-        $scope.currentPlan = $scope.config.plan;
-        $scope.currency = $scope.config.currency === 'eur' ? '€' : '$';
+        if ($scope.config.provider === 'caas') {
+            getPlans();
+
+            $scope.currentPlan = $scope.config.plan;
+            $scope.currency = $scope.config.currency === 'eur' ? '€' : '$';
+        }
     });
 
     // setup all the dialog focus handling
