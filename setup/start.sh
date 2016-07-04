@@ -34,6 +34,9 @@ set_progress() {
 set_progress "1" "Create container"
 $script_dir/container.sh
 
+set_progress "5" "Set hostname"
+hostnamectl set-hostname "${arg_fqdn}"
+
 set_progress "10" "Ensuring directories"
 # keep these in sync with paths.js
 [[ "${is_update}" == "false" ]] && btrfs subvolume create "${DATA_DIR}/box"
