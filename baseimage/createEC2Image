@@ -159,6 +159,7 @@ while [ $i -lt ${#ec2_regions[*]} ]; do
     while true; do
         event_status=`aws ec2 describe-images --region ${ec2_regions[$i]} --profile ${aws_credentials} --image-id ${ec2_amis[$i]} | $JSON Images[0].State`
         if [[ "${event_status}" == "available" ]]; then
+            echo "done"
             break
         fi
         debug -n "."
