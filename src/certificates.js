@@ -92,7 +92,7 @@ function getApi(app, callback) {
 }
 
 function installAdminCertificate(callback) {
-    if (cloudron.isConfiguredSync()) return callback();
+    if (!cloudron.isConfiguredSync()) return callback();
 
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
