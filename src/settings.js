@@ -1,5 +1,3 @@
-/* jslint node:true */
-
 'use strict';
 
 exports = module.exports = {
@@ -51,10 +49,15 @@ var assert = require('assert'),
     config = require('./config.js'),
     CronJob = require('cron').CronJob,
     DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:settings'),
+    dns = require('native-dns'),
     moment = require('moment-timezone'),
     paths = require('./paths.js'),
+    route53 = require('./dns/route53.js'),
     safe = require('safetydance'),
     settingsdb = require('./settingsdb.js'),
+    SubdomainError = require('./subdomains.js').SubdomainError,
+    sysinfo = require('./sysinfo.js'),
     util = require('util'),
     _ = require('underscore');
 
@@ -244,11 +247,46 @@ function getDnsConfig(callback) {
     });
 }
 
+function validateRoute53Config(domain, dnsConfig, callback) {
+    const zoneName = domain;
+
+    sysinfo.getIp(function (error, ip) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, 'Error getting IP:' + error.message));
+
+        dns.resolveNs(zoneName, function (error, nameservers) {
+            if (error || !nameservers) return callback(error || new Error('Unable to get nameservers'));
+
+            route53.getHostedZone(dnsConfig, zoneName, function (error, zone) {
+                if (error && error.reason === SubdomainError.ACCESS_DENIED) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Error getting zone information: Access denied'));
+                if (error && error.reason === SubdomainError.NOT_FOUND) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Zone not found'));
+                if (error && error.reason === SubdomainError.EXTERNAL_ERROR) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Error getting zone information:' + error.message));
+                if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+                if (!_.isEqual(zone.DelegationSet.NameServers.sort(), nameservers.sort())) {
+                    debug('validateRoute53Config: %j and %j do not match', nameservers, zone.DelegationSet.NameServers);
+                    return callback(new Error('domain nameservers are not set to route53'));
+                }
+
+                route53.add(dnsConfig, zoneName, 'my', 'A', [ ip ], function (error, changeId) {
+                    if (error && error.reason === SubdomainError.ACCESS_DENIED) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Error adding A record. Access denied'));
+                    if (error && error.reason === SubdomainError.NOT_FOUND) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Zone not found'));
+                    if (error && error.reason === SubdomainError.EXTERNAL_ERROR) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Error adding A record:' + error.message));
+                    if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+                    debug('validateRoute53Config: A record added with change id %s', changeId);
+
+                    callback();
+                });
+            });
+        });
+    });
+}
+
 function setDnsConfig(dnsConfig, callback) {
     assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var credentials;
+    var credentials, validator;
 
     if (dnsConfig.provider === 'route53') {
         if (typeof dnsConfig.accessKeyId !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'accessKeyId must be a string'));
@@ -261,20 +299,27 @@ function setDnsConfig(dnsConfig, callback) {
             region: dnsConfig.region || 'us-east-1',
             endpoint: dnsConfig.endpoint || null
         };
+
+        validator = validateRoute53Config.bind(null, config.fqdn());
     } else if (dnsConfig.provider === 'caas') {
         credentials = {
             provider: dnsConfig.provider
         };
+        validator = function (caasConfig, next) { return next(); };
     } else {
         return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be route53 or caas'));
     }
 
-    settingsdb.set(exports.DNS_CONFIG_KEY, JSON.stringify(credentials), function (error) {
-        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+    validator(credentials, function (error) {
+        if (error) return callback(error);
 
-        exports.events.emit(exports.DNS_CONFIG_KEY, dnsConfig);
+        settingsdb.set(exports.DNS_CONFIG_KEY, JSON.stringify(credentials), function (error) {
+            if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
-        callback(null);
+            exports.events.emit(exports.DNS_CONFIG_KEY, dnsConfig);
+
+            callback(null);
+        });
     });
 }
 

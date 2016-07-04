@@ -5,7 +5,10 @@ exports = module.exports = {
     get: get,
     del: del,
     update: update,
-    getChangeStatus: getChangeStatus
+    getChangeStatus: getChangeStatus,
+
+    // not part of "dns" interface
+    getHostedZone: getHostedZone
 };
 
 var assert = require('assert'),
@@ -47,6 +50,22 @@ function getZoneByName(dnsConfig, zoneName, callback) {
         if (!zone) return callback(new SubdomainError(SubdomainError.NOT_FOUND, 'no such zone'));
 
         callback(null, zone);
+    });
+}
+
+function getHostedZone(dnsConfig, zoneName, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
+    assert.strictEqual(typeof zoneName, 'string');
+    assert.strictEqual(typeof callback, 'function');
+ 
+    getZoneByName(dnsConfig, zoneName, function (error, zone) {
+        var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
+        route53.getHostedZone({ Id: zone.Id }, function (error, result) {
+            if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
+            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
+
+            callback(null, result);
+        });
     });
 }
 
