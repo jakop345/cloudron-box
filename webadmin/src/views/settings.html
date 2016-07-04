@@ -118,13 +118,13 @@
     </div>
 </div>
 
-<div class="section-header" ng-show="user.admin">
+<div class="section-header" ng-show="config.provider === 'caas' && user.admin">
     <div class="text-left">
         <h3>Plans</h3>
     </div>
 </div>
 
-<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
+<div class="card" style="margin-bottom: 15px;" ng-show="config.provider === 'caas' && user.admin">
     <div class="row">
         <div class="col-xs-10 plans" style="margin-left: 20px">
             <div ng-repeat="plan in availablePlans">
