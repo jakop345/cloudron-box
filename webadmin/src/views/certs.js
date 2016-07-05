@@ -3,6 +3,8 @@
 angular.module('Application').controller('CertsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
     Client.onReady(function () { if (!Client.getUserInfo().admin || !Client.getConfig().isCustomDomain) $location.path('/'); });
 
+    $scope.config = Client.getConfig();
+
     $scope.defaultCert = {
         error: null,
         success: false,
