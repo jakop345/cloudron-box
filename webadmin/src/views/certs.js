@@ -102,13 +102,23 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         $scope.dnsCredentials.error = null;
         $scope.dnsCredentials.success = false;
 
+        var migrateDomain = $scope.dnsCredentials.customDomain !== $sccope.config.fqdn;
+
         var data = {
             provider: $scope.dnsCredentials.provider,
             accessKeyId: $scope.dnsCredentials.accessKeyId,
             secretAccessKey: $scope.dnsCredentials.secretAccessKey
         };
 
-        Client.setDnsConfig(data, function (error) {
+        var func;
+        if (migrateDomain) {
+            data.domain = $scope.dnsCredentials.customDomain;
+            func = Client.migrate.bind(Client, data, $scope.dnsCredentials.password);
+        } else {
+            func = Client.setDnsConfig.bind(Client, data);
+        }
+
+        func(function (error) {
             if (error) {
                 $scope.dnsCredentials.error = error.message;
             } else {
