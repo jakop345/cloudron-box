@@ -4,6 +4,7 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
     Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
 
     $scope.config = Client.getConfig();
+    $scope.dnsConfig = null;
 
     $scope.defaultCert = {
         error: null,
@@ -29,7 +30,6 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         error: null,
         success: false,
         busy: false,
-        formVisible: false,
         accessKeyId: '',
         secretAccessKey: '',
         provider: 'route53'
@@ -95,11 +95,6 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         });
     };
 
-    $scope.hideDnsCredentialsForm = function () {
-        $('#collapseDnsCredentialsForm').collapse('hide');
-        $scope.dnsCredentials.formVisible = false;
-    };
-
     $scope.setDnsCredentials = function () {
         $scope.dnsCredentials.busy = true;
         $scope.dnsCredentials.error = null;
@@ -120,28 +115,35 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
                 $scope.dnsConfig.accessKeyId = $scope.dnsCredentials.accessKeyId;
                 $scope.dnsConfig.secretAccessKey = $scope.dnsCredentials.secretAccessKey;
 
-                $scope.dnsCredentials.accessKeyId = '';
-                $scope.dnsCredentials.secretAccessKey = '';
+                $('#dnsCredentialsModal').modal('hide');
 
-                $scope.hideDnsCredentialsForm();
+                dnsCredentialsReset();
             }
 
             $scope.dnsCredentials.busy = false;
         });
     };
 
-    $scope.showDnsCredentialsForm = function () {
+    function dnsCredentialsReset() {
         $scope.dnsCredentials.busy = false;
         $scope.dnsCredentials.success = false;
         $scope.dnsCredentials.error = null;
+
         $scope.dnsCredentials.accessKeyId = '';
         $scope.dnsCredentials.secretAccessKey = '';
+
         $scope.dnsCredentialsForm.$setPristine();
         $scope.dnsCredentialsForm.$setUntouched();
 
-        $scope.dnsCredentials.formVisible = true;
-        $('#collapseDnsCredentialsForm').collapse('show');
         $('#dnsCredentialsAccessKeyId').focus();
+    }
+
+    $scope.showChangeDnsCredentials = function () {
+        dnsCredentialsReset();
+
+        $scope.dnsCredentials.accessKeyId = $scope.dnsConfig.accessKeyId;
+
+        $('#dnsCredentialsModal').modal('show');
     };
 
     Client.onReady(function () {
@@ -149,6 +151,13 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
             if (error) return console.error(error);
 
             $scope.dnsConfig = result;
+        });
+    });
+
+    // setup all the dialog focus handling
+    ['dnsCredentialsModal'].forEach(function (id) {
+        $('#' + id).on('shown.bs.modal', function () {
+            $(this).find("[autofocus]:first").focus();
         });
     });
 }]);
