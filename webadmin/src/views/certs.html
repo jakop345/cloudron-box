@@ -62,7 +62,13 @@
 </div>
 
 <div class="card" style="margin-bottom: 15px;">
-    <div class="row">
+    <div class="row" ng-show="!config.isCustomDomain">
+        <div class="col-md-12">
+            Certificates can only by set for custom domains.
+        </div>
+    </div>
+
+    <div class="row" ng-show="config.isCustomDomain">
         <div class="col-md-12">
             <form name="defaultCertForm" ng-submit="setDefaultCert()">
                 <fieldset>
