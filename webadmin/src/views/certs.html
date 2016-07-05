@@ -46,6 +46,11 @@
             <p ng-show="!config.isCustomDomain">To use a custom domain, configure your domain to use <a target="_blank" href="https://aws.amazon.com/route53/">Route53.</a> Moving to a custom domain will retain all your apps and data and will take around 15 minutes.</p>
 
             <table width="100%">
+                <tr>
+                    <td class="text-muted" style="vertical-align: top;">Domain Name</td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.fqdn }}</td>
+                </tr>
+
                 <tr ng-show="config.isCustomDomain">
                     <td class="text-muted" style="vertical-align: top;">Access Key Id</td>
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ dnsConfig.accessKeyId || 'unset' }}</td>
