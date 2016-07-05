@@ -46,6 +46,7 @@ var apps = require('./apps.js'),
     progress = require('./progress.js'),
     safe = require('safetydance'),
     settings = require('./settings.js'),
+    SettingsError = settings.SettingsError,
     shell = require('./shell.js'),
     subdomains = require('./subdomains.js'),
     superagent = require('superagent'),
@@ -715,7 +716,7 @@ function retire(reason, callback) {
     shell.sudo('retire', [ RETIRE_CMD, reason, JSON.stringify(data) ], callback);
 }
 
-function migrate(options, callback) {
+function doMigrate(options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
@@ -755,4 +756,20 @@ function migrate(options, callback) {
     });
 
     callback(null);
+}
+
+function migrate(options, callback) {
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (!options.domain) return doMigrate(options, callback);
+
+    var dnsConfig = _.pick(options, 'provider', 'accessKeyId', 'secretAccessKey', 'region', 'endpoint');
+
+    settings.setDnsConfig(options.domain, dnsConfig, function (error) {
+        if (error && error.reason === SettingsError.BAD_FIELD) return callback(new CloudronError(CloudronError.BAD_FIELD, error.message));
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+        doMigrate(options, callback);
+    });
 }
