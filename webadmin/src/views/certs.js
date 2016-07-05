@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('Application').controller('CertsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
-    Client.onReady(function () { if (!Client.getUserInfo().admin || !Client.getConfig().isCustomDomain) $location.path('/'); });
+    Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
 
     $scope.config = Client.getConfig();
 
