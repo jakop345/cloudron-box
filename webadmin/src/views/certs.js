@@ -130,6 +130,8 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
                 $('#dnsCredentialsModal').modal('hide');
 
                 dnsCredentialsReset();
+
+                if (migrateDomain) window.location.href = '/update.html';
             }
 
             $scope.dnsCredentials.busy = false;
