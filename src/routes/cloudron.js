@@ -131,7 +131,7 @@ function migrate(req, res, next) {
     var options = _.pick(req.body, 'domain', 'size', 'region');
     if (Object.keys(options).length === 0) return next(new HttpError(400, 'no migrate option provided'));
 
-    cloudron.migrate(options, function (error) {
+    cloudron.migrate(req.body, function (error) { // pass req.body because 'domain' can have arbitrary options
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
 
