@@ -59,6 +59,8 @@ function getHostedZone(dnsConfig, zoneName, callback) {
     assert.strictEqual(typeof callback, 'function');
  
     getZoneByName(dnsConfig, zoneName, function (error, zone) {
+        if (error) return callback(error);
+
         var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
         route53.getHostedZone({ Id: zone.Id }, function (error, result) {
             if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
