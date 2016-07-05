@@ -22,7 +22,7 @@
                             <label class="control-label" for="dnsCredentialsSecretAccessKey">Secret Access Key</label>
                             <input type="text" class="form-control" ng-model="dnsCredentials.secretAccessKey" id="dnsCredentialsSecretAccessKey" name="secretAccessKey" ng-disabled="dnsCredentials.busy" required>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': false }" ng-show="config.fqdn !== dnsCredentials.customDomain">
+                        <div class="form-group" ng-class="{ 'has-error': false }" ng-if="config.fqdn !== dnsCredentials.customDomain">
                             <label class="control-label" for="dnsCredentialsPassword">Provide your password to confirm this action</label>
                             <input type="password" class="form-control" ng-model="dnsCredentials.password" id="dnsCredentialsPassword" name="password" ng-disabled="dnsCredentials.busy" required>
                         </div>
