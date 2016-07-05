@@ -13,7 +13,6 @@ exports = module.exports = {
 
 var assert = require('assert'),
     AWS = require('aws-sdk'),
-    config = require('../config.js'),
     debug = require('debug')('box:dns/route53'),
     SubdomainError = require('../subdomains.js').SubdomainError,
     util = require('util'),
@@ -84,7 +83,7 @@ function add(dnsConfig, zoneName, subdomain, type, values, callback) {
     getZoneByName(dnsConfig, zoneName, function (error, zone) {
         if (error) return callback(error);
 
-        var fqdn = config.appFqdn(subdomain);
+        var fqdn = subdomain + '.' + zoneName;
         var records = values.map(function (v) { return { Value: v }; });
 
         var params = {
@@ -172,7 +171,7 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
     getZoneByName(dnsConfig, zoneName, function (error, zone) {
         if (error) return callback(error);
 
-        var fqdn = config.appFqdn(subdomain);
+        var fqdn = subdomain + '.' + zoneName;
         var records = values.map(function (v) { return { Value: v }; });
 
         var resourceRecordSet = {
