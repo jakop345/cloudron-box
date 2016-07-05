@@ -30,9 +30,11 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         error: null,
         success: false,
         busy: false,
+        customDomain: '',
         accessKeyId: '',
         secretAccessKey: '',
-        provider: 'route53'
+        provider: 'route53',
+        password: ''
     };
 
     function readFileLocally(obj, file, fileName) {
@@ -129,19 +131,23 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         $scope.dnsCredentials.success = false;
         $scope.dnsCredentials.error = null;
 
+        $scope.dnsCredentials.customDomain = '';
         $scope.dnsCredentials.accessKeyId = '';
         $scope.dnsCredentials.secretAccessKey = '';
+        $scope.dnsCredentials.password = '';
 
         $scope.dnsCredentialsForm.$setPristine();
         $scope.dnsCredentialsForm.$setUntouched();
 
-        $('#dnsCredentialsAccessKeyId').focus();
+        $('#customDomainId').focus();
     }
 
     $scope.showChangeDnsCredentials = function () {
         dnsCredentialsReset();
 
+        $scope.dnsCredentials.customDomain = $scope.config.fqdn;
         $scope.dnsCredentials.accessKeyId = $scope.dnsConfig.accessKeyId;
+        $scope.dnsCredentials.secretAccessKey = $scope.dnsConfig.secretAccessKey;
 
         $('#dnsCredentialsModal').modal('show');
     };
