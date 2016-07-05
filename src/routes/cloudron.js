@@ -116,12 +116,20 @@ function reboot(req, res, next) {
 }
 
 function migrate(req, res, next) {
-    if (typeof req.body.size !== 'string') return next(new HttpError(400, 'size must be string'));
-    if (typeof req.body.region !== 'string') return next(new HttpError(400, 'region must be string'));
+    if (config.provider() !== 'caas') return next(new HttpError(422, 'Cannot use migrate API with this provider'));
 
-    debug('Migration requested', req.body.size, req.body.region);
+    if ('size' in req.body && typeof req.body.size !== 'string') return next(new HttpError(400, 'size must be string'));
+    if ('region' in req.body && typeof req.body.region !== 'string') return next(new HttpError(400, 'region must be string'));
+
+    if ('domain' in req.body) {
+        if (typeof req.body.domain !== 'string') return next(new HttpError(400, 'domain must be string'));
+        if (typeof req.body.provider !== 'string') return next(new HttpError(400, 'provider must be string'));
+    }
+
+    debug('Migration requested domain:%s size:%s region:%s', req.body.domain, req.body.size, req.body.region);
 
     var options = _.pick(req.body, 'domain', 'size', 'region');
+    if (Object.keys(options).length === 0) return next(new HttpError(400, 'no migrate option provided'));
 
     cloudron.migrate(options, function (error) {
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
