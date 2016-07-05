@@ -300,7 +300,7 @@ function setDnsConfig(dnsConfig, callback) {
             endpoint: dnsConfig.endpoint || null
         };
 
-        validator = validateRoute53Config.bind(null, config.fqdn());
+        validator = validateRoute53Config.bind(null, dnsConfig.domain || config.fqdn());
     } else if (dnsConfig.provider === 'caas') {
         credentials = {
             provider: dnsConfig.provider
