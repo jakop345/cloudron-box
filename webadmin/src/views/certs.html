@@ -13,7 +13,7 @@
 <div class="card" style="margin-bottom: 15px;">
     <div class="row">
         <div class="col-md-12">
-            <p>Currently only Amazon <a href="https://aws.amazon.com/route53/">Route53</a> is supported. Let us know if you require a different DNS provider <a href="#/support">here</a>.</p>
+            <p ng-show="!config.isCustomDomain">To use a custom domain, configure your domain to use <a target="_blank" href="https://aws.amazon.com/route53/">Route53.</a> Moving to a custom domain will retain all your apps and data and will take around 15 minutes.</p>
 
             <table width="100%">
                 <tr>
@@ -31,7 +31,7 @@
             </table>
 
             <div class="collapse" id="collapseDnsCredentialsForm" data-toggle="false">
-                <p>The security credentials have to be valid for full Route53 access.</p>
+                <p>The security credentials must have full Route53 access.</p>
                 <form name="dnsCredentialsForm" ng-submit="setDnsCredentials()">
                     <fieldset>
                         <div class="has-error text-center" ng-show="dnsCredentials.error">{{ dnsCredentials.error }}</div>
