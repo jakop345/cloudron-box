@@ -102,7 +102,7 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         $scope.dnsCredentials.error = null;
         $scope.dnsCredentials.success = false;
 
-        var migrateDomain = $scope.dnsCredentials.customDomain !== $sccope.config.fqdn;
+        var migrateDomain = $scope.dnsCredentials.customDomain !== $scope.config.fqdn;
 
         var data = {
             provider: $scope.dnsCredentials.provider,
