@@ -124,9 +124,6 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
                 $scope.dnsCredentials.secretAccessKey = '';
 
                 $scope.hideDnsCredentialsForm();
-
-                // attempt to reload to make the browser get the new certs
-                window.location.reload(true);
             }
 
             $scope.dnsCredentials.busy = false;
