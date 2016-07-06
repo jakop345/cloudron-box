@@ -24,7 +24,7 @@ arg_update_config=""
 arg_provider=""
 arg_app_bundle=""
 
-args=$(getopt -o "" -l "data:,retire-reason:retire-info:" -n "$0" -- "$@")
+args=$(getopt -o "" -l "data:,retire-reason:,retire-info:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
