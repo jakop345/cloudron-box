@@ -705,15 +705,16 @@ function checkDiskSpace(callback) {
     });
 }
 
-function retire(reason, callback) {
+function retire(reason, info, callback) {
     assert(reason === 'migrate' || reason === 'upgrade');
+    info = info || { };
     callback = callback || NOOP_CALLBACK;
 
     var data = {
         isCustomDomain: config.isCustomDomain(),
         fqdn: config.fqdn()
     };
-    shell.sudo('retire', [ RETIRE_CMD, reason, JSON.stringify(data) ], callback);
+    shell.sudo('retire', [ RETIRE_CMD, reason, JSON.stringify(info), JSON.stringify(data) ], callback);
 }
 
 function doMigrate(options, callback) {
@@ -751,7 +752,7 @@ function doMigrate(options, callback) {
 
             progress.set(progress.MIGRATE, 10, 'Migrating');
 
-            retire('migrate');
+            retire('migrate', _.pick(options, 'domain', 'size', 'region'));
         });
     });
 

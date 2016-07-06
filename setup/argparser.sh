@@ -10,7 +10,8 @@ arg_fqdn=""
 arg_is_custom_domain="false"
 arg_restore_key=""
 arg_restore_url=""
-arg_retire=""
+arg_retire_reason=""
+arg_retire_info=""
 arg_tls_config=""
 arg_tls_cert=""
 arg_tls_key=""
@@ -23,13 +24,17 @@ arg_update_config=""
 arg_provider=""
 arg_app_bundle=""
 
-args=$(getopt -o "" -l "data:,retire:" -n "$0" -- "$@")
+args=$(getopt -o "" -l "data:,retire-reason:retire-info:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
-    --retire)
-        arg_retire="$2"
+    --retire-reason)
+        arg_retire_reason="$2"
+        shift 2
+        ;;
+    --retire-info)
+        arg_retire_info="$2"
         shift 2
         ;;
     --data)
