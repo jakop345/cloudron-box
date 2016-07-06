@@ -711,6 +711,7 @@ function retire(reason, info, callback) {
     callback = callback || NOOP_CALLBACK;
 
     var data = {
+        apiServerOrigin: config.apiServerOrigin(),
         isCustomDomain: config.isCustomDomain(),
         fqdn: config.fqdn()
     };

@@ -37,7 +37,7 @@ else
 fi
 
 if [[ "${arg_retire_reason}" == "migrate" ]]; then
-    echo "{ \"migrate\": { \"percent\": \"10\", \"message\": \"Migrating cloudron. This could take up to 15 minutes.\", \"info\": ${arg_retire_info} }, \"backup\": null }" > "${SETUP_WEBSITE_DIR}/progress.json"
+    echo "{ \"migrate\": { \"percent\": \"10\", \"message\": \"Migrating cloudron. This could take up to 15 minutes.\", \"info\": ${arg_retire_info} }, \"backup\": null, \"apiServerOrigin\": \"${arg_api_server_origin}\" }" > "${SETUP_WEBSITE_DIR}/progress.json"
 else
     echo '{ "update": { "percent": "10", "message": "Updating cloudron software" }, "backup": null }' > "${SETUP_WEBSITE_DIR}/progress.json"
 fi
