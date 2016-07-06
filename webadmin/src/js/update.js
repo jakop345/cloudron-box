@@ -38,6 +38,13 @@ app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, 
                     $scope.title = 'Migration in progress...';
                     $scope.percent = data.migrate.percent;
                     $scope.message = data.migrate.message;
+
+                    if (!data.migrate.info) return;
+
+                    // check if the new domain is available. only works for valid ca-certs
+                    $http.get('https://my.' + data.migrate.info.domain + '/api/v1/cloudron/status').success(function(data, status) {
+                        if (status === 200) return window.location = 'https://my.' + data.migrate.info.domain;
+                    });
                 }
             }
         }).error(function (data, status) {
