@@ -46,7 +46,7 @@ function update(req, res, next) {
 function retire(req, res, next) {
     debug('triggering retire');
 
-    cloudron.retire(function (error) {
+    cloudron.retire('migrate', { }, function (error) {
         if (error) console.error('Retire failed.', error);
     });
 
