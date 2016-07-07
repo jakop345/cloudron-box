@@ -457,7 +457,7 @@ function addDnsRecords() {
             records.push(dkimRecord);
             records.push(mxRecord);
         } else {
-            // for custom domains, we show a nakeddomain.html page
+            // for non-custom domains, we show a nakeddomain.html page
             var nakedDomainRecord = { subdomain: '', type: 'A', values: [ ip ] };
 
             records.push(nakedDomainRecord);
