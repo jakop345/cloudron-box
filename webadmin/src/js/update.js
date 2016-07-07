@@ -16,7 +16,7 @@ app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, 
     function fetchProgress() {
         $http.get('/api/v1/cloudron/progress').success(function(data, status) {
             if (status === 404) return; // just wait until we create the progress.json on the server side
-            if (status !== 200 || typeof data !== 'object') return console.error(status, data);
+            if (status !== 200 || typeof data !== 'object') return console.error('Invalid response for progress', status, data);
             if (!data.update && !data.migrate) return $scope.loadWebadmin();
 
             if (data.update) {
@@ -49,7 +49,7 @@ app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, 
                 }
             }
         }).error(function (data, status) {
-            console.error(status, data);
+            console.error('Error getting progress', status, data);
         });
     }
 
