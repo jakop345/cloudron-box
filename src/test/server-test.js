@@ -235,6 +235,15 @@ describe('Server', function () {
             });
         });
 
+        it('does not crash for malformed origin', function (done) {
+            superagent('OPTIONS', SERVER_URL + '/api/v1/cloudron/status')
+                .set('Origin', 'foobar')
+                .end(function (error, res) {
+                expect(res.statusCode).to.be(405);
+                done();
+            });
+        });
+
         after(function (done) {
             server.stop(function () {
                 done();

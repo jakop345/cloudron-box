@@ -20,6 +20,7 @@ module.exports = function cors(options) {
         if (!requestOrigin) return next();
 
         requestOrigin = url.parse(requestOrigin);
+        if (!requestOrigin.host) return res.status(405).send('CORS not allowed from this domain');
 
         var hostname = requestOrigin.host.split(':')[0]; // remove any port
         var originAllowed = origins.some(function (o) { return o === '*' || o === hostname; });
