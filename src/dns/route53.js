@@ -83,7 +83,7 @@ function add(dnsConfig, zoneName, subdomain, type, values, callback) {
     getZoneByName(dnsConfig, zoneName, function (error, zone) {
         if (error) return callback(error);
 
-        var fqdn = subdomain + '.' + zoneName;
+        var fqdn = subdomain === '' ? zoneName : subdomain + '.' + zoneName;
         var records = values.map(function (v) { return { Value: v }; });
 
         var params = {
@@ -171,7 +171,7 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
     getZoneByName(dnsConfig, zoneName, function (error, zone) {
         if (error) return callback(error);
 
-        var fqdn = subdomain + '.' + zoneName;
+        var fqdn = subdomain === '' ? zoneName : subdomain + '.' + zoneName;
         var records = values.map(function (v) { return { Value: v }; });
 
         var resourceRecordSet = {
