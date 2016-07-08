@@ -565,3 +565,9 @@
 - Add plan migration interface
 - Initial EC2 support
 
+[0.17.0]
+- Public beta release of Cloudron Mail Server
+- Add new DNS & Certs UI that enables easy migration to a custom domain
+- Allow sending and receiving email from alias subaddresses
+- Fix installation issue with some apps on the naked domain
+
