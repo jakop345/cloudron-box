@@ -399,7 +399,7 @@ function setupSendMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '.app';
+    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/g, '')) + '.app';
 
     var cmd = [ '/addons/mail/service.sh', 'add-send', from ];
 
@@ -417,7 +417,7 @@ function teardownSendMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '.app';
+    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/g, '')) + '.app';
 
     var cmd = [ '/addons/mail/service.sh', 'remove-send', from ];
 
@@ -437,7 +437,7 @@ function setupRecvMail(app, options, callback) {
 
     debugApp(app, 'Setting up recvmail');
 
-    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '.app';
+    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/g, '')) + '.app';
 
     var cmd = [ '/addons/mail/service.sh', 'add-recv', to ];
 
@@ -455,7 +455,7 @@ function teardownRecvMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '.app';
+    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/g, '')) + '.app';
 
     var cmd = [ '/addons/mail/service.sh', 'remove-recv', to ];
 
