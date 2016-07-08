@@ -417,13 +417,11 @@ function teardownSendMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    debugApp(app, 'Tearing down sendmail');
-
     var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/, '')) + '.app';
 
     var cmd = [ '/addons/mail/service.sh', 'remove-send', from ];
 
-    debugApp(app, 'Tearing down sendmail');
+    debugApp(app, 'Tearing down sendmail : %j', cmd);
 
     docker.execContainer('mail', cmd, { }, function (error) {
         if (error) return callback(error);
@@ -461,7 +459,7 @@ function teardownRecvMail(app, options, callback) {
 
     var cmd = [ '/addons/mail/service.sh', 'remove-recv', to ];
 
-    debugApp(app, 'Tearing down recvmail');
+    debugApp(app, 'Tearing down recvmail: %j', cmd);
 
     docker.execContainer('mail', cmd, { }, function (error) {
         if (error) return callback(error);
