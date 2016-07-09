@@ -430,6 +430,8 @@ function install(data, auditSource, callback) {
         if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
         if (manifest.singleUser && accessRestriction.users.length !== 1) return callback(new AppsError(AppsError.USER_REQUIRED));
 
+        var appId = uuid.v4();
+
         if (icon) {
             if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
 
@@ -441,7 +443,6 @@ function install(data, auditSource, callback) {
         error = certificates.validateCertificate(cert, key, config.appFqdn(location));
         if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
 
-        var appId = uuid.v4();
         debug('Will install app with id : ' + appId);
 
         purchase(appStoreId, function (error) {
