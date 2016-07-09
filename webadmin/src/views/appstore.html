@@ -10,6 +10,9 @@
                 <span class="appstore-install-meta">{{ appInstall.app.manifest.author }}</span>
                 <br/>
                 <span class="appstore-install-meta"><a href="{{ appInstall.app.manifest.website }}" target="_blank">Website</a></span>
+                <br/>
+                <span class="appstore-install-meta">Last updated {{ appInstall.app.creationDate | prettyDate }}</span>
+
             </div>
             <div class="modal-body">
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
