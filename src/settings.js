@@ -250,6 +250,8 @@ function getDnsConfig(callback) {
 function validateRoute53Config(domain, dnsConfig, callback) {
     const zoneName = domain;
 
+    if (process.env.BOX_ENV === 'test') return callback();
+
     sysinfo.getIp(function (error, ip) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, 'Error getting IP:' + error.message));
 
