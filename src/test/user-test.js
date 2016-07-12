@@ -7,7 +7,9 @@
 
 var async = require('async'),
     database = require('../database.js'),
+    constants = require('../constants.js'),
     expect = require('expect.js'),
+    fs = require('fs'),
     groupdb = require('../groupdb.js'),
     groups = require('../groups.js'),
     mailer = require('../mailer.js'),
@@ -293,6 +295,62 @@ describe('User', function () {
                 done();
             });
         });
+
+        it('fails for ghost if not enabled', function (done) {
+            user.verify(userObject.id, 'foobar', function (error) {
+                expect(error).to.be.a(UserError);
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
+                done();
+            });
+        });
+
+        it('fails for ghost with wrong password', function (done) {
+            var ghost = { };
+            ghost[userObject.username] = 'testpassword';
+            fs.writeFileSync(constants.GHOST_USER_FILE, JSON.stringify(ghost), 'utf8');
+
+            user.verify(userObject.id, 'foobar', function (error) {
+                fs.unlinkSync(constants.GHOST_USER_FILE);
+
+                expect(error).to.be.a(UserError);
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
+                done();
+            });
+        });
+
+        it('succeeds for ghost', function (done) {
+            var ghost = { };
+            ghost[userObject.username] = 'testpassword';
+            fs.writeFileSync(constants.GHOST_USER_FILE, JSON.stringify(ghost), 'utf8');
+
+            user.verify(userObject.id, 'testpassword', function (error, result) {
+                fs.unlinkSync(constants.GHOST_USER_FILE);
+
+                expect(error).to.equal(null);
+                expect(result.id).to.equal(userObject.id);
+                expect(result.username).to.equal(userObject.username);
+                expect(result.email).to.equal(userObject.email);
+                expect(result.displayName).to.equal(userObject.displayName);
+
+                done();
+            });
+        });
+
+        it('succeeds for normal user password when ghost file exists', function (done) {
+            var ghost = { };
+            ghost[userObject.username] = 'testpassword';
+            fs.writeFileSync(constants.GHOST_USER_FILE, JSON.stringify(ghost), 'utf8');
+
+            user.verify(userObject.id, PASSWORD, function (error, result) {
+                fs.unlinkSync(constants.GHOST_USER_FILE);
+
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+
+                done();
+            });
+
+        });
     });
 
     describe('verifyWithUsername', function () {
@@ -346,6 +404,40 @@ describe('User', function () {
                 done();
             });
         });
+
+        it('fails for ghost with wrong password', function (done) {
+            var ghost = { };
+            ghost[userObject.username] = 'testpassword';
+
+            fs.writeFileSync(constants.GHOST_USER_FILE, JSON.stringify(ghost), 'utf8');
+
+            user.verifyWithUsername(USERNAME, 'foobar', function (error) {
+                fs.unlinkSync(constants.GHOST_USER_FILE);
+
+                expect(error).to.be.a(UserError);
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
+                done();
+            });
+        });
+
+        it('succeeds for ghost', function (done) {
+            var ghost = { };
+            ghost[userObject.username] = 'testpassword';
+
+            fs.writeFileSync(constants.GHOST_USER_FILE, JSON.stringify(ghost), 'utf8');
+
+            user.verifyWithUsername(USERNAME, 'testpassword', function (error, result) {
+                fs.unlinkSync(constants.GHOST_USER_FILE);
+
+                expect(error).to.equal(null);
+                expect(result.id).to.equal(userObject.id);
+                expect(result.username).to.equal(userObject.username);
+                expect(result.email).to.equal(userObject.email);
+                expect(result.displayName).to.equal(userObject.displayName);
+
+                done();
+            });
+        });
     });
 
     describe('verifyWithEmail', function () {
@@ -395,6 +487,40 @@ describe('User', function () {
             user.verifyWithEmail(EMAIL.toUpperCase(), PASSWORD, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
+
+                done();
+            });
+        });
+
+        it('fails for ghost with wrong password', function (done) {
+            var ghost = { };
+            ghost[userObject.username] = 'testpassword';
+
+            fs.writeFileSync(constants.GHOST_USER_FILE, JSON.stringify(ghost), 'utf8');
+
+            user.verifyWithEmail(EMAIL, 'foobar', function (error) {
+                fs.unlinkSync(constants.GHOST_USER_FILE);
+
+                expect(error).to.be.a(UserError);
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
+                done();
+            });
+        });
+
+        it('succeeds for ghost', function (done) {
+            var ghost = { };
+            ghost[userObject.username] = 'testpassword';
+
+            fs.writeFileSync(constants.GHOST_USER_FILE, JSON.stringify(ghost), 'utf8');
+
+            user.verifyWithEmail(EMAIL, 'testpassword', function (error, result) {
+                fs.unlinkSync(constants.GHOST_USER_FILE);
+
+                expect(error).to.equal(null);
+                expect(result.id).to.equal(userObject.id);
+                expect(result.username).to.equal(userObject.username);
+                expect(result.email).to.equal(userObject.email);
+                expect(result.displayName).to.equal(userObject.displayName);
 
                 done();
             });

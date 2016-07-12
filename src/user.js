@@ -26,6 +26,7 @@ exports = module.exports = {
 var assert = require('assert'),
     clients = require('./clients.js'),
     crypto = require('crypto'),
+    constants = require('./constants.js'),
     debug = require('debug')('box:user'),
     DatabaseError = require('./databaseerror.js'),
     eventlog = require('./eventlog.js'),
@@ -34,6 +35,7 @@ var assert = require('assert'),
     hat = require('hat'),
     mailer = require('./mailer.js'),
     mailboxes = require('./mailboxes.js'),
+    safe = require('safetydance'),
     tokendb = require('./tokendb.js'),
     userdb = require('./userdb.js'),
     util = require('util'),
@@ -189,6 +191,23 @@ function createUser(username, password, email, displayName, auditSource, options
     });
 }
 
+// returns true if ghost user was matched
+function verifyGhost(username, password) {
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof password, 'string');
+
+    var ghostFile = safe.fs.readFileSync(constants.GHOST_USER_FILE, 'utf8');
+    var ghostData = safe.JSON.parse(ghostFile);
+    if (!ghostData) return false;
+
+    if (username in ghostData && ghostData[username] === password) {
+        debug('verifyGhost: matched ghost user');
+        return true;
+    }
+
+    return false;
+}
+
 function verify(userId, password, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof password, 'string');
@@ -197,6 +216,8 @@ function verify(userId, password, callback) {
     userdb.get(userId, function (error, user) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        if (verifyGhost(user.username, password)) return callback(null, user);
 
         var saltBinary = new Buffer(user.salt, 'hex');
         crypto.pbkdf2(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
