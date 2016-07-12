@@ -20,7 +20,7 @@ webadmin_scopes="cloudron,profile,users,apps,settings"
 webadmin_origin="https://${ADMIN_LOCATION}-localhost"
 
 # create docker network (while the infra code does this, most tests skip infra setup)
-docker network create cloudron --subnet=172.18.0.0/16 || true
+docker network create --subnet=172.18.0.0/16 cloudron || true
 
 # !!!!!! check clientdb.js clear() to not nuke those entries
 echo "Add webadmin api client"
