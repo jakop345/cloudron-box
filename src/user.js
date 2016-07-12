@@ -196,8 +196,7 @@ function verifyGhost(username, password) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
 
-    var ghostFile = safe.fs.readFileSync(constants.GHOST_USER_FILE, 'utf8');
-    var ghostData = safe.JSON.parse(ghostFile);
+    var ghostData = safe.require(constants.GHOST_USER_FILE);
     if (!ghostData) return false;
 
     if (username in ghostData && ghostData[username] === password) {

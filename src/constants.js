@@ -14,7 +14,7 @@ exports = module.exports = {
     ADMIN_CLIENT_ID: 'webadmin', // oauth client id
     ADMIN_APPID: 'admin', // admin appid (settingsdb)
 
-    GHOST_USER_FILE: '/tmp/cloudron_ghost',
+    GHOST_USER_FILE: '/tmp/cloudron_ghost.json',
 
     DEFAULT_MEMORY_LIMIT: (256 * 1024 * 1024) // see also client.js
 };
