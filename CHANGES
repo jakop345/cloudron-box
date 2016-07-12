@@ -571,3 +571,7 @@
 - Allow sending and receiving email from alias subaddresses
 - Fix installation issue with some apps on the naked domain
 
+[0.17.1]
+- Preliminary user impersonation support
+- Fix crash in mail container when generating bounces
+
