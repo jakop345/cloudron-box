@@ -43,7 +43,6 @@ var addons = require('./addons.js'),
     debug = require('debug')('box:src/docker.js'),
     once = require('once'),
     safe = require('safetydance'),
-    semver = require('semver'),
     spawn = child_process.spawn,
     util = require('util'),
     _ = require('underscore');
