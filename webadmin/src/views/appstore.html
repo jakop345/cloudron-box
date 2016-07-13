@@ -7,12 +7,10 @@
                 <img ng-src="{{appInstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
                 <h3 class="appstore-install-title" title="Version {{ appInstall.app.manifest.version }}">{{ appInstall.app.manifest.title }} <span class="badge badge-danger" ng-show="appInstall.app.publishState === 'testing'">Testing</span></h3>
                 <br/>
-                <span class="appstore-install-meta">{{ appInstall.app.manifest.author }}</span>
+                <span class="appstore-install-meta">Last updated {{ appInstall.app.creationDate | prettyDate }}</span>
                 <br/>
                 <span class="appstore-install-meta"><a href="{{ appInstall.app.manifest.website }}" target="_blank">Website</a></span>
-                <br/>
-                <span class="appstore-install-meta">Last updated {{ appInstall.app.creationDate | prettyDate }}</span>
-
+                <span class="appstore-install-meta">{{ appInstall.app.manifest.author }}</span>
             </div>
             <div class="modal-body">
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
