@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS apps(
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     memoryLimit BIGINT DEFAULT 0,
     altDomain VARCHAR(256),
+    xFrameOptions VARCHAR(512),
 
     lastBackupId VARCHAR(128), // tracks last valid backup, can be removed
 
