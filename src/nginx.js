@@ -45,7 +45,8 @@ function configureAdmin(certFilePath, keyFilePath, callback) {
         vhost: config.adminFqdn(),
         endpoint: 'admin',
         certFilePath: certFilePath,
-        keyFilePath: keyFilePath
+        keyFilePath: keyFilePath,
+        xFrameOptions: 'SAMEORIGIN'
     };
     var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
     var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, 'admin.conf');
@@ -73,7 +74,8 @@ function configureApp(app, certFilePath, keyFilePath, callback) {
         port: app.httpPort,
         endpoint: endpoint,
         certFilePath: certFilePath,
-        keyFilePath: keyFilePath
+        keyFilePath: keyFilePath,
+        xFrameOptions: 'SAMEORIGIN'
     };
     var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
 

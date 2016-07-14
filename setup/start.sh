@@ -110,7 +110,7 @@ if [[ -f "${DATA_DIR}/box/certs/${admin_fqdn}.cert" && -f "${DATA_DIR}/box/certs
     admin_key_file="${DATA_DIR}/box/certs/${admin_fqdn}.key"
 fi
 ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${admin_fqdn}\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\", \"certFilePath\": \"${admin_cert_file}\", \"keyFilePath\": \"${admin_key_file}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
+    -O "{ \"vhost\": \"${admin_fqdn}\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\", \"certFilePath\": \"${admin_cert_file}\", \"keyFilePath\": \"${admin_key_file}\", \"xFrameOptions\": \"SAMEORIGIN\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
 
 mkdir -p "${DATA_DIR}/nginx/cert"
 if [[ -f "${DATA_DIR}/box/certs/host.cert" && -f "${DATA_DIR}/box/certs/host.key" ]]; then
