@@ -262,6 +262,7 @@ function getAppConfig(app) {
         accessRestriction: app.accessRestriction,
         portBindings: app.portBindings,
         memoryLimit: app.memoryLimit,
+        xFrameOptions: app.xFrameOptions,
         altDomain: app.altDomain
     };
 }
@@ -541,6 +542,12 @@ function configure(appId, data, auditSource, callback) {
             values.memoryLimit = values.memoryLimit || app.memoryLimit || app.manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
         }
 
+        if ('xFrameOptions' in data) {
+            values.xFrameOptions = data.xFrameOptions;
+            error = validateXFrameOptions(values.xFrameOptions);
+            if (error) return callback(error);
+        }
+
         // save cert to data/box/certs. TODO: move this to apptask when we have a real task queue
         if ('cert' in data && 'key' in data) {
             if (data.cert && data.key) {
@@ -782,6 +789,7 @@ function clone(appId, data, auditSource, callback) {
                     installationState: appdb.ISTATE_PENDING_CLONE,
                     memoryLimit: app.memoryLimit,
                     accessRestriction: app.accessRestriction,
+                    xFrameOptions: app.xFrameOptions,
                     lastBackupId: backupId
                 };
 

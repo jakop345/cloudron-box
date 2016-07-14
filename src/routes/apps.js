@@ -53,7 +53,8 @@ function removeInternalAppFields(app) {
         iconUrl: app.iconUrl,
         fqdn: app.fqdn,
         memoryLimit: app.memoryLimit,
-        altDomain: app.altDomain
+        altDomain: app.altDomain,
+        xFrameOptions: app.xFrameOptions
     };
 }
 
@@ -120,6 +121,8 @@ function installApp(req, res, next) {
     // falsy value in altDomain unsets it
     if (data.altDomain && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
 
+    if (data.xFrameOptions && typeof data.xFrameOptions !== 'string') return next(new HttpError(400, 'xFrameOptions must be a string'));
+
     debug('Installing app id:%s data:%j', data);
 
     apps.install(data, auditSource(req), function (error, app) {
@@ -155,6 +158,7 @@ function configureApp(req, res, next) {
 
     if ('memoryLimit' in data && typeof data.memoryLimit !== 'number') return next(new HttpError(400, 'memoryLimit is not a number'));
     if (data.altDomain && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
+    if (data.xFrameOptions && typeof data.xFrameOptions !== 'string') return next(new HttpError(400, 'xFrameOptions must be a string'));
 
     debug('Configuring app id:%s data:%j', req.params.id, data);
 
