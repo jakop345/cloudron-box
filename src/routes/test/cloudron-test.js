@@ -325,12 +325,12 @@ describe('Cloudron', function () {
             });
         });
 
-        it('fails with missing size', function (done) {
+        it('succeeds without size', function (done) {
             superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ region: 'sfo', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(result.statusCode).to.equal(400);
+                expect(result.statusCode).to.equal(202);
                 done();
             });
         });
@@ -345,12 +345,12 @@ describe('Cloudron', function () {
             });
         });
 
-        it('fails with missing region', function (done) {
+        it('succeeds without region', function (done) {
             superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ size: 'small', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(result.statusCode).to.equal(400);
+                expect(result.statusCode).to.equal(202);
                 done();
             });
         });
