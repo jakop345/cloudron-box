@@ -150,7 +150,7 @@ function checkRedis(containerId, done) {
 }
 
 describe('Apps', function () {
-    this.timeout(50000);
+    this.timeout(100000);
 
     var dockerProxy;
     var imageDeleted = false;
