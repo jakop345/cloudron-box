@@ -75,7 +75,7 @@ function configureApp(app, certFilePath, keyFilePath, callback) {
         endpoint: endpoint,
         certFilePath: certFilePath,
         keyFilePath: keyFilePath,
-        xFrameOptions: 'SAMEORIGIN'
+        xFrameOptions: app.xFrameOptions || 'SAMEORIGIN'
     };
     var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
 

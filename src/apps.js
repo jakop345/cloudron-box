@@ -68,6 +68,7 @@ var addons = require('./addons.js'),
     split = require('split'),
     superagent = require('superagent'),
     taskmanager = require('./taskmanager.js'),
+    url = require('url'),
     util = require('util'),
     uuid = require('node-uuid'),
     validator = require('validator');
@@ -216,6 +217,20 @@ function validateMemoryLimit(manifest, memoryLimit) {
     if (memoryLimit > max) return new AppsError(AppsError.BAD_FIELD, 'memoryLimit too large');
 
     return null;
+}
+
+// https://tools.ietf.org/html/rfc7034
+function validateXFrameOptions(xFrameOptions) {
+    assert.strictEqual(typeof xFrameOptions, 'string');
+
+    if (xFrameOptions === 'DENY') return null;
+    if (xFrameOptions === 'SAMEORIGIN') return null;
+
+    var parts = xFrameOptions.split(' ');
+    if (parts.length !== 2 || parts[0] !== 'ALLOW-FROM') return new AppsError(AppsError.BAD_FIELD, 'xFrameOptions must be "DENY", "SAMEORIGIN" or "ALLOW-FROM uri"' );
+
+    var uri = url.parse(parts[1]);
+    return (uri.protocol === 'http:' || uri.protocol === 'https:') ? null : new AppsError(AppsError.BAD_FIELD, 'xFrameOptions ALLOW-FROM uri must be a valid http[s] uri' );
 }
 
 function getDuplicateErrorDetails(location, portBindings, error) {
@@ -396,7 +411,8 @@ function install(data, auditSource, callback) {
         cert = data.cert || null,
         key = data.key || null,
         memoryLimit = data.memoryLimit || 0,
-        altDomain = data.altDomain || null;
+        altDomain = data.altDomain || null,
+        xFrameOptions = data.xFrameOptions || 'SAMEORIGIN';
 
     assert(data.appStoreId || data.manifest); // atleast one of them is required
 
@@ -419,6 +435,9 @@ function install(data, auditSource, callback) {
         if (error) return callback(error);
 
         error = validateMemoryLimit(manifest, memoryLimit);
+        if (error) return callback(error);
+
+        error = validateXFrameOptions(xFrameOptions);
         if (error) return callback(error);
 
         // memoryLimit might come in as 0 if not specified
@@ -451,7 +470,8 @@ function install(data, auditSource, callback) {
             var data = {
                 accessRestriction: accessRestriction,
                 memoryLimit: memoryLimit,
-                altDomain: altDomain
+                altDomain: altDomain,
+                xFrameOptions: xFrameOptions
             };
 
             appdb.add(appId, appStoreId, manifest, location, portBindings, data, function (error) {
