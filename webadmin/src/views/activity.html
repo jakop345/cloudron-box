@@ -30,13 +30,13 @@
               <thead>
                 <tr>
                   <th class="col-md-2">Time</th>
-                  <th class="col-md-2">Source</th>
-                  <th class="col-md-6">Action</th>
+                  <th class="col-md-3">Source</th>
+                  <th class="col-md-7">Action</th>
                 </tr>
               </thead>
               <tbody>
                 <tr ng-repeat="eventLog in eventLogs">
-                  <th scope="row">{{ eventLog.creationTime | prettyDate }}</td>
+                  <td><span uib-tooltip="{{eventLog.creationTime}}" class="arrow">{{ eventLog.creationTime | prettyDate }}</span></td>
                   <td>{{ eventLog.source.username || eventLog.source.userId || eventLog.source.authType }} <span ng-show="eventLog.source.ip || eventLog.source.appId"> ({{ eventLog.source.ip || eventLog.source.appId }}) </span> </td>
                   <td>{{ eventLog | eventLogDetails }}</td>
                 </tr>
