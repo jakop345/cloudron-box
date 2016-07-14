@@ -35,6 +35,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         memoryLimit: $scope.memoryTicks[0],
         accessRestrictionOption: '',
         accessRestriction: { users: [], groups: [] },
+        xFrameOptions: '',
 
         isAccessRestrictionValid: function () {
             var tmp = $scope.appConfigure.accessRestriction;
@@ -90,6 +91,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.memoryLimit = $scope.memoryTicks[0];
         $scope.appConfigure.accessRestrictionOption = '';
         $scope.appConfigure.accessRestriction = { users: [], groups: [] };
+        $scope.appConfigure.xFrameOptions = '';
 
         $scope.appConfigureForm.$setPristine();
         $scope.appConfigureForm.$setUntouched();
@@ -178,6 +180,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
         $scope.appConfigure.memoryUsage = app.memoryUsage || 256;
+        $scope.appConfigure.xFrameOptions = app.xFrameOptions.indexOf('ALLOW-FROM') === 0 ? app.xFrameOptions.split(' ')[1] : '';
 
         // fill the portBinding structures. There might be holes in the app.portBindings, which signalizes a disabled port
         for (var env in $scope.appConfigure.portBindingsInfo) {
@@ -213,7 +216,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             portBindings: finalPortBindings,
             accessRestriction: !$scope.appConfigure.accessRestrictionOption ? null : $scope.appConfigure.accessRestriction,
             cert: $scope.appConfigure.certificateFile,
-            key: $scope.appConfigure.keyFile
+            key: $scope.appConfigure.keyFile,
+            xFrameOptions: $scope.appConfigure.xFrameOptions ? ('ALLOW-FROM ' + $scope.appConfigure.xFrameOptions) : 'SAMEORIGIN'
             // memoryLimit: $scope.appConfigure.memoryLimit
         };
 
