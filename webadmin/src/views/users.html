@@ -261,7 +261,7 @@
                         <tbody>
                             <tr ng-repeat="user in users">
                                 <td>
-                                    <i class="fa fa-briefcase" ng-show="user.admin" data-toggle="tooltip" title="This user can manage apps, groups and other users" ng-init="initTooltip()"></i>
+                                    <i class="fa fa-briefcase arrow" ng-show="user.admin" uib-tooltip="This user can manage apps, groups and other users"></i>
                                 </td>
                                 <td class="hand elide-table-cell" ng-click="showUserEdit(user)">
                                     {{ user.username }}
