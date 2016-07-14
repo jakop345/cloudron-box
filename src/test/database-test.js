@@ -34,7 +34,7 @@ describe('database', function () {
         database._clear(done);
     });
 
-    describe('userdb', function () {
+    describe('user', function () {
         var USER_0 = {
             id: 'uuid0',
             username: 'uuid0',
@@ -553,7 +553,8 @@ describe('database', function () {
             lastBackupId: null,
             oldConfig: null,
             memoryLimit: 4294967296,
-            altDomain: null
+            altDomain: null,
+            xFrameOptions: 'DENY'
         };
         var APP_1 = {
             id: 'appid-1',
@@ -572,7 +573,8 @@ describe('database', function () {
             lastBackupId: null,
             oldConfig: null,
             memoryLimit: 0,
-            altDomain: null
+            altDomain: null,
+            xFrameOptions: ''
         };
 
         it('add fails due to missing arguments', function () {
