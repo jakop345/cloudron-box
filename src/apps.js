@@ -262,7 +262,7 @@ function getAppConfig(app) {
         accessRestriction: app.accessRestriction,
         portBindings: app.portBindings,
         memoryLimit: app.memoryLimit,
-        xFrameOptions: app.xFrameOptions,
+        xFrameOptions: app.xFrameOptions || 'SAMEORIGIN',
         altDomain: app.altDomain
     };
 }

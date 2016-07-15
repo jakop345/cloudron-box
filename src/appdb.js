@@ -92,6 +92,9 @@ function postProcess(result) {
     result.accessRestriction = safe.JSON.parse(result.accessRestrictionJson);
     if (result.accessRestriction && !result.accessRestriction.users) result.accessRestriction.users = [];
     delete result.accessRestrictionJson;
+
+    // TODO remove later once all apps have this attribute
+    result.xFrameOptions = result.xFrameOptions || 'SAMEORIGIN';
 }
 
 function get(id, callback) {
