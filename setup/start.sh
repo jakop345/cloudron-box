@@ -34,8 +34,9 @@ set_progress() {
 set_progress "1" "Create container"
 $script_dir/container.sh
 
-set_progress "5" "Set hostname"
+set_progress "5" "Adjust system settings"
 hostnamectl set-hostname "${arg_fqdn}"
+sysctl vm.swappiness=0
 
 set_progress "10" "Ensuring directories"
 # keep these in sync with paths.js
