@@ -575,3 +575,6 @@
 - Preliminary user impersonation support
 - Fix crash in mail container when generating bounces
 
+[0.17.2]
+- Add config option to embed aps in other sites
+
