@@ -63,6 +63,9 @@
                                 </div>
                             </ng-form>
                         </div>
+
+                        <br/>
+
                         <div class="form-group" ng-show="appConfigure.app.manifest.singleUser">
                             <label class="control-label">User</label>
                             <p>
@@ -94,42 +97,47 @@
                             </div>
                         </div>
 
-                        <div class="form-group" ng-hide="true">
-                            <label class="control-label" for="memoryUsage">Maximum Memory Usage: <b>{{ appConfigure.memoryUsage / 1024 / 1024 }} MB</b></label>
-                            <br/>
-                            <div style="padding: 0 10px;">
-                                <slider id="memoryUsage" ng-model="appConfigure.memoryUsage" step="33554432" tooltip="hide" ticks="memoryTicks" ticks-snap-bounds="67108864"></slider>
-                            </div>
-                        </div>
+                        <br/>
 
-                        <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.xFrameOptions.$dirty && appConfigure.error.xFrameOptions }">
-                            <label class="control-label">Allow site embedding from origin</label>
-                            <div class="control-label" ng-show="appConfigure.error.xFrameOptions"><small>Must be empty of a valid URL</small></div>
-                            <input type="text" class="form-control" id="appConfigureXFrameOptionsInput" name="xFrameOptions" placeholder="https://example.com" ng-model="appConfigure.xFrameOptions" uib-tooltip="Leave blank to not allow embedding">
-                        </div>
+                        <!-- <label class="control-label hand" data-toggle="collapse" data-target="#appConfigureCollapseAdvanced">Show advanced</label> -->
+                        <!-- <div class="collapse" id="appConfigureCollapseAdvanced"> -->
+                            <div class="form-group" ng-hide="true">
+                                <label class="control-label" for="memoryUsage">Maximum Memory Usage: <b>{{ appConfigure.memoryUsage / 1024 / 1024 }} MB</b></label>
+                                <br/>
+                                <div style="padding: 0 10px;">
+                                    <slider id="memoryUsage" ng-model="appConfigure.memoryUsage" step="33554432" tooltip="hide" ticks="memoryTicks" ticks-snap-bounds="67108864"></slider>
+                                </div>
+                            </div>
 
-                        <div class="hide">
-                        <label class="control-label" for="appConfigureCertificateInput" ng-show="config.isCustomDomain">Certificate (optional)</label>
-                        <div class="has-error text-center" ng-show="appConfigure.error.cert && config.isCustomDomain">{{ appConfigure.error.cert }}</div>
-                        <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.certificate.$dirty && appConfigure.error.cert }" ng-show="config.isCustomDomain">
-                            <div class="input-group">
-                                <input type="file" id="appConfigureCertificateFileInput" style="display:none"/>
-                                <input type="text" class="form-control" placeholder="Certificate" ng-model="appConfigure.certificateFileName" id="appConfigureCertificateInput" name="certificate" onclick="getElementById('appConfigureCertificateFileInput').click();" style="cursor: pointer;" ng-required="appConfigure.keyFileName">
-                                <span class="input-group-addon">
-                                    <i class="fa fa-upload" onclick="getElementById('appConfigureCertificateFileInput').click();"></i>
-                                </span>
+                            <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.xFrameOptions.$dirty && appConfigure.error.xFrameOptions }">
+                                <label class="control-label">Allow site embedding from origin</label>
+                                <div class="control-label" ng-show="appConfigure.error.xFrameOptions"><small>Must be empty of a valid URL</small></div>
+                                <input type="text" class="form-control" id="appConfigureXFrameOptionsInput" name="xFrameOptions" placeholder="https://example.com" ng-model="appConfigure.xFrameOptions" uib-tooltip="Leave blank to not allow embedding">
                             </div>
-                        </div>
-                        <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.key.$dirty && appConfigure.error.cert }" ng-show="config.isCustomDomain">
-                            <div class="input-group">
-                                <input type="file" id="appConfigureKeyFileInput" style="display:none"/>
-                                <input type="text" class="form-control" placeholder="Key" ng-model="appConfigure.keyFileName" id="appConfigureKeyInput" name="key" onclick="getElementById('appConfigureKeyFileInput').click();" style="cursor: pointer;" ng-required="appConfigure.certificateFileName">
-                                <span class="input-group-addon">
-                                    <i class="fa fa-upload" onclick="getElementById('appConfigureKeyFileInput').click();"></i>
-                                </span>
+
+                            <div class="hide">
+                                <label class="control-label" for="appConfigureCertificateInput" ng-show="config.isCustomDomain">Certificate (optional)</label>
+                                <div class="has-error text-center" ng-show="appConfigure.error.cert && config.isCustomDomain">{{ appConfigure.error.cert }}</div>
+                                <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.certificate.$dirty && appConfigure.error.cert }" ng-show="config.isCustomDomain">
+                                    <div class="input-group">
+                                        <input type="file" id="appConfigureCertificateFileInput" style="display:none"/>
+                                        <input type="text" class="form-control" placeholder="Certificate" ng-model="appConfigure.certificateFileName" id="appConfigureCertificateInput" name="certificate" onclick="getElementById('appConfigureCertificateFileInput').click();" style="cursor: pointer;" ng-required="appConfigure.keyFileName">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-upload" onclick="getElementById('appConfigureCertificateFileInput').click();"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.key.$dirty && appConfigure.error.cert }" ng-show="config.isCustomDomain">
+                                    <div class="input-group">
+                                        <input type="file" id="appConfigureKeyFileInput" style="display:none"/>
+                                        <input type="text" class="form-control" placeholder="Key" ng-model="appConfigure.keyFileName" id="appConfigureKeyInput" name="key" onclick="getElementById('appConfigureKeyFileInput').click();" style="cursor: pointer;" ng-required="appConfigure.certificateFileName">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-upload" onclick="getElementById('appConfigureKeyFileInput').click();"></i>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        </div>
+                        <!-- </div> -->
 
                         <a ng-show="!!appConfigure.app.manifest.configurePath" ng-href="https://{{ appConfigure.app.fqdn }}/{{ appConfigure.app.manifest.configurePath }}" target="_blank">Application Specific Settings</a>
                         <br/>
