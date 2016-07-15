@@ -201,6 +201,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.error.other = null;
         $scope.appConfigure.error.location = null;
         $scope.appConfigure.error.password = null;
+        $scope.appConfigure.error.xFrameOptions = null;
 
         // only use enabled ports from portBindings
         var finalPortBindings = {};
@@ -240,6 +241,10 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
                     $scope.appConfigure.certificateFile = null;
                     $scope.appConfigure.keyFileName = '';
                     $scope.appConfigure.keyFile = null;
+                } else if (error.statusCode === 400 && error.message.indexOf('xFrameOptions') !== -1 ) {
+                    $scope.appConfigure.error.xFrameOptions = error.message;
+                    $scope.appConfigureForm.xFrameOptions.$setPristine();
+                    $('#appConfigureXFrameOptionsInput').focus();
                 } else {
                     $scope.appConfigure.error.other = error.message;
                 }

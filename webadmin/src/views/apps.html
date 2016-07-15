@@ -102,9 +102,10 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.xFrameOptions.$dirty && appConfigure.error.xFrameOptions }">
                             <label class="control-label">Allow site embedding from origin</label>
-                            <input type="text" class="form-control" placeholder="https://example.com" ng-model="appConfigure.xFrameOptions" uib-tooltip="Leave blank to not allow embedding">
+                            <div class="control-label" ng-show="appConfigure.error.xFrameOptions"><small>Must be empty of a valid URL</small></div>
+                            <input type="text" class="form-control" id="appConfigureXFrameOptionsInput" name="xFrameOptions" placeholder="https://example.com" ng-model="appConfigure.xFrameOptions" uib-tooltip="Leave blank to not allow embedding">
                         </div>
 
                         <div class="hide">
