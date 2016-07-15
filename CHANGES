@@ -576,5 +576,5 @@
 - Fix crash in mail container when generating bounces
 
 [0.17.2]
-- Add config option to embed aps in other sites
+- Add config option to embed apps in other sites
 
