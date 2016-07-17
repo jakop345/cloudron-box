@@ -131,7 +131,7 @@ function status(changeId, callback) {
         if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
         api(dnsConfig.provider).getChangeStatus(dnsConfig, changeId, function (error, status) {
-            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error));
+            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
             callback(null, status === 'INSYNC' ? 'done' : 'pending');
         });
     });
