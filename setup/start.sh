@@ -36,7 +36,11 @@ $script_dir/container.sh
 
 set_progress "5" "Adjust system settings"
 hostnamectl set-hostname "${arg_fqdn}"
-sysctl vm.swappiness=0
+
+# ec2 instances use lots of cpu for swapping, which can be significantly reduced adjusting the swappiness
+if [[ "${arg_provider}" == 'ec2' ]]; then
+    sysctl vm.swappiness=0
+fi
 
 set_progress "10" "Ensuring directories"
 # keep these in sync with paths.js
