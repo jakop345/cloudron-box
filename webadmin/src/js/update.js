@@ -44,7 +44,9 @@ app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, 
                     // check if the new domain is available via the appstore (cannot use cloudron
                     // directly as we might hit NXDOMAIN)
                     $http.get(data.apiServerOrigin + '/api/v1/boxes/' + data.migrate.info.domain + '/status').success(function(data2, status) {
-                        if (status === 200 && data2.status === 'ready') return window.location = 'https://my.' + data.migrate.info.domain;
+                        if (status === 200 && data2.status === 'ready') {
+                            window.location = 'https://my.' + data.migrate.info.domain;
+                        }
                     });
                 }
             }
@@ -53,7 +55,7 @@ app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, 
         });
     }
 
-    $interval(fetchProgress, 2000);
+    $interval(fetchProgress, 5000);
 
     fetchProgress();
 }]);
