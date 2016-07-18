@@ -292,14 +292,15 @@ function getBoxAndUserDetails(callback) {
 
     if (gBoxAndUserDetails) return callback(null, gBoxAndUserDetails);
 
-    if (!config.token()) return callback(new Error(CloudronError.EXTERNAL_ERROR, 'No appstore token'));
+    // only supported for caas
+    if (config.provider() !== 'caas') return callback(null, {});
 
     superagent
         .get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn())
         .query({ token: config.token() })
         .end(function (error, result) {
-            if (error && !error.response) return callback(error);
-            if (result.statusCode !== 200) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+            if (error && !error.response) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, 'Cannot reach appstore'));
+            if (result.statusCode !== 200) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
 
             gBoxAndUserDetails = result.body;
 
@@ -311,11 +312,9 @@ function getConfig(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     getBoxAndUserDetails(function (error, result) {
-        if (error) {
-            debug('Failed to fetch cloudron details.', error);
-        }
+        if (error) debug('Failed to fetch cloudron details.', error.reason, error.message);
 
-        result = _.extend(BOX_AND_USER_TEMPLATE, result || { });
+        result = _.extend(BOX_AND_USER_TEMPLATE, result || {});
 
         settings.getCloudronName(function (error, cloudronName) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
