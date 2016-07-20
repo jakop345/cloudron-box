@@ -179,7 +179,7 @@
         </div>
         <div class="col-xs-6 text-right">
             <span ng-show="lastBackup">{{ lastBackup.creationTime | prettyDate }}</span>
-            <span ng-hide="lastBackup">No backups have been created yet</span>
+            <span ng-hide="lastBackup">No backups have been made yet</span>
         </div>
     </div>
     <!-- If a backup is blocked (not triggered), the UI does not give feedback currently. This button is only available in dev at the moment! -->
@@ -191,7 +191,7 @@
             </div>
         </div>
         <div class="col-xs-3 text-right">
-            <button class="btn btn-outline btn-xs btn-primary" ng-click="showCreateBackup()" ng-disabled="createBackup.busy">Create Backup</button>
+            <button class="btn btn-outline btn-xs btn-primary" ng-click="showCreateBackup()" ng-disabled="createBackup.busy">Backup now</button>
         </div>
     </div>
 </div>
