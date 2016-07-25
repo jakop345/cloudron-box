@@ -57,7 +57,6 @@ function initialize(callback) {
         removeOldImages,
         existingInfra.version === 'none' ? apps.restoreInstalledApps : apps.configureInstalledApps,
         loadAddonVars,
-        mailboxes.setupAliases,
         fs.writeFile.bind(fs, paths.INFRA_VERSION_FILE, JSON.stringify(infra))
     ], function (error) {
         if (error) return callback(error);
@@ -239,7 +238,7 @@ function startMail(callback) {
 
         shell.execSync('startMail', cmd);
 
-        callback();
+        mailboxes.setupAliases(callback);
     });
 }
 
