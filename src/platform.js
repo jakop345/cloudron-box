@@ -53,9 +53,9 @@ function initialize(callback) {
     debug('Updating infrastructure from %s to %s', existingInfra.version, infra.version);
 
     async.series([
-        stopContainers,
+        stopContainers.bind(null, existingInfra),
         createDockerNetwork,
-        startAddons,
+        startAddons.bind(null, existingInfra),
         removeOldImages,
         existingInfra.version === 'none' ? apps.restoreInstalledApps : apps.configureInstalledApps,
         loadAddonVars,
@@ -99,10 +99,23 @@ function removeOldImages(callback) {
     callback();
 }
 
-function stopContainers(callback) {
+function stopContainers(existingInfra, callback) {
     // TODO: be nice and stop addons cleanly (example, shutdown commands)
     debug('stopping existing containers');
-    shell.execSync('stopContainersSync', 'docker ps -qa | xargs --no-run-if-empty docker rm -f');
+
+    if (existingInfra.version !== infra.version) { // infra upgrade
+        shell.execSync('stopContainers', 'docker ps -qa | xargs --no-run-if-empty docker rm -f');
+    } else {
+        assert(typeof infra.images, 'object');
+        var changedAddons = [ ];
+        for (var imageName in infra.images) {
+            if (infra.images[imageName].tag === existingInfra.images[imageName].tag) changedAddons.push(imageName);
+        }
+
+        debug('stopping addons: %s', changedAddons);
+        shell.execSync('stopContainers', 'docker rm -f ' + changedAddons.join(' '));
+    }
+
     callback();
 }
 
@@ -244,16 +257,22 @@ function startMail(callback) {
     });
 }
 
-function startAddons(callback) {
-    assert.strictEqual(typeof callback, 'function');
+function startAddons(existingInfra, callback) {
+    var startFuncs = [ ];
 
-    async.series([
-        startGraphite,
-        startMysql,
-        startPostgresql,
-        startMongodb,
-        startMail
-    ], callback);
+    if (existingInfra.images) {
+        debug('startAddons: existing infra, incremental addon create');
+        if (infra.images.graphite.tag !== existingInfra.images.graphite.tag) startFuncs.push(startGraphite);
+        if (infra.images.mysql.tag !== existingInfra.images.mysql.tag) startFuncs.push(startMysql);
+        if (infra.images.postgresql.tag !== existingInfra.images.postgresql.tag) startFuncs.push(startPostgresql);
+        if (infra.images.mongodb.tag !== existingInfra.images.mongodb.tag) startFuncs.push(startMongodb);
+        if (infra.images.mail.tag !== existingInfra.images.mail.tag) startFuncs.push(startMail);
+    } else {
+        debug('startAddons: no existing infra, starting all addons');
+        startFuncs.push(startGraphite, startMysql, startPostgresql, startMongodb, startMail);
+    }
+
+    async.series(startFuncs, callback);
 }
 
 function loadAddonVars(callback) {
