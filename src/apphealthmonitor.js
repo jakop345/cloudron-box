@@ -145,6 +145,9 @@ function run() {
 function processDockerEvents() {
     // note that for some reason, the callback is called only on the first event
     debug('Listening for docker events');
+    const OOM_MAIL_LIMIT = 60 * 60 * 1000; // 60 minutes
+    var lastOomMailTime = new Date(new Date() - OOM_MAIL_LIMIT);
+
     docker.getEvents({ filters: JSON.stringify({ event: [ 'oom' ] }) }, function (error, stream) {
         if (error) return console.error(error);
 
@@ -157,12 +160,16 @@ function processDockerEvents() {
             appdb.getByContainerId(ev.id, function (error, app) { // this can error for addons
                 var program = error || !app.appStoreId ? ev.id : app.appStoreId;
                 var context = JSON.stringify(ev);
+                var now = new Date();
                 if (app) context = context + '\n\n' + JSON.stringify(app, null, 4) + '\n';
 
                 debug('OOM Context: %s', context);
 
                 // do not send mails for dev apps
-                if (!app || app.appStoreId !== '') mailer.unexpectedExit(program, context); // app can be null if it's an addon crash
+                if ((!app || app.appStoreId !== '') && (now - lastOomMailTime > OOM_MAIL_LIMIT)) {
+                    mailer.unexpectedExit(program, context); // app can be null if it's an addon crash
+                    lastOomMailTime = now;
+                }
             });
         });
 
