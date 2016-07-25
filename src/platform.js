@@ -266,12 +266,13 @@ function startAddons(existingInfra, callback) {
     } else {
         assert.strictEqual(typeof existingInfra.images, 'object');
 
-        debug('startAddons: existing infra. incremental addon create');
         if (infra.images.graphite.tag !== existingInfra.images.graphite.tag) startFuncs.push(startGraphite);
         if (infra.images.mysql.tag !== existingInfra.images.mysql.tag) startFuncs.push(startMysql);
         if (infra.images.postgresql.tag !== existingInfra.images.postgresql.tag) startFuncs.push(startPostgresql);
         if (infra.images.mongodb.tag !== existingInfra.images.mongodb.tag) startFuncs.push(startMongodb);
         if (infra.images.mail.tag !== existingInfra.images.mail.tag) startFuncs.push(startMail);
+
+        debug('startAddons: existing infra. incremental addon create %j', startFuncs.map(function (f) { return f.name; }));
     }
 
     async.series(startFuncs, callback);
