@@ -574,7 +574,7 @@ describe('database', function () {
             oldConfig: null,
             memoryLimit: 0,
             altDomain: null,
-            xFrameOptions: ''
+            xFrameOptions: 'SAMEORIGIN'
         };
 
         it('add fails due to missing arguments', function () {
