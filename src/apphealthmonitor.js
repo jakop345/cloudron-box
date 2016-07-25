@@ -138,7 +138,7 @@ function run() {
 
 /*
     OOM can be tested using stress tool like so:
-        docker run -ti -m 100M cloudron/base:0.3.3 /bin/bash
+        docker run -ti -m 100M cloudron/base:0.8.1 /bin/bash
         apt-get update && apt-get install stress
         stress --vm 1 --vm-bytes 200M --vm-hang 0
 */
@@ -154,7 +154,7 @@ function processDockerEvents() {
         stream.on('data', function (data) {
             var ev = JSON.parse(data);
             debug('Container ' + ev.id + ' went OOM');
-            appdb.getByContainerId(ev.id, function (error, app) {
+            appdb.getByContainerId(ev.id, function (error, app) { // this can error for addons
                 var program = error || !app.appStoreId ? ev.id : app.appStoreId;
                 var context = JSON.stringify(ev);
                 if (app) context = context + '\n\n' + JSON.stringify(app, null, 4) + '\n';
@@ -162,7 +162,7 @@ function processDockerEvents() {
                 debug('OOM Context: %s', context);
 
                 // do not send mails for dev apps
-                if (error || app.appStoreId !== '') mailer.unexpectedExit(program, context); // app can be null if it's an addon crash
+                if (!app || app.appStoreId !== '') mailer.unexpectedExit(program, context); // app can be null if it's an addon crash
             });
         });
 
