@@ -581,4 +581,5 @@
 [0.17.3]
 - Incremental infrastructure update logic
 - Keep eventlogs only for a week
+- Throttle OOM mails
 
