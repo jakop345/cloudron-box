@@ -26,7 +26,8 @@ var apps = require('./apps.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
-    util = require('util');
+    util = require('util'),
+    _ = require('underscore');
 
 var gAddonVars = null,
     gPlatformReadyTimer = null;
@@ -42,7 +43,8 @@ function initialize(callback) {
         if (!existingInfra) existingInfra = { version: 'corrupt' };
     }
 
-    if (infra.version === existingInfra.version) {
+    // short-circuit for the restart case
+    if (_.isEqual(infra, existingInfra)) {
         debug('platform is uptodate at version %s', infra.version);
         process.nextTick(function () { exports.events.emit(exports.EVENT_READY); });
         return loadAddonVars(callback);
