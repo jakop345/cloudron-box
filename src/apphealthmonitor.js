@@ -194,7 +194,7 @@ function stop(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     clearTimeout(gRunTimeout);
-    gDockerEventStream.end();
+    if (gDockerEventStream) gDockerEventStream.end();
 
     callback();
 }
