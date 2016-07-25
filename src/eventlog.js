@@ -6,6 +6,7 @@ exports = module.exports = {
     add: add,
     get: get,
     getAllPaged: getAllPaged,
+    cleanup: cleanup,
 
     // keep in sync with webadmin index.js filter
     ACTION_ACTIVATE: 'cloudron.activate',
@@ -98,5 +99,18 @@ function getAllPaged(action, search, page, perPage, callback) {
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
 
         callback(null, boxes);
+    });
+}
+
+function cleanup(callback) {
+    callback = callback || NOOP_CALLBACK;
+
+     var d = new Date();
+     d.setDate(d.getDate() - 7); // 7 days ago
+
+    eventlogdb.delByCreationTime(d, function (error) {
+        if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
+
+        callback(null);
     });
 }

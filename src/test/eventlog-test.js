@@ -78,4 +78,19 @@ describe('Eventlog', function () {
             done();
         });
     });
+
+    it('cleans up token', function (done) {
+        eventlog.cleanup(function (error) {
+            expect(error).to.be(null);
+
+            eventlog.get(eventId, function (error, result) { // should not have deleted it
+                expect(error).to.be(null);
+                expect(result.id).to.be(eventId);
+                expect(result.action).to.be('some.event');
+                expect(result.creationTime).to.be.a(Date);
+
+                done();
+            });
+        });
+    });
 });

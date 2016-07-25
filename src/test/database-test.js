@@ -1173,6 +1173,19 @@ describe('database', function () {
                 done();
             });
         });
+
+        it('delByCreationTime succeeds', function (done) {
+            eventlogdb.delByCreationTime(new Date(), function (error) {
+                expect(error).to.be(null);
+
+                eventlogdb.getAllPaged(null, null, 1, 1, function (error, results) {
+                    expect(error).to.be(null);
+                    expect(results.length).to.be(0);
+
+                    done();
+                });
+            });
+        });
     });
 
     describe('mailboxes', function () {

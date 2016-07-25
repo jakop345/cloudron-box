@@ -5,6 +5,7 @@ exports = module.exports = {
     getAllPaged: getAllPaged,
     add: add,
     count: count,
+    delByCreationTime: delByCreationTime,
 
     _clear: clear
 };
@@ -13,7 +14,8 @@ var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
     mysql = require('mysql'),
-    safe = require('safetydance');
+    safe = require('safetydance'),
+    util = require('util');
 
 var EVENTLOGS_FIELDS = [ 'id', 'action', 'source', 'data', 'creationTime' ].join(',');
 
@@ -102,3 +104,13 @@ function clear(callback) {
     });
 }
 
+function delByCreationTime(creationTime, callback) {
+    assert(util.isDate(creationTime));
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('DELETE FROM eventlog WHERE creationTime < ?', [ creationTime ], function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(error);
+    });
+}

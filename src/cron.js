@@ -13,6 +13,7 @@ var apps = require('./apps.js'),
     config = require('./config.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:cron'),
+    eventlog = require('./eventlog.js'),
     janitor = require('./janitor.js'),
     scheduler = require('./scheduler.js'),
     settings = require('./settings.js'),
@@ -27,7 +28,8 @@ var gAutoupdaterJob = null,
     gDockerVolumeCleanerJob = null,
     gSchedulerSyncJob = null,
     gCertificateRenewJob = null,
-    gCheckDiskSpaceJob = null;
+    gCheckDiskSpaceJob = null,
+    gCleanupEventlogJob = null;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 var AUDIT_SOURCE = { userId: null, username: 'cron' };
@@ -100,6 +102,14 @@ function recreateJobs(unusedTimeZone, callback) {
         gCleanupTokensJob = new CronJob({
             cronTime: '00 */30 * * * *', // every 30 minutes
             onTick: janitor.cleanupTokens,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
+        if (gCleanupEventlogJob) gCleanupEventlogJob.stop();
+        gCleanupEventlogJob = new CronJob({
+            cronTime: '00 */30 * * * *', // every 30 minutes
+            onTick: eventlog.cleanup,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
@@ -193,6 +203,9 @@ function uninitialize(callback) {
 
     if (gCleanupTokensJob) gCleanupTokensJob.stop();
     gCleanupTokensJob = null;
+
+    if (gCleanupEventlogJob) gCleanupEventlogJob.stop();
+    gCleanupEventlogJob = null;
 
     if (gDockerVolumeCleanerJob) gDockerVolumeCleanerJob.stop();
     gDockerVolumeCleanerJob = null;
