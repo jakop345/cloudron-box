@@ -32,7 +32,7 @@ function isChangeSynced(domain, value, type, nameserver, callback) {
 
             req.on('timeout', function () {
                 debug('nameserver %s (%s) timed out when trying to resolve %s', nameserver, nsIp, domain);
-                return iteratorCallback(false);
+                return iteratorCallback(true); // should be ok if dns server is down
             });
 
             req.on('message', function (error, message) {
