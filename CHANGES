@@ -578,3 +578,6 @@
 [0.17.2]
 - Add config option to embed apps in other sites
 
+[0.17.3]
+- Incremental infrastructure update logic
+
