@@ -380,6 +380,12 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 if (error) return console.error(error);
 
                 $scope.appstoreConfig = result;
+
+                AppStore.getProfile(result.token, function (error, result) {
+                    if (error) return console.error(error);
+
+                    $scope.appstoreConfig.profile = result;
+                });
             });
         }
     });
