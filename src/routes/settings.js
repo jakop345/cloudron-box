@@ -19,6 +19,9 @@ exports = module.exports = {
     getTimeZone: getTimeZone,
     setTimeZone: setTimeZone,
 
+    getAppstore: getAppstore,
+    setAppstore: setAppstore,
+
     setCertificate: setCertificate,
     setAdminCertificate: setAdminCertificate
 };
@@ -155,6 +158,33 @@ function setBackupConfig(req, res, next) {
     if (typeof req.body.provider !== 'string') return next(new HttpError(400, 'provider is required'));
 
     settings.setBackupConfig(req.body, function (error) {
+        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200));
+    });
+}
+
+function getAppstore(req, res, next) {
+    settings.getAppstore(function (error, result) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, result));
+    });
+}
+
+function setAppstore(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (typeof req.body.userId !== 'string') return next(new HttpError(400, 'userId is required'));
+    if (typeof req.body.token !== 'string') return next(new HttpError(400, 'token is required'));
+
+    var options = {
+        userId: req.body.userId,
+        token: req.body.token
+    };
+
+    settings.setAppstore(options, function (error) {
         if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
