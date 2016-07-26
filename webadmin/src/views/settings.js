@@ -309,6 +309,55 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         fr.readAsDataURL(event.target.files[0]);
     };
 
+    $scope.appstoreLogin = {
+        busy: false,
+        error: {},
+        email: '',
+        password: '',
+
+        reset: function () {
+            $scope.appstoreLogin.busy = false;
+            $scope.appstoreLogin.error = {};
+            $scope.appstoreLogin.email = '';
+            $scope.appstoreLogin.password = '';
+
+            $scope.appstoreLoginForm.$setUntouched();
+            $scope.appstoreLoginForm.$setPristine();
+        },
+
+        show: function () {
+            $scope.appstoreLogin.reset();
+            $('#appstoreLoginModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.appstoreLogin.error = {};
+            $scope.appstoreLogin.busy = true;
+
+            console.log('submit', $scope.appstoreLogin.email, $scope.appstoreLogin.password)
+            // var user = {
+            //     id: $scope.user.id,
+            //     displayName: $scope.appstoreLogin.displayName
+            // };
+
+            // Client.updateUser(user, function (error) {
+            //     $scope.appstoreLogin.busy = false;
+
+            //     if (error) {
+            //         console.error('Unable log into appstore.', error);
+            //         return;
+            //     }
+
+            //     // update user info in the background
+            //     Client.refreshUserInfo();
+
+            //     $scope.appstoreLogin.reset();
+            //     $('#appstoreLoginModal').modal('hide');
+            // });
+        }
+    };
+
+
     Client.onReady(function () {
         fetchBackups();
 
@@ -321,7 +370,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     });
 
     // setup all the dialog focus handling
-    ['planChangeModal'].forEach(function (id) {
+    ['planChangeModal', 'appstoreLoginModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
