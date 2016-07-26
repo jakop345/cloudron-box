@@ -335,13 +335,28 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             $scope.appstoreLogin.busy = true;
 
             console.log('submit', $scope.appstoreLogin.email, $scope.appstoreLogin.password)
+
+            AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
+                $scope.appstoreLogin.busy = false;
+
+                if (error && error.statusCode === 403) {
+                    $scope.appstoreLogin.error.password = 'Wrong email or password';
+                    $scope.appstoreLogin.password = '';
+                    $('#inputAppstoreLoginPassword').focus();
+                    $scope.appstoreLoginForm.password.$setPristine();
+
+                    return;
+                }
+
+                console.log('---', error, result);
+            });
+
             // var user = {
             //     id: $scope.user.id,
             //     displayName: $scope.appstoreLogin.displayName
             // };
 
             // Client.updateUser(user, function (error) {
-            //     $scope.appstoreLogin.busy = false;
 
             //     if (error) {
             //         console.error('Unable log into appstore.', error);
@@ -356,7 +371,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             // });
         }
     };
-
 
     Client.onReady(function () {
         fetchBackups();
