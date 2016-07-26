@@ -7,6 +7,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
     $scope.dnsConfig = {};
+    $scope.appstoreConfig = {};
 
     $scope.lastBackup = null;
     $scope.backups = [];
@@ -380,6 +381,12 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
             $scope.currentPlan = $scope.config.plan;
             $scope.currency = $scope.config.currency === 'eur' ? '€' : '$';
+        } else {
+            Client.getAppstoreConfig(function (error, result) {
+                if (error) return console.error(error);
+
+                $scope.appstoreConfig = result;
+            });
         }
     });
 
