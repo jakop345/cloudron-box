@@ -392,14 +392,18 @@ function certificateRenewalError(domain, message) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof message, 'string');
 
-    var mailOptions = {
-        from: platform.mailConfig().from,
-        to: 'admin@cloudron.io',
-        subject: util.format('[%s] Certificate renewal error', domain),
-        text: render('certificate_renewal_error.ejs', { domain: domain, message: message, format: 'text' })
-    };
+    getAdminEmails(function (error, adminEmails) {
+        if (error) return console.log('Error getting admins', error);
 
-    sendMails([ mailOptions ]);
+        var mailOptions = {
+            from: platform.mailConfig().from,
+            to: config.provider() === 'caas' ? 'admin@cloudron.io' : adminEmails.join(', '),
+            subject: util.format('[%s] Certificate renewal error', domain),
+            text: render('certificate_renewal_error.ejs', { domain: domain, message: message, format: 'text' })
+        };
+
+        sendMails([ mailOptions ]);
+    });
 }
 
 // this function bypasses the queue intentionally. it is also expected to work without the mailer module initialized
