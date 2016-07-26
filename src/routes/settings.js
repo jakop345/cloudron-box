@@ -19,8 +19,8 @@ exports = module.exports = {
     getTimeZone: getTimeZone,
     setTimeZone: setTimeZone,
 
-    getAppstore: getAppstore,
-    setAppstore: setAppstore,
+    getAppstoreConfig: getAppstoreConfig,
+    setAppstoreConfig: setAppstoreConfig,
 
     setCertificate: setCertificate,
     setAdminCertificate: setAdminCertificate
@@ -165,15 +165,15 @@ function setBackupConfig(req, res, next) {
     });
 }
 
-function getAppstore(req, res, next) {
-    settings.getAppstore(function (error, result) {
+function getAppstoreConfig(req, res, next) {
+    settings.getAppstoreConfig(function (error, result) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, result));
     });
 }
 
-function setAppstore(req, res, next) {
+function setAppstoreConfig(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.userId !== 'string') return next(new HttpError(400, 'userId is required'));
@@ -184,7 +184,7 @@ function setAppstore(req, res, next) {
         token: req.body.token
     };
 
-    settings.setAppstore(options, function (error) {
+    settings.setAppstoreConfig(options, function (error) {
         if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 

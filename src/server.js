@@ -191,8 +191,8 @@ function initializeExpressSync() {
     router.post('/api/v1/settings/admin_certificate',  settingsScope, routes.user.requireAdmin, routes.settings.setAdminCertificate);
     router.get ('/api/v1/settings/time_zone',          settingsScope, routes.user.requireAdmin, routes.settings.getTimeZone);
     router.post('/api/v1/settings/time_zone',          settingsScope, routes.user.requireAdmin, routes.settings.setTimeZone);
-    router.get ('/api/v1/settings/appstore_config',    settingsScope, routes.user.requireAdmin, routes.settings.getAppstore);
-    router.post('/api/v1/settings/appstore_config',    settingsScope, routes.user.requireAdmin, routes.settings.setAppstore);
+    router.get ('/api/v1/settings/appstore_config',    settingsScope, routes.user.requireAdmin, routes.settings.getAppstoreConfig);
+    router.post('/api/v1/settings/appstore_config',    settingsScope, routes.user.requireAdmin, routes.settings.setAppstoreConfig);
 
     // eventlog route
     router.get('/api/v1/eventlog', settingsScope, routes.user.requireAdmin, routes.eventlog.get);
