@@ -19,7 +19,6 @@ var acme = require('./cert/acme.js'),
     assert = require('assert'),
     async = require('async'),
     caas = require('./cert/caas.js'),
-    cloudron = require('./cloudron.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
     debug = require('debug')('box:src/certificates'),
@@ -36,8 +35,6 @@ var acme = require('./cert/acme.js'),
     util = require('util'),
     waitForDns = require('./waitfordns.js'),
     x509 = require('x509');
-
-var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 function CertificatesError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
