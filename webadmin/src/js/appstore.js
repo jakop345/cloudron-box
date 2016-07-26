@@ -140,10 +140,10 @@ angular.module('Application').service('AppStore', ['$http', '$base64', 'Client',
         });
     };
 
-    AppStore.prototype.profile = function (token, callback) {
+    AppStore.prototype.getProfile = function (token, callback) {
         if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
 
-        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/profile?accessToken=' + token).success(function (data, status) {
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/profile', { params: { accessToken: token }}).success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
             return callback(null, data.profile);
         }).error(function (data, status) {
