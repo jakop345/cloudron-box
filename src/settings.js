@@ -30,6 +30,9 @@ exports = module.exports = {
     getUpdateConfig: getUpdateConfig,
     setUpdateConfig: setUpdateConfig,
 
+    getAppstoreConfig: getAppstoreConfig,
+    setAppstoreConfig: setAppstoreConfig,
+
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
@@ -41,6 +44,7 @@ exports = module.exports = {
     BACKUP_CONFIG_KEY: 'backup_config',
     TLS_CONFIG_KEY: 'tls_config',
     UPDATE_CONFIG_KEY: 'update_config',
+    APPSTORE_CONFIG_KEY: 'appstore_config',
 
     events: new (require('events').EventEmitter)()
 };
@@ -71,6 +75,7 @@ var gDefaults = (function () {
     result[exports.BACKUP_CONFIG_KEY] = { };
     result[exports.TLS_CONFIG_KEY] = { provider: 'caas' };
     result[exports.UPDATE_CONFIG_KEY] = { prerelease: false };
+    result[exports.APPSTORE_CONFIG_KEY] = { };
 
     return result;
 })();
@@ -400,6 +405,30 @@ function setUpdateConfig(updateConfig, callback) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         exports.events.emit(exports.UPDATE_CONFIG_KEY, updateConfig);
+
+        callback(null);
+    });
+}
+
+function getAppstoreConfig(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.get(exports.APPSTORE_CONFIG_KEY, function (error, value) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.APPSTORE_CONFIG_KEY]);
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        callback(null, JSON.parse(value));
+    });
+}
+
+function setAppstoreConfig(appstoreConfig, callback) {
+    assert.strictEqual(typeof appstoreConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.set(exports.APPSTORE_CONFIG_KEY, JSON.stringify(appstoreConfig), function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        exports.events.emit(exports.APPSTORE_CONFIG_KEY, appstoreConfig);
 
         callback(null);
     });
