@@ -335,8 +335,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             $scope.appstoreLogin.error = {};
             $scope.appstoreLogin.busy = true;
 
-            console.log('submit', $scope.appstoreLogin.email, $scope.appstoreLogin.password)
-
             AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
 
                 if (error) {
