@@ -338,38 +338,34 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             console.log('submit', $scope.appstoreLogin.email, $scope.appstoreLogin.password)
 
             AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
-                $scope.appstoreLogin.busy = false;
 
-                if (error && error.statusCode === 403) {
-                    $scope.appstoreLogin.error.password = 'Wrong email or password';
-                    $scope.appstoreLogin.password = '';
-                    $('#inputAppstoreLoginPassword').focus();
-                    $scope.appstoreLoginForm.password.$setPristine();
+                if (error) {
+                    $scope.appstoreLogin.busy = false;
+
+                    if (error.statusCode === 403) {
+                        $scope.appstoreLogin.error.password = 'Wrong email or password';
+                        $scope.appstoreLogin.password = '';
+                        $('#inputAppstoreLoginPassword').focus();
+                        $scope.appstoreLoginForm.password.$setPristine();
+                    } else {
+                        console.error(error);
+                    }
 
                     return;
                 }
 
-                console.log('---', error, result);
+                var config = {
+                    userId: result.userId,
+                    token: result.accessToken
+                };
+
+                Client.setAppstoreConfig(config, function (error) {
+                    if (error) return console.error(error);
+
+                    $scope.appstoreLogin.reset();
+                    $('#appstoreLoginModal').modal('hide');
+                });
             });
-
-            // var user = {
-            //     id: $scope.user.id,
-            //     displayName: $scope.appstoreLogin.displayName
-            // };
-
-            // Client.updateUser(user, function (error) {
-
-            //     if (error) {
-            //         console.error('Unable log into appstore.', error);
-            //         return;
-            //     }
-
-            //     // update user info in the background
-            //     Client.refreshUserInfo();
-
-            //     $scope.appstoreLogin.reset();
-            //     $('#appstoreLoginModal').modal('hide');
-            // });
         }
     };
 

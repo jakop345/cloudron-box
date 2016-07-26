@@ -123,7 +123,7 @@ angular.module('Application').service('AppStore', ['$http', '$base64', 'Client',
 
         $http.get(Client.getConfig().apiServerOrigin + '/api/v1/login', { headers: headers }).success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
-            return callback(null, data.accessToken);
+            return callback(null, data);
         }).error(function (data, status) {
             return callback(new AppStoreError(status, data));
         });
