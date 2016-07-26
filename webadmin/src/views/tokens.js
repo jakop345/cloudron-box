@@ -6,7 +6,6 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
 
     $scope.activeClients = [];
     $scope.apiClient = {};
-    $scope.tokenInUse = null;
 
     $scope.developerModeChange = {
         busy: false,
@@ -211,8 +210,6 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
     }
 
     function refresh() {
-        $scope.tokenInUse = Client._token;
-
         Client.getOAuthClients(function (error, activeClients) {
             if (error) return console.error(error);
 
