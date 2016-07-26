@@ -9,7 +9,7 @@ if (search.accessToken) localStorage.token = search.accessToken;
 
 
 // create main application module
-var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'ngSanitize', 'angular-md5', 'slick', 'ui-notification', 'ui.bootstrap', 'ui.bootstrap-slider']);
+var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'ngSanitize', 'angular-md5', 'base64', 'slick', 'ui-notification', 'ui.bootstrap', 'ui.bootstrap-slider']);
 
 app.config(['NotificationProvider', function (NotificationProvider) {
     NotificationProvider.setOptions({
