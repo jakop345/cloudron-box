@@ -2,7 +2,7 @@
 
 /* global angular:false */
 
-angular.module('Application').service('AppStore', ['$http', 'Client', function ($http, Client) {
+angular.module('Application').service('AppStore', ['$http', '$base64', 'Client', function ($http, $base64, Client) {
 
     function AppStoreError(statusCode, message) {
         Error.call(this);
@@ -109,6 +109,32 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
         $http.get(Client.getConfig().apiServerOrigin + '/api/v1/regions').success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
             return callback(null, data.regions);
+        }).error(function (data, status) {
+            return callback(new AppStoreError(status, data));
+        });
+    };
+
+    AppStore.prototype.login = function (email, password, callback) {
+        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
+
+        var headers = {
+            authorization: 'Basic ' + $base64.encode(email + ':' + password)
+        };
+
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/login', { headers: headers }).success(function (data, status) {
+            if (status !== 200) return callback(new AppStoreError(status, data));
+            return callback(null, data.accessToken);
+        }).error(function (data, status) {
+            return callback(new AppStoreError(status, data));
+        });
+    };
+
+    AppStore.prototype.logout = function (email, password, callback) {
+        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
+
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/logout').success(function (data, status) {
+            if (status !== 200) return callback(new AppStoreError(status, data));
+            return callback(null);
         }).error(function (data, status) {
             return callback(new AppStoreError(status, data));
         });
