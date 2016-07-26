@@ -374,14 +374,18 @@ function appUpdateAvailable(app, updateInfo) {
 function outOfDiskSpace(message) {
     assert.strictEqual(typeof message, 'string');
 
-    var mailOptions = {
-        from: platform.mailConfig().from,
-        to: 'admin@cloudron.io',
-        subject: util.format('[%s] Out of disk space alert', config.fqdn()),
-        text: render('out_of_disk_space.ejs', { fqdn: config.fqdn(), message: message, format: 'text' })
-    };
+    getAdminEmails(function (error, adminEmails) {
+        if (error) return console.log('Error getting admins', error);
 
-    sendMails([ mailOptions ]);
+        var mailOptions = {
+            from: platform.mailConfig().from,
+            to: config.provider() === 'caas' ? 'admin@cloudron.io' : adminEmails.join(', '),
+            subject: util.format('[%s] Out of disk space alert', config.fqdn()),
+            text: render('out_of_disk_space.ejs', { fqdn: config.fqdn(), message: message, format: 'text' })
+        };
+
+        sendMails([ mailOptions ]);
+    });
 }
 
 function certificateRenewalError(domain, message) {
