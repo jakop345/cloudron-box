@@ -57,7 +57,7 @@ function initialize(callback) {
         createDockerNetwork,
         startAddons.bind(null, existingInfra),
         removeOldImages,
-        existingInfra.version === 'none' ? apps.restoreInstalledApps : apps.configureInstalledApps,
+        startApps.bind(null, existingInfra),
         loadAddonVars,
         fs.writeFile.bind(fs, paths.INFRA_VERSION_FILE, JSON.stringify(infra))
     ], function (error) {
@@ -276,6 +276,19 @@ function startAddons(existingInfra, callback) {
     }
 
     async.series(startFuncs, callback);
+}
+
+function startApps(existingInfra, callback) {
+    if (existingInfra.version === infra.version) {
+        debug('startApp: apps are already uptodate');
+        callback();
+    } else if (existingInfra.version === 'none') {
+        debug('startApps: restoring installed apps');
+        apps.restoreInstalledApps(callback);
+    } else {
+        debug('startApps: reconfiguring installed apps');
+        apps.configureInstalledApps(callback);
+    }
 }
 
 function loadAddonVars(callback) {
