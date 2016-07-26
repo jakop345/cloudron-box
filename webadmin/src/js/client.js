@@ -366,6 +366,20 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.setAppstoreConfig = function (config, callback) {
+         $http.post(client.apiOrigin + '/api/v1/settings/appstore_config', config).success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
+    Client.prototype.getAppstoreConfig = function (callback) {
+         $http.get(client.apiOrigin + '/api/v1/settings/appstore_config').success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.getBackups = function (callback) {
         $http.get(client.apiOrigin + '/api/v1/backups').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
