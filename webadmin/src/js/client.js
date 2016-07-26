@@ -65,7 +65,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         config.headers = config.headers || {};
         config.headers.Authorization = 'Bearer ' + token;
 
-        return $http.get(url, config);
+        return $http.get(client.apiOrigin + url, config);
     }
 
     function post(url, data, config) {
@@ -74,7 +74,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         config.headers = config.headers || {};
         config.headers.Authorization = 'Bearer ' + token;
 
-        return $http.post(url, data, config);
+        return $http.post(client.apiOrigin + url, data, config);
     }
 
     function put(url, data, config) {
@@ -83,7 +83,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         config.headers = config.headers || {};
         config.headers.Authorization = 'Bearer ' + token;
 
-        return $http.put(url, data, config);
+        return $http.put(client.apiOrigin + url, data, config);
     }
 
     function del(url, config) {
@@ -91,7 +91,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         config.headers = config.headers || {};
         config.headers.Authorization = 'Bearer ' + token;
 
-        return $http.delete(url, config);
+        return $http.delete(client.apiOrigin + url, config);
     }
 
     function Client() {
@@ -240,14 +240,14 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
      * Rest API wrappers
      */
     Client.prototype.config = function (callback) {
-        get(client.apiOrigin + '/api/v1/cloudron/config').success(function(data, status) {
+        get('/api/v1/cloudron/config').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.userInfo = function (callback) {
-        get(client.apiOrigin + '/api/v1/profile').success(function(data, status) {
+        get('/api/v1/profile').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -257,7 +257,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var that = this;
 
         var data = { password: password, enabled: enabled };
-        post(client.apiOrigin + '/api/v1/developer', data).success(function (data, status) {
+        post('/api/v1/developer', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
 
             // will get overriden after polling for config, but ensures quick UI update
@@ -271,7 +271,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var fd = new FormData();
         fd.append('avatar', avatarFile);
 
-        post(client.apiOrigin + '/api/v1/settings/cloudron_avatar', fd, {
+        post('/api/v1/settings/cloudron_avatar', fd, {
             headers: { 'Content-Type': undefined },
             transformRequest: angular.identity
         }).success(function(data, status) {
@@ -291,7 +291,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             key: config.key
         };
 
-        post(client.apiOrigin + '/api/v1/apps/install', data).success(function (data, status) {
+        post('/api/v1/apps/install', data).success(function (data, status) {
             if (status !== 202 || typeof data !== 'object') return defaultErrorHandler(callback);
 
             // put new app with amended title in cache
@@ -309,7 +309,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
     Client.prototype.restoreApp = function (appId, backupId, password, callback) {
         var data = { password: password, backupId: backupId };
-        post(client.apiOrigin + '/api/v1/apps/' + appId + '/restore', data).success(function (data, status) {
+        post('/api/v1/apps/' + appId + '/restore', data).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -317,7 +317,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
     Client.prototype.uninstallApp = function (appId, password, callback) {
         var data = { password: password };
-        post(client.apiOrigin + '/api/v1/apps/' + appId + '/uninstall', data).success(function (data, status) {
+        post('/api/v1/apps/' + appId + '/uninstall', data).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -337,7 +337,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             xFrameOptions: config.xFrameOptions
         };
 
-        post(client.apiOrigin + '/api/v1/apps/' + id + '/configure', data).success(function (data, status) {
+        post('/api/v1/apps/' + id + '/configure', data).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -350,21 +350,21 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             portBindings: portBindings
         };
 
-        post(client.apiOrigin + '/api/v1/apps/' + id + '/update', data).success(function (data, status) {
+        post('/api/v1/apps/' + id + '/update', data).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.startApp = function (id, callback) {
-        post(client.apiOrigin + '/api/v1/apps/' + id + '/start').success(function (data, status) {
+        post('/api/v1/apps/' + id + '/start').success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.stopApp = function (id, callback) {
-        post(client.apiOrigin + '/api/v1/apps/' + id + '/stop').success(function (data, status) {
+        post('/api/v1/apps/' + id + '/stop').success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -374,35 +374,35 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         // this is used in the defaultErrorHandler itself, and avoids a loop
         if (typeof errorCallback !== 'function') errorCallback = defaultErrorHandler(callback);
 
-        get(client.apiOrigin + '/api/v1/cloudron/progress').success(function(data, status) {
+        get('/api/v1/cloudron/progress').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(errorCallback);
     };
 
     Client.prototype.version = function (callback) {
-        get(client.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
+        get('/api/v1/cloudron/status').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getStatus = function (callback) {
-        get(client.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
+        get('/api/v1/cloudron/status').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.setDnsConfig = function (dnsConfig, callback) {
-        post(client.apiOrigin + '/api/v1/settings/dns_config', dnsConfig).success(function(data, status) {
+        post('/api/v1/settings/dns_config', dnsConfig).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getDnsConfig = function (callback) {
-        get(client.apiOrigin + '/api/v1/settings/dns_config').success(function(data, status) {
+        get('/api/v1/settings/dns_config').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -411,28 +411,28 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.setAppstoreConfig = function (config, callback) {
         var data = config;
 
-        post(client.apiOrigin + '/api/v1/settings/appstore_config', data).success(function(data, status) {
+        post('/api/v1/settings/appstore_config', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getAppstoreConfig = function (callback) {
-        get(client.apiOrigin + '/api/v1/settings/appstore_config').success(function(data, status) {
+        get('/api/v1/settings/appstore_config').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getBackups = function (callback) {
-        get(client.apiOrigin + '/api/v1/backups').success(function (data, status) {
+        get('/api/v1/backups').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data.backups);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.backup = function (callback) {
-        post(client.apiOrigin + '/api/v1/backups').success(function(data, status) {
+        post('/api/v1/backups').success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -448,7 +448,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             }
         };
 
-        get(client.apiOrigin + '/api/v1/eventlog', config).success(function (data, status) {
+        get('/api/v1/eventlog', config).success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
 
             callback(null, data.eventlogs);
@@ -456,42 +456,42 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.getApps = function (callback) {
-        get(client.apiOrigin + '/api/v1/apps').success(function (data, status) {
+        get('/api/v1/apps').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data.apps);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getUsers = function (callback) {
-        get(client.apiOrigin + '/api/v1/users').success(function (data, status) {
+        get('/api/v1/users').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data.users);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getGroups = function (callback) {
-        get(client.apiOrigin + '/api/v1/groups').success(function (data, status) {
+        get('/api/v1/groups').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data.groups);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getMailboxes = function (callback) {
-        get(client.apiOrigin + '/api/v1/mailboxes').success(function (data, status) {
+        get('/api/v1/mailboxes').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data.mailboxes);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.setGroups = function (userId, groupIds, callback) {
-        put(client.apiOrigin + '/api/v1/users/' + userId + '/groups', { groupIds: groupIds }).success(function (data, status) {
+        put('/api/v1/users/' + userId + '/groups', { groupIds: groupIds }).success(function (data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getGroup = function (groupId, callback) {
-        get(client.apiOrigin + '/api/v1/groups/' + groupId).success(function (data, status) {
+        get('/api/v1/groups/' + groupId).success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -502,7 +502,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             name: name
         };
 
-        post(client.apiOrigin + '/api/v1/groups', data).success(function(data, status) {
+        post('/api/v1/groups', data).success(function(data, status) {
             if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -518,7 +518,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             }
         };
 
-        del(client.apiOrigin + '/api/v1/groups/' + groupId, config).success(function(data, status) {
+        del('/api/v1/groups/' + groupId, config).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -527,7 +527,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.getNonApprovedApps = function (callback) {
         if (!this._config.developerMode) return callback(null, []);
 
-        get(client.apiOrigin + '/api/v1/developer/apps').success(function (data, status) {
+        get('/api/v1/developer/apps').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data.apps || []);
         }).error(defaultErrorHandler(callback));
@@ -561,7 +561,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.sendInvite = function (user, callback) {
-        post(client.apiOrigin + '/api/v1/users/' + user.id + '/invite').success(function (data, status) {
+        post('/api/v1/users/' + user.id + '/invite').success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.resetToken);
         }).error(defaultErrorHandler(callback));
@@ -577,7 +577,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             displayName: displayName
         };
 
-        post(client.apiOrigin + '/api/v1/cloudron/activate?setupToken=' + setupToken, data).success(function(data, status) {
+        post('/api/v1/cloudron/activate?setupToken=' + setupToken, data).success(function(data, status) {
             if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
 
             that.setToken(data.token);
@@ -588,7 +588,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.getOAuthClients = function (callback) {
-        get(client.apiOrigin + '/api/v1/oauth/clients').success(function(data, status) {
+        get('/api/v1/oauth/clients').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data.clients);
         }).error(defaultErrorHandler(callback));
@@ -601,42 +601,42 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             redirectURI: redirectURI
         };
 
-        post(client.apiOrigin + '/api/v1/oauth/clients', data).success(function(data, status) {
+        post('/api/v1/oauth/clients', data).success(function(data, status) {
             if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data.clients);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.delOAuthClient = function (id, callback) {
-        del(client.apiOrigin + '/api/v1/oauth/clients/' + id).success(function(data, status) {
+        del('/api/v1/oauth/clients/' + id).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.createTokenByClientId = function (id, expiresAt, callback) {
-        post(client.apiOrigin + '/api/v1/oauth/clients/' + id + '/tokens?expiresAt=' + expiresAt).success(function(data, status) {
+        post('/api/v1/oauth/clients/' + id + '/tokens?expiresAt=' + expiresAt).success(function(data, status) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data.token);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getTokensByClientId = function (id, callback) {
-        get(client.apiOrigin + '/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
+        get('/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.tokens);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.delTokensByClientId = function (id, callback) {
-        del(client.apiOrigin + '/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
+        del('/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.delToken = function (clientId, tokenId, callback) {
-        del(client.apiOrigin + '/api/v1/oauth/clients/' + clientId + '/tokens/' + tokenId).success(function(data, status) {
+        del('/api/v1/oauth/clients/' + clientId + '/tokens/' + tokenId).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -645,14 +645,14 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.update = function (password, callback) {
         var data = { password: password };
 
-        post(client.apiOrigin + '/api/v1/cloudron/update', data).success(function(data, status) {
+        post('/api/v1/cloudron/update', data).success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.reboot = function (callback) {
-        post(client.apiOrigin + '/api/v1/cloudron/reboot').success(function(data, status) {
+        post('/api/v1/cloudron/reboot').success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -662,7 +662,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var data = options;
         data.password = password;
 
-        post(client.apiOrigin + '/api/v1/cloudron/migrate', data).success(function(data, status) {
+        post('/api/v1/cloudron/migrate', data).success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -674,7 +674,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             key: keyFile
         };
 
-        post(client.apiOrigin + '/api/v1/settings/certificate', data).success(function(data, status) {
+        post('/api/v1/settings/certificate', data).success(function(data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -686,7 +686,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             key: keyFile
         };
 
-        post(client.apiOrigin + '/api/v1/settings/admin_certificate', data).success(function(data, status) {
+        post('/api/v1/settings/admin_certificate', data).success(function(data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -701,7 +701,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             }
         };
 
-        get(client.apiOrigin + '/api/v1/cloudron/graphs', config).success(function (data, status) {
+        get('/api/v1/cloudron/graphs', config).success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -714,7 +714,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             description: description
         };
 
-        post(client.apiOrigin + '/api/v1/cloudron/feedback', data).success(function (data, status) {
+        post('/api/v1/cloudron/feedback', data).success(function (data, status) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -725,7 +725,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             name: name
         };
 
-        post(client.apiOrigin + '/api/v1/mailboxes', data).success(function(data, status) {
+        post('/api/v1/mailboxes', data).success(function(data, status) {
             if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -741,7 +741,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             }
         };
 
-        del(client.apiOrigin + '/api/v1/mailboxes/' + name, config).success(function(data, status) {
+        del('/api/v1/mailboxes/' + name, config).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -752,7 +752,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             aliases: aliases
         };
 
-        put(client.apiOrigin + '/api/v1/mailboxes/' + name + '/aliases', data).success(function(data, status) {
+        put('/api/v1/mailboxes/' + name + '/aliases', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -766,7 +766,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             invite: !!sendInvite
         };
 
-        post(client.apiOrigin + '/api/v1/users', data).success(function(data, status) {
+        post('/api/v1/users', data).success(function(data, status) {
             if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -778,7 +778,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             displayName: user.displayName
         };
 
-        post(client.apiOrigin + '/api/v1/users/' + user.id, data).success(function(data, status) {
+        post('/api/v1/users/' + user.id, data).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -794,7 +794,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             }
         };
 
-        del(client.apiOrigin + '/api/v1/users/' + userId, config).success(function(data, status) {
+        del('/api/v1/users/' + userId, config).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -806,7 +806,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             newPassword: newPassword
         };
 
-        post(client.apiOrigin + '/api/v1/profile/password', data).success(function(data, status) {
+        post('/api/v1/profile/password', data).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -933,7 +933,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             client_secret: this._clientSecret
         };
 
-        post(client.apiOrigin + '/api/v1/oauth/token?response_type=token&client_id=' + this._clientId, data).success(function(data, status) {
+        post('/api/v1/oauth/token?response_type=token&client_id=' + this._clientId, data).success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
 
             callback(null, data.access_token);
@@ -953,7 +953,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.setShowTutorial = function (show, callback) {
         var data = { showTutorial: show };
 
-        post(client.apiOrigin + '/api/v1/profile/tutorial', data).success(function (data, status) {
+        post('/api/v1/profile/tutorial', data).success(function (data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
