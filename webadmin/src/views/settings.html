@@ -136,13 +136,13 @@
     </div>
 </div>
 
-<div class="section-header" ng-show="user.admin">
+<div class="section-header">
     <div class="text-left">
         <h3>About</h3>
     </div>
 </div>
 
-<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
+<div class="card" style="margin-bottom: 15px;">
     <div class="row">
         <div class="col-xs-4" style="min-width: 150px;">
             <div class="settings-avatar" ng-click="showChangeAvatar()" style="background-image: url('{{ client.avatar }}');">
@@ -164,13 +164,13 @@
     </div>
 </div>
 
-<div class="section-header" ng-show="user.admin">
+<div class="section-header">
     <div class="text-left">
         <h3>Appstore Account (<a href="https://cloudron.io" target="_blank">cloudron.io</a>)</h3>
     </div>
 </div>
 
-<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
+<div class="card" style="margin-bottom: 15px;">
     <div class="row">
         <div class="col-xs-12 text-center" ng-show="!appstoreConfig.userId">
             <button class="btn btn-success" ng-click="appstoreLogin.show()">Login to the Cloudron Store</button>
@@ -181,13 +181,13 @@
     </div>
 </div>
 
-<div class="section-header" ng-show="config.provider === 'caas' && user.admin">
+<div class="section-header" ng-show="config.provider === 'caas'">
     <div class="text-left">
         <h3>Plans</h3>
     </div>
 </div>
 
-<div class="card" style="margin-bottom: 15px;" ng-show="config.provider === 'caas' && user.admin">
+<div class="card" style="margin-bottom: 15px;" ng-show="config.provider === 'caas'">
     <div class="row">
         <div class="col-xs-10 plans" style="margin-left: 20px">
             <div ng-repeat="plan in availablePlans">
@@ -208,13 +208,13 @@
     </div>
 </div>
 
-<div class="section-header" ng-show="user.admin">
+<div class="section-header">
     <div class="text-left">
         <h3>Backups</h3>
     </div>
 </div>
 
-<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
+<div class="card" style="margin-bottom: 15px;">
     <div class="row">
         <div class="col-xs-6">
             <span class="text-muted">Last Backup</span>
