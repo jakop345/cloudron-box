@@ -18,7 +18,7 @@ exports = module.exports = {
 
     outOfDiskSpace: outOfDiskSpace,
 
-    certificateRenewed: certificateRenewed,
+    certificateRenewalError: certificateRenewalError,
 
     FEEDBACK_TYPE_FEEDBACK: 'feedback',
     FEEDBACK_TYPE_TICKET: 'ticket',
@@ -384,15 +384,15 @@ function outOfDiskSpace(message) {
     sendMails([ mailOptions ]);
 }
 
-function certificateRenewed(domain, message) {
+function certificateRenewalError(domain, message) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof message, 'string');
 
     var mailOptions = {
         from: platform.mailConfig().from,
         to: 'admin@cloudron.io',
-        subject: util.format('[%s] Certificate was %s renewed', domain, message ? 'not' : ''),
-        text: render('certificate_renewed.ejs', { domain: domain, message: message, format: 'text' })
+        subject: util.format('[%s] Certificate renewal error', domain),
+        text: render('certificate_renewal_error.ejs', { domain: domain, message: message, format: 'text' })
     };
 
     sendMails([ mailOptions ]);

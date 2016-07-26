@@ -169,10 +169,11 @@ function renewAll(auditSource, callback) {
 
                     var errorMessage = error ? error.message : '';
                     eventlog.add(eventlog.ACTION_CERTIFICATE_RENEWAL, auditSource, { domain: domain, errorMessage: errorMessage });
-                    mailer.certificateRenewed(domain, errorMessage);
 
                     if (error) {
                         debug('renewAll: could not renew cert for %s because %s', domain, error);
+
+                        mailer.certificateRenewalError(domain, errorMessage);
 
                         // check if we should fallback if we expire in the coming day
                         if (!isExpiringSync(certFilePath, 24 * 1)) return iteratorCallback();
