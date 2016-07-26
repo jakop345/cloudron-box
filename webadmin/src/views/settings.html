@@ -151,7 +151,7 @@
         </div>
         <div class="col-xs-8">
             <table width="100%">
-                <tr>
+                <tr ng-show="config.provider === 'caas'">
                     <td class="text-muted" style="vertical-align: top;">Model</td>
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.size }} - {{ config.region }}</td>
                 </tr>
