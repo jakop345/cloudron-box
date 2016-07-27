@@ -693,7 +693,7 @@ function checkDiskSpace(callback) {
 
         var oos = entries.some(function (entry) {
             return (entry.mount === paths.DATA_DIR && entry.capacity >= 0.90) ||
-                   (entry.mount === '/' && entry.used <= (1.25 * 1024 * 1024)); // 1.5G
+                   (entry.mount === '/' && entry.available <= (1.25 * 1024 * 1024)); // 1.5G
         });
 
         debug('Disk space checked. ok: %s', !oos);
