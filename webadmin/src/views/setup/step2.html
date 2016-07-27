@@ -22,10 +22,14 @@
                 <small ng-show="setup_form.password.$dirty && setup_form.password.$invalid">Password must be 8-30 character with at least one uppercase, one numeric and one special character</small>
             </div>
         </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 text-center">
         <div class="form-group">
             <div class="checkbox">
                 <label>
-                    <input type="checkbox" ng-model="wizard.createAppstoreAccount"> Create Cloudron store account with the same credentials
+                    <input type="checkbox" ng-model="wizard.createAppstoreAccount"> Create <a href="https://cloudron.io" target="_blank">Cloudron Store</a> account with same credentials
                 </label>
             </div>
         </div>
