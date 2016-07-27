@@ -379,7 +379,7 @@ function outOfDiskSpace(message) {
 
         var mailOptions = {
             from: platform.mailConfig().from,
-            to: config.provider() === 'caas' ? 'admin@cloudron.io' : adminEmails.join(', '),
+            to: config.provider() === 'caas' ? 'support@cloudron.io' : adminEmails.join(', '),
             subject: util.format('[%s] Out of disk space alert', config.fqdn()),
             text: render('out_of_disk_space.ejs', { fqdn: config.fqdn(), message: message, format: 'text' })
         };
@@ -397,7 +397,7 @@ function certificateRenewalError(domain, message) {
 
         var mailOptions = {
             from: platform.mailConfig().from,
-            to: config.provider() === 'caas' ? 'admin@cloudron.io' : adminEmails.join(', '),
+            to: config.provider() === 'caas' ? 'support@cloudron.io' : adminEmails.join(', '),
             subject: util.format('[%s] Certificate renewal error', domain),
             text: render('certificate_renewal_error.ejs', { domain: domain, message: message, format: 'text' })
         };
@@ -414,7 +414,7 @@ function unexpectedExit(program, context) {
 
     var mailOptions = {
         from: platform.mailConfig().from,
-        to: 'admin@cloudron.io',
+        to: 'support@cloudron.io',
         subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
         text: render('unexpected_exit.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
     };
