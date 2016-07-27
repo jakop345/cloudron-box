@@ -220,8 +220,24 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
 
 }]);
 
-app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', function ($scope, $location, Wizard, Client) {
+app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', 'AppStore', function ($scope, $location, Wizard, Client, AppStore) {
     $scope.wizard = Wizard;
+
+    function setDnsConfigIfNeeded(callback) {
+        if ($scope.wizard.dnsConfig === null) return callback(null);
+
+        Client.setDnsConfig($scope.wizard.dnsConfig, callback);
+    }
+
+    function registerAppstoreAccountIfNeeded(callback) {
+        if (!Wizard.createAppstoreAccount) return callback(null);
+
+        AppStore.register(Wizard.email, Wizard.password, function (error, result) {
+            if (error) return callback(error);
+
+            Client.setAppstoreConfig({ userId: result.userId, token: result.accessToken }, callback);
+        });
+    }
 
     Client.createAdmin(Wizard.username, Wizard.password, Wizard.email, Wizard.displayName, Wizard.setupToken, function (error) {
         if (error) {
@@ -233,15 +249,14 @@ app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', f
         Client.changeCloudronAvatar($scope.wizard.avatarBlob, function (error) {
             if (error) return console.error('Unable to set avatar.', error);
 
-            if ($scope.wizard.dnsConfig === null) {
-                window.location.href = '/';
-                return;
-            }
-
-            Client.setDnsConfig($scope.wizard.dnsConfig, function (error) {
+            setDnsConfigIfNeeded(function (error) {
                 if (error) return console.error('Unable to set dns config.', error);
 
-                window.location.href = '/';
+                registerAppstoreAccountIfNeeded(function (error) {
+                    if (error) console.error('Unable to create appstore account.', error);  // this is not fatal
+
+                    window.location.href = '/';
+                });
             });
         });
     });
@@ -292,8 +307,15 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
         Wizard.requireEmail = !search.email;
         Wizard.provider = status.provider;
 
-        $location.path('/step1');
+        Client.refreshConfig(function (error) {
+            if (error) {
+                window.location.href = '/error.html';
+                return;
+            }
 
-        $scope.initialized = true;
+            $location.path('/step1');
+
+            $scope.initialized = true;
+        });
     });
 }]);
