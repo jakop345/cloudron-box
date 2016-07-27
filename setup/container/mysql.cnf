@@ -5,3 +5,6 @@
 [mysqld]
 performance_schema=OFF
 max_connections=50
+# on ec2, without this we get a sporadic connection drop when doing the initial migration
+max_allowed_packet=32M
+
