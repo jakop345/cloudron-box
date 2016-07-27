@@ -64,14 +64,6 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         Client.logout();
     };
 
-    $scope.setup = function (provider) {
-        if (provider === 'caas') {
-            window.location.href = '/error.html?errorCode=1';
-        } else {
-            window.location.href = '/setup.html';
-        }
-    };
-
     $scope.error = function (error) {
         console.error(error);
         window.location.href = '/error.html';
@@ -111,7 +103,11 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
 
     Client.getStatus(function (error, status) {
         if (error) return $scope.error(error);
-        if (!status.activated) return $scope.setup();
+
+        if (!status.activated) {
+            window.location.href = '/setup.html';
+            return;
+        }
 
         Client.refreshConfig(function (error) {
             if (error) return $scope.error(error);
