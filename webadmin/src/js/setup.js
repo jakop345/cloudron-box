@@ -232,6 +232,7 @@ app.controller('FinishController', ['$scope', '$location', '$http', 'Wizard', 'C
 
     function registerAppstoreAccountIfNeeded(callback) {
         if (!Wizard.createAppstoreAccount) return callback(null);
+        if (Wizard.provider === 'caas') return callback(null);
 
         $http.post(Wizard.apiServerOrigin + '/api/v1/users', { email: Wizard.email, password: Wizard.password }).success(function (data, status) {
             if (status !== 201) return callback({ status: status, data: data });
