@@ -53,10 +53,11 @@ function getAppUpdates(callback) {
         var appUpdateInfo = { };
         // appStoreId can be '' for dev apps
         var appStoreIds = apps.map(function (app) { return app.appStoreId; }).filter(function (id) { return id !== ''; });
+        var appVersions = apps.map(function (app) { return { id: app.appStoreId, version: app.manifest.version }; } ).filter(function (v) { return v.id !== ''; });
 
         superagent
             .post(config.apiServerOrigin() + '/api/v1/appupdates')
-            .send({ appIds: appStoreIds, boxVersion: config.version() })
+            .send({ appIds: appStoreIds, appVersions: appVersions, boxVersion: config.version() })
             .timeout(10 * 1000)
             .end(function (error, result) {
 
