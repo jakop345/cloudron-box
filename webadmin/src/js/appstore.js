@@ -114,17 +114,6 @@ angular.module('Application').service('AppStore', ['$http', '$base64', 'Client',
         });
     };
 
-    AppStore.prototype.register = function (email, password, callback) {
-        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
-
-        $http.post(Client.getConfig().apiServerOrigin + '/api/v1/users', { email: email, password: password }).success(function (data, status) {
-            if (status !== 201) return callback(new AppStoreError(status, data));
-            return callback(null, data);
-        }).error(function (data, status) {
-            return callback(new AppStoreError(status, data));
-        });
-    };
-
     AppStore.prototype.login = function (email, password, callback) {
         if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
 

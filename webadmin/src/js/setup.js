@@ -46,6 +46,7 @@ app.service('Wizard', [ function () {
         this.displayName = '';
         this.setupToken = null;
         this.provider = null;
+        this.apiServerOrigin = null;
         this.createAppstoreAccount = true;
         this.availableAvatars = [{
             file: null,
@@ -220,7 +221,7 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
 
 }]);
 
-app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', 'AppStore', function ($scope, $location, Wizard, Client, AppStore) {
+app.controller('FinishController', ['$scope', '$location', '$http', 'Wizard', 'Client', function ($scope, $location, $http, Wizard, Client) {
     $scope.wizard = Wizard;
 
     function setDnsConfigIfNeeded(callback) {
@@ -232,10 +233,12 @@ app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', '
     function registerAppstoreAccountIfNeeded(callback) {
         if (!Wizard.createAppstoreAccount) return callback(null);
 
-        AppStore.register(Wizard.email, Wizard.password, function (error, result) {
-            if (error) return callback(error);
+        $http.post(Wizard.apiServerOrigin + '/api/v1/users', { email: Wizard.email, password: Wizard.password }).success(function (data, status) {
+            if (status !== 201) return callback({ status: status, data: data });
 
-            Client.setAppstoreConfig({ userId: result.userId, token: result.accessToken }, callback);
+            Client.setAppstoreConfig({ userId: data.userId, token: data.accessToken }, callback);
+        }).error(function (data, status) {
+            callback({ status: status, data: data });
         });
     }
 
@@ -306,16 +309,10 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
         Wizard.displayName = search.displayName;
         Wizard.requireEmail = !search.email;
         Wizard.provider = status.provider;
+        Wizard.apiServerOrigin = status.apiServerOrigin;
 
-        Client.refreshConfig(function (error) {
-            if (error) {
-                window.location.href = '/error.html';
-                return;
-            }
+        $location.path('/step1');
 
-            $location.path('/step1');
-
-            $scope.initialized = true;
-        });
+        $scope.initialized = true;
     });
 }]);
