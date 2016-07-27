@@ -583,3 +583,8 @@
 - Keep eventlogs only for a week
 - Throttle OOM mails
 
+[0.17.4]
+- Add warning for users moving to custom domains
+- Out of disk space and certificate renewal mails are now sent to cloudron owner for selfhosters
+- Fix a bug where selfhosted Cloudrons do not start because of a MySQL error
+
