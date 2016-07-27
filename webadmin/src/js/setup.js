@@ -46,6 +46,7 @@ app.service('Wizard', [ function () {
         this.displayName = '';
         this.setupToken = null;
         this.provider = null;
+        this.createAppstoreAccount = true;
         this.availableAvatars = [{
             file: null,
             data: null,
