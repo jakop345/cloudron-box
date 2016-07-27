@@ -175,11 +175,14 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         this._readyListener.forEach(function (callback) {
             callback();
         });
+
+        // clear the listeners, we only callback once!
+        this._readyListener = [];
     };
 
     Client.prototype.onReady = function (callback) {
         if (this._ready) callback();
-        this._readyListener.push(callback);
+        else this._readyListener.push(callback);
     };
 
     Client.prototype.onConfig = function (callback) {
