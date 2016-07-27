@@ -57,13 +57,6 @@ server {
         client_max_body_size 0;
 
 <% if ( endpoint === 'admin' ) { %>
-        error_page 404 = @fallback;
-        location @fallback {
-            internal;
-            root /home/yellowtent/box/webadmin/dist;
-            rewrite ^/$ /error.html?errorCode=4 break;
-        }
-
         location /api/ {
             proxy_pass   http://127.0.0.1:3000;
             client_max_body_size 1m;
