@@ -389,7 +389,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         });
     }
 
-    refresh();
+    Client.onReady(refresh);
 
     // setup all the dialog focus handling
     ['userAddModal', 'userRemoveModal', 'userEditModal', 'groupAddModal', 'groupRemoveModal'].forEach(function (id) {

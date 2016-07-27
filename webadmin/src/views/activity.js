@@ -43,10 +43,6 @@ angular.module('Application').controller('ActivityController', ['$scope', '$loca
         });
     }
 
-    Client.onReady(function () {
-        fetchEventLogs();
-    });
-
     $scope.showNextPage = function () {
         $scope.currentPage++;
         fetchEventLogs();
@@ -62,4 +58,8 @@ angular.module('Application').controller('ActivityController', ['$scope', '$loca
     $scope.updateFilter = function () {
         fetchEventLogs();
     };
+
+    Client.onReady(function () {
+        fetchEventLogs();
+    });
 }]);

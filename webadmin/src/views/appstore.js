@@ -373,28 +373,31 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         });
     }
 
-    (function refresh() {
-        $scope.ready = false;
+    Client.onReady(function () {
+        (function refresh() {
+            $scope.ready = false;
 
-        getAppList(function (error, apps) {
-            if (error) {
-                console.error(error);
-                return $timeout(refresh, 1000);
-            }
+            getAppList(function (error, apps) {
+                if (error) {
+                    console.error(error);
+                    return $timeout(refresh, 1000);
+                }
 
-            $scope.apps = apps;
+                $scope.apps = apps;
 
-            // show install app dialog immediately if an app id was passed in the query
-            hashChangeListener();
+                // show install app dialog immediately if an app id was passed in the query
+                hashChangeListener();
 
-            if ($scope.user.admin) {
-                fetchUsers();
-                fetchGroups();
-            }
+                if ($scope.user.admin) {
+                    fetchUsers();
+                    fetchGroups();
+                }
 
-            $scope.ready = true;
-        });
-    })();
+                $scope.ready = true;
+            });
+        })();
+
+    });
 
     $('#appInstallModal').on('hide.bs.modal', function () {
         $location.path('/appstore', false).search({ version: undefined });
