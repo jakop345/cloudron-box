@@ -164,13 +164,13 @@
     </div>
 </div>
 
-<div class="section-header">
+<div class="section-header" ng-hide="config.provider === 'caas'">
     <div class="text-left">
         <h3>Appstore Account (<a href="https://cloudron.io" target="_blank">cloudron.io</a>)</h3>
     </div>
 </div>
 
-<div class="card" style="margin-bottom: 15px;">
+<div class="card" style="margin-bottom: 15px;" ng-hide="config.provider === 'caas'">
     <div class="row">
         <div class="col-xs-12 text-center" ng-show="!appstoreConfig.userId">
             <button class="btn btn-success" ng-click="appstoreLogin.show()">Login to the Cloudron Store</button>
