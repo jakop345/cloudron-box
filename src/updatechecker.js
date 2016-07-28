@@ -144,48 +144,37 @@ function checkAppUpdates(callback) {
     getAppUpdates(function (error, updateInfo) {
         if (error) return callback(error);
 
-        settings.getUpdateConfig(function (error, updateConfig) {
-            if (error) return callback(error);
+        var oldState = loadState();
+        var newState = { box: oldState.box }; // create new state so that old app ids are removed
 
-            var oldState = loadState();
-            var newState = { box: oldState.box }; // create new state so that old app ids are removed
+        async.eachSeries(Object.keys(updateInfo), function iterator(id, iteratorDone) {
+            gAppUpdateInfo[id] = updateInfo[id];
 
-            async.eachSeries(Object.keys(updateInfo), function iterator(id, iteratorDone) {
-                var isPrerelease = semver.parse(updateInfo[id].manifest.version).prerelease.length !== 0;
+            // decide whether to send email
+            newState[id] = updateInfo[id].manifest.version;
 
-                if (isPrerelease && !updateConfig.prerelease) {
-                    debug('Skipping update %s of app %s as this box does not want prereleases', gBoxUpdateInfo.version, id);
+            if (oldState[id] === updateInfo[id].manifest.version) {
+                debug('Skipping notification of app update %s since user was already notified', id);
+                return iteratorDone();
+            }
+
+            apps.get(id, function (error, app) {
+                if (error) {
+                    debug('Error getting app %s %s', id, error);
                     return iteratorDone();
                 }
 
-                gAppUpdateInfo[id] = updateInfo[id];
-
-                // decide whether to send email
-                newState[id] = updateInfo[id].manifest.version;
-
-                if (oldState[id] === updateInfo[id].manifest.version) {
-                    debug('Skipping notification of app update %s since user was already notified', id);
-                    return iteratorDone();
+                if (semver.satisfies(newState[id], '~' + app.manifest.version)) {
+                    debug('Skipping notification of box update as this is a patch release');
+                } else {
+                    mailer.appUpdateAvailable(app, updateInfo[id]);
                 }
 
-                apps.get(id, function (error, app) {
-                    if (error) {
-                        debug('Error getting app %s %s', id, error);
-                        return iteratorDone();
-                    }
-
-                    if (semver.satisfies(newState[id], '~' + app.manifest.version)) {
-                        debug('Skipping notification of box update as this is a patch release');
-                    } else {
-                        mailer.appUpdateAvailable(app, updateInfo[id]);
-                    }
-
-                    iteratorDone();
-                });
-            }, function () {
-                saveState(newState);
-                callback();
+                iteratorDone();
             });
+        }, function () {
+            saveState(newState);
+            callback();
         });
     });
 }
