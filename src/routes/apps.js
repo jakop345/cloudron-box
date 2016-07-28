@@ -123,7 +123,7 @@ function installApp(req, res, next) {
 
     if (data.xFrameOptions && typeof data.xFrameOptions !== 'string') return next(new HttpError(400, 'xFrameOptions must be a string'));
 
-    debug('Installing app id:%s data:%j', data);
+    debug('Installing app :%j', data);
 
     apps.install(data, auditSource(req), function (error, app) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
