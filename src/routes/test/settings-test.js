@@ -175,7 +175,7 @@ describe('Settings API', function () {
                    .query({ access_token: token })
                    .send({ name: name })
                    .end(function (err, res) {
-                expect(res.statusCode).to.equal(200);
+                expect(res.statusCode).to.equal(202);
                 done();
             });
         });
