@@ -212,6 +212,9 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.setConfig = function (config) {
         var that = this;
 
+        // provide fallback to caas
+        if (!config.provider) config.provider = 'caas';
+
         angular.copy(config, this._config);
 
         this._configListener.forEach(function (callback) {
