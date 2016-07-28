@@ -121,7 +121,7 @@ angular.module('Application').service('AppStore', ['$http', '$base64', 'Client',
             authorization: 'Basic ' + $base64.encode(email + ':' + password)
         };
 
-        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/login', { headers: headers }).success(function (data, status) {
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/login?persistent', { headers: headers }).success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
             return callback(null, data);
         }).error(function (data, status) {
