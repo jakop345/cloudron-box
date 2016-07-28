@@ -264,8 +264,9 @@ describe('updatechecker - checkAppUpdates', function () {
         nock.cleanAll();
 
         var scope = nock('http://localhost:4444')
-            .post('/api/v1/appupdates')
-            .reply(200, { appVersions: { 'io.cloudron.app': { manifest: { version: '1.0.0' } } } });
+            .get('/api/v1/apps/io.cloudron.app/versions/1.0.0/update')
+            .query({ boxVersion: config.version() })
+            .reply(200, { update: null });
 
         updatechecker.checkAppUpdates(function (error) {
             expect(!error).to.be.ok();
@@ -278,22 +279,9 @@ describe('updatechecker - checkAppUpdates', function () {
         nock.cleanAll();
 
         var scope = nock('http://localhost:4444')
-            .post('/api/v1/appupdates')
-            .reply(500, { appVersions: { 'io.cloudron.app': { manifest: { version: '1.0.0' } } } });
-
-        updatechecker.checkAppUpdates(function (error) {
-            expect(error).to.be.ok();
-            expect(updatechecker.getUpdateInfo().apps).to.eql({});
-            checkMails(0, done);
-        });
-    });
-
-    it('missing info', function (done) {
-        nock.cleanAll();
-
-        var scope = nock('http://localhost:4444')
-            .post('/api/v1/appupdates')
-            .reply(200, { appVersions: { 'io.cloudron.app2': { manifest: { version: '1.0.0' } } } });
+            .get('/api/v1/apps/io.cloudron.app/versions/1.0.0/update')
+            .query({ boxVersion: config.version() })
+            .reply(500, { update: { manifest: { version: '1.0.0' } } } );
 
         updatechecker.checkAppUpdates(function (error) {
             expect(!error).to.be.ok();
@@ -306,8 +294,9 @@ describe('updatechecker - checkAppUpdates', function () {
         nock.cleanAll();
 
         var scope = nock('http://localhost:4444')
-            .post('/api/v1/appupdates')
-            .reply(200, { appVersions: { 'io.cloudron.app': { manifest: { version: '2.0.0' } } } });
+            .get('/api/v1/apps/io.cloudron.app/versions/1.0.0/update')
+            .query({ boxVersion: config.version() })
+            .reply(200, { update: { manifest: { version: '2.0.0' } } } );
 
         updatechecker.checkAppUpdates(function (error) {
             expect(!error).to.be.ok();
@@ -320,8 +309,9 @@ describe('updatechecker - checkAppUpdates', function () {
         nock.cleanAll();
 
         var scope = nock('http://localhost:4444')
-            .post('/api/v1/appupdates')
-            .reply(200, { appVersions: { 'io.cloudron.app': { manifest: { version: '1.0.1' } } } });
+            .get('/api/v1/apps/io.cloudron.app/versions/1.0.0/update')
+            .query({ boxVersion: config.version() })
+            .reply(200, { update: { manifest: { version: '1.0.1' } } } );
 
         updatechecker.checkAppUpdates(function (error) {
             expect(!error).to.be.ok();

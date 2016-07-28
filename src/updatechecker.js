@@ -46,43 +46,18 @@ function resetUpdateInfo() {
     gBoxUpdateInfo = null;
 }
 
-function getAppUpdates(callback) {
-    apps.getAll(function (error, apps) {
-        if (error) return callback(error);
+function getAppUpdate(app, callback) {
+    superagent
+       .get(config.apiServerOrigin() + '/api/v1/apps/' + app.appStoreId + '/versions/' + app.manifest.version + '/update')
+        .query({ boxVersion: config.version() })
+        .timeout(10 * 1000)
+        .end(function (error, result) {
 
-        var appUpdateInfo = { };
-        // appStoreId can be '' for dev apps
-        var appStoreIds = apps.map(function (app) { return app.appStoreId; }).filter(function (id) { return id !== ''; });
-        var appVersions = apps.map(function (app) { return { id: app.appStoreId, version: app.manifest.version }; } ).filter(function (v) { return v.id !== ''; });
+        if (error && !error.response) return callback(error);
 
-        superagent
-            .post(config.apiServerOrigin() + '/api/v1/appupdates')
-            .send({ appIds: appStoreIds, appVersions: appVersions, boxVersion: config.version() })
-            .timeout(10 * 1000)
-            .end(function (error, result) {
+        if (result.statusCode !== 200 || !('update' in result.body)) return callback(new Error(util.format('Bad response: %s %s', result.statusCode, result.text)));
 
-            if (error && !error.response) return callback(error);
-
-            if (result.statusCode !== 200 || !result.body.appVersions) {
-                return callback(new Error(util.format('Error checking app update: %s %s', result.statusCode, result.text)));
-            }
-
-            var latestAppVersions = result.body.appVersions;
-            for (var i = 0; i < apps.length; i++) {
-                if (!(apps[i].appStoreId in latestAppVersions)) continue;
-
-                var oldVersion = apps[i].manifest.version;
-
-                var newManifest = latestAppVersions[apps[i].appStoreId].manifest;
-                var newVersion = newManifest.version;
-                if (semver.gt(newVersion, oldVersion)) {
-                    appUpdateInfo[apps[i].id] = latestAppVersions[apps[i].appStoreId];
-                    debug('Update available for %s (%s) from %s to %s', apps[i].location, apps[i].id, oldVersion, newVersion);
-                }
-            }
-
-            callback(null, appUpdateInfo);
-        });
+        callback(null, result.body.update);
     });
 }
 
@@ -140,34 +115,40 @@ function checkAppUpdates(callback) {
     debug('Checking App Updates');
 
     gAppUpdateInfo = { };
+    var oldState = loadState();
+    var newState = { box: oldState.box }; // create new state so that old app ids are removed
 
-    getAppUpdates(function (error, updateInfo) {
+    apps.getAll(function (error, apps) {
         if (error) return callback(error);
 
-        var oldState = loadState();
-        var newState = { box: oldState.box }; // create new state so that old app ids are removed
+        async.eachSeries(apps, function (app, iteratorDone) {
+            if (app.appStoreId === '') return iteratorDone(); // appStoreId can be '' for dev apps
 
-        async.eachSeries(Object.keys(updateInfo), function iterator(id, iteratorDone) {
-            gAppUpdateInfo[id] = updateInfo[id];
-
-            // decide whether to send email
-            newState[id] = updateInfo[id].manifest.version;
-
-            if (oldState[id] === updateInfo[id].manifest.version) {
-                debug('Skipping notification of app update %s since user was already notified', id);
-                return iteratorDone();
-            }
-
-            apps.get(id, function (error, app) {
+            getAppUpdate(app, function (error, updateInfo) {
                 if (error) {
-                    debug('Error getting app %s %s', id, error);
+                    debug('Error getting app update info for %s', app.id, error);
+                    return iteratorDone();  // continue to next
+                }
+
+                if (!updateInfo || !safe.query(updateInfo, 'manifest.version')) {
+                    delete gAppUpdateInfo[app.id];
                     return iteratorDone();
                 }
 
-                if (semver.satisfies(newState[id], '~' + app.manifest.version)) {
+                gAppUpdateInfo[app.id] = updateInfo;
+
+                // decide whether to send email
+                newState[app.id] = updateInfo.manifest.version;
+
+                if (oldState[app.id] === newState[app.id]) {
+                    debug('Skipping notification of app update %s since user was already notified', app.id);
+                    return iteratorDone();
+                }
+
+                if (semver.satisfies(newState[app.id], '~' + app.manifest.version)) {
                     debug('Skipping notification of box update as this is a patch release');
                 } else {
-                    mailer.appUpdateAvailable(app, updateInfo[id]);
+                    mailer.appUpdateAvailable(app, updateInfo);
                 }
 
                 iteratorDone();
