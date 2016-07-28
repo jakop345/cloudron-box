@@ -25,6 +25,35 @@
     </div>
 </div>
 
+<!-- Modal change cloudron name -->
+<div class="modal fade" id="cloudronNameChangeModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Change Cloudron Name</h4>
+            </div>
+            <div class="modal-body">
+                <form name="cloudronNameChangeForm" role="form" novalidate ng-submit="cloudronNameChange.submit()" autocomplete="off">
+                    <div class="form-group" ng-class="{ 'has-error': (cloudronNameChangeForm.name.$dirty && cloudronNameChangeForm.name.$invalid) }">
+                        <label class="control-label">Name</label>
+                        <div class="control-label" ng-show="(!cloudronNameChangeForm.name.$dirty && cloudronNameChange.error.name) || (cloudronNameChangeForm.name.$dirty && cloudronNameChangeForm.name.$invalid)">
+                            <small ng-show="cloudronNameChangeForm.name.$error.required">A name is required</small>
+                            <small ng-show="cloudronNameChangeForm.name.$error.maxlength">The name is too long</small>
+                            <small ng-show="!cloudronNameChangeForm.name.$dirty && cloudronNameChange.error.name">{{ cloudronNameChange.error.name }}</small>
+                        </div>
+                        <input type="text" class="form-control" ng-model="cloudronNameChange.name" name="name" id="inputCloudronName" ng-maxlength="30" required autofocus>
+                    </div>
+                    <input class="ng-hide" type="submit" ng-disabled="cloudronNameChangeForm.$invalid"/>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="cloudronNameChange.submit()" ng-disabled="cloudronNameChangeForm.$invalid || cloudronNameChange.busy"><i class="fa fa-spinner fa-pulse" ng-show="cloudronNameChange.busy"></i> Change</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal backup -->
 <div class="modal fade" id="createBackupModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -151,6 +180,10 @@
         </div>
         <div class="col-xs-8">
             <table width="100%">
+                <tr>
+                    <td class="text-muted" style="vertical-align: top;">Name</td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.cloudronName }} <a href="" ng-click="cloudronNameChange.show()"><i class="fa fa-pencil text-small"></i></a></td>
+                </tr>
                 <tr ng-show="config.provider === 'caas'">
                     <td class="text-muted" style="vertical-align: top;">Model</td>
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.size }} - {{ config.region }}</td>

@@ -367,6 +367,53 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         }
     };
 
+    $scope.cloudronNameChange = {
+        busy: false,
+        error: {},
+        name: '',
+
+        reset: function () {
+            $scope.cloudronNameChange.busy = false;
+            $scope.cloudronNameChange.error.name = null;
+            $scope.cloudronNameChange.name = '';
+
+            $scope.cloudronNameChangeForm.$setUntouched();
+            $scope.cloudronNameChangeForm.$setPristine();
+        },
+
+        show: function () {
+            $scope.cloudronNameChange.reset();
+            $scope.cloudronNameChange.name = $scope.config.cloudronName;
+            $('#cloudronNameChangeModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.cloudronNameChange.error.name = null;
+            $scope.cloudronNameChange.busy = true;
+
+            Client.changeCloudronName($scope.cloudronNameChange.name, function (error) {
+                $scope.cloudronNameChange.busy = false;
+
+                if (error) {
+                    if (error.statusCode === 400) {
+                        $scope.cloudronNameChange.error.name = 'Invalid name';
+                        $scope.cloudronNameChange.name = '';
+                        $('#inputCloudronName').focus();
+                        $scope.cloudronNameChangeForm.password.$setPristine();
+                    } else {
+                        console.error('Unable to change name.', error);
+                        return;
+                    }
+                }
+
+                $scope.cloudronNameChange.reset();
+                $('#cloudronNameChangeModal').modal('hide');
+
+                Client.refreshConfig();
+            });
+        }
+    };
+
     Client.onReady(function () {
         fetchBackups();
 
@@ -391,7 +438,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     });
 
     // setup all the dialog focus handling
-    ['planChangeModal', 'appstoreLoginModal'].forEach(function (id) {
+    ['planChangeModal', 'appstoreLoginModal', 'cloudronNameChangeModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
