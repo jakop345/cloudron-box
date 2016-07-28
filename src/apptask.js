@@ -638,7 +638,7 @@ function update(app, callback) {
             if (app.installationState === appdb.ISTATE_PENDING_FORCE_UPDATE) return next(null);
 
             async.series([
-                updateApp.bind(null, app, { installationProgress: '30, Backup app' }),
+                updateApp.bind(null, app, { installationProgress: '30, Backing up app' }),
                 backups.backupApp.bind(null, app, app.oldConfig.manifest)
             ], next);
         },
