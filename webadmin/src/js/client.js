@@ -286,6 +286,17 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.changeCloudronName = function (name, callback) {
+        var data = {
+            name: name
+        };
+
+        post('/api/v1/settings/cloudron_name', data).success(function(data, status) {
+            if (status !== 202) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.installApp = function (id, manifest, title, config, callback) {
         var that = this;
         var data = {
