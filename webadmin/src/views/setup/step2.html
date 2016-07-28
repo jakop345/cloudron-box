@@ -11,7 +11,7 @@
             <input type="email" class="form-control" ng-model="wizard.email" id="inputEmail" name="email" placeholder="Email" ng-enter="focusNext('inputDisplayName', setup_form.email.$invalid)" required autocomplete="off">
         </div>
         <div class="form-group" ng-class="{ 'has-error': setup_form.displayName.$dirty && setup_form.displayName.$invalid }">
-            <input type="text" class="form-control" ng-model="wizard.displayName" id="inputDisplayName" name="displayName" placeholder="Display Name" ng-enter="focusNext('inputUsername', setup_form.displayName.$invalid)" required autofocus autocomplete="off">
+            <input type="text" class="form-control" ng-model="wizard.displayName" id="inputDisplayName" name="displayName" placeholder="Display Name" ng-enter="focusNext('inputUsername', setup_form.displayName.$invalid)" required autocomplete="off">
         </div>
         <div class="form-group" ng-class="{ 'has-error': setup_form.username.$dirty && setup_form.username.$invalid }">
             <input type="text" class="form-control" ng-model="wizard.username" id="inputUsername" name="username" placeholder="Username" ng-enter="focusNext('inputPassword', setup_form.username.$invalid)" ng-maxlength="512" ng-minlength="3" required autocomplete="off">

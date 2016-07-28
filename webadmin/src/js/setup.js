@@ -180,8 +180,13 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
     };
 
     $scope.$on('$viewContentLoaded', function () {
-        $('a[autofocus]').focus();
-        $('input[autofocus]').focus();
+        if ($location.path() === '/step2') {
+            if (Wizard.requireEmail) $('#inputEmail').focus();
+            else $('#inputDisplayName').focus();
+        } else {
+            $('a[autofocus]').focus();
+            $('input[autofocus]').focus();
+        }
     });
 
     $scope.showCustomAvatarSelector = function () {
