@@ -426,13 +426,15 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             Client.getAppstoreConfig(function (error, result) {
                 if (error) return console.error(error);
 
-                $scope.appstoreConfig = result;
+                if (result.token) {
+                    $scope.appstoreConfig = result;
 
-                AppStore.getProfile(result.token, function (error, result) {
-                    if (error) return console.error(error);
+                    AppStore.getProfile(result.token, function (error, result) {
+                        if (error) return console.error(error);
 
-                    $scope.appstoreConfig.profile = result;
-                });
+                        $scope.appstoreConfig.profile = result;
+                    });
+                }
             });
         }
     });
