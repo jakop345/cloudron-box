@@ -597,23 +597,17 @@ footer {
     font-size: 14px;
     padding: 5px;
     z-index: 1000;
-    opacity: 0.5;
-    transition: all 250ms;
+
+    a {
+        color: #62bdfc;
+        padding: 10px;
+    }
 }
 
 @media(min-width:767px) {
     footer {
         position: fixed;
     }
-}
-
-footer:hover {
-    opacity: 1;
-}
-
-footer a {
-    color: #62bdfc;
-    padding: 10px;
 }
 
 .hand {
