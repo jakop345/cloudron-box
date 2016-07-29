@@ -112,6 +112,13 @@ if ! $ssh22 "root@${server_ip}" "/bin/bash /home/ubuntu/initializeBaseUbuntuImag
     exit 1
 fi
 
+echo "Strip ssh key"
+if ! $ssh22 "root@${server_ip}" "rm /root/.ssh/authorized_keys"; then
+    echo "Unable to remove ssh access"
+    echo "Make sure to cleanup the ec2 instance ${instance_id}"
+    exit 1
+fi
+
 snapshot_name="cloudron-${pretty_revision}-${now}"
 
 echo "Creating ami image ${snapshot_name}"
