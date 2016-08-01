@@ -7,6 +7,7 @@ var appdb = require('../appdb'),
     clients = require('../clients'),
     ClientsError = clients.ClientsError,
     config = require('../config.js'),
+    constants = require('../constants'),
     DatabaseError = require('../databaseerror'),
     debug = require('debug')('box:routes/oauth2'),
     eventlog = require('../eventlog.js'),
@@ -75,7 +76,7 @@ gServer.grant(oauth2orize.grant.token({ scopeSeparator: ',' }, function (client,
     debug('grant token:', client.id, user.id, ares);
 
     var token = tokendb.generateToken();
-    var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+    var expires = Date.now() + constants.DEFAULT_TOKEN_EXPIRATION;
 
     tokendb.add(token, user.id, client.id, expires, client.scope, function (error) {
         if (error) return callback(error);
@@ -105,7 +106,7 @@ gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, 
             if(error) return callback(error);
 
             var token = tokendb.generateToken();
-            var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+            var expires = Date.now() + constants.DEFAULT_TOKEN_EXPIRATION;
 
             tokendb.add(token, authCode.userId, authCode.clientId, expires, client.scope, function (error) {
                 if (error) return callback(error);

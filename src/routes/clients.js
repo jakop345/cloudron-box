@@ -14,6 +14,7 @@ exports = module.exports = {
 var assert = require('assert'),
     clients = require('../clients.js'),
     ClientsError = clients.ClientsError,
+    constants = require('../constants.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     validUrl = require('valid-url');
@@ -75,7 +76,7 @@ function addClientToken(req, res, next) {
     assert.strictEqual(typeof req.params.clientId, 'string');
     assert.strictEqual(typeof req.user, 'object');
 
-    var expiresAt = req.query.expiresAt ? parseInt(req.query.expiresAt, 10) : Date.now() + 24 * 60 * 60 * 1000; // default 1 day;
+    var expiresAt = req.query.expiresAt ? parseInt(req.query.expiresAt, 10) : Date.now() + constants.DEFAULT_TOKEN_EXPIRATION;
     if (isNaN(expiresAt) || expiresAt <= Date.now()) return next(new HttpError(400, 'expiresAt must be a timestamp in the future'));
 
     clients.addClientTokenByUserId(req.params.clientId, req.user.id, expiresAt, function (error, result) {

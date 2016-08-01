@@ -463,7 +463,7 @@ function setPassword(userId, newPassword, callback) {
                     if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                     var token = tokendb.generateToken();
-                    var expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+                    var expiresAt = Date.now() + constants.DEFAULT_TOKEN_EXPIRATION;
 
                     tokendb.add(token, user.id, result.id, expiresAt, '*', function (error) {
                         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));

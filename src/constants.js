@@ -16,6 +16,8 @@ exports = module.exports = {
 
     GHOST_USER_FILE: '/tmp/cloudron_ghost.json',
 
+    DEFAULT_TOKEN_EXPIRATION: 7 * 24 * 60 * 60 * 1000, // 1 week
+
     DEFAULT_MEMORY_LIMIT: (256 * 1024 * 1024) // see also client.js
 };
 

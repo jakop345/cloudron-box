@@ -11,6 +11,7 @@ var apps = require('./apps.js'),
     clients = require('./clients.js'),
     ClientsError = clients.ClientsError,
     config = require('./config.js'),
+    constants = require('./constants.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:src/simpleauth'),
     eventlog = require('./eventlog.js'),
@@ -51,7 +52,7 @@ function loginLogic(clientId, username, password, callback) {
                     if (!access) return callback(new AppsError(AppsError.ACCESS_DENIED));
 
                     var accessToken = tokendb.generateToken();
-                    var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+                    var expires = Date.now() + constants.DEFAULT_TOKEN_EXPIRATION;
 
                     tokendb.add(accessToken, userObject.id, clientId, expires, clientObject.scope, function (error) {
                         if (error) return callback(error);
