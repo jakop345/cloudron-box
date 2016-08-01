@@ -171,23 +171,24 @@
                     <br/><br/>
                     <p>For using the Cloudron App Store, you have to login with your <a href="{{ config.webServerOrigin }}" target="_blank">cloudron.io</a> account.</p>
                     <br/>
+                    <small class="text-danger" ng-show="appstoreLogin.error.generic">{{ appstoreLogin.error.generic }}</small>
                 </center>
 
                 <form name="appstoreLoginForm" role="form" novalidate ng-submit="appstoreLogin.submit()" autocomplete="off">
                     <input type="password" style="display: none;">
 
-                    <div class="form-group" ng-class="{ 'has-error': (appstoreLoginForm.email.$dirty && appstoreLoginForm.email.$invalid) }">
+                    <div class="form-group" ng-class="{ 'has-error': (appstoreLoginForm.email.$dirty && appstoreLoginForm.email.$invalid) || appstoreLogin.error.generic }">
                         <label class="control-label">Email Address</label>
-                        <input type="email" class="form-control" ng-model="appstoreLogin.email" name="email" required autofocus>
-                        <div class="control-label" ng-show="(!appstoreLoginForm.email.$dirty && appstoreLogin.error.email) || (appstoreLoginForm.email.$dirty && appstoreLoginForm.email.$invalid)">
+                        <input type="email" class="form-control" ng-model="appstoreLogin.email" id="inputAppstoreLoginEmail" name="email" required autofocus>
+                        <div class="control-label" ng-show="(!appstoreLoginForm.email.$dirty && appstoreLogin.error.email) || (appstoreLoginForm.email.$dirty && appstoreLoginForm.email.$invalid) || appstoreLogin.error.email">
                             <small ng-show="appstoreLoginForm.email.$error.required">A valid email address is required</small>
                             <small ng-show="(appstoreLoginForm.email.$dirty && appstoreLoginForm.email.$invalid) && !appstoreLoginForm.email.$error.required">The Email address is not valid</small>
                         </div>
                     </div>
 
-                    <div class="form-group" ng-class="{ 'has-error': (!appstoreLoginForm.password.$dirty && appstoreLogin.error.password) || (appstoreLoginForm.password.$dirty && appstoreLoginForm.password.$invalid) }">
+                    <div class="form-group" ng-class="{ 'has-error': (!appstoreLoginForm.password.$dirty && appstoreLogin.error.password) || (appstoreLoginForm.password.$dirty && appstoreLoginForm.password.$invalid) || appstoreLogin.error.generic }">
                         <label class="control-label">Password</label>
-                        <input type="password" class="form-control" ng-model="appstoreLogin.password" id="inputAppstoreLoginPassword" name="password" required autofocus>
+                        <input type="password" class="form-control" ng-model="appstoreLogin.password" id="inputAppstoreLoginPassword" name="password" required>
                         <div class="control-label" ng-show="(!appstoreLoginForm.password.$dirty && appstoreLogin.error.password) || (appstoreLoginForm.password.$dirty && appstoreLoginForm.password.$invalid)">
                             <small ng-show=" appstoreLoginForm.password.$dirty && appstoreLoginForm.password.$invalid">A password is required</small>
                             <small ng-show="!appstoreLoginForm.password.$dirty && appstoreLogin.error.password">Wrong password</small>

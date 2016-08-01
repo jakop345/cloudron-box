@@ -241,7 +241,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appstoreLogin.busy = true;
 
             AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
-
                 if (error) {
                     $scope.appstoreLogin.busy = false;
 
@@ -263,7 +262,27 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 };
 
                 Client.setAppstoreConfig(config, function (error) {
-                    if (error) return console.error(error);
+                    if (error) {
+                        $scope.appstoreLogin.busy = false;
+
+                        if (error.statusCode === 406) {
+                            if (error.message === 'wrong user') {
+                                $scope.appstoreLogin.error.generic = 'Wrong cloudron.io account';
+                                $scope.appstoreLogin.email = '';
+                                $scope.appstoreLogin.password = '';
+                                $scope.appstoreLoginForm.email.$setPristine();
+                                $scope.appstoreLoginForm.password.$setPristine();
+                                $('#inputAppstoreLoginEmail').focus();
+                            } else {
+                                console.error(error);
+                                $scope.appstoreLogin.error.generic = 'Please retry later';
+                            }
+                        } else {
+                            console.error(error);
+                        }
+
+                        return;
+                    }
 
                     $scope.appstoreLogin.reset();
                     $('#appstoreLoginModal').modal('hide');

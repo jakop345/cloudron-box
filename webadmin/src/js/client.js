@@ -429,7 +429,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var data = config;
 
         post('/api/v1/settings/appstore_config', data).success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
