@@ -223,6 +223,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     });
 
     function checkAppstoreAccount() {
+        if (Client.getConfig().provider === 'caas') return;
         if (!$scope.user.admin) return;
 
         // only check after tutorial was shown
