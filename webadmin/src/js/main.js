@@ -101,6 +101,63 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         });
     };
 
+    $scope.appstoreLogin = {
+        busy: false,
+        error: {},
+        email: '',
+        password: '',
+
+        reset: function () {
+            $scope.appstoreLogin.busy = false;
+            $scope.appstoreLogin.error = {};
+            $scope.appstoreLogin.email = '';
+            $scope.appstoreLogin.password = '';
+
+            $scope.appstoreLoginForm.$setUntouched();
+            $scope.appstoreLoginForm.$setPristine();
+        },
+
+        show: function () {
+            $scope.appstoreLogin.reset();
+            $('#appstoreLoginModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.appstoreLogin.error = {};
+            $scope.appstoreLogin.busy = true;
+
+            AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
+
+                if (error) {
+                    $scope.appstoreLogin.busy = false;
+
+                    if (error.statusCode === 403) {
+                        $scope.appstoreLogin.error.password = 'Wrong email or password';
+                        $scope.appstoreLogin.password = '';
+                        $('#inputAppstoreLoginPassword').focus();
+                        $scope.appstoreLoginForm.password.$setPristine();
+                    } else {
+                        console.error(error);
+                    }
+
+                    return;
+                }
+
+                var config = {
+                    userId: result.userId,
+                    token: result.accessToken
+                };
+
+                Client.setAppstoreConfig(config, function (error) {
+                    if (error) return console.error(error);
+
+                    $scope.appstoreLogin.reset();
+                    $('#appstoreLoginModal').modal('hide');
+                });
+            });
+        }
+    };
+
     Client.getStatus(function (error, status) {
         if (error) return $scope.error(error);
 
@@ -236,10 +293,10 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         }
     });
 
-    Client.onRead(checkAppstoreAccount);
+    Client.onReady(checkAppstoreAccount);
 
     // setup all the dialog focus handling
-    ['updateModal'].forEach(function (id) {
+    ['updateModal', 'appstoreLoginModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });

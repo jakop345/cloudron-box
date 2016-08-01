@@ -111,52 +111,6 @@
     </div>
 </div>
 
-<!-- Modal appstore login -->
-<div class="modal fade" id="appstoreLoginModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Login to the Cloudron Store</h4>
-            </div>
-            <div class="modal-body">
-                <center>
-                    <img ng-src="{{ config.webServerOrigin }}/img/logo.png" width="128px" height="128px"/>
-                </center>
-
-                <form name="appstoreLoginForm" role="form" novalidate ng-submit="appstoreLogin.submit()" autocomplete="off">
-                    <input type="password" style="display: none;">
-
-                    <div class="form-group" ng-class="{ 'has-error': (appstoreLoginForm.email.$dirty && appstoreLoginForm.email.$invalid) }">
-                        <label class="control-label">Email Address</label>
-                        <input type="email" class="form-control" ng-model="appstoreLogin.email" name="email" required autofocus>
-                        <div class="control-label" ng-show="(!appstoreLoginForm.email.$dirty && appstoreLogin.error.email) || (appstoreLoginForm.email.$dirty && appstoreLoginForm.email.$invalid)">
-                            <small ng-show="appstoreLoginForm.email.$error.required">A valid email address is required</small>
-                            <small ng-show="(appstoreLoginForm.email.$dirty && appstoreLoginForm.email.$invalid) && !appstoreLoginForm.email.$error.required">The Email address is not valid</small>
-                        </div>
-                    </div>
-
-                    <div class="form-group" ng-class="{ 'has-error': (!appstoreLoginForm.password.$dirty && appstoreLogin.error.password) || (appstoreLoginForm.password.$dirty && appstoreLoginForm.password.$invalid) }">
-                        <label class="control-label">Password</label>
-                        <input type="password" class="form-control" ng-model="appstoreLogin.password" id="inputAppstoreLoginPassword" name="password" required autofocus>
-                        <div class="control-label" ng-show="(!appstoreLoginForm.password.$dirty && appstoreLogin.error.password) || (appstoreLoginForm.password.$dirty && appstoreLoginForm.password.$invalid)">
-                            <small ng-show=" appstoreLoginForm.password.$dirty && appstoreLoginForm.password.$invalid">A password is required</small>
-                            <small ng-show="!appstoreLoginForm.password.$dirty && appstoreLogin.error.password">Wrong password</small>
-                        </div>
-                    </div>
-
-                    <input class="ng-hide" type="submit" ng-disabled="appstoreLoginForm.$invalid"/>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <a class="btn btn-primary pull-left" href="{{ config.webServerOrigin }}/console.html#/register" target="_blank">Register</a>
-
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="appstoreLogin.submit()" ng-disabled="appstoreLoginForm.$invalid || appstoreLogin.busy"><i class="fa fa-spinner fa-pulse" ng-show="appstoreLogin.busy"></i> Login</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <br/>
 
 <div class="section-header">
@@ -184,6 +138,10 @@
                     <td class="text-muted" style="vertical-align: top;">Name</td>
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.cloudronName }} <a href="" ng-click="cloudronNameChange.show()"><i class="fa fa-pencil text-small"></i></a></td>
                 </tr>
+                <tr ng-show="appstoreConfig.profile">
+                    <td class="text-muted" style="vertical-align: top;">Appstore Account</td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ appstoreConfig.profile.email }}</td>
+                </tr>
                 <tr ng-show="config.provider === 'caas'">
                     <td class="text-muted" style="vertical-align: top;">Model</td>
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.size }} - {{ config.region }}</td>
@@ -193,23 +151,6 @@
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.version }}</td>
                 </tr>
             </table>
-        </div>
-    </div>
-</div>
-
-<div class="section-header" ng-hide="true && config.provider === 'caas'">
-    <div class="text-left">
-        <h3>Appstore Account (<a href="https://cloudron.io" target="_blank">cloudron.io</a>)</h3>
-    </div>
-</div>
-
-<div class="card" style="margin-bottom: 15px;" ng-hide="true && config.provider === 'caas'">
-    <div class="row">
-        <div class="col-xs-12 text-center" ng-show="!appstoreConfig.userId">
-            <button class="btn btn-success" ng-click="appstoreLogin.show()">Login to the Cloudron Store</button>
-        </div>
-        <div class="col-xs-12" ng-show="appstoreConfig.userId">
-            This Cloudron is using {{ appstoreConfig.profile.email }}.
         </div>
     </div>
 </div>

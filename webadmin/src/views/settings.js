@@ -310,63 +310,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         fr.readAsDataURL(event.target.files[0]);
     };
 
-    $scope.appstoreLogin = {
-        busy: false,
-        error: {},
-        email: '',
-        password: '',
-
-        reset: function () {
-            $scope.appstoreLogin.busy = false;
-            $scope.appstoreLogin.error = {};
-            $scope.appstoreLogin.email = '';
-            $scope.appstoreLogin.password = '';
-
-            $scope.appstoreLoginForm.$setUntouched();
-            $scope.appstoreLoginForm.$setPristine();
-        },
-
-        show: function () {
-            $scope.appstoreLogin.reset();
-            $('#appstoreLoginModal').modal('show');
-        },
-
-        submit: function () {
-            $scope.appstoreLogin.error = {};
-            $scope.appstoreLogin.busy = true;
-
-            AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
-
-                if (error) {
-                    $scope.appstoreLogin.busy = false;
-
-                    if (error.statusCode === 403) {
-                        $scope.appstoreLogin.error.password = 'Wrong email or password';
-                        $scope.appstoreLogin.password = '';
-                        $('#inputAppstoreLoginPassword').focus();
-                        $scope.appstoreLoginForm.password.$setPristine();
-                    } else {
-                        console.error(error);
-                    }
-
-                    return;
-                }
-
-                var config = {
-                    userId: result.userId,
-                    token: result.accessToken
-                };
-
-                Client.setAppstoreConfig(config, function (error) {
-                    if (error) return console.error(error);
-
-                    $scope.appstoreLogin.reset();
-                    $('#appstoreLoginModal').modal('hide');
-                });
-            });
-        }
-    };
-
     $scope.cloudronNameChange = {
         busy: false,
         error: {},
