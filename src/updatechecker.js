@@ -131,6 +131,7 @@ function checkAppUpdates(callback) {
                 }
 
                 if (!updateInfo || !safe.query(updateInfo, 'manifest.version')) {
+                    debug('Skipping malformed update of app %s. got %j', app.id, updateInfo);
                     delete gAppUpdateInfo[app.id];
                     return iteratorDone();
                 }
@@ -142,12 +143,10 @@ function checkAppUpdates(callback) {
 
                 if (oldState[app.id] === newState[app.id]) {
                     debug('Skipping notification of app update %s since user was already notified', app.id);
-                    return iteratorDone();
-                }
-
-                if (semver.satisfies(newState[app.id], '~' + app.manifest.version)) {
-                    debug('Skipping notification of box update as this is a patch release');
+                } else if (semver.satisfies(newState[app.id], '~' + app.manifest.version)) {
+                    debug('Skipping notification of app update as this is a patch release');
                 } else {
+                    debug('Notifying user of app update for %s from %s to %s', app.id, app.manifest.version, updateInfo.manifest.version);
                     mailer.appUpdateAvailable(app, updateInfo);
                 }
 
