@@ -213,6 +213,63 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         }
     };
 
+    $scope.appstoreLogin = {
+        busy: false,
+        error: {},
+        email: '',
+        password: '',
+
+        reset: function () {
+            $scope.appstoreLogin.busy = false;
+            $scope.appstoreLogin.error = {};
+            $scope.appstoreLogin.email = '';
+            $scope.appstoreLogin.password = '';
+
+            $scope.appstoreLoginForm.$setUntouched();
+            $scope.appstoreLoginForm.$setPristine();
+        },
+
+        show: function () {
+            $scope.appstoreLogin.reset();
+            $('#appstoreLoginModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.appstoreLogin.error = {};
+            $scope.appstoreLogin.busy = true;
+
+            AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
+
+                if (error) {
+                    $scope.appstoreLogin.busy = false;
+
+                    if (error.statusCode === 403) {
+                        $scope.appstoreLogin.error.password = 'Wrong email or password';
+                        $scope.appstoreLogin.password = '';
+                        $('#inputAppstoreLoginPassword').focus();
+                        $scope.appstoreLoginForm.password.$setPristine();
+                    } else {
+                        console.error(error);
+                    }
+
+                    return;
+                }
+
+                var config = {
+                    userId: result.userId,
+                    token: result.accessToken
+                };
+
+                Client.setAppstoreConfig(config, function (error) {
+                    if (error) return console.error(error);
+
+                    $scope.appstoreLogin.reset();
+                    $('#appstoreLoginModal').modal('hide');
+                });
+            });
+        }
+    };
+
     function getAppList(callback) {
         AppStore.getApps(function (error, apps) {
             if (error) return callback(error);
@@ -373,31 +430,75 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         });
     }
 
-    Client.onReady(function () {
-        (function refresh() {
-            $scope.ready = false;
+    function checkAppstoreAccount() {
+        if (Client.getConfig().provider === 'caas') return;
+        if (!$scope.user.admin) return;
 
-            getAppList(function (error, apps) {
-                if (error) {
-                    console.error(error);
-                    return $timeout(refresh, 1000);
-                }
+        // only check after tutorial was shown
+        if ($scope.user.showTutorial) return setTimeout(checkAppstoreAccount, 5000);
 
-                $scope.apps = apps;
+        Client.getAppstoreConfig(function (error, appstoreConfig) {
+            if (error) return console.error(error);
 
-                // show install app dialog immediately if an app id was passed in the query
-                hashChangeListener();
+            if (!appstoreConfig.token) {
+                $scope.appstoreLogin.show();
+            } else {
+                console.log('Got token', appstoreConfig.token);
 
-                if ($scope.user.admin) {
-                    fetchUsers();
-                    fetchGroups();
-                }
+                AppStore.getProfile(appstoreConfig.token, function (error, result) {
+                    if (error) {
+                        console.error('failed to get profile', error);
+                        return;
+                    }
 
-                $scope.ready = true;
-            });
-        })();
+                    console.log('Got profile', result);
 
-    });
+                    if (!appstoreConfig.cloudronId) {
+                        console.log('No cloudronId, try to register');
+                        AppStore.registerCloudron(appstoreConfig.token, result.id, Client.getConfig().fqdn, function (error, result) {
+                            if (error) return console.error(error);
+
+                            console.log('Successfully registered cloudron', result);
+
+                            // TODO set the cloudron id now with the appstore details
+                        });
+                    } else {
+                        AppStore.getCloudron(appstoreConfig.token, result.id, appstoreConfig.cloudronId, function (error, result) {
+                            if (error) return console.error(error);
+
+                            console.log('Successfully got cloudron', result);
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function refresh() {
+        $scope.ready = false;
+
+        getAppList(function (error, apps) {
+            if (error) {
+                console.error(error);
+                return $timeout(refresh, 1000);
+            }
+
+            $scope.apps = apps;
+
+            // show install app dialog immediately if an app id was passed in the query
+            hashChangeListener();
+
+            if ($scope.user.admin) {
+                fetchUsers();
+                fetchGroups();
+            }
+
+            $scope.ready = true;
+        });
+    }
+
+    Client.onReady(refresh);
+    Client.onReady(checkAppstoreAccount);
 
     $('#appInstallModal').on('hide.bs.modal', function () {
         $location.path('/appstore', false).search({ version: undefined });
@@ -410,7 +511,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     });
 
     // setup all the dialog focus handling
-    ['appInstallModal', 'feedbackModal'].forEach(function (id) {
+    ['appInstallModal', 'feedbackModal', 'appstoreLoginModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });

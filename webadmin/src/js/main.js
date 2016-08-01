@@ -101,63 +101,6 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         });
     };
 
-    $scope.appstoreLogin = {
-        busy: false,
-        error: {},
-        email: '',
-        password: '',
-
-        reset: function () {
-            $scope.appstoreLogin.busy = false;
-            $scope.appstoreLogin.error = {};
-            $scope.appstoreLogin.email = '';
-            $scope.appstoreLogin.password = '';
-
-            $scope.appstoreLoginForm.$setUntouched();
-            $scope.appstoreLoginForm.$setPristine();
-        },
-
-        show: function () {
-            $scope.appstoreLogin.reset();
-            $('#appstoreLoginModal').modal('show');
-        },
-
-        submit: function () {
-            $scope.appstoreLogin.error = {};
-            $scope.appstoreLogin.busy = true;
-
-            AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
-
-                if (error) {
-                    $scope.appstoreLogin.busy = false;
-
-                    if (error.statusCode === 403) {
-                        $scope.appstoreLogin.error.password = 'Wrong email or password';
-                        $scope.appstoreLogin.password = '';
-                        $('#inputAppstoreLoginPassword').focus();
-                        $scope.appstoreLoginForm.password.$setPristine();
-                    } else {
-                        console.error(error);
-                    }
-
-                    return;
-                }
-
-                var config = {
-                    userId: result.userId,
-                    token: result.accessToken
-                };
-
-                Client.setAppstoreConfig(config, function (error) {
-                    if (error) return console.error(error);
-
-                    $scope.appstoreLogin.reset();
-                    $('#appstoreLoginModal').modal('hide');
-                });
-            });
-        }
-    };
-
     Client.getStatus(function (error, status) {
         if (error) return $scope.error(error);
 
@@ -222,50 +165,6 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         });
     });
 
-    function checkAppstoreAccount() {
-        if (Client.getConfig().provider === 'caas') return;
-        if (!$scope.user.admin) return;
-
-        // only check after tutorial was shown
-        if ($scope.user.showTutorial) return setTimeout(checkAppstoreAccount, 5000);
-
-        Client.getAppstoreConfig(function (error, appstoreConfig) {
-            if (error) return console.error(error);
-
-            if (!appstoreConfig.token) {
-                $scope.appstoreLogin.show();
-            } else {
-                console.log('Got token', appstoreConfig.token);
-
-                AppStore.getProfile(appstoreConfig.token, function (error, result) {
-                    if (error) {
-                        console.error('failed to get profile', error);
-                        return;
-                    }
-
-                    console.log('Got profile', result);
-
-                    if (!appstoreConfig.cloudronId) {
-                        console.log('No cloudronId, try to register');
-                        AppStore.registerCloudron(appstoreConfig.token, result.id, Client.getConfig().fqdn, function (error, result) {
-                            if (error) return console.error(error);
-
-                            console.log('Successfully registered cloudron', result);
-
-                            // TODO set the cloudron id now with the appstore details
-                        });
-                    } else {
-                        AppStore.getCloudron(appstoreConfig.token, result.id, appstoreConfig.cloudronId, function (error, result) {
-                            if (error) return console.error(error);
-
-                            console.log('Successfully got cloudron', result);
-                        });
-                    }
-                });
-            }
-        });
-    }
-
     // wait till the view has loaded until showing a modal dialog
     Client.onConfig(function (config) {
         // if (!config.billing) {
@@ -294,10 +193,8 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         }
     });
 
-    Client.onReady(checkAppstoreAccount);
-
     // setup all the dialog focus handling
-    ['updateModal', 'appstoreLoginModal'].forEach(function (id) {
+    ['updateModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
