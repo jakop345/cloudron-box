@@ -186,9 +186,14 @@ function setAppstoreConfig(req, res, next) {
 
     settings.setAppstoreConfig(options, function (error) {
         if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === SettingsError.EXTERNAL_ERROR) return next(new HttpError(406, error.message));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200));
+        settings.getAppstoreConfig(function (error, result) {
+            if (error) return next(new HttpError(500, error));
+
+            next(new HttpSuccess(202, result));
+        });
     });
 }
 

@@ -61,6 +61,7 @@ var assert = require('assert'),
     safe = require('safetydance'),
     settingsdb = require('./settingsdb.js'),
     SubdomainError = require('./subdomains.js').SubdomainError,
+    superagent = require('superagent'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
     _ = require('underscore');
@@ -105,6 +106,7 @@ function SettingsError(reason, errorOrMessage) {
 }
 util.inherits(SettingsError, Error);
 SettingsError.INTERNAL_ERROR = 'Internal Error';
+SettingsError.EXTERNAL_ERROR = 'External Error';
 SettingsError.NOT_FOUND = 'Not Found';
 SettingsError.BAD_FIELD = 'Bad Field';
 
@@ -425,13 +427,59 @@ function setAppstoreConfig(appstoreConfig, callback) {
     assert.strictEqual(typeof appstoreConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    settingsdb.set(exports.APPSTORE_CONFIG_KEY, JSON.stringify(appstoreConfig), function (error) {
-        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+    getAppstoreConfig(function (error, oldConfig) {
+        if (error) return callback(error);
 
-        exports.events.emit(exports.APPSTORE_CONFIG_KEY, appstoreConfig);
+        var cloudronId = oldConfig.cloudronId;
 
-        callback(null);
+        function setNewConfig() {
+            var data = {
+                userId: appstoreConfig.userId,
+                token: appstoreConfig.token,
+                cloudronId: cloudronId
+            };
+
+            settingsdb.set(exports.APPSTORE_CONFIG_KEY, JSON.stringify(data), function (error) {
+                if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+                exports.events.emit(exports.APPSTORE_CONFIG_KEY, appstoreConfig);
+
+                callback(null);
+            });
+        }
+
+        function registerCloudron() {
+            const url = config.apiServerOrigin() + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons';
+            const data = {
+                domain: config.fqdn()
+            };
+
+            superagent.post(url).send(data).query({ accessToken: appstoreConfig.token }).end(function (error, result) {
+                if (error && !error.response) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, error.message));
+                if (result.statusCode === 401) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'invalid appstore token'));
+                if (result.statusCode !== 201) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'unable to register cloudron'));
+
+                cloudronId = result.body.cloudron.id;
+
+                setNewConfig();
+            });
+        }
+
+        if (!cloudronId) return registerCloudron();
+
+        // verify that cloudron belongs to this user
+        const url = config.apiServerOrigin() + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons/' + oldConfig.cloudronId;
+        superagent.get(url).query({ accessToken: appstoreConfig.token }).end(function (error, result) {
+            if (error && !error.response) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, error.message));
+            if (result.statusCode === 401) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'invalid appstore token'));
+            if (result.statusCode === 403) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'wrong user'));
+            if (result.statusCode === 404) return registerCloudron();
+            if (result.statusCode !== 200) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'unknown error'));
+
+            setNewConfig();
+        });
     });
+
 }
 
 function getDefaultSync(name) {
