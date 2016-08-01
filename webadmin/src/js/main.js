@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Application').controller('MainController', ['$scope', '$route', '$interval', 'Client', function ($scope, $route, $interval, Client) {
+angular.module('Application').controller('MainController', ['$scope', '$route', '$interval', 'Client', 'AppStore', function ($scope, $route, $interval, Client, AppStore) {
     $scope.initialized = false;
     $scope.user = Client.getUserInfo();
     $scope.installedApps = Client.getInstalledApps();
@@ -165,6 +165,49 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         });
     });
 
+    function checkAppstoreAccount() {
+        if (!$scope.user.admin) return;
+
+        // only check after tutorial was shown
+        if ($scope.user.showTutorial) return setTimeout(checkAppstoreAccount, 5000);
+
+        Client.getAppstoreConfig(function (error, appstoreConfig) {
+            if (error) return console.error(error);
+
+            if (!appstoreConfig.token) {
+                console.log('No token, prompt the user');
+            } else {
+                console.log('Got token', appstoreConfig.token);
+
+                AppStore.getProfile(appstoreConfig.token, function (error, result) {
+                    if (error) {
+                        console.error('failed to get profile', error);
+                        return;
+                    }
+
+                    console.log('Got profile', result);
+
+                    if (!appstoreConfig.cloudronId) {
+                        console.log('No cloudronId, try to register');
+                        AppStore.registerCloudron(appstoreConfig.token, result.id, Client.getConfig().fqdn, function (error, result) {
+                            if (error) return console.error(error);
+
+                            console.log('Successfully registered cloudron', result);
+
+                            // TODO set the cloudron id now with the appstore details
+                        });
+                    } else {
+                        AppStore.getCloudron(appstoreConfig.token, result.id, appstoreConfig.cloudronId, function (error, result) {
+                            if (error) return console.error(error);
+
+                            console.log('Successfully got cloudron', result);
+                        });
+                    }
+                });
+            }
+        });
+    }
+
     // wait till the view has loaded until showing a modal dialog
     Client.onConfig(function (config) {
         // if (!config.billing) {
@@ -191,6 +234,8 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         if (config.cloudronName) {
             document.title = config.cloudronName;
         }
+
+        checkAppstoreAccount();
     });
 
 
