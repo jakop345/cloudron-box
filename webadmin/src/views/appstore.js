@@ -230,6 +230,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         },
 
         show: function () {
+            $('#appInstallModal').modal('hide');
+
             $scope.appstoreLogin.reset();
             $('#appstoreLoginModal').modal('show');
         },
