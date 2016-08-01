@@ -151,15 +151,11 @@ angular.module('Application').service('AppStore', ['$http', '$base64', 'Client',
         });
     };
 
-    AppStore.prototype.registerCloudron = function (token, userId, fqdn, callback) {
+    AppStore.prototype.getCloudronDetails = function (appstoreConfig, callback) {
         if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
 
-        var data = {
-            domain: fqdn
-        };
-
-        $http.post(Client.getConfig().apiServerOrigin + '/api/v1/users/' + userId + '/cloudrons', data, { params: { accessToken: token }}).success(function (data, status) {
-            if (status !== 201) return callback(new AppStoreError(status, data));
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons/' + appstoreConfig.cloudronId, { params: { accessToken: appstoreConfig.token }}).success(function (data, status) {
+            if (status !== 200) return callback(new AppStoreError(status, data));
             return callback(null, data.cloudron);
         }).error(function (data, status) {
             return callback(new AppStoreError(status, data));

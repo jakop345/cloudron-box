@@ -439,40 +439,25 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         // only check after tutorial was shown
         if ($scope.user.showTutorial) return setTimeout(checkAppstoreAccount, 5000);
 
-        Client.getAppstoreConfig(function (error, appstoreConfig) {
+        Client.getAppstoreConfig(function (error, result) {
             if (error) return console.error(error);
 
-            if (!appstoreConfig.token) {
+            if (!result.token || !result.cloudronId) {
                 $scope.appstoreLogin.show();
-            } else {
-                console.log('Got token', appstoreConfig.token);
-
-                AppStore.getProfile(appstoreConfig.token, function (error, result) {
-                    if (error) {
-                        console.error('failed to get profile', error);
-                        return;
-                    }
-
-                    console.log('Got profile', result);
-
-                    if (!appstoreConfig.cloudronId) {
-                        console.log('No cloudronId, try to register');
-                        AppStore.registerCloudron(appstoreConfig.token, result.id, Client.getConfig().fqdn, function (error, result) {
-                            if (error) return console.error(error);
-
-                            console.log('Successfully registered cloudron', result);
-
-                            // TODO set the cloudron id now with the appstore details
-                        });
-                    } else {
-                        AppStore.getCloudron(appstoreConfig.token, result.id, appstoreConfig.cloudronId, function (error, result) {
-                            if (error) return console.error(error);
-
-                            console.log('Successfully got cloudron', result);
-                        });
-                    }
-                });
+                return;
             }
+
+            console.log('Got token', result);
+
+            AppStore.getCloudronDetails(result, function (error, result) {
+                if (error) {
+                    console.error('Unable to get Cloudron details.', error);
+                    $scope.appstoreLogin.show();
+                    return;
+                }
+
+                console.log('Successfully got cloudron', result);
+            });
         });
     }
 
