@@ -466,16 +466,14 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 return;
             }
 
-            console.log('Got token', result);
-
-            AppStore.getCloudronDetails(result, function (error, result) {
+            AppStore.getCloudronDetails(result, function (error) {
                 if (error) {
                     console.error('Unable to get Cloudron details.', error);
                     $scope.appstoreLogin.show();
                     return;
                 }
 
-                console.log('Successfully got cloudron', result);
+                // All good
             });
         });
     }
