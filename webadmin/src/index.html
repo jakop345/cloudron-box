@@ -155,11 +155,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Login to the Cloudron Store</h4>
+                    <h4 class="modal-title">Login to the Cloudron App Store</h4>
                 </div>
                 <div class="modal-body">
                     <center>
                         <img ng-src="{{ config.webServerOrigin }}/img/logo.png" width="128px" height="128px"/>
+                        <br/><br/>
+                        <p>For using the Cloudron App Store, you have to login with your <a href="{{ config.webServerOrigin }}" target="_blank">cloudron.io</a> account.</p>
+                        <br/>
                     </center>
 
                     <form name="appstoreLoginForm" role="form" novalidate ng-submit="appstoreLogin.submit()" autocomplete="off">
