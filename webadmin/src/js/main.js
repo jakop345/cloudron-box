@@ -234,10 +234,9 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         if (config.cloudronName) {
             document.title = config.cloudronName;
         }
-
-        checkAppstoreAccount();
     });
 
+    Client.onRead(checkAppstoreAccount);
 
     // setup all the dialog focus handling
     ['updateModal'].forEach(function (id) {
