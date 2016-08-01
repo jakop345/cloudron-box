@@ -232,7 +232,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
             if (error) return console.error(error);
 
             if (!appstoreConfig.token) {
-                console.log('No token, prompt the user');
+                $scope.appstoreLogin.show();
             } else {
                 console.log('Got token', appstoreConfig.token);
 
