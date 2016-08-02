@@ -326,7 +326,7 @@ function appDied(app) {
 
         var mailOptions = {
             from: platform.mailConfig().from,
-            to: adminEmails.concat('support@cloudron.io').join(', '),
+            to: config.provider() === 'caas' ? 'support@cloudron.io' : adminEmails.concat('support@cloudron.io').join(', '),
             subject: util.format('App %s is down', app.location),
             text: render('app_down.ejs', { fqdn: config.fqdn(), title: app.manifest.title, appFqdn: config.appFqdn(app.location), format: 'text' })
         };
@@ -412,14 +412,18 @@ function unexpectedExit(program, context) {
     assert.strictEqual(typeof program, 'string');
     assert.strictEqual(typeof context, 'string');
 
-    var mailOptions = {
-        from: platform.mailConfig().from,
-        to: 'support@cloudron.io',
-        subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
-        text: render('unexpected_exit.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
-    };
+    getAdminEmails(function (error, adminEmails) {
+        if (error) return console.log('Error getting admins', error);
 
-    sendMails([ mailOptions ]);
+        var mailOptions = {
+            from: platform.mailConfig().from,
+            to: config.provider() === 'caas' ? 'support@cloudron.io' : adminEmails.concat('support@cloudron.io').join(', '),
+            subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
+            text: render('unexpected_exit.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
+        };
+
+        sendMails([ mailOptions ]);
+    });
 }
 
 function sendFeedback(user, type, subject, description) {
