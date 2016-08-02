@@ -210,5 +210,6 @@ function isDev() {
 }
 
 function provider() {
-    return get('provider');
+    // FIXME this fallback is only there because old Cloudrons do not have the provider set till the next upgrade
+    return get('provider') || 'caas';
 }
