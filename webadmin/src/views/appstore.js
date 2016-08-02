@@ -218,12 +218,14 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         error: {},
         email: '',
         password: '',
+        register: false,
 
         reset: function () {
             $scope.appstoreLogin.busy = false;
             $scope.appstoreLogin.error = {};
             $scope.appstoreLogin.email = '';
             $scope.appstoreLogin.password = '';
+            $scope.appstoreLogin.register = false;
 
             $scope.appstoreLoginForm.$setUntouched();
             $scope.appstoreLoginForm.$setPristine();
@@ -240,43 +242,16 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appstoreLogin.error = {};
             $scope.appstoreLogin.busy = true;
 
-            AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
-                if (error) {
-                    $scope.appstoreLogin.busy = false;
-
-                    if (error.statusCode === 403) {
-                        $scope.appstoreLogin.error.password = 'Wrong email or password';
-                        $scope.appstoreLogin.password = '';
-                        $('#inputAppstoreLoginPassword').focus();
-                        $scope.appstoreLoginForm.password.$setPristine();
-                    } else {
-                        console.error(error);
-                    }
-
-                    return;
-                }
-
-                var config = {
-                    userId: result.userId,
-                    token: result.accessToken
-                };
-
-                Client.setAppstoreConfig(config, function (error) {
+            function login() {
+                AppStore.login($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error, result) {
                     if (error) {
                         $scope.appstoreLogin.busy = false;
 
-                        if (error.statusCode === 406) {
-                            if (error.message === 'wrong user') {
-                                $scope.appstoreLogin.error.generic = 'Wrong cloudron.io account';
-                                $scope.appstoreLogin.email = '';
-                                $scope.appstoreLogin.password = '';
-                                $scope.appstoreLoginForm.email.$setPristine();
-                                $scope.appstoreLoginForm.password.$setPristine();
-                                $('#inputAppstoreLoginEmail').focus();
-                            } else {
-                                console.error(error);
-                                $scope.appstoreLogin.error.generic = 'Please retry later';
-                            }
+                        if (error.statusCode === 403) {
+                            $scope.appstoreLogin.error.password = 'Wrong email or password';
+                            $scope.appstoreLogin.password = '';
+                            $('#inputAppstoreLoginPassword').focus();
+                            $scope.appstoreLoginForm.password.$setPristine();
                         } else {
                             console.error(error);
                         }
@@ -284,9 +259,62 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                         return;
                     }
 
-                    $scope.appstoreLogin.reset();
-                    $('#appstoreLoginModal').modal('hide');
+                    var config = {
+                        userId: result.userId,
+                        token: result.accessToken
+                    };
+
+                    Client.setAppstoreConfig(config, function (error) {
+                        if (error) {
+                            $scope.appstoreLogin.busy = false;
+
+                            if (error.statusCode === 406) {
+                                if (error.message === 'wrong user') {
+                                    $scope.appstoreLogin.error.generic = 'Wrong cloudron.io account';
+                                    $scope.appstoreLogin.email = '';
+                                    $scope.appstoreLogin.password = '';
+                                    $scope.appstoreLoginForm.email.$setPristine();
+                                    $scope.appstoreLoginForm.password.$setPristine();
+                                    $('#inputAppstoreLoginEmail').focus();
+                                } else {
+                                    console.error(error);
+                                    $scope.appstoreLogin.error.generic = 'Please retry later';
+                                }
+                            } else {
+                                console.error(error);
+                            }
+
+                            return;
+                        }
+
+                        $scope.appstoreLogin.reset();
+                        $('#appstoreLoginModal').modal('hide');
+                    });
                 });
+            }
+
+            if (!$scope.appstoreLogin.register) return login();
+
+            AppStore.register($scope.appstoreLogin.email, $scope.appstoreLogin.password, function (error) {
+                if (error) {
+                    $scope.appstoreLogin.busy = false;
+
+                    if (error.statusCode === 409) {
+                        $scope.appstoreLogin.error.generic = 'An account with this email already exists';
+                        $scope.appstoreLogin.email = '';
+                        $scope.appstoreLogin.password = '';
+                        $scope.appstoreLoginForm.email.$setPristine();
+                        $scope.appstoreLoginForm.password.$setPristine();
+                        $('#inputAppstoreLoginEmail').focus();
+                    } else {
+                        console.error(error);
+                        $scope.appstoreLogin.error.generic = 'Please retry later';
+                    }
+
+                    return;
+                }
+
+                login();
             });
         }
     };
