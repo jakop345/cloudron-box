@@ -375,7 +375,7 @@ function purchase(appId, appstoreId, callback) {
         var url = config.apiServerOrigin() + '/api/v1/users/' + result.userId + '/cloudrons/' + result.cloudronId + '/apps/' + appId;
         var data = { appstoreId: appstoreId };
 
-        superagent.post(url).send(data).query({ token: config.token() }).end(function (error, result) {
+        superagent.post(url).send(data).query({ accessToken: result.token }).end(function (error, result) {
             if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
             if (result.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND));
             if (result.statusCode !== 201 && result.statusCode !== 200) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
