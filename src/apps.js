@@ -63,6 +63,7 @@ var addons = require('./addons.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     semver = require('semver'),
+    settings = require('./settings.js'),
     spawn = require('child_process').spawn,
     split = require('split'),
     superagent = require('superagent'),
@@ -357,25 +358,30 @@ function getAllByUser(user, callback) {
     });
 }
 
-function purchase(appStoreId, callback) {
-    assert.strictEqual(typeof appStoreId, 'string');
+function purchase(appId, appstoreId, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof appstoreId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    // Skip purchase if appStoreId is empty
-    if (appStoreId === '') return callback(null);
+    if (appstoreId === '') return callback(null);
 
-    // Skip if we don't have an appstore token
-    if (config.token() === '') return callback(null);
+    // Skip for caas at the moment
+    if (config.provider() === 'caas') return callback(null);
 
-    var url = config.apiServerOrigin() + '/api/v1/apps/' + appStoreId + '/purchase';
+    settings.getAppstoreConfig(function (error, result) {
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+        if (!result.token) return callback(new AppsError(AppsError.BILLING_REQUIRED));
 
-    superagent.post(url).query({ token: config.token() }).end(function (error, res) {
-        if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
-        if (res.statusCode === 402) return callback(new AppsError(AppsError.BILLING_REQUIRED));
-        if (res.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND));
-        if (res.statusCode !== 201 && res.statusCode !== 200) return callback(new Error(util.format('App purchase failed. %s %j', res.status, res.body)));
+        var url = config.apiServerOrigin() + '/api/v1/users/' + result.userId + '/cloudrons/' + result.cloudronId + '/apps/' + appId;
+        var data = { appstoreId: appstoreId };
 
-        callback(null);
+        superagent.post(url).send(data).query({ token: config.token() }).end(function (error, result) {
+            if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
+            if (result.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND));
+            if (result.statusCode !== 201 && result.statusCode !== 200) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
+
+            callback(null);
+        });
     });
 }
 
@@ -464,7 +470,7 @@ function install(data, auditSource, callback) {
 
         debug('Will install app with id : ' + appId);
 
-        purchase(appStoreId, function (error) {
+        purchase(appId, appStoreId, function (error) {
             if (error) return callback(error);
 
             var data = {
@@ -781,7 +787,7 @@ function clone(appId, data, auditSource, callback) {
 
             var newAppId = uuid.v4(), appStoreId = app.appStoreId, manifest = restoreConfig.manifest;
 
-            purchase(appStoreId, function (error) {
+            purchase(newAppId, appStoreId, function (error) {
                 if (error) return callback(error);
 
                 var data = {
