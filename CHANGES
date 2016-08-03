@@ -593,4 +593,5 @@
 - Fix migration interface issue
 - Allow self hosted Cloudron to login to the Cloudron Store
 - Send mail to self hosted Cloudron admins about OOM and App died errors
+- Fix bug where box update emails are sent repeatedly
 

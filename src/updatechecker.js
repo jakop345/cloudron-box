@@ -116,7 +116,7 @@ function checkAppUpdates(callback) {
 
     gAppUpdateInfo = { };
     var oldState = loadState();
-    var newState = { box: oldState.box }; // create new state so that old app ids are removed
+    var newState = { };  // create new state so that old app ids are removed
 
     apps.getAll(function (error, apps) {
         if (error) return callback(error);
@@ -153,6 +153,7 @@ function checkAppUpdates(callback) {
                 iteratorDone();
             });
         }, function () {
+            newState.box = loadState().box; // preserve the latest box state information
             saveState(newState);
             callback();
         });
