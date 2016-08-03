@@ -68,7 +68,7 @@ echo "Cleaning up snapshots"
 find "${DATA_DIR}/snapshots" -mindepth 1 -maxdepth 1 | xargs --no-run-if-empty btrfs subvolume delete
 
 # restart mysql to make sure it has latest config
-service mysql restart
+systemctl restart mysql
 
 readonly mysql_root_password="password"
 mysqladmin -u root -ppassword password password # reset default root password
@@ -100,7 +100,7 @@ EOF
 
 set_progress "28" "Setup collectd"
 cp "${script_dir}/start/collectd.conf" "${DATA_DIR}/collectd/collectd.conf"
-service collectd restart
+systemctl restart collectd
 
 set_progress "30" "Setup nginx"
 mkdir -p "${DATA_DIR}/nginx/applications"
