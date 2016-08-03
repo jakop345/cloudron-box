@@ -9,7 +9,6 @@ exports = module.exports = {
     getByIpAddress: getByIpAddress,
     getAll: getAll,
     getAllByUser: getAllByUser,
-    purchase: purchase,
     install: install,
     configure: configure,
     uninstall: uninstall,
