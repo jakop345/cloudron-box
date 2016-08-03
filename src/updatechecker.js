@@ -131,7 +131,7 @@ function checkAppUpdates(callback) {
                 }
 
                 if (!updateInfo || !safe.query(updateInfo, 'manifest.version')) {
-                    debug('Skipping malformed update of app %s. got %j', app.id, updateInfo);
+                    debug('Skipping null or malformed update of app %s. got %j', app.id, updateInfo);
                     delete gAppUpdateInfo[app.id];
                     return iteratorDone();
                 }
