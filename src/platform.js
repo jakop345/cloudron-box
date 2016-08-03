@@ -230,6 +230,8 @@ function startMail(callback) {
         return callback(new Error('Could not create mail var file:' + safe.error.message));
     }
 
+    // TODO: watch for a signal here should the certificate path change. Note that haraka reloads
+    // config automatically if the contents of the certificate changes (eg, renawal).
     certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
         if (error) return callback(error);
 
