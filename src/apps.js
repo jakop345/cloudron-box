@@ -392,17 +392,17 @@ function unpurchase(appId, callback) {
     // Skip for caas at the moment
     if (config.provider() === 'caas') return callback(null);
 
-    settings.getAppstoreConfig(function (error, result) {
+    settings.getAppstoreConfig(function (error, appstoreConfig) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-        if (!result.token) return callback(new AppsError(AppsError.BILLING_REQUIRED));
+        if (!appstoreConfig.token) return callback(new AppsError(AppsError.BILLING_REQUIRED));
 
-        var url = config.apiServerOrigin() + '/api/v1/users/' + result.userId + '/cloudrons/' + result.cloudronId + '/apps/' + appId;
+        var url = config.apiServerOrigin() + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons/' + appstoreConfig.cloudronId + '/apps/' + appId;
 
-        superagent.get(url).query({ accessToken: result.token }).end(function (error, result) {
+        superagent.get(url).query({ accessToken: appstoreConfig.token }).end(function (error, result) {
             if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
             if (result.statusCode === 404) return callback(null);   // was never purchased
 
-            superagent.del(url).query({ accessToken: result.token }).end(function (error, result) {
+            superagent.del(url).query({ accessToken: appstoreConfig.token }).end(function (error, result) {
                 if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
                 if (result.statusCode !== 204) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App unpurchase failed. %s %j', result.status, result.body)));
 
