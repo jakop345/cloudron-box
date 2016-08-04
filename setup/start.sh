@@ -63,6 +63,12 @@ echo "Cleaning up snapshots"
 find "${DATA_DIR}/snapshots" -mindepth 1 -maxdepth 1 | xargs --no-run-if-empty btrfs subvolume delete
 
 # restart mysql to make sure it has latest config
+# wait for all running mysql jobs
+while true; do
+    if ! systemctl list-jobs | grep mysql; then break; fi
+    echo "Waiting for mysql jobs..."
+    sleep 1
+done
 systemctl restart mysql
 
 readonly mysql_root_password="password"
