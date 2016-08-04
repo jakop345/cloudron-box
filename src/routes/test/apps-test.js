@@ -439,7 +439,7 @@ describe('Apps', function () {
             });
         });
 
-        it('app install fails due to purchase failure', function (done) {
+        xit('app install fails due to purchase failure', function (done) {
             var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
             var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(402, {});
 
@@ -456,7 +456,6 @@ describe('Apps', function () {
 
         it('app install succeeds with purchase', function (done) {
             var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
-            var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
@@ -466,7 +465,6 @@ describe('Apps', function () {
                 expect(res.body.id).to.be.a('string');
                 APP_ID = res.body.id;
                 expect(fake1.isDone()).to.be.ok();
-                expect(fake2.isDone()).to.be.ok();
                 done();
             });
         });
@@ -573,9 +571,8 @@ describe('Apps', function () {
             });
         });
 
-        it('app install succeeds already purchased', function (done) {
+        it('app install succeeds again', function (done) {
             var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
-            var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(200, {});
 
             superagent.post(SERVER_URL + '/api/v1/apps/install')
                    .query({ access_token: token })
@@ -585,7 +582,6 @@ describe('Apps', function () {
                 expect(res.body.id).to.be.a('string');
                 APP_ID = res.body.id;
                 expect(fake1.isDone()).to.be.ok();
-                expect(fake2.isDone()).to.be.ok();
                 done();
             });
         });
@@ -678,7 +674,6 @@ describe('Apps', function () {
 
         it('can install test app', function (done) {
             var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
-            var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(200, {});
 
             var count = 0;
             function checkInstallStatus() {
@@ -699,7 +694,6 @@ describe('Apps', function () {
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 expect(fake1.isDone()).to.be.ok();
-                expect(fake2.isDone()).to.be.ok();
                 expect(res.body.id).to.be.a('string');
                 APP_ID = res.body.id;
                 checkInstallStatus();
@@ -1077,7 +1071,6 @@ describe('Apps', function () {
 
         it('can install test app', function (done) {
             var fake1 = nock(config.apiServerOrigin()).get('/api/v1/apps/test').reply(200, { manifest: APP_MANIFEST });
-            var fake2 = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
             var count = 0;
             function checkInstallStatus() {
@@ -1098,7 +1091,6 @@ describe('Apps', function () {
                   .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 expect(fake1.isDone()).to.be.ok();
-                expect(fake2.isDone()).to.be.ok();
                 APP_ID = res.body.id;
                 checkInstallStatus();
             });
