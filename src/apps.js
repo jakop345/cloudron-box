@@ -385,9 +385,12 @@ function purchase(appId, appstoreId, callback) {
     });
 }
 
-function unpurchase(appId, callback) {
+function unpurchase(appId, appstoreId, callback) {
     assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof appstoreId, 'string');
     assert.strictEqual(typeof callback, 'function');
+
+    if (appstoreId === '') return callback(null);
 
     // Skip for caas at the moment
     if (config.provider() === 'caas') return callback(null);
@@ -847,17 +850,21 @@ function uninstall(appId, auditSource, callback) {
 
     debug('Will uninstall app with id:%s', appId);
 
-    unpurchase(appId, function (error) {
+    get(appId, function (error, result) {
         if (error) return callback(error);
 
-        taskmanager.stopAppTask(appId, function () {
-            appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UNINSTALL, function (error) {
-                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
-                if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+        unpurchase(appId, result.appStoreId, function (error) {
+            if (error) return callback(error);
 
-                eventlog.add(eventlog.ACTION_APP_UNINSTALL, auditSource, { appId: appId });
+            taskmanager.stopAppTask(appId, function () {
+                appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UNINSTALL, function (error) {
+                    if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+                    if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                taskmanager.startAppTask(appId, callback);
+                    eventlog.add(eventlog.ACTION_APP_UNINSTALL, auditSource, { appId: appId });
+
+                    taskmanager.startAppTask(appId, callback);
+                });
             });
         });
     });
