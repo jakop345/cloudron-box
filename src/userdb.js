@@ -171,7 +171,7 @@ function del(userId, callback) {
     database.transaction(queries, function (error, result) {
         if (error && error.code === 'ER_NO_REFERENCED_ROW_2') return callback(new DatabaseError(DatabaseError.NOT_FOUND, error));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (result[1].affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND, error));
+        if (result[1].affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(error);
     });

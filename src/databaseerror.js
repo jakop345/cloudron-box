@@ -16,7 +16,7 @@ function DatabaseError(reason, errorOrMessage) {
 
     this.name = this.constructor.name;
     this.reason = reason;
-    if (typeof errorOrMessage === 'undefined' || errorOrMessage === null) {
+    if (typeof errorOrMessage === 'undefined') {
         this.message = reason;
     } else if (typeof errorOrMessage === 'string') {
         this.message = errorOrMessage;
