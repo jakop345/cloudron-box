@@ -47,6 +47,11 @@ function initialize(options, callback) {
         ssl: false
     });
 
+    gConnectionPool.on('connection', function (connection) {
+        connection.query('USE ' + config.database().name);
+        connection.query('SET SESSION sql_mode = \'strict_all_tables\'');
+    });
+
     reconnect(callback);
 }
 
@@ -57,24 +62,6 @@ function uninitialize(callback) {
     } else {
         callback(null);
     }
-}
-
-function setupConnection(connection, callback) {
-    assert.strictEqual(typeof connection, 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    connection.on('error', console.error);
-
-    async.series([
-        connection.query.bind(connection, 'USE ' + config.database().name),
-        connection.query.bind(connection, 'SET SESSION sql_mode = \'strict_all_tables\'')
-    ], function (error) {
-        connection.removeListener('error', console.error);
-
-        if (error) connection.release();
-
-        callback(error);
-    });
 }
 
 function reconnect(callback) {
@@ -97,13 +84,9 @@ function reconnect(callback) {
             setTimeout(reconnect.bind(null, callback), 1000);
         });
 
-        setupConnection(connection, function (error) {
-            if (error) return setTimeout(reconnect.bind(null, callback), 1000);
+        gDefaultConnection = connection;
 
-            gDefaultConnection = connection;
-
-            callback(null);
-        });
+        callback(null);
     });
 }
 
@@ -131,16 +114,15 @@ function beginTransaction(callback) {
     if (gConnectionPool === null) return callback(new Error('No database connection pool.'));
 
     gConnectionPool.getConnection(function (error, connection) {
-        if (error) return callback(error);
+        if (error) {
+            console.error('Unable to get connection to database. Try again in a bit.', error.message);
+            return setTimeout(beginTransaction.bind(null, callback), 1000);
+        }
 
-        setupConnection(connection, function (error) {
+        connection.beginTransaction(function (error) {
             if (error) return callback(error);
 
-            connection.beginTransaction(function (error) {
-                if (error) return callback(error);
-
-                return callback(null, connection);
-            });
+            return callback(null, connection);
         });
     });
 }
