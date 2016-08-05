@@ -84,7 +84,7 @@ function AppsError(reason, errorOrMessage) {
 
     this.name = this.constructor.name;
     this.reason = reason;
-    if (typeof errorOrMessage === 'undefined') {
+    if (typeof errorOrMessage === 'undefined' || errorOrMessage === null) {
         this.message = reason;
     } else if (typeof errorOrMessage === 'string') {
         this.message = errorOrMessage;

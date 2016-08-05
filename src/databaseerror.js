@@ -9,11 +9,12 @@ var assert = require('assert'),
 
 function DatabaseError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
-    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined' || errorOrMessage === null);
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
 
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
 
+    this.name = this.constructor.name;
     this.reason = reason;
     if (typeof errorOrMessage === 'undefined' || errorOrMessage === null) {
         this.message = reason;
