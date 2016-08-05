@@ -595,3 +595,6 @@
 - Send mail to self hosted Cloudron admins about OOM and App died errors
 - Fix bug where box update emails are sent repeatedly
 
+[0.17.6]
+- Fix app bundle installation
+
