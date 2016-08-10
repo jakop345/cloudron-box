@@ -138,7 +138,7 @@ cd "${SOURCE_DIR}"
 git archive --format=tar HEAD | $ssh22 "root@${server_ip}" "cat - > /tmp/box.tar.gz"
 
 echo "Executing init script"
-if ! $ssh22 "root@${server_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${installer_revision}"; then
+if ! $ssh22 "root@${server_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${installer_revision} caas"; then
     echo "Init script failed"
     exit 1
 fi

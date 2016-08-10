@@ -6,6 +6,7 @@ readonly USER=yellowtent
 readonly USER_HOME="/home/${USER}"
 readonly INSTALLER_SOURCE_DIR="${USER_HOME}/installer"
 readonly INSTALLER_REVISION="$1"
+readonly PROVIDER="$2"
 readonly USER_DATA_FILE="/root/user_data.img"
 readonly USER_DATA_DIR="/home/yellowtent/data"
 
@@ -133,7 +134,11 @@ iptables -I FORWARD -d 169.254.169.254 -j DROP
 mkdir /etc/iptables && iptables-save > /etc/iptables/rules.v4
 
 echo "=== Enable memory accounting =="
-sed -e 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1 panic_on_oops=1 panic=5"/' -i /etc/default/grub
+if [[ "${PROVIDER}" == "digitalocean" ]] || [[ "${PROVIDER}" == "caas" ]]; then
+    sed -e 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="console=tty1 root=LABEL=DOROOT notsc clocksource=kvm-clock net.ifnames=0 cgroup_enable=memory swapaccount=1 panic_on_oops=1 panic=5"/' -i /etc/default/grub
+else
+    sed -e 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1 panic_on_oops=1 panic=5"/' -i /etc/default/grub
+fi
 update-grub
 
 # now add the user to the docker group
@@ -149,12 +154,16 @@ apt-get install -y python   # Install python which is required for npm rebuild
 [[ "$(python --version 2>&1)" == "Python 2.7."* ]] || die "Expecting python version to be 2.7.x"
 
 echo "==== Downloading docker images ===="
-images=$(node -e "var i = require('${SOURCE_DIR}/infra_version.js'); console.log(i.baseImage, Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join(' '));")
+if [ -f ${SOURCE_DIR}/infra_version.js ]; then
+    images=$(node -e "var i = require('${SOURCE_DIR}/infra_version.js'); console.log(i.baseImage, Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join(' '));")
 
-echo "Pulling images: ${images}"
-for image in ${images}; do
-    docker pull "${image}"
-done
+    echo "Pulling images: ${images}"
+    for image in ${images}; do
+        docker pull "${image}"
+    done
+else
+    echo "No infra_versions.js found, skipping image download"
+fi
 
 echo "==== Install nginx ===="
 apt-get -y install nginx-full
