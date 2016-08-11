@@ -113,7 +113,7 @@ if ! $ssh22 "root@${server_ip}" "/bin/bash /home/ubuntu/initializeBaseUbuntuImag
 fi
 
 echo "Strip ssh key"
-if ! $ssh22 "root@${server_ip}" "rm /root/.ssh/authorized_keys"; then
+if ! $ssh202 "root@${server_ip}" "rm /root/.ssh/authorized_keys"; then
     echo "Unable to remove ssh access"
     echo "Make sure to cleanup the ec2 instance ${instance_id}"
     exit 1
