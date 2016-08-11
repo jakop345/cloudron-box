@@ -78,6 +78,7 @@ apt-get -y install btrfs-tools
 
 echo "==== Install docker ===="
 # install docker from binary to pin it to a specific version. the current debian repo does not allow pinning
+# IMPORTANT: docker 1.11.x breaks the --dns option hack that we use below
 curl https://get.docker.com/builds/Linux/x86_64/docker-1.10.2 > /usr/bin/docker
 apt-get -y install aufs-tools
 chmod +x /usr/bin/docker
