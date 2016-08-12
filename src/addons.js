@@ -376,7 +376,7 @@ function setupLdap(app, options, callback) {
         'LDAP_USERS_BASE_DN=ou=users,dc=cloudron',
         'LDAP_GROUPS_BASE_DN=ou=groups,dc=cloudron',
         'LDAP_BIND_DN=cn='+ app.id + ',ou=apps,dc=cloudron',
-        'LDAP_BIND_PASSWORD=' + hat(8 * 128) // this is ignored
+        'LDAP_BIND_PASSWORD=' + hat(4 * 128) // this is ignored
     ];
 
     debugApp(app, 'Setting up LDAP');
