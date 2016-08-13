@@ -128,7 +128,9 @@ else
 fi
 
 set_progress "33" "Changing ownership"
-chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd" "${DATA_DIR}/addons" "${DATA_DIR}/acme"
+chown "${USER}:${USER}" -R "${DATA_DIR}/nginx" "${DATA_DIR}/collectd" "${DATA_DIR}/addons" "${DATA_DIR}/acme"
+# during updates, do not trample mail ownership behind the the mail container's back
+find "${DATA_DIR}/box" -mindepth 1 -maxdepth 1 -not -path "${DATA_DIR}/box/mail" -print0 | xargs -0 chown -R "${USER}:${USER}"
 chown "${USER}:${USER}" "${DATA_DIR}/INFRA_VERSION" || true
 chown "${USER}:${USER}" "${DATA_DIR}"
 
