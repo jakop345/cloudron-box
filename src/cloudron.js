@@ -31,6 +31,7 @@ var apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
     backups = require('./backups.js'),
+    child_process = require('child_process'),
     clients = require('./clients.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
@@ -373,8 +374,8 @@ function ensureDkimKeySync() {
 
     debug('Generating new DKIM keys');
 
-    safe.child_process.execSync('openssl genrsa -out ' + dkimPrivateKeyFile + ' 1024');
-    safe.child_process.execSync('openssl rsa -in ' + dkimPrivateKeyFile + ' -out ' + dkimPublicKeyFile + ' -pubout -outform PEM');
+    child_process.execSync('openssl genrsa -out ' + dkimPrivateKeyFile + ' 1024');
+    child_process.execSync('openssl rsa -in ' + dkimPrivateKeyFile + ' -out ' + dkimPublicKeyFile + ' -pubout -outform PEM');
 }
 
 function readDkimPublicKeySync() {
