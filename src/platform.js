@@ -238,8 +238,8 @@ function startMail(callback) {
         const cmd = `docker run --restart=always -d --name="mail" \
                     --net cloudron \
                     --net-alias mail \
-                    -m 75m \
-                    --memory-swap 150m \
+                    -m 128m \
+                    --memory-swap 256m \
                     -e "MAIL_DOMAIN=${fqdn}" \
                     -e "MAIL_SERVER_NAME=${mailFqdn}" \
                     -v "${dataDir}/box/mail:/app/data" \
