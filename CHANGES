@@ -598,4 +598,5 @@
 [0.18.0]
 - Fix app bundle installation
 - Fix RBL lookup in mail server
+- Add spam filter for email
 
