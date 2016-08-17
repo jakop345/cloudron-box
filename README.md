@@ -29,6 +29,10 @@ anyone to effortlessly host web applications on their server on their own terms.
 * Trivially migrate to another server keeping your apps and data (for example, switch your
   infrastructure provider or move to a bigger server).
 
+* Comprehensive [REST API](https://cloudron.io/references/api.html).
+
+* [CLI](https://git.cloudron.io/cloudron/cloudron-cli) to configure apps.
+
 * Alerts, audit logs, graphs, dns management ... and much more
 
 ## Demo
