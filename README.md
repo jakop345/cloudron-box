@@ -1,17 +1,32 @@
-Cloudron a Smart Server
-=======================
+# Cloudron
 
+[Cloudron](https://cloudron.io) is the best way to run apps on your server.
 
+Web applications like email, contacts, blog, chat are the backbone of the modern
+internet. Yet, we live in a world where hosting these essential applications is
+a complex task.
 
-Selfhost Instructions
----------------------
+We are building the ultimate self-hosting platform. Our product allows anyone to
+effortlessly host web applications on their server on their own terms.
 
-The smart server currently relies on an AWS account with access to Route53 and S3 and is tested on DigitalOcean and EC2.
+Try our demo at https://my-demo.cloudron.me (username: cloudron password: cloudron).
 
-First create a virtual private server with Ubuntu 15.04 and run the following commands in an ssh session to initialize the base image:
+## Installing
 
-```
-curl https://s3.amazonaws.com/prod-cloudron-releases/installer.sh -o installer.sh
-chmod +x installer.sh
-./installer.sh <domain> <aws access key> <aws acccess secret> <backup bucket> <provider> <release sha1>
-```
+You can install the Cloudron platform on your own server or get a managed server
+from cloudron.io.
+
+* [Selfhosting](https://cloudron.io/references/selfhosting.html)
+* [Managed Hosting](https://cloudron.io/pricing.html)
+
+## Documentation
+
+* [User manual](https://cloudron.io/references/usermanual.html)
+* [Developer docs](https://cloudron.io/documentation.html)
+* [Architecture](https://cloudron.io/references/architecture.html)
+
+## Community
+
+* [Chat](https://chat.cloudron.io/)
+* [Support](mailto:support@cloudron.io)
+
