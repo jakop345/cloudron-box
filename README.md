@@ -49,6 +49,21 @@ from cloudron.io.
 * [Developer docs](https://cloudron.io/documentation.html)
 * [Architecture](https://cloudron.io/references/architecture.html)
 
+## Related repos
+
+The [base image repo](https://git.cloudron.io/cloudron/docker-base-image) is the parent image of all
+the containers in the Cloudron.
+
+The [graphite repo](https://git.cloudron.io/cloudron/docker-graphite) contains the graphite code
+that collects metrics for graphs.
+
+The addons are located in separate repositories
+* [Redis](https://git.cloudron.io/cloudron/redis-addon)
+* [Postgresql](https://git.cloudron.io/cloudron/postgresql-addon)
+* [MySQL](https://git.cloudron.io/cloudron/mysql-addon)
+* [Mongodb](https://git.cloudron.io/cloudron/mongodb-addon)
+* [Mail](https://git.cloudron.io/cloudron/mail-addon)
+
 ## Community
 
 * [Chat](https://chat.cloudron.io/)
