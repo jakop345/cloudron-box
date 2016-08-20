@@ -44,7 +44,7 @@ done
 
 if [[ ${try} -eq 5 ]]; then
     echo "restore failed"
-    exit 1
+    exit 3
 else
     echo "restore successful"
 fi

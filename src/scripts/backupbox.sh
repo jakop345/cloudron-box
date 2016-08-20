@@ -57,7 +57,7 @@ btrfs subvolume delete "${box_snapshot_dir}"
 
 if [[ ${try} -eq 5 ]]; then
     echo "Backup failed"
-    exit 1
+    exit 3
 else
     echo "Backup successful"
 fi

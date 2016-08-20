@@ -55,7 +55,7 @@ done
 if [[ ${try} -eq 5 ]]; then
     echo "Backup failed uploading config.json"
     btrfs subvolume delete "${app_data_snapshot}"
-    exit 1
+    exit 3
 fi
 
 for try in `seq 1 5`; do
@@ -74,7 +74,7 @@ btrfs subvolume delete "${app_data_snapshot}"
 
 if [[ ${try} -eq 5 ]]; then
     echo "Backup failed uploading backup tarball"
-    exit 1
+    exit 3
 else
     echo "Backup successful"
 fi
