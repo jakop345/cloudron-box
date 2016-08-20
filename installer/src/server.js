@@ -58,17 +58,23 @@ function provision(callback) {
         return callback(null); // already provisioned
     }
 
-    // try first digitalocean, then ec2
-    provisionDigitalOcean(function (error, userData) {
-        if (!error) return installer.provision(userData, callback);
+    async.retry({ times: 5, interval: 30000 }, function (done) {
+        // try first digitalocean, then ec2
+        provisionDigitalOcean(function (error1, userData) {
+            if (!error1) return done(null, userData);
 
-        provisionEC2(function (error, userData) {
-            if (!error) return installer.provision(userData, callback);
+            provisionEC2(function (error2, userData) {
+                if (!error2) return done(null, userData);
 
-            console.error('Unable to get meta data', error);
+                console.error('Unable to get meta data: ', error1.message + ' ' + error2.message);
 
-            callback(new Error('Error getting metadata'));
+                callback(new Error(error1.message + ' ' + error2.message));
+            });
         });
+    }, function (error, userData) {
+        if (error) return callback(error);
+
+        installer.provision(userData, callback);
     });
 }
 
