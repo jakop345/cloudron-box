@@ -242,7 +242,7 @@ cat > /etc/systemd/system/box-setup.service <<EOF
 [Unit]
 Description=Box Setup
 Before=docker.service collectd.service mysql.service
-After=do-resize.service cloud-init.service
+After=cloud-init.service
 
 [Service]
 Type=oneshot
