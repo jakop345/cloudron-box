@@ -23,6 +23,7 @@ install it yourself.
 * Gunicorn 19.4.5
 * Java 1.8
 * Maven 3.3.9
+* Mongo 2.6.10
 * MySQL Client 5.7.13
 * nginx 1.10.0
 * Node 0.10.40, 0.12.7, 4.2.6, 4.4.7 (installed under `/usr/local/node-<version>`) [more information](#node-js)
