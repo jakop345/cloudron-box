@@ -53,7 +53,10 @@ function provisionEC2(callback) {
 }
 
 function provision(callback) {
-    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
+    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) {
+        debug('provision: already provisioned');
+        return callback(null); // already provisioned
+    }
 
     // try first digitalocean, then ec2
     provisionDigitalOcean(function (error, userData) {
@@ -70,7 +73,10 @@ function provision(callback) {
 }
 
 function provisionLocal(callback) {
-    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
+    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) {
+        debug('provisionLocal: already provisioned');
+        return callback(null); // already provisioned
+    }
 
     if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
         console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
