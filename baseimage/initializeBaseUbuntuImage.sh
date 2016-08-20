@@ -156,7 +156,7 @@ apt-get install -y python   # Install python which is required for npm rebuild
 
 echo "==== Downloading docker images ===="
 if [ -f ${SOURCE_DIR}/infra_version.js ]; then
-    images=$(node -e "var i = require('${SOURCE_DIR}/infra_version.js'); console.log(i.baseImage, Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join(' '));")
+    images=$(node -e "var i = require('${SOURCE_DIR}/infra_version.js'); console.log(i.baseImages.join(' '), Object.keys(i.images).map(function (x) { return i.images[x].tag; }).join(' '));")
 
     echo "Pulling images: ${images}"
     for image in ${images}; do

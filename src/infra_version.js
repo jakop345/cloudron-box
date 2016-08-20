@@ -8,7 +8,7 @@ exports = module.exports = {
     // a version bump means that all containers (apps and addons) are recreated
     'version': 40,
 
-    'baseImage': 'cloudron/base:0.8.1',
+    'baseImages': [ 'cloudron/base:0.8.1', 'cloudron/base:0.9.0' ],
 
     'images': {
         'mysql': { repo: 'cloudron/mysql', tag: 'cloudron/mysql:0.12.0' },
