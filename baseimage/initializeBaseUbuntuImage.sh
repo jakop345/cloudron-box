@@ -241,7 +241,7 @@ echo "==== Install box-setup systemd script ===="
 cat > /etc/systemd/system/box-setup.service <<EOF
 [Unit]
 Description=Box Setup
-Before=docker.service collectd.service mysql.service sshd.service
+Before=docker.service collectd.service mysql.service sshd.service nginx.service
 After=cloud-init.service
 
 [Service]
