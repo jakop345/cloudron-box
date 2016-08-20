@@ -31,6 +31,7 @@ install it yourself.
 * PHP 7.0.8
 * Postgresql client 9.5.4
 * Python 2.7.12
+* Redis 3.0.6
 * Ruby 2.3.1
 * sqlite3 3.11.0
 * Supervisor 3.2.0
