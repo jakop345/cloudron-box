@@ -600,3 +600,7 @@
 - Fix RBL lookup in mail server
 - Add spam filter for email
 
+[0.19.0]
+* New base image 0.19.0
+* Upgrade PostgreSQL and MySQL
+
