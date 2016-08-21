@@ -10,6 +10,8 @@ exports = module.exports = {
 
     'baseImages': [ 'cloudron/base:0.8.1', 'cloudron/base:0.9.0' ],
 
+    // Note that if any of the databases include an upgrade, bump the infra version above
+    // This is because we upgrade using dumps instead of mysql_upgrade, pg_upgrade etc
     'images': {
         'mysql': { repo: 'cloudron/mysql', tag: 'cloudron/mysql:0.13.0' },
         'postgresql': { repo: 'cloudron/postgresql', tag: 'cloudron/postgresql:0.12.0' },
