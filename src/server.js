@@ -208,8 +208,6 @@ function initializeExpressSync() {
 
     // upgrade handler
     httpServer.on('upgrade', function (req, socket, head) {
-        if (req.headers['upgrade'] !== 'tcp') return req.end('Only TCP upgrades are possible');
-
         // create a node response object for express
         var res = new http.ServerResponse({});
         res.assignSocket(socket);
