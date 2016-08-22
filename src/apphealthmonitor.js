@@ -138,7 +138,7 @@ function run() {
 
 /*
     OOM can be tested using stress tool like so:
-        docker run -ti -m 100M cloudron/base:0.8.1 /bin/bash
+        docker run -ti -m 100M cloudron/base:0.9.0 /bin/bash
         apt-get update && apt-get install stress
         stress --vm 1 --vm-bytes 200M --vm-hang 0
 */

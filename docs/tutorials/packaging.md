@@ -79,7 +79,7 @@ console.log("Server running at port 8000");
 The Dockerfile contains instructions on how to create an image for your application.
 
 ```Dockerfile
-FROM cloudron/base:0.8.1
+FROM cloudron/base:0.9.0
 
 ADD server.js /app/code/server.js
 
@@ -188,7 +188,7 @@ Build scheduled with id e7706847-f2e3-4ba2-9638-3f334a9453a5
 Waiting for build to begin, this may take a bit...
 Downloading source
 Building
-Step 1 : FROM cloudron/base:0.8.1
+Step 1 : FROM cloudron/base:0.9.0
  ---> be9fc6312b2d
 Step 2 : ADD server.js /app/code/server.js
  ---> 10513e428d7a
