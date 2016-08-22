@@ -505,25 +505,20 @@ The update progress can be tracked by polling the value of [installationProgress
 
 Curl example to update Gogs to a new version 0.13.0:
 ```
-curl -kX POST -d '{ "appStoreId": "io.gogs.cloudronapp@0.13.0" }' -H 'Content-Type: application/json' -H 'Authorization: Bearer 256e4c6c6f783dbff95ae233c63a36e297ef70a3528171b891a399f895a8e0e0' https://my-demo.cloudron.me/api/v1/apps/aaa8ad53-301b-4a77-9551-5df261686166/update
+curl -X POST -d '{ "appStoreId": "io.gogs.cloudronapp@0.13.0" }' -H 'Content-Type: application/json' -H 'Authorization: Bearer 256e4c6c6f783dbff95ae233c63a36e297ef70a3528171b891a399f895a8e0e0' https://my-demo.cloudron.me/api/v1/apps/aaa8ad53-301b-4a77-9551-5df261686166/update
 ```
 
 ### Exec
 
-POST `/api/v1/apps/:appId/exec` <scope>admin</scope>
+GET `/api/v1/apps/:appId/exec` <scope>admin</scope>
 
 Executes an arbitrary command in the context of the app.
 
-Request:
-
-```
-{
-    cmd: [ <string>, ... ],     // the command to execute. default: '/bin/bash'
-    rows: <number>,             // optional. the tty window row size
-    columns: <number>,          // optional. the tty window column size
-    tty: <boolean>              // set to true, if a tty should be allocated
-}
-```
+Query Parameters:
+* `cmd`: JSON encoded string array of the command to execute. default: '/bin/bash'
+* `rows`: optional. the tty window row size
+* `columns`: optional. the tty window column size
+* `tty`: set to true if a tty should be allocated
 
 In order to provide separate streams for **stdout** and **stderr**, the http connection
 is upgraded to **tcp** using the following headers:
@@ -542,6 +537,11 @@ single stream. If no `tty` was allocated, then the server writes data in the fol
 
 See the [Docker docs](https://docs.docker.com/engine/reference/api/docker_remote_api_v1.19/#attach-to-a-container)
 for details.
+
+Curl example to execute 'ls' command:
+```
+curl -H 'Upgrade: tcp' -H 'Connection: Upgrade' -H 'Authorization: Bearer eba011a45eb056c7497820c408d1170e94ac7ed0fb10cef798fcdaacbcbcd2ee' 'https://my-demo.cloudron.me/api/v1/apps/41dfe1f1-edb3-4011-9ba3-889d0b24a177/exec?cmd=%5B%22ls%22%5D&tty=true'
+```
 
 ### Start app
 
