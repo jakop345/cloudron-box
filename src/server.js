@@ -218,13 +218,9 @@ function initializeExpressSync() {
                          '\r\n');
         };
 
-        // route through express middleware
-        app(req, res, function (error) {
-            if (error) {
-                console.error(error);
-                socket.destroy();
-            }
-        });
+        // route through express middleware. if we provide no callback, express will provide a 'finalhandler'
+        // TODO: it's not clear if socket needs to be destroyed
+        app(req, res);
     });
 
     return httpServer;
