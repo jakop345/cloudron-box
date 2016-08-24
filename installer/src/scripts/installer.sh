@@ -4,12 +4,13 @@ set -eu -o pipefail
 
 readonly BOX_SRC_DIR=/home/yellowtent/box
 readonly DATA_DIR=/home/yellowtent/data
+readonly CLOUDRON_CONF=/home/yellowtent/configs/cloudron.conf
 
 readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly json="${script_dir}/../../node_modules/.bin/json"
 readonly curl="curl --fail --connect-timeout 20 --retry 10 --retry-delay 2 --max-time 300"
 
-readonly is_update=$([[ -d "${BOX_SRC_DIR}" ]] && echo "yes" || echo "no")
+readonly is_update=$([[ -f "${CLOUDRON_CONF}" ]] && echo "yes" || echo "no")
 
 # create a provision file for testing. %q escapes args. %q is reused as much as necessary to satisfy $@
 (echo -e "#!/bin/bash\n"; printf "%q " "${script_dir}/installer.sh" "$@") > /home/yellowtent/provision.sh
