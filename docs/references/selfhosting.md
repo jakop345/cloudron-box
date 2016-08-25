@@ -152,9 +152,19 @@ The Cloudron has a backup schedule of creating one once a day. In addition to re
 
 Since this might result in a lot of backup data on your S3 backup bucket, we recommend adjusting the bucket properties. This can be done adding a lifecycle rule for that bucket, using the AWS console. S3 supports both permanent deletion or moving objects to the cheaper Glacier storage class based on an age attribute. With the current daily backup schedule a setting of two days should be already sufficient for most use-cases.
 
-You can list backups using the following command:
+If your Cloudron is running, you can list backups using the following command:
 ```
 cloudron machine backup list <domain>
+```
+
+Alternately, you can list the backups by querying S3 using the following command:
+```
+cloudron machine backup list --provider ec2 \
+        --region <region> \
+        --access-key-id <access-key-id> \
+        --secret-access-key <secret-access-key> \
+        --backup-bucket <s3 bucket name> \
+        <domain>
 ```
 
 ## Restore
