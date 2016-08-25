@@ -72,7 +72,7 @@ function getRestoreUrl(apiConfig, filename, callback) {
         var params = {
             Bucket: apiConfig.bucket,
             Key: apiConfig.prefix + '/' + filename,
-            Expires: 60 * 60 /* 60 minutes */
+            Expires: 60 * 60 * 24 /* 1 day */
         };
 
         var url = s3.getSignedUrl('getObject', params);
