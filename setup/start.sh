@@ -21,7 +21,7 @@ source "${script_dir}/argparser.sh" "$@" # this injects the arg_* variables used
 admin_fqdn=$([[ "${arg_is_custom_domain}" == "true" ]] && echo "${ADMIN_LOCATION}.${arg_fqdn}" ||  echo "${ADMIN_LOCATION}-${arg_fqdn}")
 admin_origin="https://${admin_fqdn}"
 
-readonly is_update=$([[ -d "${DATA_DIR}/box" ]] && echo "true" || echo "false")
+readonly is_update=$([[ -f "${CONFIG_DIR}/cloudron.conf" ]] && echo "true" || echo "false")
 
 set_progress() {
     local percent="$1"
