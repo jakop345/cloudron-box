@@ -117,7 +117,8 @@ Request:
     cert: <string>,                  // pem encoded TLS cert
     key: <string>,                   // pem encoded TLS key
     memoryLimit: <number>,           // memory constraint in bytes
-    altDomain: <string>              // alternate domain from which this app can be reached
+    altDomain: <string>,             // alternate domain from which this app can be reached
+    xFrameOptions: <string>          // set X-Frame-Options header, to control app embedding in other pages
 }
 ```
 
@@ -142,6 +143,9 @@ from the Cloudron Store (or uses a fallback icon).
 provided, a 400 will be returned.
 
 If `altDomain` is set, the app can be accessed from `https://<altDomain>`.
+
+`xFrameOptions` is set to `SAMEORIGIN` unless otherwise specified. This property can hold one value of either `DENY`, `SAMEORIGIN` or `ALLOW-FROM https://example.com/`.
+Read more about this [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options).
 
 Response (200):
 
@@ -450,7 +454,8 @@ Request:
     cert: <string>,                 // pem encoded TLS cert
     key: <string>,                  // pem encoded TLS key
     memoryLimit: <number>,          // memory constraint in bytes
-    altDomain: <string>             // alternate domain from which this app can be reached
+    altDomain: <string>,            // alternate domain from which this app can be reached
+    xFrameOptions: <string>         // set X-Frame-Options header, to control app embedding in other pages
 ```
 
 All values are optional. See [Install app](/references/api.html#install-app) API for field descriptions.
