@@ -12,7 +12,14 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.searchString = '';
 
     $scope.showRequestUpgrade = function () {
-        $location.path('/settings');
+        // wait for dialog to be fully closed to avoid modal behavior breakage when moving to a different view already
+        $('#appInstallModal').on('hidden.bs.modal', function () {
+            $scope.appInstall.reset();
+            $('#appInstallModal').off('hidden.bs.modal');
+            $location.path('/settings');
+        });
+
+        $('#appInstallModal').modal('hide');
     };
 
     $scope.appInstall = {
@@ -166,6 +173,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 // wait for dialog to be fully closed to avoid modal behavior breakage when moving to a different view already
                 $('#appInstallModal').on('hidden.bs.modal', function () {
                     $scope.appInstall.reset();
+                    $('#appInstallModal').off('hidden.bs.modal');
                     $location.path('/apps');
                 });
 
