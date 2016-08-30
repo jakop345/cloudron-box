@@ -11,6 +11,10 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.cachedCategory = ''; // used to cache the selected category while searching
     $scope.searchString = '';
 
+    $scope.showRequestUpgrade = function () {
+        $location.path('/settings');
+    };
+
     $scope.appInstall = {
         busy: false,
         installFormVisible: false,
