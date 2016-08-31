@@ -194,13 +194,14 @@
             <span>Cloudron has a built-in email server that allows you to send/receive email for your domain. When enabled, your DNS will be configured automatically.</span>
         </div>
     </div>
+    <br/>
     <div class="row">
         <p class="col-md-12" ng-show="!config.isCustomDomain">
-            Email server can only be enabled for custom domains.
+            <b>Email can only be enabled for custom domains.</b>
         </p>
 
-        <div class="col-md-12" ng-show="!config.isCustomDomain">
-            <button class="btn btn-primary pull-right" ng-click="toggleEmail()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
+        <div class="col-md-12" ng-show="config.isCustomDomain">
+            <button ng-class="mailConfig.enabled ? 'btn btn-danger pull-right' : 'btn btn-primary pull-right'" ng-click="toggleEmail()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
         </div>
     </div>
 </div>
