@@ -1200,6 +1200,37 @@ Sets the credentials used to configure DNS.
 
 This is currently internal API and is documented here for completeness.
 
+### Get Email Configuration
+
+GET `/api/v1/settings/mail_config` <scope>admin</scope> <scope>internal</scope>
+
+Gets the email configuration. The Cloudron has a built-in email server for users.
+This configuration can be used to disable the server. Note that the Cloudron will
+always be able to send email on behalf of apps, regardless of this setting.
+
+Response(200):
+```
+{
+  "enable": <boolean> // true to enable email
+}
+```
+
+### Set Email Configuration
+
+POST `/api/v1/settings/mail_config` <scope>admin</scope> <scope>internal</scope>
+
+Sets the email configuration. The Cloudron has a built-in email server for users.
+This configuration can be used to enable or disable the email server. Note that
+the Cloudron will always be able to send email on behalf of apps, regardless of 
+this setting.
+
+Request:
+```
+{
+    "enable": <boolean>
+}
+```
+
 ### Set fallback Certificate
 
 POST `/api/v1/settings/certificate` <scope>admin</scope> <scope>internal</scope>

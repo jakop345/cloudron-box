@@ -153,6 +153,22 @@ describe('Settings', function () {
             });
         });
 
+        it('can set mail config', function (done) {
+            settings.setMailConfig({ prerelease: true }, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('can get backup config', function (done) {
+            settings.getUpdateConfig(function (error, updateConfig) {
+                expect(error).to.be(null);
+                expect(updateConfig.prerelease).to.be(true);
+                done();
+            });
+        });
+
+
         it('can get all values', function (done) {
             settings.getAll(function (error, allSettings) {
                 expect(error).to.be(null);
