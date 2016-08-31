@@ -184,6 +184,29 @@
 
 <div class="section-header">
     <div class="text-left">
+        <h3>Email</h3>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 15px;">
+    <div class="row">
+        <div class="col-md-12">
+            <span>Cloudron has a built-in email server that allows you to send/receive email for your domain. When enabled, your DNS will be configured automatically.</span>
+        </div>
+    </div>
+    <div class="row">
+        <p class="col-md-12" ng-show="!config.isCustomDomain">
+            Email server can only be enabled for custom domains.
+        </p>
+
+        <div class="col-xs-6 text-right" ng-show="config.isCustomDomain">
+            <button class="btn btn-primary pull-right" ng-click="toggleEmail()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
+        </div>
+    </div>
+</div>
+
+<div class="section-header">
+    <div class="text-left">
         <h3>Backups</h3>
     </div>
 </div>

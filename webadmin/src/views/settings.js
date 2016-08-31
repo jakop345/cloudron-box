@@ -9,6 +9,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.dnsConfig = {};
     $scope.appstoreConfig = {};
 
+    $scope.mailConfig = null;
+
     $scope.lastBackup = null;
     $scope.backups = [];
 
@@ -118,6 +120,22 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             }
         });
     }
+
+    function getMailConfig() {
+        Client.getMailConfig(function (error, mailConfig) {
+            if (error) return console.error(error);
+
+            $scope.mailConfig = mailConfig;
+        });
+    }
+
+    $scope.toggleEmail = function () {
+        Client.setMailConfig({ enabled: !$scope.mailConfig.enabled }, function (error) {
+            if (error) return console.error(error);
+
+            $scope.mailConfig.enabled = !$scope.mailConfig.enabled;
+        });
+    };
 
     function getPlans() {
         AppStore.getSizes(function (error, result) {
@@ -359,6 +377,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     Client.onReady(function () {
         fetchBackups();
+        getMailConfig();
 
         if ($scope.config.provider === 'caas') {
             getPlans();
