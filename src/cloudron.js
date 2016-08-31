@@ -23,8 +23,7 @@ exports = module.exports = {
     events: new (require('events').EventEmitter)(),
 
     EVENT_ACTIVATED: 'activated',
-    EVENT_CONFIGURED: 'configured',
-    EVENT_FIRST_RUN: 'firstrun'
+    EVENT_CONFIGURED: 'configured'
 };
 
 var apps = require('./apps.js'),
@@ -117,12 +116,10 @@ function initialize(callback) {
     ensureDkimKeySync();
 
     exports.events.on(exports.EVENT_CONFIGURED, addDnsRecords);
-    exports.events.on(exports.EVENT_FIRST_RUN, installAppBundle);
 
     if (!fs.existsSync(paths.FIRST_RUN_FILE)) {
-        // EE API is sync. do not keep the server waiting
-        debug('initialize: emitting first run event');
-        process.nextTick(function () { exports.events.emit(exports.EVENT_FIRST_RUN); });
+        debug('initialize: installing app bundle on first run');
+        process.nextTick(installAppBundle);
         fs.writeFileSync(paths.FIRST_RUN_FILE, 'been there, done that', 'utf8');
     }
 
