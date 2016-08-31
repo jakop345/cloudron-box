@@ -23,6 +23,7 @@ var apps = require('./apps.js'),
     infra = require('./infra_version.js'),
     ini = require('ini'),
     mailboxes = require('./mailboxes.js'),
+    settings = require('./settings.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
@@ -235,27 +236,30 @@ function startMail(callback) {
     certificates.getAdminCertificatePath(function (error, certFilePath, keyFilePath) {
         if (error) return callback(error);
 
-        const cmd = `docker run --restart=always -d --name="mail" \
-                    --net cloudron \
-                    --net-alias mail \
-                    -m 128m \
-                    --memory-swap 256m \
-                    -e "MAIL_DOMAIN=${fqdn}" \
-                    -e "MAIL_SERVER_NAME=${mailFqdn}" \
-                    -v "${dataDir}/box/mail:/app/data" \
-                    -v "${dataDir}/mail:/run" \
-                    -v "${dataDir}/addons/mail_vars.sh:/etc/mail/mail_vars.sh:ro" \
-                    -v "${certFilePath}:/etc/tls_cert.pem:ro" \
-                    -v "${keyFilePath}:/etc/tls_key.pem:ro" \
-                    -p 587:2525 \
-                    -p 993:9993 \
-                    -p 4190:4190 \
-                    -p 25:2525 \
-                    --read-only -v /tmp ${tag}`;
+        settings.getMailConfig(function (error, mailConfig) {
+            if (error) return callback(error);
 
-        shell.execSync('startMail', cmd);
+            var ports = mailConfig.enabled ? '-p 587:2525 -p 993:9993 -p 4190:4190 -p 25:2525' : '';
 
-        mailboxes.setupAliases(callback);
+            const cmd = `docker run --restart=always -d --name="mail" \
+                        --net cloudron \
+                        --net-alias mail \
+                        -m 128m \
+                        --memory-swap 256m \
+                        -e "MAIL_DOMAIN=${fqdn}" \
+                        -e "MAIL_SERVER_NAME=${mailFqdn}" \
+                        -v "${dataDir}/box/mail:/app/data" \
+                        -v "${dataDir}/mail:/run" \
+                        -v "${dataDir}/addons/mail_vars.sh:/etc/mail/mail_vars.sh:ro" \
+                        -v "${certFilePath}:/etc/tls_cert.pem:ro" \
+                        -v "${keyFilePath}:/etc/tls_key.pem:ro" \
+                        ${ports} \
+                        --read-only -v /tmp ${tag}`;
+
+            shell.execSync('startMail', cmd);
+
+            mailboxes.setupAliases(callback);
+        });
     });
 }
 
