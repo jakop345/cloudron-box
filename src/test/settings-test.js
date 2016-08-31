@@ -138,14 +138,14 @@ describe('Settings', function () {
             });
         });
 
-        it('can set backup config', function (done) {
+        it('can set update config', function (done) {
             settings.setUpdateConfig({ prerelease: true }, function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
-        it('can get backup config', function (done) {
+        it('can get update config', function (done) {
             settings.getUpdateConfig(function (error, updateConfig) {
                 expect(error).to.be(null);
                 expect(updateConfig.prerelease).to.be(true);
@@ -154,20 +154,19 @@ describe('Settings', function () {
         });
 
         it('can set mail config', function (done) {
-            settings.setMailConfig({ prerelease: true }, function (error) {
+            settings.setMailConfig({ enabled: true }, function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
-        it('can get backup config', function (done) {
-            settings.getUpdateConfig(function (error, updateConfig) {
+        it('can get mail config', function (done) {
+            settings.getMailConfig(function (error, mailConfig) {
                 expect(error).to.be(null);
-                expect(updateConfig.prerelease).to.be(true);
+                expect(mailConfig.enabled).to.be(true);
                 done();
             });
         });
-
 
         it('can get all values', function (done) {
             settings.getAll(function (error, allSettings) {
