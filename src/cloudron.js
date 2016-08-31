@@ -427,13 +427,10 @@ function addDnsRecords() {
         // DMARC requires special setup if report email id is in different domain
         var dmarcRecord = { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' ] };
 
-        var mxRecord = { subdomain: '', type: 'MX', values: [ '10 ' + config.mailFqdn() + '.' ] };
-
         var records = [ ];
         if (config.isCustomDomain()) {
             records.push(webadminRecord);
             records.push(dkimRecord);
-            records.push(mxRecord);
         } else {
             // for non-custom domains, we show a nakeddomain.html page
             var nakedDomainRecord = { subdomain: '', type: 'A', values: [ ip ] };
@@ -442,7 +439,6 @@ function addDnsRecords() {
             records.push(webadminRecord);
             records.push(dkimRecord);
             records.push(dmarcRecord);
-            records.push(mxRecord);
         }
 
         debug('addDnsRecords: %j', records);

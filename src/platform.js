@@ -27,6 +27,7 @@ var apps = require('./apps.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
+    subdomains = require('./subdomains.js'),
     util = require('util'),
     _ = require('underscore');
 
@@ -258,7 +259,15 @@ function startMail(callback) {
 
             shell.execSync('startMail', cmd);
 
-            mailboxes.setupAliases(callback);
+            mailboxes.setupAliases(function (error) {
+                if (error) return callback(error);
+
+                if (!mailConfig.enabled || process.env.BOX_ENV === 'test') return callback();
+
+                // Add MX record
+                var mxRecord = { subdomain: '', type: 'MX', values: [ '10 ' + config.mailFqdn() + '.' ] };
+                subdomains.update(mxRecord.subdomain, mxRecord.type, mxRecord.values, callback);
+            });
         });
     });
 }
