@@ -193,6 +193,8 @@ function initializeExpressSync() {
     router.post('/api/v1/settings/time_zone',          settingsScope, routes.user.requireAdmin, routes.settings.setTimeZone);
     router.get ('/api/v1/settings/appstore_config',    settingsScope, routes.user.requireAdmin, routes.settings.getAppstoreConfig);
     router.post('/api/v1/settings/appstore_config',    settingsScope, routes.user.requireAdmin, routes.settings.setAppstoreConfig);
+    router.get ('/api/v1/settings/mail_config',        settingsScope, routes.user.requireAdmin, routes.settings.getMailConfig);
+    router.post('/api/v1/settings/mail_config',        settingsScope, routes.user.requireAdmin, routes.settings.setMailConfig);
 
     // eventlog route
     router.get('/api/v1/eventlog', settingsScope, routes.user.requireAdmin, routes.eventlog.get);

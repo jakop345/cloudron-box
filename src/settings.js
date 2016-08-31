@@ -33,6 +33,9 @@ exports = module.exports = {
     getAppstoreConfig: getAppstoreConfig,
     setAppstoreConfig: setAppstoreConfig,
 
+    getMailConfig: getMailConfig,
+    setMailConfig: setMailConfig,
+
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
@@ -45,6 +48,7 @@ exports = module.exports = {
     TLS_CONFIG_KEY: 'tls_config',
     UPDATE_CONFIG_KEY: 'update_config',
     APPSTORE_CONFIG_KEY: 'appstore_config',
+    MAIL_CONFIG_KEY: 'mail_config',
 
     events: new (require('events').EventEmitter)()
 };
@@ -77,6 +81,7 @@ var gDefaults = (function () {
     result[exports.TLS_CONFIG_KEY] = { provider: 'caas' };
     result[exports.UPDATE_CONFIG_KEY] = { prerelease: false };
     result[exports.APPSTORE_CONFIG_KEY] = { };
+    result[exports.MAIL_CONFIG_KEY] = { enabled: false };
 
     return result;
 })();
@@ -407,6 +412,30 @@ function setUpdateConfig(updateConfig, callback) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         exports.events.emit(exports.UPDATE_CONFIG_KEY, updateConfig);
+
+        callback(null);
+    });
+}
+
+function getMailConfig(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.get(exports.MAIL_CONFIG_KEY, function (error, value) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.MAIL_CONFIG_KEY]);
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        callback(null, JSON.parse(value));
+    });
+}
+
+function setMailConfig(mailConfig, callback) {
+    assert.strictEqual(typeof mailConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.set(exports.MAIL_CONFIG_KEY, JSON.stringify(mailConfig), function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        exports.events.emit(exports.MAIL_CONFIG_KEY, mailConfig);
 
         callback(null);
     });

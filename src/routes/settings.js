@@ -19,6 +19,9 @@ exports = module.exports = {
     getTimeZone: getTimeZone,
     setTimeZone: setTimeZone,
 
+    getMailConfig: getMailConfig,
+    setMailConfig: setMailConfig,
+
     getAppstoreConfig: getAppstoreConfig,
     setAppstoreConfig: setAppstoreConfig,
 
@@ -91,6 +94,27 @@ function setTimeZone(req, res, next) {
     if (typeof req.body.timeZone !== 'string') return next(new HttpError(400, 'timeZone is required'));
 
     settings.setTimeZone(req.body.timeZone, function (error) {
+        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200));
+    });
+}
+
+function getMailConfig(req, res, next) {
+    settings.getMailConfig(function (error, mail) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, mail));
+    });
+}
+
+function setMailConfig(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (typeof req.body.enabled !== 'boolean') return next(new HttpError(400, 'enabled is required'));
+
+    settings.setMailConfig({ enabled: req.body.enabled }, function (error) {
         if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
