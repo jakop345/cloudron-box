@@ -179,8 +179,8 @@ function startPostgresql(callback) {
     const cmd = `docker run --restart=always -d --name="postgresql" \
                 --net cloudron \
                 --net-alias postgresql \
-                -m 100m \
-                --memory-swap 200m \
+                -m 256m \
+                --memory-swap 512m \
                 -v "${dataDir}/postgresql:/var/lib/postgresql" \
                 -v "${dataDir}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:ro" \
                 --read-only -v /tmp -v /run "${tag}"`;
