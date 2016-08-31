@@ -243,6 +243,8 @@ function startMail(callback) {
         settings.getMailConfig(function (error, mailConfig) {
             if (error) return callback(error);
 
+            shell.execSync('startMail', 'docker rm -f mail || true');
+
             var ports = mailConfig.enabled ? '-p 587:2525 -p 993:9993 -p 4190:4190 -p 25:2525' : '';
 
             const cmd = `docker run --restart=always -d --name="mail" \
