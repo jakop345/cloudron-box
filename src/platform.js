@@ -23,9 +23,9 @@ var apps = require('./apps.js'),
     infra = require('./infra_version.js'),
     ini = require('ini'),
     mailboxes = require('./mailboxes.js'),
-    settings = require('./settings.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    settings = require('./settings.js'),
     shell = require('./shell.js'),
     subdomains = require('./subdomains.js'),
     util = require('util'),
@@ -74,6 +74,8 @@ function initialize(callback) {
             exports.events.emit(exports.EVENT_READY);
         }, 30000);
 
+        settings.events.on(exports.MAIL_CONFIG_KEY, startMail);
+
         callback();
     });
 }
@@ -81,6 +83,7 @@ function initialize(callback) {
 function uninitialize(callback) {
     clearTimeout(gPlatformReadyTimer);
     gPlatformReadyTimer = null;
+    settings.events.removeListener(exports.MAIL_CONFIG_KEY, startMail);
     callback();
 }
 
