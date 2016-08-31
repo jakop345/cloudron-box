@@ -604,3 +604,7 @@
 * New base image 0.19.0
 * Upgrade PostgreSQL and MySQL
 
+[0.20.0]
+* Make email optional (settings -> enable/disable mail)
+* Make PostgresSQL behave better in low memory cloudrons
+
