@@ -118,7 +118,7 @@ Request:
     key: <string>,                   // pem encoded TLS key
     memoryLimit: <number>,           // memory constraint in bytes
     altDomain: <string>,             // alternate domain from which this app can be reached
-    xFrameOptions: <string>          // set X-Frame-Options header, to control app embedding in other pages
+    xFrameOptions: <string>          // set X-Frame-Options header, to control which websites can embed this app
 }
 ```
 
@@ -144,8 +144,12 @@ provided, a 400 will be returned.
 
 If `altDomain` is set, the app can be accessed from `https://<altDomain>`.
 
-`xFrameOptions` is set to `SAMEORIGIN` unless otherwise specified. This property can hold one value of either `DENY`, `SAMEORIGIN` or `ALLOW-FROM https://example.com/`.
-Read more about this [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options).
+`xFrameOptions` can hold one of the following values:
+* `DENY` - to prevent embedding from any website
+* `SAMEORIGIN` - allows embedding from the same domain as the app. This is the default.
+* `ALLOW-FROM https://example.com/` - allows this app to be embedded from example.com
+
+Read more about the options at [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options).
 
 Response (200):
 
@@ -455,7 +459,7 @@ Request:
     key: <string>,                  // pem encoded TLS key
     memoryLimit: <number>,          // memory constraint in bytes
     altDomain: <string>,            // alternate domain from which this app can be reached
-    xFrameOptions: <string>         // set X-Frame-Options header, to control app embedding in other pages
+    xFrameOptions: <string>         // set X-Frame-Options header, to control which websites can embed this app
 ```
 
 All values are optional. See [Install app](/references/api.html#install-app) API for field descriptions.
