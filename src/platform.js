@@ -34,10 +34,14 @@ var apps = require('./apps.js'),
 var gAddonVars = null,
     gPlatformReadyTimer = null;
 
+var NOOP_CALLBACK = function (error) { if (error) debug(error); };
+
 function initialize(callback) {
     if (process.env.BOX_ENV === 'test' && !process.env.CREATE_INFRA) return callback();
 
     debug('initializing addon infrastructure');
+
+    settings.events.on(settings.MAIL_CONFIG_KEY, function () { startMail(NOOP_CALLBACK); });
 
     var existingInfra = { version: 'none' };
     if (fs.existsSync(paths.INFRA_VERSION_FILE)) {
@@ -74,8 +78,6 @@ function initialize(callback) {
             exports.events.emit(exports.EVENT_READY);
         }, 30000);
 
-        settings.events.on(exports.MAIL_CONFIG_KEY, startMail);
-
         callback();
     });
 }
@@ -83,7 +85,7 @@ function initialize(callback) {
 function uninitialize(callback) {
     clearTimeout(gPlatformReadyTimer);
     gPlatformReadyTimer = null;
-    settings.events.removeListener(exports.MAIL_CONFIG_KEY, startMail);
+    settings.events.removeListener(settings.MAIL_CONFIG_KEY, startMail);
     callback();
 }
 

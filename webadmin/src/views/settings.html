@@ -199,7 +199,7 @@
             Email server can only be enabled for custom domains.
         </p>
 
-        <div class="col-xs-6 text-right" ng-show="config.isCustomDomain">
+        <div class="col-md-12" ng-show="!config.isCustomDomain">
             <button class="btn btn-primary pull-right" ng-click="toggleEmail()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
         </div>
     </div>
