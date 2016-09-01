@@ -314,6 +314,7 @@ function getConfig(callback) {
                         update: updateChecker.getUpdateInfo(),
                         progress: progress.get(),
                         isCustomDomain: config.isCustomDomain(),
+                        isDemo: config.isDemo(),
                         developerMode: developerMode,
                         region: result.box.region,
                         size: result.box.size,
