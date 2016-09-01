@@ -20,6 +20,6 @@ exports = module.exports = {
 
     DEFAULT_MEMORY_LIMIT: (256 * 1024 * 1024), // see also client.js
 
-    DEMO_USER_ID: 'cloudron'
+    DEMO_USERNAME: 'cloudron'
 };
 
