@@ -41,7 +41,9 @@ function initialize(callback) {
 
     debug('initializing addon infrastructure');
 
-    settings.events.on(settings.MAIL_CONFIG_KEY, function () { startMail(NOOP_CALLBACK); });
+    settings.events.on(settings.MAIL_CONFIG_KEY, function () {
+        async.series([ startMail, loadAddonVars ], NOOP_CALLBACK);
+    });
 
     var existingInfra = { version: 'none' };
     if (fs.existsSync(paths.INFRA_VERSION_FILE)) {
