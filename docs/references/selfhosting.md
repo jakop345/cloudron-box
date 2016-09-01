@@ -231,3 +231,8 @@ of your IP by filling out a form at the DNSBL manager site.
 ## Other Providers
 
 Currently, we do not support other cloud server provider. Please let us know at [support@cloudron.io](mailto:support@cloudron.io), if you want to see other providers supported.
+
+## Help
+
+If you run into any problems, join us in our [chat](https://chat.cloudron.io) or [email us](mailto:support@cloudron.io).
+
