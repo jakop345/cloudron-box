@@ -26,6 +26,7 @@ exports = module.exports = {
 var assert = require('assert'),
     clients = require('./clients.js'),
     crypto = require('crypto'),
+    config = require('./config.js'),
     constants = require('./constants.js'),
     debug = require('debug')('box:user'),
     DatabaseError = require('./databaseerror.js'),
@@ -261,6 +262,8 @@ function removeUser(userId, auditSource, callback) {
     assert.strictEqual(typeof auditSource, 'object');
     assert.strictEqual(typeof callback, 'function');
 
+    if (config.isDemo() && userId === constants.DEMO_USER_ID) return callback(new UserError(UserError.BAD_FIELD, 'Not allowed in demo mode'));
+
     getUser(userId, function (error, user) {
         if (error) return callback(error);
 
@@ -345,6 +348,8 @@ function updateUser(userId, data, auditSource, callback) {
     data = _.pick(data, 'email', 'displayName', 'username');
 
     if (_.isEmpty(data)) return callback();
+
+    if (config.isDemo() && userId === constants.DEMO_USER_ID) return callback(new UserError(UserError.BAD_FIELD, 'Not allowed in demo mode'));
 
     if (data.username) {
         data.username = data.username.toLowerCase();
@@ -441,6 +446,8 @@ function setPassword(userId, newPassword, callback) {
 
     var error = validatePassword(newPassword);
     if (error) return callback(new UserError(UserError.BAD_FIELD, error.message));
+
+    if (config.isDemo() && userId === constants.DEMO_USER_ID) return callback(new UserError(UserError.BAD_FIELD, 'Not allowed in demo mode'));
 
     userdb.get(userId, function (error, user) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));

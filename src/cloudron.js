@@ -738,6 +738,8 @@ function migrate(options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
+    if (config.isDemo()) return callback(new CloudronError(CloudronError.BAD_FIELD, 'Not allowed in demo mode'));
+
     if (!options.domain) return doMigrate(options, callback);
 
     var dnsConfig = _.pick(options, 'domain', 'provider', 'accessKeyId', 'secretAccessKey', 'region', 'endpoint');
