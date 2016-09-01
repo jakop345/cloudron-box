@@ -27,11 +27,11 @@
                             <input type="hidden" name="_csrf" value="<%= csrf %>"/>
                             <div class="form-group">
                                 <label class="control-label" for="inputUsername">Username or Email</label>
-                                <input type="text" class="form-control" id="inputUsername" name="username" autofocus required>
+                                <input type="text" class="form-control" id="inputUsername" name="username" value="<%= username %>" autofocus required>
                             </div>
                             <div class="form-group">
                                 <label class="control-label" for="inputPassword">Password</label>
-                                <input type="password" class="form-control" name="password" id="inputPassword" required>
+                                <input type="password" class="form-control" name="password" id="inputPassword" value="<%= password %>" required>
                             </div>
                             <input class="btn btn-primary btn-outline pull-right" type="submit" value="Sign in"/>
                         </form>

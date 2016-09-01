@@ -193,12 +193,16 @@ function loginForm(req, res) {
     if (!u.query.client_id) return sendErrorPageOrRedirect(req, res, 'Invalid login request. No client_id provided.');
 
     function render(applicationName, applicationLogo) {
+        var error = req.query.error || null;
+
         renderTemplate(res, 'login', {
             adminOrigin: config.adminOrigin(),
             csrf: req.csrfToken(),
             applicationName: applicationName,
             applicationLogo: applicationLogo,
-            error: req.query.error || null,
+            error: error,
+            username: config.isDemo() ? constants.DEMO_USERNAME : '',
+            password: config.isDemo() ? 'cloudron' : '',
             title: applicationName + ' Login'
         });
     }
