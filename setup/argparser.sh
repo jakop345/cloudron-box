@@ -23,6 +23,7 @@ arg_dns_config=""
 arg_update_config=""
 arg_provider=""
 arg_app_bundle=""
+arg_is_demo="false"
 
 args=$(getopt -o "" -l "data:,retire-reason:,retire-info:" -n "$0" -- "$@")
 eval set -- "${args}"
@@ -51,6 +52,9 @@ while true; do
         # read possibly empty parameters here
         arg_app_bundle=$(echo "$2" | $json appBundle)
         [[ "${arg_app_bundle}" == "" ]] && arg_app_bundle="[]"
+
+        arg_is_demo=$(echo "$2" | $json isDemo)
+        [[ "${arg_is_demo}" == "" ]] && arg_is_demo="false"
 
         arg_tls_cert=$(echo "$2" | $json tlsCert)
         arg_tls_key=$(echo "$2" | $json tlsKey)

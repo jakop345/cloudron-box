@@ -150,6 +150,7 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
     "isCustomDomain": ${arg_is_custom_domain},
     "boxVersionsUrl": "${arg_box_versions_url}",
     "provider": "${arg_provider}",
+    "isDemo": ${arg_is_demo},
     "database": {
         "hostname": "localhost",
         "username": "root",
