@@ -33,6 +33,7 @@ exports = module.exports = {
     zoneName: zoneName,
 
     isDev: isDev,
+    isDemo: isDemo,
 
     // for testing resets to defaults
     _reset: _reset
@@ -207,6 +208,10 @@ function database() {
 
 function isDev() {
     return /dev/i.test(get('boxVersionsUrl'));
+}
+
+function isDemo() {
+    return get('isDemo') === true;
 }
 
 function provider() {
