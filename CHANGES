@@ -608,4 +608,5 @@
 * Make email optional (settings -> enable/disable mail)
 * Make PostgresSQL behave better in low memory cloudrons
 * Add demo mode check
+* Fix plan listing
 

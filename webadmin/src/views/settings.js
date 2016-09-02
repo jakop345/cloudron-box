@@ -141,22 +141,18 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         AppStore.getSizes(function (error, result) {
             if (error) return console.error(error);
 
-            // only show plans bigger than the current size
             var found = false;
+            var SIZE_SLUGS = [ '512mb', '1gb', '2gb', '4gb', '8gb', '16bg', '32gb', '48gb', '64gb' ];
             result = result.filter(function (size) {
-                if (size.slug === $scope.config.plan.slug) {
-                    found = true;
-                    return true;
-                } else {
-                    return found;
-                }
+                // only show plans bigger than the current size
+                if (found) return true;
+                found = SIZE_SLUGS.indexOf(size.slug) > SIZE_SLUGS.indexOf($scope.config.plan.slug);
+                return found;
             });
             angular.copy(result, $scope.availablePlans);
 
-            // prepend the 'custom' plan'
-            if ($scope.availablePlans.length === 0 || $scope.availablePlans[0].name !== $scope.config.plan.name) {
-                $scope.availablePlans.unshift($scope.config.plan);
-            }
+            // prepend the current plan
+            $scope.availablePlans.unshift($scope.config.plan);
 
             $scope.planChange.requestedPlan = $scope.availablePlans[0]; // need the reference to preselect
 
