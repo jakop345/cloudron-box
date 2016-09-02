@@ -5,22 +5,20 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    os = require('os'),
+    superagent = require('superagent'),
     SysInfoError = require('../sysinfo.js').SysInfoError;
 
 function getIp(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var ifaces = os.networkInterfaces();
-    for (var dev in ifaces) {
-        if (dev.match(/^(en|eth|wlp).*/) === null) continue;
-
-        for (var i = 0; i < ifaces[dev].length; i++) {
-            if (ifaces[dev][i].family === 'IPv4') {
-                return callback(null, ifaces[dev][i].address);
-            }
+    superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
+        if (error || result.statusCode !== 200) {
+            console.error('Error getting metadata', error);
+            return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found'));
         }
-    }
 
-    callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found'));
+        if (!result.body.floating_ip || !result.body.floating_ip.ipv4 || !result.body.floating_ip.ipv4.ip_address) return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found'));
+
+        callback(null, result.body.floating_ip.ipv4.ip_address);
+    });
 }
