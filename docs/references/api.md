@@ -1211,7 +1211,7 @@ always be able to send email on behalf of apps, regardless of this setting.
 Response(200):
 ```
 {
-  "enable": <boolean> // true to enable email
+  "enabled": <boolean> // true to enable email
 }
 ```
 
@@ -1227,7 +1227,7 @@ this setting.
 Request:
 ```
 {
-    "enable": <boolean>
+    "enabled": <boolean>
 }
 ```
 
