@@ -407,23 +407,19 @@ function certificateRenewalError(domain, message) {
 }
 
 // this function bypasses the queue intentionally. it is also expected to work without the mailer module initialized
-// crashnotifier should be able to send mail when there is no db
+// NOTE: crashnotifier should be able to send mail when there is no db
 function unexpectedExit(program, context) {
     assert.strictEqual(typeof program, 'string');
     assert.strictEqual(typeof context, 'string');
 
-    getAdminEmails(function (error, adminEmails) {
-        if (error) return console.log('Error getting admins', error);
+    var mailOptions = {
+        from: platform.mailConfig().from,
+        to: 'support@cloudron.io',
+        subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
+        text: render('unexpected_exit.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
+    };
 
-        var mailOptions = {
-            from: platform.mailConfig().from,
-            to: config.provider() === 'caas' ? 'support@cloudron.io' : adminEmails.concat('support@cloudron.io').join(', '),
-            subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
-            text: render('unexpected_exit.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
-        };
-
-        sendMails([ mailOptions ]);
-    });
+    sendMails([ mailOptions ]);
 }
 
 function sendFeedback(user, type, subject, description) {
