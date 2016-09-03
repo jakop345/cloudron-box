@@ -7,9 +7,7 @@ exports = module.exports = {
     events: new (require('events').EventEmitter)(),
     EVENT_READY: 'ready',
 
-    isReadySync: isReadySync,
-
-    mailConfig: mailConfig
+    isReadySync: isReadySync
 };
 
 var apps = require('./apps.js'),
@@ -21,7 +19,6 @@ var apps = require('./apps.js'),
     fs = require('fs'),
     hat = require('hat'),
     infra = require('./infra_version.js'),
-    ini = require('ini'),
     mailboxes = require('./mailboxes.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
@@ -31,8 +28,7 @@ var apps = require('./apps.js'),
     util = require('util'),
     _ = require('underscore');
 
-var gAddonVars = null,
-    gPlatformReadyTimer = null;
+var gPlatformReadyTimer = null;
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
@@ -41,9 +37,7 @@ function initialize(callback) {
 
     debug('initializing addon infrastructure');
 
-    settings.events.on(settings.MAIL_CONFIG_KEY, function () {
-        async.series([ startMail, loadAddonVars ], NOOP_CALLBACK);
-    });
+    settings.events.on(settings.MAIL_CONFIG_KEY, function () { startMail(NOOP_CALLBACK); });
 
     var existingInfra = { version: 'none' };
     if (fs.existsSync(paths.INFRA_VERSION_FILE)) {
@@ -55,7 +49,7 @@ function initialize(callback) {
     if (_.isEqual(infra, existingInfra)) {
         debug('platform is uptodate at version %s', infra.version);
         process.nextTick(function () { exports.events.emit(exports.EVENT_READY); });
-        return loadAddonVars(callback);
+        return callback;
     }
 
     debug('Updating infrastructure from %s to %s', existingInfra.version, infra.version);
@@ -66,7 +60,6 @@ function initialize(callback) {
         startAddons.bind(null, existingInfra),
         removeOldImages,
         startApps.bind(null, existingInfra),
-        loadAddonVars,
         fs.writeFile.bind(fs, paths.INFRA_VERSION_FILE, JSON.stringify(infra))
     ], function (error) {
         if (error) return callback(error);
@@ -316,24 +309,3 @@ function startApps(existingInfra, callback) {
     }
 }
 
-function loadAddonVars(callback) {
-    gAddonVars = {
-        mail: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mail_vars.sh', 'utf8')),
-        postgresql: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/postgresql_vars.sh', 'utf8')),
-        mysql: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh', 'utf8')),
-        mongodb: ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mongodb_vars.sh', 'utf8'))
-    };
-    callback();
-}
-
-function mailConfig() {
-    if (process.env.BOX_ENV === 'test' && !process.env.TEST_CREATE_INFRA) {
-        return { username: 'no-reply', from: 'no-reply@' + config.fqdn(), password: 'doesnotwork' };
-    }
-
-    return {
-        username: gAddonVars.mail.MAIL_ROOT_USERNAME,
-        from: '"Cloudron" <' + gAddonVars.mail.MAIL_ROOT_USERNAME + '@' + config.fqdn() + '>',
-        password: gAddonVars.mail.MAIL_ROOT_PASSWORD
-    };
-}

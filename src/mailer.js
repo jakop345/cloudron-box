@@ -39,9 +39,11 @@ var assert = require('assert'),
     dns = require('native-dns'),
     docker = require('./docker.js').connection,
     ejs = require('ejs'),
+    fs = require('fs'),
+    ini = require('ini'),
     nodemailer = require('nodemailer'),
     path = require('path'),
-    platform = require('./platform.js'),
+    paths = require('./paths.js'),
     safe = require('safetydance'),
     smtpTransport = require('nodemailer-smtp-transport'),
     users = require('./user.js'),
@@ -79,6 +81,20 @@ function uninitialize(callback) {
     gMailQueue = [ ];
 
     callback(null);
+}
+
+function mailConfig() {
+    if (process.env.BOX_ENV === 'test' && !process.env.TEST_CREATE_INFRA) {
+        return { username: 'no-reply', from: 'no-reply@' + config.fqdn(), password: 'doesnotwork' };
+    }
+
+    var mail = ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mail_vars.sh', 'utf8'));
+
+    return {
+        username: mail.MAIL_ROOT_USERNAME,
+        from: '"Cloudron" <' + mail.MAIL_ROOT_USERNAME + '@' + config.fqdn() + '>',
+        password: mail.MAIL_ROOT_PASSWORD
+    };
 }
 
 function getTxtRecords(callback) {
@@ -162,8 +178,8 @@ function sendMails(queue) {
             host: mailServerIp,
             port: config.get('smtpPort'),
             auth: {
-                user: platform.mailConfig().username,
-                pass: platform.mailConfig().password
+                user: mailConfig().username,
+                pass: mailConfig().password
             }
         }));
 
@@ -223,7 +239,7 @@ function mailUserEventToAdmins(user, event) {
         adminEmails = _.difference(adminEmails, [ user.email ]);
 
         var mailOptions = {
-            from: platform.mailConfig().from,
+            from: mailConfig().from,
             to: adminEmails.join(', '),
             subject: util.format('%s %s in Cloudron %s', user.username || user.email, event, config.fqdn()),
             text: render('user_event.ejs', { fqdn: config.fqdn(), user: user, event: event, format: 'text' }),
@@ -249,7 +265,7 @@ function sendInvite(user, invitor) {
     };
 
     var mailOptions = {
-        from: platform.mailConfig().from,
+        from: mailConfig().from,
         to: user.email,
         subject: util.format('Welcome to Cloudron %s', config.fqdn()),
         text: render('welcome_user.ejs', templateData)
@@ -272,7 +288,7 @@ function userAdded(user, inviteSent) {
         var inviteLink = inviteSent ? null : config.adminOrigin() + '/api/v1/session/account/setup.html?reset_token=' + user.resetToken;
 
         var mailOptions = {
-            from: platform.mailConfig().from,
+            from: mailConfig().from,
             to: adminEmails.join(', '),
             subject: util.format('%s added in Cloudron %s', user.email, config.fqdn()),
             text: render('user_added.ejs', { fqdn: config.fqdn(), user: user, inviteLink: inviteLink, format: 'text' }),
@@ -307,7 +323,7 @@ function passwordReset(user) {
     var resetLink = config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token=' + user.resetToken;
 
     var mailOptions = {
-        from: platform.mailConfig().from,
+        from: mailConfig().from,
         to: user.email,
         subject: 'Password Reset Request',
         text: render('password_reset.ejs', { fqdn: config.fqdn(), user: user, resetLink: resetLink, format: 'text' })
@@ -325,7 +341,7 @@ function appDied(app) {
         if (error) return console.log('Error getting admins', error);
 
         var mailOptions = {
-            from: platform.mailConfig().from,
+            from: mailConfig().from,
             to: config.provider() === 'caas' ? 'support@cloudron.io' : adminEmails.concat('support@cloudron.io').join(', '),
             subject: util.format('App %s is down', app.location),
             text: render('app_down.ejs', { fqdn: config.fqdn(), title: app.manifest.title, appFqdn: config.appFqdn(app.location), format: 'text' })
@@ -343,7 +359,7 @@ function boxUpdateAvailable(newBoxVersion, changelog) {
         if (error) return console.log('Error getting admins', error);
 
          var mailOptions = {
-            from: platform.mailConfig().from,
+            from: mailConfig().from,
             to: adminEmails.join(', '),
             subject: util.format('%s has a new update available', config.fqdn()),
             text: render('box_update_available.ejs', { fqdn: config.fqdn(), webadminUrl: config.adminOrigin(), newBoxVersion: newBoxVersion, changelog: changelog, format: 'text' })
@@ -361,7 +377,7 @@ function appUpdateAvailable(app, updateInfo) {
         if (error) return console.log('Error getting admins', error);
 
          var mailOptions = {
-            from: platform.mailConfig().from,
+            from: mailConfig().from,
             to: adminEmails.join(', '),
             subject: util.format('%s has a new update available', app.fqdn),
             text: render('app_update_available.ejs', { fqdn: config.fqdn(), webadminUrl: config.adminOrigin(), app: app, updateInfo: updateInfo, format: 'text' })
@@ -378,7 +394,7 @@ function outOfDiskSpace(message) {
         if (error) return console.log('Error getting admins', error);
 
         var mailOptions = {
-            from: platform.mailConfig().from,
+            from: mailConfig().from,
             to: config.provider() === 'caas' ? 'support@cloudron.io' : adminEmails.join(', '),
             subject: util.format('[%s] Out of disk space alert', config.fqdn()),
             text: render('out_of_disk_space.ejs', { fqdn: config.fqdn(), message: message, format: 'text' })
@@ -396,7 +412,7 @@ function certificateRenewalError(domain, message) {
         if (error) return console.log('Error getting admins', error);
 
         var mailOptions = {
-            from: platform.mailConfig().from,
+            from: mailConfig().from,
             to: config.provider() === 'caas' ? 'support@cloudron.io' : adminEmails.join(', '),
             subject: util.format('[%s] Certificate renewal error', domain),
             text: render('certificate_renewal_error.ejs', { domain: domain, message: message, format: 'text' })
@@ -413,7 +429,7 @@ function unexpectedExit(program, context) {
     assert.strictEqual(typeof context, 'string');
 
     var mailOptions = {
-        from: platform.mailConfig().from,
+        from: mailConfig().from,
         to: 'support@cloudron.io',
         subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
         text: render('unexpected_exit.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
@@ -435,7 +451,7 @@ function sendFeedback(user, type, subject, description) {
         type === exports.FEEDBACK_TYPE_APP_ERROR);
 
     var mailOptions = {
-        from: platform.mailConfig().from,
+        from: mailConfig().from,
         to: 'support@cloudron.io',
         subject: util.format('[%s] %s - %s', type, config.fqdn(), subject),
         text: render('feedback.ejs', { fqdn: config.fqdn(), type: type, user: user, subject: subject, description: description, format: 'text'})
