@@ -122,7 +122,8 @@ function stopContainers(existingInfra, callback) {
         }
 
         debug('stopping addons for incremental infra update: %j', changedAddons);
-        shell.execSync('stopContainers', 'docker rm -f ' + changedAddons.join(' '));
+        // ignore error if container not found (and fail later) so that this code works across restarts
+        shell.execSync('stopContainers', 'docker rm -f ' + changedAddons.join(' ') + ' || true');
     }
 
     callback();
