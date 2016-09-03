@@ -327,7 +327,9 @@ function loadAddonVars(callback) {
 }
 
 function mailConfig() {
-    if (!gAddonVars) return { username: 'no-reply', from: 'no-reply@' + config.fqdn(), password: 'doesnotwork' }; // for tests which don't run infra
+    if (process.env.BOX_ENV === 'test' && !process.env.TEST_CREATE_INFRA) {
+        return { username: 'no-reply', from: 'no-reply@' + config.fqdn(), password: 'doesnotwork' };
+    }
 
     return {
         username: gAddonVars.mail.MAIL_ROOT_USERNAME,
