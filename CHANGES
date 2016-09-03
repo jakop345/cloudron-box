@@ -610,3 +610,6 @@
 * Add demo mode check
 * Fix plan listing
 
+[0.20.0]
+* Fix bug where crash reports where not being sent to support@cloudron.io
+* 
