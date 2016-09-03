@@ -159,7 +159,7 @@ describe('Apps', function () {
     before(function (done) {
         config._reset();
 
-        process.env.CREATE_INFRA = 1;
+        process.env.TEST_CREATE_INFRA = 1;
 
         safe.fs.unlinkSync(paths.INFRA_VERSION_FILE);
         child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
@@ -242,7 +242,7 @@ describe('Apps', function () {
     });
 
     after(function (done) {
-        delete process.env.CREATE_INFRA;
+        delete process.env.TEST_CREATE_INFRA;
 
         // child_process.execSync('docker ps -qa | xargs --no-run-if-empty docker rm -f');
         dockerProxy.close(function () { });

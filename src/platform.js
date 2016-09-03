@@ -37,7 +37,7 @@ var gAddonVars = null,
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 function initialize(callback) {
-    if (process.env.BOX_ENV === 'test' && !process.env.CREATE_INFRA) return callback();
+    if (process.env.BOX_ENV === 'test' && !process.env.TEST_CREATE_INFRA) return callback();
 
     debug('initializing addon infrastructure');
 
