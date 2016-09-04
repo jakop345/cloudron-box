@@ -379,7 +379,7 @@ Logging to stdout has many advantages:
 
 ## Memory
 
-By default, applications get 200MB RAM (including swap). This can be changed using the `memoryLimit`
+By default, applications get 256MB RAM (including swap). This can be changed using the `memoryLimit`
 field in the manifest.
 
 Design your application runtime for concurrent use by 50 users. The Cloudron is not designed for

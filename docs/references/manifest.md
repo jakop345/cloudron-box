@@ -271,7 +271,7 @@ Required: no
 The `memoryLimit` field is the maximum amount of memory (including swap) in bytes an app is allowed to consume before it
 gets killed and restarted.
 
-By default, all apps have a memoryLimit of 200MB. For example, to have a limit of 500MB,
+By default, all apps have a memoryLimit of 256MB. For example, to have a limit of 500MB,
 
 ```
   "memoryLimit": 524288000

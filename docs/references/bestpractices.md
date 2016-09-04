@@ -65,7 +65,7 @@ This document gives you some recipes for configuring popular libraries to log to
 
 ## Memory
 
-By default, applications get 200MB RAM (including swap). This can be changed using the `memoryLimit` field in the manifest.
+By default, applications get 256MB RAM (including swap). This can be changed using the `memoryLimit` field in the manifest.
 
 Design your application runtime for concurrent use by 10s of users. The Cloudron is not designed for concurrent access by
 100s or 1000s of users.
