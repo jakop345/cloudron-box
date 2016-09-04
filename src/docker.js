@@ -163,13 +163,14 @@ function createSubcontainer(app, name, cmd, options, callback) {
     }
 
     // first check db record, then manifest
-    var memoryLimit = app.memoryLimit || manifest.memoryLimit;
+    var memoryLimit = app.memoryLimit || manifest.memoryLimit || 0;
 
-    // ensure we never go below minimum
-    memoryLimit = memoryLimit < constants.DEFAULT_MEMORY_LIMIT ? constants.DEFAULT_MEMORY_LIMIT : memoryLimit; // 256mb by default
-
-    // developerMode does not restrict memory usage
-    memoryLimit = developmentMode ? 0 : memoryLimit;
+    if (developmentMode) {
+        // developerMode does not restrict memory usage
+        memoryLimit = 0;
+    } else if (memoryLimit === 0 || memoryLimit < constants.DEFAULT_MEMORY_LIMIT) { // ensure we never go below minimum (in case we change the default)
+        memoryLimit = constants.DEFAULT_MEMORY_LIMIT;
+    }
 
     addons.getEnvironment(app, function (error, addonEnv) {
         if (error) return callback(new Error('Error getting addon environment : ' + error));

@@ -476,9 +476,6 @@ function install(data, auditSource, callback) {
         error = validateXFrameOptions(xFrameOptions);
         if (error) return callback(error);
 
-        // memoryLimit might come in as 0 if not specified
-        memoryLimit = memoryLimit || manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
-
         if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
 
         // singleUser mode requires accessRestriction to contain exactly one user
@@ -572,9 +569,6 @@ function configure(appId, data, auditSource, callback) {
             values.memoryLimit = data.memoryLimit;
             error = validateMemoryLimit(app.manifest, values.memoryLimit);
             if (error) return callback(error);
-
-            // memoryLimit might come in as 0 if not specified
-            values.memoryLimit = values.memoryLimit || app.memoryLimit || app.manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
         }
 
         if ('xFrameOptions' in data) {
