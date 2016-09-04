@@ -179,7 +179,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
-        $scope.appConfigure.memoryUsage = app.memoryUsage || 256;
+        $scope.appConfigure.memoryLimit = app.memoryLimit || 256;
         $scope.appConfigure.xFrameOptions = app.xFrameOptions.indexOf('ALLOW-FROM') === 0 ? app.xFrameOptions.split(' ')[1] : '';
 
         // fill the portBinding structures. There might be holes in the app.portBindings, which signalizes a disabled port
