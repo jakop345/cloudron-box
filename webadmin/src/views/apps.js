@@ -11,6 +11,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.users = [];
 
     $scope.memoryTicks = [
+        0, // result to default memory limit
         256 * 1024 * 1024,
         512 * 1024 * 1024,
         1024 * 1024 * 1024,
@@ -179,7 +180,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
-        $scope.appConfigure.memoryLimit = app.memoryLimit || 256;
+        $scope.appConfigure.memoryLimit = app.memoryLimit;
         $scope.appConfigure.xFrameOptions = app.xFrameOptions.indexOf('ALLOW-FROM') === 0 ? app.xFrameOptions.split(' ')[1] : '';
 
         // fill the portBinding structures. There might be holes in the app.portBindings, which signalizes a disabled port

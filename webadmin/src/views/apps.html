@@ -102,7 +102,7 @@
                         <label class="control-label hand" data-toggle="collapse" data-target="#appConfigureCollapseAdvanced">Show advanced</label>
                         <div class="collapse" id="appConfigureCollapseAdvanced">
                             <div class="form-group">
-                                <label class="control-label" for="memoryLimit">Maximum Memory Usage: <b>{{ appConfigure.memoryLimit / 1024 / 1024 }} MB</b></label>
+                                <label class="control-label" for="memoryLimit">Maximum Memory Usage: <b>{{ appConfigure.memoryLimit ? appConfigure.memoryLimit / 1024 / 1024 + 'MB' : 'Default' }}</b></label>
                                 <br/>
                                 <div style="padding: 0 10px;">
                                     <slider id="memoryLimit" ng-model="appConfigure.memoryLimit" step="33554432" tooltip="hide" ticks="memoryTicks" ticks-snap-bounds="67108864"></slider>
