@@ -219,8 +219,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             accessRestriction: !$scope.appConfigure.accessRestrictionOption ? null : $scope.appConfigure.accessRestriction,
             cert: $scope.appConfigure.certificateFile,
             key: $scope.appConfigure.keyFile,
-            xFrameOptions: $scope.appConfigure.xFrameOptions ? ('ALLOW-FROM ' + $scope.appConfigure.xFrameOptions) : 'SAMEORIGIN'
-            // memoryLimit: $scope.appConfigure.memoryLimit
+            xFrameOptions: $scope.appConfigure.xFrameOptions ? ('ALLOW-FROM ' + $scope.appConfigure.xFrameOptions) : 'SAMEORIGIN',
+            memoryLimit: $scope.appConfigure.memoryLimit
         };
 
         Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, data, function (error) {
