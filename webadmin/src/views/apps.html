@@ -99,9 +99,9 @@
 
                         <br/>
 
-                        <!-- <label class="control-label hand" data-toggle="collapse" data-target="#appConfigureCollapseAdvanced">Show advanced</label> -->
-                        <!-- <div class="collapse" id="appConfigureCollapseAdvanced"> -->
-                            <div class="form-group" ng-hide="true">
+                        <label class="control-label hand" data-toggle="collapse" data-target="#appConfigureCollapseAdvanced">Show advanced</label>
+                        <div class="collapse" id="appConfigureCollapseAdvanced">
+                            <div class="form-group">
                                 <label class="control-label" for="memoryUsage">Maximum Memory Usage: <b>{{ appConfigure.memoryUsage / 1024 / 1024 }} MB</b></label>
                                 <br/>
                                 <div style="padding: 0 10px;">
@@ -137,7 +137,7 @@
                                     </div>
                                 </div>
                             </div>
-                        <!-- </div> -->
+                        </div>
 
                         <br/>
                         <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) || (!appConfigureForm.password.$dirty && appConfigure.error.password) }">
