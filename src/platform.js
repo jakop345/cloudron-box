@@ -49,7 +49,7 @@ function initialize(callback) {
     if (_.isEqual(infra, existingInfra)) {
         debug('platform is uptodate at version %s', infra.version);
         process.nextTick(function () { exports.events.emit(exports.EVENT_READY); });
-        return callback;
+        return callback();
     }
 
     debug('Updating infrastructure from %s to %s', existingInfra.version, infra.version);
