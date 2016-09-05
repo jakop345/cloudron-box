@@ -1,7 +1,6 @@
 'use strict';
 
 module.exports = exports = {
-    add: add,
     remove: remove,
     status: status,
     upsert: upsert,
@@ -54,22 +53,6 @@ function api(provider) {
         case 'route53': return route53;
         default: return null;
     }
-}
-
-function add(subdomain, type, values, callback) {
-    assert.strictEqual(typeof subdomain, 'string');
-    assert.strictEqual(typeof type, 'string');
-    assert(util.isArray(values));
-    assert.strictEqual(typeof callback, 'function');
-
-    settings.getDnsConfig(function (error, dnsConfig) {
-        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
-
-        api(dnsConfig.provider).add(dnsConfig, config.zoneName(), subdomain, type, values, function (error, changeId) {
-            if (error) return callback(error);
-            callback(null, changeId);
-        });
-    });
 }
 
 function get(subdomain, type, callback) {

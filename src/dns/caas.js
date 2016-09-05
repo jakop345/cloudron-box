@@ -1,7 +1,6 @@
 'use strict';
 
 exports = module.exports = {
-    add: add,
     del: del,
     upsert: upsert,
     getChangeStatus: getChangeStatus,

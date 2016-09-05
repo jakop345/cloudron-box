@@ -1,7 +1,6 @@
 'use strict';
 
 exports = module.exports = {
-    add: add,
     get: get,
     del: del,
     upsert: upsert,
