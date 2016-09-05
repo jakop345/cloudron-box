@@ -99,8 +99,8 @@
 
                         <br/>
 
-                        <label class="control-label hand" data-toggle="collapse" data-target="#appConfigureCollapseAdvanced">Show advanced</label>
-                        <div class="collapse" id="appConfigureCollapseAdvanced">
+                        <a href="" ng-click="appConfigure.advancedVisible = true" ng-hide="appConfigure.advancedVisible">Show advanced</a>
+                        <div  uib-collapse="!appConfigure.advancedVisible">
                             <div class="form-group">
                                 <label class="control-label" for="memoryLimit">Maximum Memory Usage: <b>{{ appConfigure.memoryLimit ? appConfigure.memoryLimit / 1024 / 1024 + 'MB' : 'Default' }}</b></label>
                                 <br/>
@@ -139,6 +139,7 @@
                             </div>
                         </div>
 
+                        <br/>
                         <br/>
                         <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) || (!appConfigureForm.password.$dirty && appConfigure.error.password) }">
                             <label class="control-label" for="appConfigurePasswordInput">Provide your password to confirm this action</label>

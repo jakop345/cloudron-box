@@ -25,6 +25,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         app: {},
         location: '',
         usingAltDomain: false,
+        advancedVisible: false,
         password: '',
         portBindings: {},
         portBindingsEnabled: {},
@@ -81,6 +82,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.error = {};
         $scope.appConfigure.app = {};
         $scope.appConfigure.location = '';
+        $scope.appConfigure.advancedVisible = false;
         $scope.appConfigure.usingAltDomain = false;
         $scope.appConfigure.password = '';
         $scope.appConfigure.portBindings = {};          // This is the actual model holding the env:port pair
