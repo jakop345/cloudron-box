@@ -651,6 +651,9 @@ describe('Apps', function () {
                         .get('/2013-04-01/hostedzone')
                         .max(Infinity)
                         .reply(200, js2xml('ListHostedZonesResponse', awsHostedZones, { arrayMap: { HostedZones: 'HostedZone'} }), { 'Content-Type': 'application/xml' })
+                        .get('/2013-04-01/hostedzone/ZONEID/rrset?maxitems=1&name=appslocation.localhost.&type=A')
+                        .max(Infinity)
+                        .reply(200, js2xml('ListResourceRecordSetsResponse', { ResourceRecordSets: [ ] }, { 'Content-Type': 'application/xml' }))
                         .filteringRequestBody(function (unusedBody) { return ''; }) // strip out body
                         .post('/2013-04-01/hostedzone/ZONEID/rrset/')
                         .max(Infinity)
@@ -1049,6 +1052,10 @@ describe('Apps', function () {
                         .get('/2013-04-01/hostedzone')
                         .max(Infinity)
                         .reply(200, js2xml('ListHostedZonesResponse', awsHostedZones, { arrayMap: { HostedZones: 'HostedZone'} }), { 'Content-Type': 'application/xml' })
+                        .filteringPathRegEx(/name=[^&]*/, 'name=location')
+                        .get('/2013-04-01/hostedzone/ZONEID/rrset?maxitems=1&name=location&type=A')
+                        .max(Infinity)
+                        .reply(200, js2xml('ListResourceRecordSetsResponse', { ResourceRecordSets: [ ] }, { 'Content-Type': 'application/xml' }))
                         .filteringRequestBody(function (unusedBody) { return ''; }) // strip out body
                         .post('/2013-04-01/hostedzone/ZONEID/rrset/')
                         .max(Infinity)

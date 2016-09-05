@@ -207,7 +207,10 @@ describe('apptask', function () {
 
         var awsScope = nock('http://localhost:5353')
             .get('/2013-04-01/hostedzone')
+            .times(2)
             .reply(200, js2xml('ListHostedZonesResponse', awsHostedZones, { arrayMap: { HostedZones: 'HostedZone'} }))
+            .get('/2013-04-01/hostedzone/ZONEID/rrset?maxitems=1&name=applocation.localhost.&type=A')
+            .reply(200, js2xml('ListResourceRecordSetsResponse', { ResourceRecordSets: [ ] }, { 'Content-Type': 'application/xml' }))
             .post('/2013-04-01/hostedzone/ZONEID/rrset/')
             .reply(200, js2xml('ChangeResourceRecordSetsResponse', { ChangeInfo: { Id: 'RRID', Status: 'INSYNC' } }));
 
