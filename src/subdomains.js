@@ -41,6 +41,7 @@ util.inherits(SubdomainError, Error);
 
 SubdomainError.NOT_FOUND = 'No such domain';
 SubdomainError.EXTERNAL_ERROR = 'External error';
+SubdomainError.BAD_FIELD = 'Bad Field';
 SubdomainError.STILL_BUSY = 'Still busy';
 SubdomainError.MISSING_CREDENTIALS = 'Missing credentials';
 SubdomainError.INTERNAL_ERROR = 'Internal error';

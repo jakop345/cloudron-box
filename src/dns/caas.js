@@ -41,6 +41,7 @@ function add(dnsConfig, zoneName, subdomain, type, values, callback) {
         .send(data)
         .end(function (error, result) {
             if (error && !error.response) return callback(error);
+            if (result.statusCode === 400) return callback(new SubdomainError(SubdomainError.BAD_FIELD, result.body.message));
             if (result.statusCode === 420) return callback(new SubdomainError(SubdomainError.STILL_BUSY));
             if (result.statusCode !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
 
@@ -108,6 +109,7 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
         .send(data)
         .end(function (error, result) {
             if (error && !error.response) return callback(error);
+            if (result.statusCode === 400) return callback(new SubdomainError(SubdomainError.BAD_FIELD, result.body.message));
             if (result.statusCode === 420) return callback(new SubdomainError(SubdomainError.STILL_BUSY));
             if (result.statusCode === 404) return callback(new SubdomainError(SubdomainError.NOT_FOUND));
             if (result.statusCode !== 204) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
