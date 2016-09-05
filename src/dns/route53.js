@@ -152,7 +152,7 @@ function get(dnsConfig, zoneName, subdomain, type, callback) {
             if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
             if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
             if (result.ResourceRecordSets.length === 0) return callback(null, [ ]);
-            if (result.ResourceRecordSets[0].Name !== params.StartRecordName && result.ResourceRecordSets[0].Type !== params.StartRecordType) return callback(null, [ ]);
+            if (result.ResourceRecordSets[0].Name !== params.StartRecordName || result.ResourceRecordSets[0].Type !== params.StartRecordType) return callback(null, [ ]);
 
             var values = result.ResourceRecordSets[0].ResourceRecords.map(function (record) { return record.Value; });
 
