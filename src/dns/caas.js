@@ -95,7 +95,7 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    debug('add: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
+    debug('del: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
 
     var data = {
         type: type,
