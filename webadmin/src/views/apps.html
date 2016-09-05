@@ -99,7 +99,7 @@
 
                         <br/>
 
-                        <a href="" ng-click="appConfigure.advancedVisible = true" ng-hide="appConfigure.advancedVisible">Show advanced</a>
+                        <a href="" ng-click="appConfigure.advancedVisible = true" ng-hide="appConfigure.advancedVisible">Show advanced settings...</a>
                         <div  uib-collapse="!appConfigure.advancedVisible">
                             <div class="form-group">
                                 <label class="control-label" for="memoryLimit">Maximum Memory Usage: <b>{{ appConfigure.memoryLimit ? appConfigure.memoryLimit / 1024 / 1024 + 'MB' : 'Default' }}</b></label>
@@ -108,6 +108,8 @@
                                     <slider id="memoryLimit" ng-model="appConfigure.memoryLimit" step="134217728" tooltip="hide" ticks="memoryTicks" ticks-snap-bounds="67108864"></slider>
                                 </div>
                             </div>
+
+                            <br/>
 
                             <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.xFrameOptions.$dirty && appConfigure.error.xFrameOptions }">
                                 <label class="control-label">Allow embedding from the following site</label>
