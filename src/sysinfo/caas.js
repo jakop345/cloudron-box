@@ -6,6 +6,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     superagent = require('superagent'),
+    safe = require('safetydance'),
     SysInfoError = require('../sysinfo.js').SysInfoError;
 
 function getIp(callback) {
@@ -17,8 +18,11 @@ function getIp(callback) {
             return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found'));
         }
 
-        if (!result.body.floating_ip || !result.body.floating_ip.ipv4 || !result.body.floating_ip.ipv4.ip_address) return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found'));
+        // first try to get the floating ip
+        var ip = safe.query(result.body, 'floating_ip.ipv4.ip_address');
+        if (!ip) ip = safe.query(result.body, 'interfaces.public[0].ipv4.ip_address');
+        if (!ip) return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found'));
 
-        callback(null, result.body.floating_ip.ipv4.ip_address);
+        callback(null, ip);
     });
 }
