@@ -3,7 +3,7 @@
 exports = module.exports = {
     add: add,
     del: del,
-    update: update,
+    upsert: upsert,
     getChangeStatus: getChangeStatus,
     get: get
 };
@@ -69,7 +69,7 @@ function get(dnsConfig, zoneName, subdomain, type, callback) {
         });
 }
 
-function update(dnsConfig, zoneName, subdomain, type, values, callback) {
+function upsert(dnsConfig, zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
@@ -77,13 +77,7 @@ function update(dnsConfig, zoneName, subdomain, type, values, callback) {
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    get(dnsConfig, zoneName, subdomain, type, function (error, result) {
-        if (error) return callback(error);
-
-        if (_.isEqual(values, result)) return callback();
-
-        add(dnsConfig, zoneName, subdomain, type, values, callback);
-    });
+    add(dnsConfig, zoneName, subdomain, type, values, callback);
 }
 
 function del(dnsConfig, zoneName, subdomain, type, values, callback) {

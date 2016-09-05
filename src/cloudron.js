@@ -453,7 +453,7 @@ function addDnsRecords() {
                 debug('addDnsRecords: will update %j', records);
 
                 async.mapSeries(records, function (record, iteratorCallback) {
-                    subdomains.update(record.subdomain, record.type, record.values, iteratorCallback);
+                    subdomains.upsert(record.subdomain, record.type, record.values, iteratorCallback);
                 }, function (error, changeIds) {
                     if (error) debug('addDnsRecords: failed to update : %s. will retry', error);
                     else debug('addDnsRecords: records %j added with changeIds %j', records, changeIds);

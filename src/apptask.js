@@ -253,7 +253,7 @@ function registerSubdomain(app, callback) {
         async.retry({ times: 200, interval: 5000 }, function (retryCallback) {
             debugApp(app, 'Registering subdomain location [%s]', app.location);
 
-            subdomains.update(app.location, 'A', [ ip ], function (error, changeId) {
+            subdomains.upsert(app.location, 'A', [ ip ], function (error, changeId) {
                 if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
 
                 retryCallback(null, error || changeId);

@@ -4,7 +4,7 @@ module.exports = exports = {
     add: add,
     remove: remove,
     status: status,
-    update: update, // unlike add, this fetches latest value, compares and adds if necessary. atomicity depends on backend
+    upsert: upsert,
     get: get,
 
     SubdomainError: SubdomainError
@@ -88,7 +88,7 @@ function get(subdomain, type, callback) {
     });
 }
 
-function update(subdomain, type, values, callback) {
+function upsert(subdomain, type, values, callback) {
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
     assert(util.isArray(values));
@@ -97,7 +97,7 @@ function update(subdomain, type, values, callback) {
     settings.getDnsConfig(function (error, dnsConfig) {
         if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        api(dnsConfig.provider).update(dnsConfig, config.zoneName(), subdomain, type, values, function (error, changeId) {
+        api(dnsConfig.provider).upsert(dnsConfig, config.zoneName(), subdomain, type, values, function (error, changeId) {
             if (error) return callback(error);
 
             callback(null, changeId);

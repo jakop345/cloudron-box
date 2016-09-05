@@ -269,7 +269,7 @@ function startMail(callback) {
 
                 // Add MX record
                 var mxRecord = { subdomain: '', type: 'MX', values: [ '10 ' + config.mailFqdn() + '.' ] };
-                subdomains.update(mxRecord.subdomain, mxRecord.type, mxRecord.values, callback);
+                subdomains.upsert(mxRecord.subdomain, mxRecord.type, mxRecord.values, callback);
             });
         });
     });
