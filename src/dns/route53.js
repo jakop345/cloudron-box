@@ -105,6 +105,7 @@ function add(dnsConfig, zoneName, subdomain, type, values, callback) {
         route53.changeResourceRecordSets(params, function(error, result) {
             if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
             if (error && error.code === 'PriorRequestNotComplete') return callback(new SubdomainError(SubdomainError.STILL_BUSY, error.message));
+            if (error && error.code === 'InvalidChangeBatch') return callback(new SubdomainError(SubdomainError.BAD_FIELD, error.message));
             if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
 
             callback(null, result.ChangeInfo.Id);
