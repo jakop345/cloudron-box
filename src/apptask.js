@@ -281,7 +281,7 @@ function unregisterSubdomain(app, location, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     // do not unregister bare domain because we show a error/cloudron info page there
-    if (location === '') {
+    if (!config.isCustomDomain() && location === '') {
         debugApp(app, 'Skip unregister of empty subdomain');
         return callback(null);
     }
