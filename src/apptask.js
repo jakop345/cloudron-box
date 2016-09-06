@@ -261,8 +261,6 @@ function registerSubdomain(app, callback) {
                 // note that the appstore sets up the naked domain for non-custom domains
                 if (config.isCustomDomain() && values.length !== 0 && !app.dnsRecordId) return retryCallback(null, new Error('DNS Record already exists'));
 
-                if (_.isEqual(values, [ ip ])) return retryCallback(null, app.dnsRecordId); // in sync already
-
                 subdomains.upsert(app.location, 'A', [ ip ], function (error, changeId) {
                     if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
 
