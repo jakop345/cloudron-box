@@ -2,11 +2,10 @@
 
 The Cloudron platform can be installed on your own cloud server. The self hosted version comes with all the same features as the managed version.
 
-## The CLI tool
-
-The [cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) has a `machine` subcommand that can be used to create, update and maintain a self-hosted Cloudron.
-
 ### Installation
+
+The [Cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) is used for managing a Cloudron. It has a `machine` 
+subcommand that can be used to create, update and maintain a self-hosted Cloudron.
 
 Installing the CLI tool requires node.js and npm. The CLI tool can be installed using the following command:
 
@@ -17,7 +16,6 @@ npm install -g cloudron
 Depending on your setup, you may need to run this as root.
 
 You should now be able to run the `cloudron machine help` command in a shell.
-
 
 ### Machine subcommands
 
@@ -44,12 +42,11 @@ The Cloudron uses the following AWS services:
 * **Route53** for DNS. The Cloudron will manage all app subdomains as well as the email related DNS records automatically.
 * **S3** to store encrypted Cloudron backups.
 
-The minimum requirements for a Cloudron heavily depends on the apps installed. The absolute minimum required EC2 instance is `t2.small`.
+The minimum requirements for a Cloudron depends on the apps installed. The absolute minimum required EC2 instance is `t2.small`.
 
 The Cloudron runs best on instances which do not have a burst mode VCPU.
 
-The system disk space usage of a Cloudron is around 15GB. This results in a minimum requirement of about 30GB to give some headroom for app
-installations and user data.
+The system disk space usage of a Cloudron is around 15GB. This results in a minimum requirement of about 30GB to give some headroom for app installations and user data.
 
 ### Cost Estimation
 
@@ -71,8 +68,25 @@ For custom cost estimation, please use the [AWS Cost Calculator](http://calculat
 Open the AWS console and create the required resources:
 
 1. Create a Route53 zone for your domain. Be sure to set the Route53 nameservers for your domain in your name registrar.
-2. Create a S3 bucket for backups. The bucket region *must* be the same region as where you intend to create your Cloudron (EC2).
-3. Create an SSH key pair in the target region (`Key Pairs` in the left pane of the EC2 console).
+
+2. Create a S3 bucket for backups. The bucket region **must* be the same region as where you intend to create your Cloudron (EC2).
+
+When creating the S3 bucket, it is important to choose a region. Do **NOT** choose `US Standard`.
+
+The supported regions are:
+    * US East (N. Virginia)       us-east-1
+    * US West (N. California)     us-west-1
+    * US West (Oregon)            us-west-2
+    * Asia Pacific (Mumbai)       ap-south-1
+    * Asia Pacific (Seoul)        ap-northeast-2
+    * Asia Pacific (Sydney)       ap-southeast-2
+    * Asia Pacific (Tokyo)        ap-northeast-1
+    * EU (Frankfurt)              eu-central-1
+    * EU (Ireland)                eu-west-1
+    * South America (São Paulo)   sa-east-1
+
+3. Create a new SSH key or upload an existing SSH key in the target region (`Key Pairs` in the left pane of the EC2 console).
+
 4. Create AWS credentials. You can either use root **or** IAM credentials.
   * For root credentials:
     * In AWS Console, under your name in the menu bar, click `Security Credentials`
@@ -123,11 +137,11 @@ cloudron machine create ec2 \
         --region <aws-region> \
         --type t2.small \
         --disk-size 30 \
-        --ssh-key <ssh-key-name> \
+        --ssh-key <ssh-key-name-or-filepath> \
         --access-key-id <aws-access-key-id> \
         --secret-access-key <aws-access-key-secret> \
         --backup-bucket <bucket-name> \
-        --backup-key <secret> \
+        --backup-key '<secret>' \
         --fqdn <domain>
 ```
 
@@ -136,13 +150,21 @@ regions is list <a href="//docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-reg
 
 The `--disk-size` parameter indicates the volume (hard disk) size to be allocated for the Cloudron.
 
-The `--backup-key <secret>` will be used to encrypt all backups prior to uploading to S3. Keep that secret in a safe place, as you need it to restore your Cloudron from a backup! You can generate a random key using `pwgen -1y 64`.
+The `--ssh-key` is the path to a PEM file or the private SSH Key. If your key is located as `~/.ssh/id_rsa_<name>`, you can
+also simply provide the `name` as the argument.
+
+The `--backup-key '<secret>'` will be used to encrypt all backups prior to uploading to S3. Keep that secret in a safe place, as you need it to restore your Cloudron from a backup! You can generate a random key using `pwgen -1y 64`. Be sure to put single quotes
+around the `secret` to prevent accidental shell expansion.
 
 **NOTE**: The `cloudron machine create` subcommand will automatically create a corresponding VPC, subnet and security group for your Cloudron, unless `--subnet` and `--security-group` arguments are explicitly passed in. If you want to reuse existing resources, please ensure that the security group does not limit any traffic to the Cloudron since the Cloudron manages its own firewall and that the subnet has an internet gateway setup in the routing table.
 
 ## First time setup
 
-Visit `https://my.<domain>/setup.html` to do first time setup of your Cloudron.
+Visit `https://my.<domain>` to do first time setup of your Cloudron.
+
+1. The website should already have a valid TLS certificate. If you see any certificate warnings, it means your Cloudron was not created correctly.
+2. If you see a login screen, instead of a setup screen, it means that someone else got to your Cloudron first and set it up
+already! In this unlikely case, simply delete the EC2 instance and create a new Cloudron again.
 
 Once the setup is done, you can access the admin page in the future at `https://my.<domain>`.
 
