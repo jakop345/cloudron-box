@@ -611,5 +611,7 @@
 * Fix plan listing
 
 [0.20.0]
-* Fix bug where crash reports where not being sent to support@cloudron.io
-* 
+* Fix bug where crash reports where not being sent to support@cloudron.io (#29)
+* Do not overwrite existing DNS records during app installation (#27)
+* Add UI to configure app's memory limit (#18)
+
