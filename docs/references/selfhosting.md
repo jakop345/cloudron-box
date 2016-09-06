@@ -106,6 +106,16 @@ The supported regions are:
         },
         {
             "Effect": "Allow",
+            "Action": [
+                "route53:ListHostedZones",
+                "route53:GetChange"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Effect": "Allow",
             "Action": "s3:*",
             "Resource": [
                 "arn:aws:s3:::<your bucket name>",
