@@ -134,7 +134,9 @@ is only required if `appStoreId` is not provided. Apps with a manifest won't rec
 `location` is the subdomain on which the app is installed. This can be empty if the app was installed on the naked domain.
 If another app already exists in the same location, 409 is returned.
 
-For apps that require login, `accessRestriction` is the *restricted* list of users and groups that can access this app. If null, all of this Cloudron users can access this app.
+For apps that require login, `accessRestriction` is the *restricted* list of users and groups that can access this app.
+If null, any user of this Cloudron can access this app. Note that the `accessRestriction` field only works if the app
+is integrated with Cloudron Authentication.
 
 `icon` is an application icon that is displayed in the web ui. If not provided, this is automatically downloaded
 from the Cloudron Store (or uses a fallback icon).
@@ -244,7 +246,10 @@ of the format `<percent>, <message>`.
 `location` is the subdomain on which the app is installed. This can be empty if the app was installed on the naked domain. The app can be
 accessed from `fqdn` i.e `https//<fqdn>`. If `altDomain` is set, the app should be accessed from `https://<altDomain>`.
 
-For apps that require login, `accessRestriction` is the *restricted* list of users and groups that can access this app. If null, all of this Cloudron users can access this app.
+For apps that require login, `accessRestriction` is the *restricted* list of users and groups that can access this app.
+If null, any user of this Cloudron can access this app. Note that the `accessRestriction` field only works if the app
+is integrated with Cloudron Authentication.
+
 
 `lastBackupId` is the last valid backup id. The [restore API](/references/api.html#restore-app) can be used to restore the app to this backup.
 
