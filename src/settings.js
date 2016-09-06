@@ -281,7 +281,7 @@ function validateRoute53Config(domain, dnsConfig, callback) {
                     return callback(new Error('domain nameservers are not set to route53'));
                 }
 
-                route53.add(dnsConfig, zoneName, 'my', 'A', [ ip ], function (error, changeId) {
+                route53.upsert(dnsConfig, zoneName, 'my', 'A', [ ip ], function (error, changeId) {
                     if (error && error.reason === SubdomainError.ACCESS_DENIED) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Error adding A record. Access denied'));
                     if (error && error.reason === SubdomainError.NOT_FOUND) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Zone not found'));
                     if (error && error.reason === SubdomainError.EXTERNAL_ERROR) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Error adding A record:' + error.message));
