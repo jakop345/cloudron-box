@@ -253,10 +253,20 @@ function registerSubdomain(app, callback) {
         async.retry({ times: 200, interval: 5000 }, function (retryCallback) {
             debugApp(app, 'Registering subdomain location [%s]', app.location);
 
-            subdomains.upsert(app.location, 'A', [ ip ], function (error, changeId) {
-                if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
+            // get the current record before updating it
+            subdomains.get(app.location, 'A', function (error, values) {
+                if (error) return retryCallback(error);
 
-                retryCallback(null, error || changeId);
+                // refuse to update any existing DNS record that we did not create
+                if (values.length !== 0 && !app.dnsRecordId) return retryCallback(null, new Error('DNS Record already exists'));
+
+                if (_.isEqual(values, [ ip ])) return retryCallback(null, app.dnsRecordId); // in sync already
+
+                subdomains.upsert(app.location, 'A', [ ip ], function (error, changeId) {
+                    if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
+
+                    retryCallback(null, error || changeId);
+                });
             });
         }, function (error, result) {
             if (error || result instanceof Error) return callback(error || result);
