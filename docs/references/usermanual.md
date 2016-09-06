@@ -2,33 +2,38 @@
 
 ## Introduction
 
-The Cloudron is the best way to run apps and manage users on your private server.
-When we say `private`, we mean that we create a virtual server that is exclusive
-to you. Each cloudron.io user gets their own server.
+The Cloudron is the best platform self-hosting web applications on your server. You
+can easily install apps on it, add users, manage access restriction and keep your
+server and apps updated with no effort.
 
-You might wonder that there are many 1-click app solutions out there and what's so special
-about Cloudron? Most 1-click solutions simply put code into a server and leave it at that.
-There's so much more to do:
+You might wonder that there are so many 1-click app solutions out there and what is so special
+about Cloudron? As the name implies, 1-click installers simply install code into a server
+and leave it at that. There's so much more to do:
+
 1. Configure a domain to point to your server
 2. Setup SSL certificates and renew them periodically
-3. Ensure app is backed up correctly
-4. Ensure app is uptodate and secure
-5. Have a mechanism to quickly restore the app from a backup
+3. Ensure apps are backed up correctly
+4. Ensure apps are uptodate and secure
+5. Have a mechanism to quickly restore apps from a backup
 6. Manage users across all your apps
-7. Notifications about the app status
+7. Get alerts and notifications about the status of apps
 
 ... and so on ...
 
 We made the Cloudron to dramatically lower the bar for people to run apps on servers. Just provide
-a domain name, install apps and add users. All the server management listed above is completely automated.
+a domain name, install apps and add users. All the server management tasks listed above is
+completely automated.
 
-If you want to learn more about the secret sauce that makes the Cloudron, please read our [architecture overview](/references/architecture.html).
+If you want to learn more about the secret sauce that makes the Cloudron, please read our
+[architecture overview](/references/architecture.html).
 
 ## Use cases
 
-What can you run on a Cloudron? Here are some of the apps you can run on a Cloudron:
+Here are some of the apps you can run on a Cloudron:
+
 * RSS Reader
 * Chat, IRC, Jabber servers
+* Public forum
 * Blog
 * File syncing and sharing
 * Code hosting
@@ -46,7 +51,7 @@ the Cloudron from the `Users` menu item.
 
 <img src="/docs/img/webadmin_domain.png" class="shadow">
 
-Tip: The Cloudron administration panel is located at the `my` subdomain. You might want to bookmark
+The Cloudron administration page is located at the `my` subdomain. You might want to bookmark
 this link!
 
 ## Apps
@@ -64,10 +69,10 @@ Clicking the `Install` button will show an install dialog like below:
 
 <img src="/docs/img/app_install.png" class="shadow">
 
-The `Location` field is the subdomain in which your app will be installed. For example, use the
-`mail` location to access your web mail client or the `blog` location to access your Wordpress blog.
+The `Location` field is the subdomain in which your app will be installed. For example, if you use the
+`mail` location for your web mail client, then it will be accessible at `mail.<domain>`.
 
-Tip: You can access the apps directly on your browser using `blog.<mydomain>`. You don't have to
+Tip: You can access the apps directly on your browser using `mail.<domain>`. You don't have to
 visit the Cloudron administration panel.
 
 `Access control` specifies who can access this app.
@@ -75,7 +80,7 @@ visit the Cloudron administration panel.
 * `Every Cloudron user` - Any user in your Cloudron can access the app. Initially, you are the only
    user in your Cloudron. Unless you explicitly invite others, nobody else can access these apps.
    Note that the term 'access' depends on the app. For a blog, this means that nobody can post new
-   blog posts (but anybody can view them). For a chat server, this means that nobody can access
+   blog posts (but anybody can view them). For a chat server, this might mean that nobody can access
    your chat server.
 
 * `Restrict to groups` - Only users in the groups can access the app.
@@ -85,19 +90,24 @@ visit the Cloudron administration panel.
 All your apps automatically update as and when the application author releases an update. The Cloudron
 will attempt to update around midnight of your timezone.
 
-Some app updates are not automatic. This can happen if a new version of the app has dropped some features
+Some app updates are not automatic. This can happen if a new version of the app has removed some features
 that you were relying on. In such a case, the update has to be manually approved. This is simply a matter
-of clicking the `Update` button after you read about the changes.
+of clicking the `Update` button (the green star) after you read about the changes.
+
+<img src="/docs/img/app_update.png" class="shadow">
 
 ### Backups
 
-All your apps will automatically backup and those backups are stored encrypted in Amazon S3. You don't have
-to do anything about it.
+All apps are automatically backed up every day. Backups are stored encrypted in Amazon S3. You don't have
+to do anything about it. The [Cloudron CLI](https://git.cloudron.io/cloudron/cloudron-cli) tool can be used
+to download application backups.
 
 ### Configuration
 
 Apps can be reconfigured using the `Configure` dialog. Click on the wrench icon in the application grid
-to bring up the following dialog:
+to bring up the following dialog.
+
+<img src="/docs/img/app_configure_button.png" class="shadow">
 
 <img src="/docs/img/app_configure.png" class="shadow">
 
@@ -109,17 +119,23 @@ Changing an app's configuration has a small downtime (usually around a minute).
 
 ### Restore
 
-Apps can be restored to a previous backup by clicking on the `Restore` button. Note that restoring previous
-data might also restore the previous version of the software. For example, you might be currently using
-Version 5 of the app. If you restore to a backup that was made with Version 3 of the app, then the restore
+Apps can be restored to a previous backup by clicking on the `Restore` button.
+
+<img src="/docs/img/app_restore_button.png" class="shadow">
+
+Note that restoring previous data might also restore the previous version of the software. For example, you might 
+be currently using Version 5 of the app. If you restore to a backup that was made with Version 3 of the app, then the restore
 operation will install Version 3 of the app. This is because the latest version may not be able to handle old data.
 
 ### Uninstall
 
-You can uninstall an app by clicking the `Uninstall` button. Note that all data associated with the app will
-be immediately removed from the Cloudron. App data might still persist in your old backups and the
-[CLI tool](https://git.cloudron.io/cloudron/cloudron-cli) provides a way to restore from those old backups should
-it be required.
+You can uninstall an app by clicking the `Uninstall` button.
+
+<img src="/docs/img/app_uninstall_button.png" class="shadow">
+
+Note that all data associated with the app will be immediately removed from the Cloudron. App data might still 
+persist in your old backups and the [CLI tool](https://git.cloudron.io/cloudron/cloudron-cli) provides a way to
+restore from those old backups should it be required.
 
 ### Embedding Apps
 
