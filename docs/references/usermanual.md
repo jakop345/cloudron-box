@@ -104,10 +104,11 @@ to download application backups.
 
 ### Configuration
 
-Apps can be reconfigured using the `Configure` dialog. Click on the wrench icon in the application grid
-to bring up the following dialog.
+Apps can be reconfigured using the `Configure` button.
 
 <img src="/docs/img/app_configure_button.png" class="shadow">
+
+Click on the wrench button will bring up the configure dialog.
 
 <img src="/docs/img/app_configure.png" class="shadow">
 
@@ -142,7 +143,8 @@ restore from those old backups should it be required.
 It is possible to embed Cloudron apps into other websites. By default, this is disabled to prevent
 [Clickjacking](https://cloudron.io/blog/2016-07-15-site-embedding.html).
 
-You can set a website that is allowed to embed your Cloudron app using the Configure app dialog.
+You can set a website that is allowed to embed your Cloudron app using the app's [Configure dialog](#configuration).
+Click on 'Show Advanced Settings...' and enter the embedder website name.
 
 ## Custom domain
 
@@ -189,6 +191,14 @@ to.
 <img src="/docs/img/users.png" class="shadow">
 
 To remove a user, simply remove them from the list. Note that the removed user cannot access any app anymore.
+
+### Administrators
+
+A Cloudron administrator is a special right given to an existing Cloudron user allowing them to manage
+apps and users. To make an existing user an administator, click the edit (pencil) button corresponding to
+the user and check the `Allow this user to manage apps, groups and other users` checkbox.
+
+<img src="/docs/img/administrator.png" class="shadow">
 
 ### Groups
 
