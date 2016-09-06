@@ -14,8 +14,7 @@ var assert = require('assert'),
     AWS = require('aws-sdk'),
     debug = require('debug')('box:dns/route53'),
     SubdomainError = require('../subdomains.js').SubdomainError,
-    util = require('util'),
-    _ = require('underscore');
+    util = require('util');
 
 function getDnsCredentials(dnsConfig) {
     assert.strictEqual(typeof dnsConfig, 'object');
