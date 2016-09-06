@@ -182,21 +182,15 @@ function validateAccessRestriction(accessRestriction) {
 
     if (accessRestriction === null) return null;
 
-    var noUsers = true, noGroups = true;
-
     if (accessRestriction.users) {
         if (!Array.isArray(accessRestriction.users)) return new AppsError(AppsError.BAD_FIELD, 'users array property required');
         if (!accessRestriction.users.every(function (e) { return typeof e === 'string'; })) return new AppsError(AppsError.BAD_FIELD, 'All users have to be strings');
-        noUsers = accessRestriction.users.length === 0;
     }
 
     if (accessRestriction.groups) {
         if (!Array.isArray(accessRestriction.groups)) return new AppsError(AppsError.BAD_FIELD, 'groups array property required');
         if (!accessRestriction.groups.every(function (e) { return typeof e === 'string'; })) return new AppsError(AppsError.BAD_FIELD, 'All groups have to be strings');
-        noGroups = accessRestriction.groups.length === 0;
     }
-
-    if (noUsers && noGroups) return new AppsError(AppsError.BAD_FIELD, 'users and groups array cannot both be empty');
 
     // TODO: maybe validate if the users and groups actually exist
     return null;

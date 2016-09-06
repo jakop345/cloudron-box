@@ -30,8 +30,7 @@ function requiresOAuthProxy(app) {
     if (tmp === null) return false;
     if (app.manifest.addons['ldap'] || app.manifest.addons['oauth'] || app.manifest.addons['simpleauth']) return false;
 
-    // check if any restrictions are set
-    return !!((tmp.users && tmp.users.length) || (tmp.groups && tmp.groups.length));
+    return true;
 }
 
 function configureAdmin(certFilePath, keyFilePath, callback) {

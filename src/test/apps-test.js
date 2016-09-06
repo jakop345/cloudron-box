@@ -225,7 +225,7 @@ describe('Apps', function () {
             expect(apps._validateAccessRestriction({ users: {} })).to.be.an(Error);
         });
 
-        it('does not allow no user input', function () {
+        it('allows no user input', function () {
             expect(apps._validateAccessRestriction({ users: [] })).to.be.an(Error);
         });
 
