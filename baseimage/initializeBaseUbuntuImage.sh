@@ -205,6 +205,7 @@ cat > /etc/systemd/system/cloudron-installer.service <<EOF
 Description=Cloudron Installer
 ; journald crashes result in a EPIPE in node. Cannot ignore it as it results in loss of logs.
 BindsTo=systemd-journald.service
+After=box-setup.service
 
 [Service]
 Type=idle
