@@ -442,7 +442,8 @@ function install(data, auditSource, callback) {
         key = data.key || null,
         memoryLimit = data.memoryLimit || 0,
         altDomain = data.altDomain || null,
-        xFrameOptions = data.xFrameOptions || 'SAMEORIGIN';
+        xFrameOptions = data.xFrameOptions || 'SAMEORIGIN',
+        oauthProxy = data.oauthProxy === true;
 
     assert(data.appStoreId || data.manifest); // atleast one of them is required
 
@@ -498,7 +499,8 @@ function install(data, auditSource, callback) {
                 accessRestriction: accessRestriction,
                 memoryLimit: memoryLimit,
                 altDomain: altDomain,
-                xFrameOptions: xFrameOptions
+                xFrameOptions: xFrameOptions,
+                oauthProxy: oauthProxy
             };
 
             appdb.add(appId, appStoreId, manifest, location, portBindings, data, function (error) {

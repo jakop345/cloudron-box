@@ -124,6 +124,8 @@ function installApp(req, res, next) {
 
     if (data.xFrameOptions && typeof data.xFrameOptions !== 'string') return next(new HttpError(400, 'xFrameOptions must be a string'));
 
+    if ('oauthProxy' in data && typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
+
     debug('Installing app :%j', data);
 
     apps.install(data, auditSource(req), function (error, app) {
@@ -160,6 +162,8 @@ function configureApp(req, res, next) {
     if ('memoryLimit' in data && typeof data.memoryLimit !== 'number') return next(new HttpError(400, 'memoryLimit is not a number'));
     if (data.altDomain && typeof data.altDomain !== 'string') return next(new HttpError(400, 'altDomain must be a string'));
     if (data.xFrameOptions && typeof data.xFrameOptions !== 'string') return next(new HttpError(400, 'xFrameOptions must be a string'));
+
+    if ('oauthProxy' in data && typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
 
     debug('Configuring app id:%s data:%j', req.params.id, data);
 
