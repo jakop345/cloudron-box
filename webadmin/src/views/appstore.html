@@ -119,7 +119,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" ng-show="appInstall.state !== 'postInstall'" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-default" ng-show="appInstall.state === 'postInstall'" data-dismiss="modal" ng-click="appInstall.switchToAppsView()">OK</button>
+                <button type="button" class="btn btn-default" ng-show="appInstall.state === 'postInstall'" data-dismiss="modal" ng-click="appInstall.switchToAppsView()">Got it</button>
                 <button type="button" class="btn btn-success" ng-show="config.provider === 'caas' && user.admin && appInstall.state === 'resourceConstraint'" ng-click="showRequestUpgrade()">Upgrade Cloudron</button>
                 <button type="button" class="btn btn-danger" ng-show="(config.isDev || config.provider !== 'caas') && user.admin && appInstall.state === 'resourceConstraint'" ng-click="appInstall.showForm(true)">Install anyway</button>
                 <button type="button" class="btn btn-success" ng-show="appInstall.state === 'appInfo' && user.admin" ng-click="appInstall.showForm()">Install</button>
