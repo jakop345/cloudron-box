@@ -305,7 +305,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             portBindings: config.portBindings,
             accessRestriction: config.accessRestriction,
             cert: config.cert,
-            key: config.key
+            key: config.key,
+            oauthProxy: config.oauthProxy
         };
 
         post('/api/v1/apps/install', data).success(function (data, status) {
@@ -351,7 +352,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             key: config.key,
             memoryLimit: config.memoryLimit,
             altDomain: config.altDomain || null,
-            xFrameOptions: config.xFrameOptions
+            xFrameOptions: config.xFrameOptions,
+            oauthProxy: config.oauthProxy
         };
 
         post('/api/v1/apps/' + id + '/configure', data).success(function (data, status) {
