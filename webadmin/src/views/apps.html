@@ -208,7 +208,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">{{ Account information for appAccounts.app.fqdn }}</h4>
+                <h4 class="modal-title">Account information for {{ appAccounts.app.fqdn }}</h4>
             </div>
             <div class="modal-body">
                 <div class="appstore-install-description">
@@ -366,11 +366,6 @@
                                         <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ app.progress }}%"></div>
                                     </div>
                                 </div>
-                                <div>
-                                    <a href="" ng-click="showAccounts(app)" ng-style="{ 'visibility': (app | installationActive) ? 'visible' : 'hidden' }">
-                                        <i class="fa fa-users scale"></i>
-                                    </a>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -404,6 +399,12 @@
 
                         <div ng-show="app.installationState === 'installed' || app.installationState === 'pending_configure' || (app | installError)">
                             <a href="" ng-click="showConfigure(app)" title="Configure App"><i class="fa fa-wrench scale"></i></a>
+                        </div>
+
+                        <div ng-show="hasAccountInfo(app)">
+                            <a href="" ng-click="showAccounts(app)">
+                                <i class="fa fa-question scale"></i>
+                            </a>
                         </div>
                     </div>
 

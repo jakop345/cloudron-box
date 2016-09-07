@@ -284,7 +284,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.reset();
 
         $scope.appAccounts.app = app;
-        $scope.appAccounts.info = app.manifest.description;
+        $scope.appAccounts.info = app.manifest.description.match(/### Accounts([\s\S]*?)###/m)[1];
 
         $('#appAccountsModal').modal('show');
 
@@ -479,6 +479,10 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
     $scope.cancel = function () {
         window.history.back();
+    };
+
+    $scope.hasAccountInfo = function (app) {
+        return app.manifest && app.manifest.description.match(/### Accounts/) !== null;
     };
 
     function fetchUsers() {
