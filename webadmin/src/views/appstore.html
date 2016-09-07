@@ -114,10 +114,10 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" ng-show="config.provider === 'caas' && !appInstall.installFormVisible && user.admin && appInstall.resourceConstraintVisible" ng-click="showRequestUpgrade()">Upgrade Cloudron</button>
-                <button type="button" class="btn btn-danger" ng-show="(config.isDev || config.provider !== 'caas') && !appInstall.installFormVisible && user.admin && appInstall.resourceConstraintVisible" ng-click="appInstall.showForm(true)">Install anyway</button>
-                <button type="button" class="btn btn-success" ng-show="!appInstall.installFormVisible && user.admin && !appInstall.resourceConstraintVisible" ng-click="appInstall.showForm()">Install</button>
-                <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible && user.admin && !appInstall.resourceConstraintVisible" ng-click="appInstall.submit()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
+                <button type="button" class="btn btn-success" ng-show="config.provider === 'caas' && user.admin && appInstall.state === 'resourceConstraint'" ng-click="showRequestUpgrade()">Upgrade Cloudron</button>
+                <button type="button" class="btn btn-danger" ng-show="(config.isDev || config.provider !== 'caas') && user.admin && appInstall.state === 'resourceConstraint'" ng-click="appInstall.showForm(true)">Install anyway</button>
+                <button type="button" class="btn btn-success" ng-show="appInstall.state === 'appInfo' && user.admin" ng-click="appInstall.showForm()">Install</button>
+                <button type="button" class="btn btn-success" ng-show="appInstall.state === 'installForm' && user.admin" ng-click="appInstall.submit()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
             </div>
         </div>
     </div>

@@ -24,8 +24,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.appInstall = {
         busy: false,
-        installFormVisible: false,
-        resourceConstraintVisible: false,
+        state: 'appInfo',
         error: {},
         app: {},
         location: '',
@@ -58,8 +57,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.error = {};
             $scope.appInstall.location = '';
             $scope.appInstall.portBindings = {};
-            $scope.appInstall.installFormVisible = false;
-            $scope.appInstall.resourceConstraintVisible = false;
+            $scope.appInstall.state = 'appInfo';
             $scope.appInstall.mediaLinks = [];
             $scope.appInstall.certificateFile = null;
             $scope.appInstall.certificateFileName = '';
@@ -82,15 +80,13 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
         showForm: function (force) {
             if (Client.enoughResourcesAvailable($scope.appInstall.app) || force) {
-                $scope.appInstall.installFormVisible = true;
-                $scope.appInstall.resourceConstraintVisible = false;
+                $scope.appInstall.state = 'installForm';
                 $('#collapseMediaLinksCarousel').collapse('hide');
                 $('#collapseResourceConstraint').collapse('hide');
                 $('#collapseInstallForm').collapse('show');
                 $('#appInstallLocationInput').focus();
             } else {
-                $scope.appInstall.installFormVisible = false;
-                $scope.appInstall.resourceConstraintVisible = true;
+                $scope.appInstall.state = 'resourceConstraint';
                 $('#collapseMediaLinksCarousel').collapse('hide');
                 $('#collapseResourceConstraint').collapse('show');
             }
