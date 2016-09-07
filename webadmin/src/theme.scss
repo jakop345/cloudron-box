@@ -210,6 +210,12 @@ html {
     top: 0;
 }
 
+.app-postinstall-message {
+    max-height: 500px;
+    overflow-x: none;
+    overflow-y: auto;
+}
+
 // ----------------------------
 // Appstore view
 // ----------------------------
