@@ -65,6 +65,11 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         password: ''
     };
 
+    $scope.appAccounts = {
+        app: {},
+        info: ''
+    };
+
     $scope.appError = {
         app: {}
     };
@@ -275,6 +280,17 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         });
     };
 
+    $scope.showAccounts = function (app) {
+        $scope.reset();
+
+        $scope.appAccounts.app = app;
+        $scope.appAccounts.info = app.manifest.description;
+
+        $('#appAccountsModal').modal('show');
+
+        return false; // prevent propagation and default
+    };
+
     $scope.showError = function (app) {
         $scope.reset();
 
@@ -291,6 +307,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appRestore.app = app;
 
         $('#appRestoreModal').modal('show');
+
+        return false; // prevent propagation and default
     };
 
     $scope.doRestore = function () {

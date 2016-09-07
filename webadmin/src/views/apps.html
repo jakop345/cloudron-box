@@ -203,6 +203,25 @@
     </div>
 </div>
 
+<!-- Modal accounts app -->
+<div class="modal fade" id="appAccountsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{{ Account information for appAccounts.app.fqdn }}</h4>
+            </div>
+            <div class="modal-body">
+                <div class="appstore-install-description">
+                    <div ng-bind-html="appAccounts.info | markdown2html"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal error app -->
 <div class="modal fade" id="appErrorModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -346,6 +365,11 @@
                                     <div class="progress progress-striped active">
                                         <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ app.progress }}%"></div>
                                     </div>
+                                </div>
+                                <div>
+                                    <a href="" ng-click="showAccounts(app)" ng-style="{ 'visibility': (app | installationActive) ? 'visible' : 'hidden' }">
+                                        <i class="fa fa-users scale"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
