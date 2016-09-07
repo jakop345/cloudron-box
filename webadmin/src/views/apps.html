@@ -208,7 +208,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">{{ appPostInstall.app.fqdn }}</h4>
+                <h4 class="modal-title">Using {{ appPostInstall.app.fqdn }}</h4>
             </div>
             <div class="modal-body">
                 <div class="appstore-install-description">
@@ -216,7 +216,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Got it</button>
             </div>
         </div>
     </div>
@@ -403,7 +403,7 @@
 
                         <div ng-show="hasPostInstallMessage(app)">
                             <a href="" ng-click="showPostInstall(app)">
-                                <i class="fa fa-question scale"></i>
+                                <i class="fa fa-info-circle scale"></i>
                             </a>
                         </div>
                     </div>
