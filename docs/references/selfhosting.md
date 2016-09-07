@@ -7,6 +7,7 @@ The Cloudron platform can be installed on your own cloud server. The self hosted
 The [Cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) is used for managing a Cloudron. It has a `machine` 
 subcommand that can be used to create, update and maintain a self-hosted Cloudron.
 
+### Linux & OS X
 Installing the CLI tool requires node.js and npm. The CLI tool can be installed using the following command:
 
 ```
@@ -15,9 +16,17 @@ npm install -g cloudron
 
 Depending on your setup, you may need to run this as root.
 
-You should now be able to run the `cloudron machine help` command in a shell.
+On OS X, it is known to work with the `openssl` package from homebrew. 
+
+See [#14](https://git.cloudron.io/cloudron/cloudron-cli/issues/14) for more information.
+
+### Windows
+
+The CLI tool does not work on Windows.
 
 ### Machine subcommands
+
+You should now be able to run the `cloudron machine help` command in a shell.
 
 ```
 create      Creates a new Cloudron
