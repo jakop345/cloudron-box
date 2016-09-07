@@ -196,7 +196,7 @@ apt-get install -y cron logrotate
 systemctl enable cron
 
 echo "=== Rebuilding npm packages ==="
-cd "${INSTALLER_SOURCE_DIR}" && npm install --production
+cd "${INSTALLER_SOURCE_DIR}" && while ! npm install --production; do sleep 1; done
 chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
 echo "==== Install installer systemd script ===="
