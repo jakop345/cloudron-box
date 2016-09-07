@@ -79,7 +79,7 @@ function configureApp(app, certFilePath, keyFilePath, callback) {
     var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
 
     var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
-    debug('writing config for "%s" to %s', vhost, nginxConfigFilename);
+    debug('writing config for "%s" to %s with options %j', vhost, nginxConfigFilename, data);
 
     if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) {
         debug('Error creating nginx config for "%s" : %s', vhost, safe.error.message);

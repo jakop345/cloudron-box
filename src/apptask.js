@@ -161,6 +161,8 @@ function allocateOAuthProxyCredentials(app, callback) {
 
     if (!nginx.requiresOAuthProxy(app)) return callback(null);
 
+    debugApp(app, 'Creating oauth proxy credentials');
+
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
 
