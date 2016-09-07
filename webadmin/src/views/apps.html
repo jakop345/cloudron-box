@@ -77,23 +77,29 @@
                             <label class="control-label">Access control</label>
                             <div class="radio">
                                 <label>
-                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="">
+                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="any">
                                     Every Cloudron user
                                 </label>
                             </div>
                             <div class="radio">
                                 <label>
-                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="restricted">
+                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="groups">
                                     Restrict to groups
                                 </label>
                             </div>
-                            <div class="has-error" ng-show="appConfigure.accessRestrictionOption !== '' && !appConfigure.isAccessRestrictionValid()">Select at least one group</div>
+                            <div class="has-error" ng-show="appConfigure.accessRestrictionOption === 'groups' && !appConfigure.isAccessRestrictionValid()">Select at least one group</div>
                             <div>
                                 <div>
                                     <span ng-repeat="group in groups | ignoreAdminGroup">
-                                        <button class="btn btn-default" type="button" ng-disabled="appConfigure.accessRestrictionOption === ''" ng-click="appConfigureToggleGroup(group);" ng-class="{ 'btn-primary': (appConfigure.accessRestriction.groups && appConfigure.accessRestriction.groups.indexOf(group.id) !== -1) }">{{ group.name }}</button>
+                                        <button class="btn btn-default" type="button" ng-disabled="appConfigure.accessRestrictionOption !== 'groups'" ng-click="appConfigureToggleGroup(group);" ng-class="{ 'btn-primary': (appConfigure.accessRestriction.groups && appConfigure.accessRestriction.groups.indexOf(group.id) !== -1) }">{{ group.name }}</button>
                                     </span>
                                 </div>
+                            </div>
+                            <div class="radio" ng-show="appConfigure.needsOAuthProxy">
+                                <label>
+                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="unrestricted">
+                                    Unrestricted
+                                </label>
                             </div>
                         </div>
 
@@ -151,13 +157,13 @@
                             </div>
                             <input type="password" class="form-control" ng-model="appConfigure.password" id="appConfigurePasswordInput" name="password" required>
                         </div>
-                        <input class="ng-hide" type="submit" ng-disabled="appConfigureForm.$invalid || busy || (appConfigure.accessRestrictionOption !== '' && !appConfigure.isAccessRestrictionValid())"/>
+                        <input class="ng-hide" type="submit" ng-disabled="appConfigureForm.$invalid || busy || (appConfigure.accessRestrictionOption === 'groups' && !appConfigure.isAccessRestrictionValid())"/>
                     </form>
                 </fieldset>
             </div>
             <div class="modal-footer ">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || appConfigure.busy || (appConfigure.accessRestrictionOption !== '' && !appConfigure.isAccessRestrictionValid()) || !appConfigure.isAltDomainValid()"><i class="fa fa-spinner fa-pulse" ng-show="appConfigure.busy"></i> Save</button>
+                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || appConfigure.busy || (appConfigure.accessRestrictionOption === 'groups' && !appConfigure.isAccessRestrictionValid()) || !appConfigure.isAltDomainValid()"><i class="fa fa-spinner fa-pulse" ng-show="appConfigure.busy"></i> Save</button>
             </div>
         </div>
     </div>

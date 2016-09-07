@@ -35,9 +35,10 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         keyFile: null,
         keyFileName: '',
         memoryLimit: $scope.memoryTicks[0],
-        accessRestrictionOption: '',
+        accessRestrictionOption: 'any',
         accessRestriction: { users: [], groups: [] },
         xFrameOptions: '',
+        needsOAuthProxy: false,
 
         isAccessRestrictionValid: function () {
             var tmp = $scope.appConfigure.accessRestriction;
@@ -92,9 +93,10 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.keyFile = null;
         $scope.appConfigure.keyFileName = '';
         $scope.appConfigure.memoryLimit = $scope.memoryTicks[0];
-        $scope.appConfigure.accessRestrictionOption = '';
+        $scope.appConfigure.accessRestrictionOption = 'any';
         $scope.appConfigure.accessRestriction = { users: [], groups: [] };
         $scope.appConfigure.xFrameOptions = '';
+        $scope.appConfigure.needsOAuthProxy = false;
 
         $scope.appConfigureForm.$setPristine();
         $scope.appConfigureForm.$setUntouched();
@@ -180,10 +182,18 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.location = app.altDomain || app.location;
         $scope.appConfigure.usingAltDomain = !!app.altDomain;
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
-        $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
+        $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'groups' : 'any';
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
         $scope.appConfigure.memoryLimit = app.memoryLimit;
         $scope.appConfigure.xFrameOptions = app.xFrameOptions.indexOf('ALLOW-FROM') === 0 ? app.xFrameOptions.split(' ')[1] : '';
+
+        var manifest = app.manifest;
+        $scope.appConfigure.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth']);
+        if ($scope.appConfigure.needsOAuthProxy && !app.oauthProxy) {
+            $scope.appConfigure.accessRestrictionOption = 'unrestricted';
+        } else {
+            $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'groups' : 'any';
+        }
 
         // fill the portBinding structures. There might be holes in the app.portBindings, which signalizes a disabled port
         for (var env in $scope.appConfigure.portBindingsInfo) {
@@ -218,11 +228,12 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             location:  $scope.appConfigure.usingAltDomain ? $scope.appConfigure.app.location : $scope.appConfigure.location,
             altDomain: $scope.appConfigure.usingAltDomain ? $scope.appConfigure.location : null,
             portBindings: finalPortBindings,
-            accessRestriction: !$scope.appConfigure.accessRestrictionOption ? null : $scope.appConfigure.accessRestriction,
+            accessRestriction: $scope.appConfigure.accessRestrictionOption === 'groups' ? $scope.appConfigure.accessRestriction : null,
             cert: $scope.appConfigure.certificateFile,
             key: $scope.appConfigure.keyFile,
             xFrameOptions: $scope.appConfigure.xFrameOptions ? ('ALLOW-FROM ' + $scope.appConfigure.xFrameOptions) : 'SAMEORIGIN',
-            memoryLimit: $scope.appConfigure.memoryLimit
+            memoryLimit: $scope.appConfigure.memoryLimit,
+            oauthProxy:  $scope.appConfigure.needsOAuthProxy && $scope.appConfigure.accessRestrictionOption !== 'unrestricted'
         };
 
         Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, data, function (error) {

@@ -34,9 +34,10 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         certificateFileName: '',
         keyFile: null,
         keyFileName: '',
-        accessRestrictionOption: '',
+        accessRestrictionOption: 'any',
         accessRestriction: { users: [], groups: [] },
         accessRestrictionSingleUser: null,
+        needsOAuthProxy: false,
 
         isAccessRestrictionValid: function () {
             var tmp = $scope.appInstall.accessRestriction;
@@ -63,9 +64,10 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.certificateFileName = '';
             $scope.appInstall.keyFile = null;
             $scope.appInstall.keyFileName = '';
-            $scope.appInstall.accessRestrictionOption = '';
+            $scope.appInstall.accessRestrictionOption = 'any';
             $scope.appInstall.accessRestriction = { users: [], groups: [] };
             $scope.appInstall.accessRestrictionSingleUser = null;
+            $scope.appInstall.needsOAuthProxy = false;
 
             $('#collapseInstallForm').collapse('hide');
             $('#collapseResourceConstraint').collapse('hide');
@@ -104,9 +106,13 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.portBindingsInfo = $scope.appInstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
             $scope.appInstall.portBindings = {};                            // This is the actual model holding the env:port pair
             $scope.appInstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
-            $scope.appInstall.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
+            $scope.appInstall.accessRestrictionOption = app.accessRestriction ? 'groups' : 'any';
             $scope.appInstall.accessRestriction = app.accessRestriction || { users: [], groups: [] };
             $scope.appInstall.accessRestrictionSingleUser = null;
+
+            var manifest = app.manifest;
+            $scope.appInstall.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth']);
+            $scope.appInstall.accessRestrictionOption = 'any';
 
             // set default ports
             for (var env in $scope.appInstall.app.manifest.tcpPorts) {
@@ -134,7 +140,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             // translate to accessRestriction object
             var accessRestriction = $scope.appInstall.app.manifest.singleUser ? {
                 users: [ $scope.appInstall.accessRestrictionSingleUser.id ]
-            } : (!$scope.appInstall.accessRestrictionOption ? null : $scope.appInstall.accessRestriction);
+            } : ($scope.appInstall.accessRestrictionOption === 'groups' ? $scope.appInstall.accessRestriction : null);
 
             var data = {
                 location: $scope.appInstall.location || '',
@@ -142,6 +148,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 accessRestriction: accessRestriction,
                 cert: $scope.appInstall.certificateFile,
                 key: $scope.appInstall.keyFile,
+                oauthProxy:  $scope.appInstall.needsOAuthProxy && ($scope.appInstall.app.manifest.singleUser || $scope.appInstall.accessRestrictionOption !== 'unrestricted')
             };
 
             Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, data, function (error) {

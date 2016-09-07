@@ -43,24 +43,30 @@
                             <label class="control-label">Access control</label>
                             <div class="radio">
                                 <label>
-                                    <input type="radio" ng-model="appInstall.accessRestrictionOption" value="">
+                                    <input type="radio" ng-model="appInstall.accessRestrictionOption" value="any">
                                     Every Cloudron user
                                 </label>
                             </div>
                             <div class="radio">
                                 <label>
-                                    <input type="radio" ng-model="appInstall.accessRestrictionOption" value="restricted" ng-disabled="groups.length <= 1">
+                                    <input type="radio" ng-model="appInstall.accessRestrictionOption" value="groups" ng-disabled="groups.length <= 1">
                                     Restrict to groups
                                 </label>
                             </div>
                             <div ng-show="groups.length <= 1">No groups available. Create groups to restrict access to them first.</div>
-                            <div class="has-error" ng-show="appInstall.accessRestrictionOption !== '' && !appInstall.isAccessRestrictionValid()">Select at least one group</div>
+                            <div class="has-error" ng-show="appInstall.accessRestrictionOption === 'groups' && !appInstall.isAccessRestrictionValid()">Select at least one group</div>
                             <div>
                                 <div>
                                     <span ng-repeat="group in groups | ignoreAdminGroup">
-                                        <button class="btn btn-default" type="button" ng-disabled="appInstall.accessRestrictionOption === ''" ng-click="appInstall.toggleGroup(group);" ng-class="{ 'btn-primary': (appInstall.accessRestriction.groups && appInstall.accessRestriction.groups.indexOf(group.id) !== -1) }">{{ group.name }}</button>
+                                        <button class="btn btn-default" type="button" ng-disabled="appInstall.accessRestrictionOption !== 'groups'" ng-click="appInstall.toggleGroup(group);" ng-class="{ 'btn-primary': (appInstall.accessRestriction.groups && appInstall.accessRestriction.groups.indexOf(group.id) !== -1) }">{{ group.name }}</button>
                                     </span>
                                 </div>
+                            </div>
+                            <div class="radio" ng-show="appInstall.needsOAuthProxy">
+                                <label>
+                                    <input type="radio" ng-model="appInstall.accessRestrictionOption" value="unrestricted">
+                                    Unrestricted
+                                </label>
                             </div>
                         </div>
 
