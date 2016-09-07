@@ -571,6 +571,10 @@ function configure(appId, data, auditSource, callback) {
             if (error) return callback(error);
         }
 
+        if ('oauthProxy' in data) {
+            values.oauthProxy = data.oauthProxy;
+        }
+
         // save cert to data/box/certs. TODO: move this to apptask when we have a real task queue
         if ('cert' in data && 'key' in data) {
             if (data.cert && data.key) {

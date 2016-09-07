@@ -554,7 +554,8 @@ describe('database', function () {
             oldConfig: null,
             memoryLimit: 4294967296,
             altDomain: null,
-            xFrameOptions: 'DENY'
+            xFrameOptions: 'DENY',
+            oauthProxy: false
         };
         var APP_1 = {
             id: 'appid-1',
@@ -574,7 +575,8 @@ describe('database', function () {
             oldConfig: null,
             memoryLimit: 0,
             altDomain: null,
-            xFrameOptions: 'SAMEORIGIN'
+            xFrameOptions: 'SAMEORIGIN',
+            oauthProxy: false
         };
 
         it('add fails due to missing arguments', function () {

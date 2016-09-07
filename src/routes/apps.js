@@ -54,7 +54,8 @@ function removeInternalAppFields(app) {
         fqdn: app.fqdn,
         memoryLimit: app.memoryLimit,
         altDomain: app.altDomain,
-        xFrameOptions: app.xFrameOptions
+        xFrameOptions: app.xFrameOptions,
+        oauthProxy: app.oauthProxy
     };
 }
 
