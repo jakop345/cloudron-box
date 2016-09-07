@@ -42,7 +42,7 @@ function provisionDigitalOcean(callback) {
 
 function provisionEC2(callback) {
     // need to use request, since octet-stream data
-    request('http://169.254.169.254/latest/user-data', function (error, response, body) {
+    request('http://169.254.169.254/latest/user-data', { timeout: 5000 }, function (error, response, body) {
         if (error || response.statusCode !== 200) {
             console.error('Error getting metadata', error);
             return callback(new Error('Error getting metadata'));
