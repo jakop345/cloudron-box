@@ -71,6 +71,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $('#collapseInstallForm').collapse('hide');
             $('#collapseResourceConstraint').collapse('hide');
             $('#collapseMediaLinksCarousel').collapse('show');
+            $('#postInstallMessage').collapse('hide');
 
             if ($scope.appInstallForm) {
                 $scope.appInstallForm.$setPristine();
@@ -174,15 +175,30 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
                 $scope.appInstall.busy = false;
 
-                // wait for dialog to be fully closed to avoid modal behavior breakage when moving to a different view already
-                $('#appInstallModal').on('hidden.bs.modal', function () {
-                    $scope.appInstall.reset();
-                    $('#appInstallModal').off('hidden.bs.modal');
-                    $location.path('/apps');
-                });
-
-                $('#appInstallModal').modal('hide');
+                $scope.appInstall.postInstall();
             });
+        },
+
+        postInstall: function () {
+            if ($scope.appInstall.app.manifest.postInstallMessage) {
+                $scope.appInstall.state = 'postInstall';
+                $('#collapseInstallForm').collapse('hide');
+                $('#postInstallMessage').collapse('show');
+                return;
+            }
+
+            $scope.appInstall.switchToAppsView();
+        },
+
+        switchToAppsView: function () {
+            // wait for dialog to be fully closed to avoid modal behavior breakage when moving to a different view already
+            $('#appInstallModal').on('hidden.bs.modal', function () {
+                $scope.appInstall.reset();
+                $('#appInstallModal').off('hidden.bs.modal');
+                $location.path('/apps');
+            });
+
+            $('#appInstallModal').modal('hide');
         }
     };
 

@@ -111,9 +111,15 @@
                     <h4 class="text-danger">This Cloudron is running low on resources.</h4>
                     <p>Please upgrade to a bigger plan. Alternately, free up resources by uninstalling unused applications.</p>
                 </div>
+                <div class="collapse" id="postInstallMessage" data-toggle="false">
+                    <div class="appstore-install-description">
+                        <div ng-bind-html="appInstall.app.manifest.postInstallMessage | markdown2html"></div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-default" ng-show="appInstall.state !== 'postInstall'" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-default" ng-show="appInstall.state === 'postInstall'" data-dismiss="modal" ng-click="appInstall.switchToAppsView()">OK</button>
                 <button type="button" class="btn btn-success" ng-show="config.provider === 'caas' && user.admin && appInstall.state === 'resourceConstraint'" ng-click="showRequestUpgrade()">Upgrade Cloudron</button>
                 <button type="button" class="btn btn-danger" ng-show="(config.isDev || config.provider !== 'caas') && user.admin && appInstall.state === 'resourceConstraint'" ng-click="appInstall.showForm(true)">Install anyway</button>
                 <button type="button" class="btn btn-success" ng-show="appInstall.state === 'appInfo' && user.admin" ng-click="appInstall.showForm()">Install</button>
