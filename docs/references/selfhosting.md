@@ -67,7 +67,8 @@ For custom cost estimation, please use the [AWS Cost Calculator](http://calculat
 
 Open the AWS console and create the required resources:
 
-1. Create a Route53 zone for your domain. Be sure to set the Route53 nameservers for your domain in your name registrar.
+1. Create a Route53 zone for your domain. Be sure to set the Route53 nameservers for your domain in your name registrar. Note: Only Second Level Domains are supported.
+   For example, `example.com`, `example.co.uk` will work fine. Choosing a domain name at any other level like `cloudron.example.com` will not work.
 
 2. Create a S3 bucket for backups. The bucket region **must* be the same region as where you intend to create your Cloudron (EC2).
 
