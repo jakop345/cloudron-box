@@ -301,6 +301,18 @@ a box lesser than `minBoxVersion` will fail.
 This is useful when the app relies on features that are only available from a certain version of the box. If unset, the
 default value is `0.0.1`.
 
+### postInstallMessage
+
+Type: markdown string
+
+Required: no
+
+The `postInstallMessageField` is a message that is displayed to the user after an app is installed.
+
+The intended use of this field is to display some post installation steps that the user has to carry out to
+complete the installation. For example, displaying the default admin credentials and informing the user to
+to change it.
+
 ### singleUser
 
 Type: boolean
