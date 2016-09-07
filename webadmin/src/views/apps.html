@@ -73,7 +73,15 @@
                                 Access is granted to <b>{{ renderAccessRestrictionUser(appConfigure.app.accessRestriction.users[0]) }}</b>.
                             </p>
                         </div>
-                        <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser">
+
+                        <div class="form-group" ng-show="appInstall.app.manifest.customAuth">
+                            <label class="control-label">Access control</label>
+                            <p>
+                                This app has it's own access control and does not integrate with Cloudron Auth.
+                            </p>
+                        </div>
+
+                        <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser || appConfigure.app.manifest.customAuth">
                             <label class="control-label">Access control</label>
                             <div class="radio">
                                 <label>
