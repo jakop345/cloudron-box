@@ -83,10 +83,11 @@
                             </div>
                             <div class="radio">
                                 <label>
-                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="groups">
+                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="groups" ng-disabled="groups.length <= 1">
                                     Restrict to groups
                                 </label>
                             </div>
+                            <div ng-show="groups.length <= 1">No groups available. Create groups to restrict access to them first.</div>
                             <div class="has-error" ng-show="appConfigure.accessRestrictionOption === 'groups' && !appConfigure.isAccessRestrictionValid()">Select at least one group</div>
                             <div>
                                 <div>
