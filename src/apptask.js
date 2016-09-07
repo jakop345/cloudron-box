@@ -159,7 +159,7 @@ function allocateOAuthProxyCredentials(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!nginx.requiresOAuthProxy(app)) return callback(null);
+    if (!app.oauthProxy) return callback(null);
 
     debugApp(app, 'Creating oauth proxy credentials');
 
