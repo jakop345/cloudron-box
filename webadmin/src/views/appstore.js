@@ -25,6 +25,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.appInstall = {
         busy: false,
         installFormVisible: false,
+        resourceConstraintVisible: false,
         error: {},
         app: {},
         location: '',
