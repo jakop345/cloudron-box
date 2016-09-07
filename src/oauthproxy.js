@@ -139,7 +139,7 @@ function authenticate(req, res, next) {
                 var scope = 'profile';
                 var oauthLogin = config.adminOrigin() + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + result.id + '&redirect_uri=' + callbackUrl + '&scope=' + scope;
 
-                debug('begin OAuth flow for client %s.', result.name);
+                debug('begin OAuth flow for client %s.', result.id);
 
                 // begin the OAuth flow
                 res.redirect(oauthLogin);
