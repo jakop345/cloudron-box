@@ -258,10 +258,19 @@ function delByAppIdAndType(appId, type, callback) {
     assert.strictEqual(typeof type, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    clientdb.delByAppIdAndType(appId, type, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new ClientsError(ClientsError.NOT_FOUND, 'No such client'));
+    getByAppIdAndType(appId, type, function (error, result) {
         if (error) return callback(error);
-        callback(null);
+
+        tokendb.delByClientId(result.id, function (error) {
+            if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(new ClientsError(ClientsError.INTERNAL_ERROR, error));
+
+            clientdb.delByAppIdAndType(appId, type, function (error) {
+                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new ClientsError(ClientsError.NOT_FOUND, 'No such client'));
+                if (error) return callback(error);
+
+                callback(null);
+            });
+        });
     });
 }
 
