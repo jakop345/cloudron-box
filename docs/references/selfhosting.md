@@ -2,7 +2,7 @@
 
 The Cloudron platform can be installed on your own cloud server. The self hosted version comes with all the same features as the managed version.
 
-### Installation
+## CLI Tool
 
 The [Cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) is used for managing a Cloudron. It has a `machine` 
 subcommand that can be used to create, update and maintain a self-hosted Cloudron.
@@ -259,6 +259,18 @@ form [here](https://aws-portal.amazon.com/gp/aws/html-forms-controller/contactus
 of your IP by filling out a form at the DNSBL manager site.
 
 * Finally, check your spam score at [mail-tester.com](https://www.mail-tester.com/).
+
+## Debugging
+
+To debug the Cloudron CLI tool:
+
+* `DEBUG=* cloudron <cmd>`
+
+You can also [SSH](#ssh) into your Cloudron and collect logs.
+
+* `journalctl -a -u box -u cloudron-installer` to get debug output of box related code.
+* `docker ps` will give you the list of containers. The addon containers are named as `mail`, `postgresql`, `mysql` etc. If you want to get a specific 
+   containers log output, `journalctl -a CONTAINER_ID=<container_id>`.
 
 ## Other Providers
 
