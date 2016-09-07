@@ -65,9 +65,9 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         password: ''
     };
 
-    $scope.appAccounts = {
+    $scope.appPostInstall = {
         app: {},
-        info: ''
+        message: ''
     };
 
     $scope.appError = {
@@ -280,13 +280,13 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         });
     };
 
-    $scope.showAccounts = function (app) {
+    $scope.showPostInstall = function (app) {
         $scope.reset();
 
-        $scope.appAccounts.app = app;
-        $scope.appAccounts.info = app.manifest.description.match(/### Accounts([\s\S]*?)###/m)[1];
+        $scope.appPostInstall.app = app;
+        $scope.appPostInstall.message = app.manifest.postInstallMessage;
 
-        $('#appAccountsModal').modal('show');
+        $('#appPostInstallModal').modal('show');
 
         return false; // prevent propagation and default
     };
@@ -481,8 +481,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         window.history.back();
     };
 
-    $scope.hasAccountInfo = function (app) {
-        return app.manifest && app.manifest.description.match(/### Accounts/) !== null;
+    $scope.hasPostInstallMessage = function (app) {
+        return app.manifest && app.manifest.postInstallMessage;
     };
 
     function fetchUsers() {

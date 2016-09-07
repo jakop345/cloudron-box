@@ -203,16 +203,16 @@
     </div>
 </div>
 
-<!-- Modal accounts app -->
-<div class="modal fade" id="appAccountsModal" tabindex="-1" role="dialog">
+<!-- Modal post install message app -->
+<div class="modal fade" id="appPostInstallModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Account information for {{ appAccounts.app.fqdn }}</h4>
+                <h4 class="modal-title">{{ appPostInstall.app.fqdn }}</h4>
             </div>
             <div class="modal-body">
                 <div class="appstore-install-description">
-                    <div ng-bind-html="appAccounts.info | markdown2html"></div>
+                    <div ng-bind-html="appPostInstall.message | markdown2html"></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -401,8 +401,8 @@
                             <a href="" ng-click="showConfigure(app)" title="Configure App"><i class="fa fa-wrench scale"></i></a>
                         </div>
 
-                        <div ng-show="hasAccountInfo(app)">
-                            <a href="" ng-click="showAccounts(app)">
+                        <div ng-show="hasPostInstallMessage(app)">
+                            <a href="" ng-click="showPostInstall(app)">
                                 <i class="fa fa-question scale"></i>
                             </a>
                         </div>
