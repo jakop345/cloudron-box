@@ -189,20 +189,20 @@ function setTimeZone(ip, callback) {
     // { url: 'http://ip-api.com/json/%s', jpath: 'timezone' },
     // { url: 'http://geoip.nekudo.com/api/%s', jpath: 'time_zone }
 
-    superagent.get('http://freegeoip.net/json/' + ip).end(function (error, result) {
+    superagent.get('http://ip-api.com/json/' + ip).end(function (error, result) {
         if ((error && !error.response) || result.statusCode !== 200) {
             debug('Failed to get geo location: %s', error.message);
             return callback(null);
         }
 
-        if (!result.body.time_zone || typeof result.body.time_zone !== 'string') {
+        if (!result.body.timezone || typeof result.body.timezone !== 'string') {
             debug('No timezone in geoip response : %j', result.body);
             return callback(null);
         }
 
-        debug('Setting timezone to ', result.body.time_zone);
+        debug('Setting timezone to ', result.body.timezone);
 
-        settings.setTimeZone(result.body.time_zone, callback);
+        settings.setTimeZone(result.body.timezone, callback);
     });
 }
 
