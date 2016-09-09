@@ -616,3 +616,6 @@
 * Add UI to configure app's memory limit (#18)
 * Fix OAuth proxy support (#6)
 
+[0.20.1]
+* Fix bug where oauth proxy was installed for apps with customAuth
+
