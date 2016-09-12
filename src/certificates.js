@@ -140,8 +140,18 @@ function renewAll(auditSource, callback) {
         var expiringApps = [ ];
         for (var i = 0; i < allApps.length; i++) {
             var appDomain = allApps[i].altDomain || config.appFqdn(allApps[i].location);
-            var certFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.cert');
-            var keyFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.key');
+
+            var certFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.user.cert');
+            var keyFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.user.key');
+
+            if (safe.fs.existsSync(certFilePath) && safe.fs.existsSync(keyFilePath)) {
+                debug('renewAll: existing user key file for %s. skipping', appDomain);
+                continue;
+            }
+
+            // check if we have an auto cert to be renewed
+            certFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.cert');
+            keyFilePath = path.join(paths.APP_CERTS_DIR, appDomain + '.key');
 
             if (!safe.fs.existsSync(keyFilePath)) {
                 debug('renewAll: no existing key file for %s. skipping', appDomain);
@@ -310,14 +320,21 @@ function ensureCertificate(app, callback) {
 
     var domain = app.altDomain || config.appFqdn(app.location);
 
-    // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
-    var userCertFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
-    var userKeyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
+    var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.user.cert');
+    var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.user.key');
 
-    if (fs.existsSync(userCertFilePath) && fs.existsSync(userKeyFilePath)) {
-        debug('ensureCertificate: %s. certificate already exists at %s', domain, userKeyFilePath);
+    if (fs.existsSync(certFilePath) && fs.existsSync(keyFilePath)) {
+        debug('ensureCertificate: %s. user certificate already exists at %s', domain, keyFilePath);
+        return callback(null, certFilePath, keyFilePath);
+    }
 
-        if (!isExpiringSync(userCertFilePath, 24 * 1)) return callback(null, userCertFilePath, userKeyFilePath);
+    certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+    keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
+
+    if (fs.existsSync(certFilePath) && fs.existsSync(keyFilePath)) {
+        debug('ensureCertificate: %s. certificate already exists at %s', domain, keyFilePath);
+
+        if (!isExpiringSync(certFilePath, 24 * 1)) return callback(null, certFilePath, keyFilePath);
     }
 
     debug('ensureCertificate: %s cert require renewal', domain);
