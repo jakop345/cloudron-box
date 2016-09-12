@@ -10,15 +10,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.groups = [];
     $scope.users = [];
 
-    $scope.memoryTicks = [
-        0, // result to default memory limit
-        256 * 1024 * 1024,
-        512 * 1024 * 1024,
-        1024 * 1024 * 1024,
-        2048 * 1024 * 1024,
-        4096 * 1024 * 1024
-    ];
-
     $scope.appConfigure = {
         busy: false,
         error: {},
@@ -34,7 +25,9 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         certificateFileName: '',
         keyFile: null,
         keyFileName: '',
-        memoryLimit: $scope.memoryTicks[0],
+        memoryLimit: 0,
+        memoryTicks: [],
+
         accessRestrictionOption: 'any',
         accessRestriction: { users: [], groups: [] },
         xFrameOptions: '',
@@ -97,7 +90,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.certificateFileName = '';
         $scope.appConfigure.keyFile = null;
         $scope.appConfigure.keyFileName = '';
-        $scope.appConfigure.memoryLimit = $scope.memoryTicks[0];
+        $scope.appConfigure.memoryLimit = 0;
+        $scope.appConfigure.memoryTicks = [];
         $scope.appConfigure.accessRestrictionOption = 'any';
         $scope.appConfigure.accessRestriction = { users: [], groups: [] };
         $scope.appConfigure.xFrameOptions = '';
@@ -192,6 +186,18 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.memoryLimit = app.memoryLimit;
         $scope.appConfigure.xFrameOptions = app.xFrameOptions.indexOf('ALLOW-FROM') === 0 ? app.xFrameOptions.split(' ')[1] : '';
 
+        // create ticks starting from manifest memory limit
+        $scope.appConfigure.memoryTicks = [
+             256 * 1024 * 1024,
+             512 * 1024 * 1024,
+             1024 * 1024 * 1024,
+             2048 * 1024 * 1024,
+             4096 * 1024 * 1024
+        ].filter(function (t) { return t >= (app.manifest.memoryLimit || 0); });
+        if (app.manifest.memoryLimit && $scope.appConfigure.memoryTicks[0] !== app.manifest.memoryLimit) {
+            $scope.appConfigure.memoryTicks.unshift(app.manifest.memoryLimit);
+        }
+
         var manifest = app.manifest;
         $scope.appConfigure.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth'] || manifest.addons['email'] || manifest.customAuth);
         if ($scope.appConfigure.needsOAuthProxy && !app.oauthProxy) {
@@ -237,7 +243,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             cert: $scope.appConfigure.certificateFile,
             key: $scope.appConfigure.keyFile,
             xFrameOptions: $scope.appConfigure.xFrameOptions ? ('ALLOW-FROM ' + $scope.appConfigure.xFrameOptions) : 'SAMEORIGIN',
-            memoryLimit: $scope.appConfigure.memoryLimit,
+            memoryLimit: $scope.appConfigure.memoryLimit === $scope.appConfigure.memoryTicks[0] ? 0 : $scope.appConfigure.memoryLimit,
             oauthProxy:  $scope.appConfigure.needsOAuthProxy && $scope.appConfigure.accessRestrictionOption !== 'unrestricted'
         };
 
