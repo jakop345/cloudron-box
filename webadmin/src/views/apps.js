@@ -193,7 +193,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.xFrameOptions = app.xFrameOptions.indexOf('ALLOW-FROM') === 0 ? app.xFrameOptions.split(' ')[1] : '';
 
         var manifest = app.manifest;
-        $scope.appConfigure.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth'] || manifest.customAuth);
+        $scope.appConfigure.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth'] || manifest.addons['email'] || manifest.customAuth);
         if ($scope.appConfigure.needsOAuthProxy && !app.oauthProxy) {
             $scope.appConfigure.accessRestrictionOption = 'unrestricted';
         } else {

@@ -109,7 +109,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.accessRestrictionSingleUser = null;
 
             var manifest = app.manifest;
-            $scope.appInstall.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth'] || manifest.customAuth);
+            $scope.appInstall.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth'] || manifest.addons['email'] || manifest.customAuth);
             $scope.appInstall.accessRestrictionOption = 'any';
 
             // set default ports

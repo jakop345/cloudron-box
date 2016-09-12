@@ -81,7 +81,14 @@
                             </p>
                         </div>
 
-                        <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser || appConfigure.app.manifest.customAuth">
+                        <div class="form-group" ng-show="appConfigure.app.manifest.addons.email">
+                            <label class="control-label">Access control</label>
+                            <p>
+                                This app authenticates all users using IMAP & SMTP.
+                            </p>
+                        </div>
+
+                        <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser || appConfigure.app.manifest.customAuth || appConfigure.app.manifest.addons.email">
                             <label class="control-label">Access control</label>
                             <div class="radio">
                                 <label>
