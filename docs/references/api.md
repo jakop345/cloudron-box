@@ -1255,6 +1255,9 @@ Request:
 }
 ```
 
+<!--
+See #47
+
 ### Set `my` subdomain certification
 
 POST `/api/v1/settings/admin_certificate` <scope>admin</scope> <scope>internal</scope>
@@ -1270,6 +1273,7 @@ Request:
     key:  <pem encoded string>    // TLS key
 }
 ```
+-->
 
 ### Get name
 
