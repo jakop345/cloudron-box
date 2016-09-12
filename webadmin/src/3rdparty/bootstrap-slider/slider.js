@@ -1,3 +1,13 @@
+(function(factory) {
+    if (typeof define === 'function' && define.amd) {
+        define(['angular', 'bootstrap-slider'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory(require('angular'), require('bootstrap-slider'));
+    } else if (window) {
+        factory(window.angular, window.Slider);
+    }
+})(function (angular, Slider) {
+
 angular.module('ui.bootstrap-slider', [])
     .directive('slider', ['$parse', '$timeout', '$rootScope', function ($parse, $timeout, $rootScope) {
         return {
@@ -200,14 +210,14 @@ angular.module('ui.bootstrap-slider', [])
                 }
 
 
-                var watchers = ['min', 'max', 'step', 'range', 'scale', 'ticksLabels'];
+                var watchers = ['min', 'max', 'step', 'range', 'scale', 'ticksLabels', 'ticks'];
                 angular.forEach(watchers, function (prop) {
                     $scope.$watch(prop, function () {
                         slider = initSlider();
                     });
                 });
 
-                var globalEvents = ['relayout', 'refresh'];
+                var globalEvents = ['relayout', 'refresh', 'resize'];
                 angular.forEach(globalEvents, function(event) {
                     if(angular.isFunction(slider[event])) {
                         $scope.$on('slider:' + event, function () {
@@ -219,3 +229,4 @@ angular.module('ui.bootstrap-slider', [])
         };
     }])
 ;
+});
