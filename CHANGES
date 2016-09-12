@@ -619,3 +619,8 @@
 [0.20.1]
 * Fix bug where oauth proxy was installed for apps with customAuth
 
+[0.20.2]
+* Fix memory limit slider to start from the minimum memory (#43)
+* Save user certs separately from automatic certs (#44)
+* Fix access control display for email apps (#45)
+
