@@ -19,7 +19,6 @@ function getBackupCredentials(apiConfig, callback) {
     assert(apiConfig.accessKeyId && apiConfig.secretAccessKey);
 
     var credentials = {
-        signatureVersion: 'v4',
         accessKeyId: apiConfig.accessKeyId,
         secretAccessKey: apiConfig.secretAccessKey,
         region: apiConfig.region || 'us-east-1'
