@@ -177,7 +177,7 @@ function getRestoreConfig(backupId, callback) {
         api(backupConfig.provider).getRestoreUrl(backupConfig, configFile, function (error, result) {
             if (error) return callback(error);
 
-            superagent.get(result.url).buffer(true).end(function (error, response) {
+            superagent.get(result.url).buffer(true).timeout(30 * 1000).end(function (error, response) {
                 if (error && !error.response) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error.message));
                 if (response.statusCode !== 200) return callback(new Error('Invalid response code when getting config.json : ' + response.statusCode));
 

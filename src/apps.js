@@ -369,7 +369,7 @@ function purchase(appId, appstoreId, callback) {
         var url = config.apiServerOrigin() + '/api/v1/users/' + result.userId + '/cloudrons/' + result.cloudronId + '/apps/' + appId;
         var data = { appstoreId: appstoreId };
 
-        superagent.post(url).send(data).query({ accessToken: result.token }).end(function (error, result) {
+        superagent.post(url).send(data).query({ accessToken: result.token }).timeout(30 * 1000).end(function (error, result) {
             if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
             if (result.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND));
             if (result.statusCode !== 201 && result.statusCode !== 200) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
@@ -395,11 +395,11 @@ function unpurchase(appId, appstoreId, callback) {
 
         var url = config.apiServerOrigin() + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons/' + appstoreConfig.cloudronId + '/apps/' + appId;
 
-        superagent.get(url).query({ accessToken: appstoreConfig.token }).end(function (error, result) {
+        superagent.get(url).query({ accessToken: appstoreConfig.token }).timeout(30 * 1000).end(function (error, result) {
             if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
             if (result.statusCode === 404) return callback(null);   // was never purchased
 
-            superagent.del(url).query({ accessToken: appstoreConfig.token }).end(function (error, result) {
+            superagent.del(url).query({ accessToken: appstoreConfig.token }).timeout(30 * 1000).end(function (error, result) {
                 if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
                 if (result.statusCode !== 204) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App unpurchase failed. %s %j', result.status, result.body)));
 
@@ -420,7 +420,7 @@ function downloadManifest(appStoreId, manifest, callback) {
 
     debug('downloading manifest from %s', url);
 
-    superagent.get(url).end(function (error, result) {
+    superagent.get(url).timeout(30 * 1000).end(function (error, result) {
         if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, 'Network error downloading manifest:' + error.message));
 
         if (result.statusCode !== 200) return callback(new AppsError(AppsError.BAD_FIELD, util.format('Failed to get app info from store.', result.statusCode, result.text)));

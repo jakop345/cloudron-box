@@ -14,7 +14,7 @@ function getIp(callback) {
 
     if (process.env.BOX_ENV === 'test') return callback(null, '127.0.0.1');
 
-    superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
+    superagent.get('http://169.254.169.254/metadata/v1.json').timeout(30 * 1000).end(function (error, result) {
         if (error || result.statusCode !== 200) {
             console.error('Error getting metadata', error);
             return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found'));

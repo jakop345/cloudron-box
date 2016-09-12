@@ -91,6 +91,7 @@ function authenticate(req, res, next) {
         superagent
             .post(config.internalAdminOrigin() + '/api/v1/oauth/token')
             .query(query).send(data)
+            .timeout(30 * 1000)
             .end(function (error, result) {
             if (error && !error.response) {
                 console.error(error);

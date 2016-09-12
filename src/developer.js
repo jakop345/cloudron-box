@@ -89,7 +89,7 @@ function getNonApprovedApps(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/apps';
-    superagent.get(url).query({ token: config.token(), boxVersion: config.version() }).end(function (error, result) {
+    superagent.get(url).query({ token: config.token(), boxVersion: config.version() }).timeout(30 * 1000).end(function (error, result) {
         if (error && !error.response) return callback(new DeveloperError(DeveloperError.EXTERNAL_ERROR, error));
         if (result.statusCode === 401 || result.statusCode === 403) {
             debug('Failed to list apps in development. Appstore token invalid or missing. Returning empty list.', result.body);

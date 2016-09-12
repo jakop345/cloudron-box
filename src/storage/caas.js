@@ -22,7 +22,7 @@ function getBackupCredentials(apiConfig, callback) {
     assert(apiConfig.token);
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/awscredentials';
-    superagent.post(url).query({ token: apiConfig.token }).end(function (error, result) {
+    superagent.post(url).query({ token: apiConfig.token }).timeout(30 * 1000).end(function (error, result) {
         if (error && !error.response) return callback(error);
         if (result.statusCode !== 201) return callback(new Error(result.text));
         if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
@@ -47,7 +47,7 @@ function getAllPaged(apiConfig, page, perPage, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
-    superagent.get(url).query({ token: apiConfig.token }).end(function (error, result) {
+    superagent.get(url).query({ token: apiConfig.token }).timeout(30 * 1000).end(function (error, result) {
         if (error && !error.response) return callback(error);
         if (result.statusCode !== 200) return callback(new Error(result.text));
         if (!result.body || !util.isArray(result.body.backups)) return callback(new Error('Unexpected response'));

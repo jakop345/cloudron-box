@@ -483,7 +483,7 @@ function setAppstoreConfig(appstoreConfig, callback) {
                 domain: config.fqdn()
             };
 
-            superagent.post(url).send(data).query({ accessToken: appstoreConfig.token }).end(function (error, result) {
+            superagent.post(url).send(data).query({ accessToken: appstoreConfig.token }).timeout(30 * 1000).end(function (error, result) {
                 if (error && !error.response) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, error.message));
                 if (result.statusCode === 401) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'invalid appstore token'));
                 if (result.statusCode !== 201) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'unable to register cloudron'));
@@ -498,7 +498,7 @@ function setAppstoreConfig(appstoreConfig, callback) {
 
         // verify that cloudron belongs to this user
         const url = config.apiServerOrigin() + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons/' + oldConfig.cloudronId;
-        superagent.get(url).query({ accessToken: appstoreConfig.token }).end(function (error, result) {
+        superagent.get(url).query({ accessToken: appstoreConfig.token }).timeout(30 * 1000).end(function (error, result) {
             if (error && !error.response) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, error.message));
             if (result.statusCode === 401) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'invalid appstore token'));
             if (result.statusCode === 403) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'wrong user'));

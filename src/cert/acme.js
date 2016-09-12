@@ -63,8 +63,8 @@ function Acme(options) {
 }
 
 Acme.prototype.getNonce = function (callback) {
-    superagent.get(this.caOrigin + '/directory', function (error, response) {
-        if (error) return callback(error);
+    superagent.get(this.caOrigin + '/directory').timeout(30 * 1000).end(function (error, response) {
+        if (error && !error.response) return callback(error);
         if (response.statusCode !== 200) return callback(new Error('Invalid response code when fetching nonce : ' + response.statusCode));
 
         return callback(null, response.headers['Replay-Nonce'.toLowerCase()]);
@@ -118,7 +118,7 @@ Acme.prototype.sendSignedRequest = function (url, payload, callback) {
             signature: signature64
         };
 
-        superagent.post(url).set('Content-Type', 'application/x-www-form-urlencoded').send(JSON.stringify(data)).end(function (error, res) {
+        superagent.post(url).set('Content-Type', 'application/x-www-form-urlencoded').send(JSON.stringify(data)).timeout(30 * 1000).end(function (error, res) {
             if (error && !error.response) return callback(error); // network errors
 
             callback(null, res);
@@ -259,7 +259,7 @@ Acme.prototype.waitForChallenge = function (challenge, callback) {
     async.retry({ times: 10, interval: 5000 }, function (retryCallback) {
         debug('waitingForChallenge: getting status');
 
-        superagent.get(challenge.uri).end(function (error, result) {
+        superagent.get(challenge.uri).timeout(30 * 1000).end(function (error, result) {
             if (error && !error.response) {
                 debug('waitForChallenge: network error getting uri %s', challenge.uri);
                 return retryCallback(new AcmeError(AcmeError.EXTERNAL_ERROR, error.message)); // network error
@@ -353,7 +353,7 @@ Acme.prototype.downloadChain = function (linkHeader, callback) {
         var data = [ ];
         res.on('data', function(chunk) { data.push(chunk); });
         res.on('end', function () { res.text = Buffer.concat(data); done(); });
-    }).end(function (error, result) {
+    }).timeout(30 * 1000).end(function (error, result) {
         if (error && !error.response) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when downloading certificate'));
         if (result.statusCode !== 200) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to get cert. Expecting 200, got %s %s', result.statusCode, result.text)));
 
@@ -379,7 +379,7 @@ Acme.prototype.downloadCertificate = function (domain, certUrl, callback) {
         var data = [ ];
         res.on('data', function(chunk) { data.push(chunk); });
         res.on('end', function () { res.text = Buffer.concat(data); done(); });
-    }).end(function (error, result) {
+    }).timeout(30 * 1000).end(function (error, result) {
         if (error && !error.response) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when downloading certificate'));
         if (result.statusCode === 202) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, 'Retry not implemented yet'));
         if (result.statusCode !== 200) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to get cert. Expecting 200, got %s %s', result.statusCode, result.text)));

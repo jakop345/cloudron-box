@@ -37,8 +37,8 @@ var addons = require('./addons.js'),
     backups = require('./backups.js'),
     certificates = require('./certificates.js'),
     clients = require('./clients.js'),
-    config = require('./config.js'),
     ClientsError = clients.ClientsError,
+    config = require('./config.js'),
     database = require('./database.js'),
     debug = require('debug')('box:apptask'),
     docker = require('./docker.js'),
@@ -232,6 +232,7 @@ function downloadIcon(app, callback) {
         superagent
             .get(iconUrl)
             .buffer(true)
+            .timeout(30 * 1000)
             .end(function (error, res) {
                 if (error && !error.response) return retryCallback(new Error('Network error downloading icon:' + error.message));
                 if (res.statusCode !== 200) return retryCallback(null); // ignore error. this can also happen for apps installed with cloudron-cli

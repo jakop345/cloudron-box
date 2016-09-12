@@ -12,8 +12,7 @@ var assert = require('assert'),
     debug = require('debug')('box:dns/caas'),
     SubdomainError = require('../subdomains.js').SubdomainError,
     superagent = require('superagent'),
-    util = require('util'),
-    _ = require('underscore');
+    util = require('util');
 
 function add(dnsConfig, zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof dnsConfig, 'object');
@@ -36,6 +35,7 @@ function add(dnsConfig, zoneName, subdomain, type, values, callback) {
         .post(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
         .query({ token: dnsConfig.token })
         .send(data)
+        .timeout(30 * 1000)
         .end(function (error, result) {
             if (error && !error.response) return callback(error);
             if (result.statusCode === 400) return callback(new SubdomainError(SubdomainError.BAD_FIELD, result.body.message));
@@ -60,6 +60,7 @@ function get(dnsConfig, zoneName, subdomain, type, callback) {
     superagent
         .get(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
         .query({ token: dnsConfig.token, type: type })
+        .timeout(30 * 1000)
         .end(function (error, result) {
             if (error && !error.response) return callback(error);
             if (result.statusCode !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
@@ -98,6 +99,7 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
         .del(config.apiServerOrigin() + '/api/v1/domains/' + config.appFqdn(subdomain))
         .query({ token: dnsConfig.token })
         .send(data)
+        .timeout(30 * 1000)
         .end(function (error, result) {
             if (error && !error.response) return callback(error);
             if (result.statusCode === 400) return callback(new SubdomainError(SubdomainError.BAD_FIELD, result.body.message));
@@ -119,6 +121,7 @@ function getChangeStatus(dnsConfig, changeId, callback) {
     superagent
         .get(config.apiServerOrigin() + '/api/v1/domains/' + config.fqdn() + '/status/' + changeId)
         .query({ token: dnsConfig.token })
+        .timeout(30 * 1000)
         .end(function (error, result) {
             if (error && !error.response) return callback(error);
             if (result.statusCode !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));

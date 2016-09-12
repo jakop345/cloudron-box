@@ -189,7 +189,7 @@ function setTimeZone(ip, callback) {
     // { url: 'http://ip-api.com/json/%s', jpath: 'timezone' },
     // { url: 'http://geoip.nekudo.com/api/%s', jpath: 'time_zone }
 
-    superagent.get('http://ip-api.com/json/' + ip).end(function (error, result) {
+    superagent.get('http://ip-api.com/json/' + ip).timeout(10 * 1000).end(function (error, result) {
         if ((error && !error.response) || result.statusCode !== 200) {
             debug('Failed to get geo location: %s', error.message);
             return callback(null);
@@ -277,6 +277,7 @@ function getBoxAndUserDetails(callback) {
     superagent
         .get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn())
         .query({ token: config.token() })
+        .timeout(30 * 1000)
         .end(function (error, result) {
             if (error && !error.response) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, 'Cannot reach appstore'));
             if (result.statusCode !== 200) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
@@ -335,7 +336,7 @@ function sendHeartbeat() {
     if (!config.token()) return;
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
-    superagent.post(url).query({ token: config.token(), version: config.version() }).timeout(10000).end(function (error, result) {
+    superagent.post(url).query({ token: config.token(), version: config.version() }).timeout(30 * 1000).end(function (error, result) {
         if (error && !error.response) debug('Network error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with %s %s', result.statusCode, result.text);
         else debug('Heartbeat sent to %s', url);
@@ -556,6 +557,7 @@ function doUpgrade(boxUpdateInfo, callback) {
         superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
           .query({ token: config.token() })
           .send({ version: boxUpdateInfo.version })
+          .timeout(30 * 1000)
           .end(function (error, result) {
             if (error && !error.response) return upgradeError(new Error('Network error making upgrade request: ' + error));
             if (result.statusCode !== 202) return upgradeError(new Error(util.format('Server not ready to upgrade. statusCode: %s body: %j', result.status, result.body)));
@@ -614,7 +616,7 @@ function doUpdate(boxUpdateInfo, callback) {
 
         debug('updating box %j', args);
 
-        superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
+        superagent.post(INSTALLER_UPDATE_URL).send(args).timeout(30 * 1000).end(function (error, result) {
             if (error && !error.response) return updateError(error);
             if (result.statusCode !== 202) return updateError(new Error('Error initiating update: ' + JSON.stringify(result.body)));
 
@@ -720,6 +722,7 @@ function doMigrate(options, callback) {
           .post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/migrate')
           .query({ token: config.token() })
           .send(options)
+          .timeout(30 * 1000)
           .end(function (error, result) {
             if (error && !error.response) return unlock(error); // network error
             if (result.statusCode === 409) return unlock(new CloudronError(CloudronError.BAD_STATE));
