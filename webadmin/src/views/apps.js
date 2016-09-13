@@ -183,7 +183,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'groups' : 'any';
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
-        $scope.appConfigure.memoryLimit = app.memoryLimit;
+        $scope.appConfigure.memoryLimit = app.memoryLimit || app.manifest.memoryLimit || (256 * 1024 * 1024);
         $scope.appConfigure.xFrameOptions = app.xFrameOptions.indexOf('ALLOW-FROM') === 0 ? app.xFrameOptions.split(' ')[1] : '';
 
         // create ticks starting from manifest memory limit
