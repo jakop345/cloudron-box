@@ -598,6 +598,7 @@ function doUpdate(boxUpdateInfo, callback) {
                 tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
                 tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
                 isCustomDomain: config.isCustomDomain(),
+                isDemo: config.isDemo(),
 
                 appstore: {
                     token: config.token(),
