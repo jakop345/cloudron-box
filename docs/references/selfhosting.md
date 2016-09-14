@@ -4,7 +4,7 @@ The Cloudron platform can be installed on your own cloud server. The self hosted
 
 ## CLI Tool
 
-The [Cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) is used for managing a Cloudron. It has a `machine` 
+The [Cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) is used for managing a Cloudron. It has a `machine`
 subcommand that can be used to create, update and maintain a self-hosted Cloudron.
 
 ### Linux & OS X
@@ -16,7 +16,7 @@ npm install -g cloudron
 
 Depending on your setup, you may need to run this as root.
 
-On OS X, it is known to work with the `openssl` package from homebrew. 
+On OS X, it is known to work with the `openssl` package from homebrew.
 
 See [#14](https://git.cloudron.io/cloudron/cloudron-cli/issues/14) for more information.
 
@@ -166,7 +166,7 @@ cloudron machine create ec2 \
 ```
 
 The `--region` is the region where your Cloudron is to be created. For example, `us-west-1` for N. California and `eu-central-1` for Frankfurt. A complete list of available
-regions is list <a href="//docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions" target="_blank">here</a>.
+regions is listed <a href="//docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions" target="_blank">here</a>.
 
 The `--disk-size` parameter indicates the volume (hard disk) size to be allocated for the Cloudron.
 
@@ -176,7 +176,109 @@ also simply provide the `name` as the argument.
 The `--backup-key '<secret>'` will be used to encrypt all backups prior to uploading to S3. Keep that secret in a safe place, as you need it to restore your Cloudron from a backup! You can generate a random key using `pwgen -1y 64`. Be sure to put single quotes
 around the `secret` to prevent accidental shell expansion.
 
-**NOTE**: The `cloudron machine create` subcommand will automatically create a corresponding VPC, subnet and security group for your Cloudron, unless `--subnet` and `--security-group` arguments are explicitly passed in. If you want to reuse existing resources, please ensure that the security group does not limit any traffic to the Cloudron since the Cloudron manages its own firewall and that the subnet has an internet gateway setup in the routing table.
+**NOTE**: The `cloudron machine create ec2` subcommand will automatically create a corresponding VPC, subnet and security group for your Cloudron, unless `--subnet` and `--security-group` arguments are explicitly passed in. If you want to reuse existing resources, please ensure that the security group does not limit any traffic to the Cloudron since the Cloudron manages its own firewall and that the subnet has an internet gateway setup in the routing table.
+
+**NOTE**: See `cloudron machine create ec2 --help` for all available options.
+
+## DigitalOcean
+
+<a id="requirements-1"></a>
+### Requirements
+
+To run the Cloudron on DigitalOcean, first sign up with [DigitalOcean](https://m.do.co/c/933831d60a1e) (please use this link to support Cloudron development).
+
+In addition to that, currently the Cloudron uses still the following AWS services:
+
+* **Route53** for DNS. The Cloudron will manage all app subdomains as well as the email related DNS records automatically.
+* **S3** to store encrypted Cloudron backups.
+
+
+The minimum requirements for a Cloudron depends on the apps installed. The absolute minimum required Droplet is `1gb`.
+
+<a id="setup-1"></a>
+### Setup
+
+Open the DigitalOcean console and perform the following actions in case you have not done that yet:
+
+1. Create an API token
+
+2. Upload the SSH key which you intend to use for your Cloudron
+
+
+Open the AWS console and create the required resources:
+
+1. Create a Route53 zone for your domain. Be sure to set the Route53 nameservers for your domain in your name registrar. Note: Only Second Level Domains are supported.
+   For example, `example.com`, `example.co.uk` will work fine. Choosing a domain name at any other level like `cloudron.example.com` will not work.
+
+2. Create a S3 bucket for backups. The bucket region should be a similar geographic region as where you intend to create your Cloudron Droplet.
+
+3. Create AWS credentials. You can either use root **or** IAM credentials.
+  * For root credentials:
+    * In AWS Console, under your name in the menu bar, click `Security Credentials`
+    * Click on `Access Keys` and create a key pair.
+  * For IAM credentials:
+    * You can use the following policy to create IAM credentials:
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "route53:*",
+            "Resource": [
+                "arn:aws:route53:::hostedzone/<hosted zone id>"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "route53:ListHostedZones",
+                "route53:GetChange"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::<your bucket name>",
+                "arn:aws:s3:::<your bucket name>/*"
+            ]
+        }
+    ]
+}
+```
+
+<a id="create-the-cloudron-1"></a>
+### Create the Cloudron
+
+Create the Cloudron using the `cloudron machine` command:
+
+```
+cloudron machine create digitalocean \
+        --fqdn <domain> \
+        --region <digitalocean-region> \
+        --token <digitalocean-api-token> \
+        --aws-region <aws-region> \
+        --ssh-key <ssh-key-name-or-filepath> \
+        --access-key-id <aws-access-key-id> \
+        --secret-access-key <aws-access-key-secret> \
+        --backup-bucket <bucket-name> \
+        --backup-key <backup-key>
+```
+
+The `--region` is the region where your Cloudron is to be created. For example, `nyc3` for New York and `fra1` for Frankfurt. A complete list of available
+regions can be obtained <a href="https://developers.digitalocean.com/documentation/v2/#regions" target="_blank">here</a>.
+
+The `--ssh-key` is the path to a PEM file or the private SSH Key. If your key is located as `~/.ssh/id_rsa_<name>`, you can
+also simply provide the `name` as the argument.
+
+The `--backup-key '<secret>'` will be used to encrypt all backups prior to uploading to S3. Keep that secret in a safe place, as you need it to restore your Cloudron from a backup! You can generate a random key using `pwgen -1y 64`. Be sure to put single quotes
+around the `secret` to prevent accidental shell expansion.
+
+**NOTE**: see `cloudron machine create digitalocean --help` for all available options.
 
 ## First time setup
 
@@ -279,7 +381,7 @@ To debug the Cloudron CLI tool:
 You can also [SSH](#ssh) into your Cloudron and collect logs.
 
 * `journalctl -a -u box -u cloudron-installer` to get debug output of box related code.
-* `docker ps` will give you the list of containers. The addon containers are named as `mail`, `postgresql`, `mysql` etc. If you want to get a specific 
+* `docker ps` will give you the list of containers. The addon containers are named as `mail`, `postgresql`, `mysql` etc. If you want to get a specific
    containers log output, `journalctl -a CONTAINER_ID=<container_id>`.
 
 ## Other Providers
