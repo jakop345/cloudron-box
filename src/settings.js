@@ -320,8 +320,14 @@ function setDnsConfig(dnsConfig, callback) {
             provider: dnsConfig.provider
         };
         validator = function (caasConfig, next) { return next(); };
+    } else if (dnsConfig.provider === 'digitalocean') {
+        credentials = {
+            provider: dnsConfig.provider,
+            token: dnsConfig.token
+        };
+        validator = function (digitaloceanConfig, next) { return next(); };
     } else {
-        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be route53 or caas'));
+        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be route53, digitalocean or caas'));
     }
 
     validator(credentials, function (error) {
