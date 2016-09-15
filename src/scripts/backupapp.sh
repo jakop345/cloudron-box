@@ -12,63 +12,94 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [ $# -lt 7 ]; then
-    echo "Usage: backupapp.sh <appid> <s3 config url> <s3 data url> <access key id> <access key> <region> <password> [session token]"
+readonly DATA_DIR="${HOME}/data"
+
+# verify argument count
+if [[ "$1" == "s3" && $# -lt 8 ]]; then
+    echo "Usage: backupapp.sh s3 <appId> <s3 config url> <s3 data url> <access key id> <access key> <region> <password> [session token]"
+    echo "Usage: backupapp.sh filesystem <backupFolder> <configFileName> <dataFileName> <password>"
     exit 1
 fi
 
-readonly DATA_DIR="${HOME}/data"
-
-# env vars used by the awscli
-readonly app_id="$1"
-readonly s3_config_url="$2"
-readonly s3_data_url="$3"
-export AWS_ACCESS_KEY_ID="$4"
-export AWS_SECRET_ACCESS_KEY="$5"
-export AWS_DEFAULT_REGION="$6"
-readonly password="$7"
-
-if [ $# -gt 7 ]; then
-    export AWS_SESSION_TOKEN="$8"
+if [[ "$1" == "filesystem" && $# -lt 5 ]]; then
+    echo "Usage: backupapp.sh filesystem <backupFolder> <configFileName> <dataFileName> <password>"
+    exit 1
 fi
 
+
+# extract arguments
+if [[ "$1" == "s3" ]]; then
+    # env vars used by the awscli
+    readonly app_id="$2"
+    readonly s3_config_url="$3"
+    readonly s3_data_url="$4"
+    export AWS_ACCESS_KEY_ID="$5"
+    export AWS_SECRET_ACCESS_KEY="$6"
+    export AWS_DEFAULT_REGION="$7"
+    readonly password="$8"
+
+    if [ $# -gt 8 ]; then
+        export AWS_SESSION_TOKEN="$9"
+    fi
+fi
+
+if [[ "$1" == "filesystem" ]]; then
+    readonly backup_folder="$2"
+    readonly backup_config_fileName="$3"
+    readonly backup_data_fileName="$4"
+    readonly password="$5"
+fi
+
+# perform backup
 readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
 readonly app_data_dir="${DATA_DIR}/${app_id}"
 readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
 
 btrfs subvolume snapshot -r "${app_data_dir}" "${app_data_snapshot}"
 
-# Upload config.json first because uploading tarball might take a lot of time, leading to token expiry
-for try in `seq 1 5`; do
-    echo "Uploading config.json to ${s3_config_url} (try ${try})"
-    error_log=$(mktemp)
+if [[ "$1" == "s3" ]]; then
+    # Upload config.json first because uploading tarball might take a lot of time, leading to token expiry
+    for try in `seq 1 5`; do
+        echo "Uploading config.json to ${s3_config_url} (try ${try})"
+        error_log=$(mktemp)
 
-    # use aws instead of curl because curl will always read entire stream memory to set Content-Length
-    # aws will do multipart upload
-    if cat "${app_data_snapshot}/config.json" \
-           |  aws s3 cp - "${s3_config_url}" 2>"${error_log}"; then
-        break
+        # use aws instead of curl because curl will always read entire stream memory to set Content-Length
+        # aws will do multipart upload
+        if cat "${app_data_snapshot}/config.json" \
+               |  aws s3 cp - "${s3_config_url}" 2>"${error_log}"; then
+            break
+        fi
+        cat "${error_log}" && rm "${error_log}"
+    done
+
+    if [[ ${try} -eq 5 ]]; then
+        echo "Backup failed uploading config.json"
+        btrfs subvolume delete "${app_data_snapshot}"
+        exit 3
     fi
-    cat "${error_log}" && rm "${error_log}"
-done
 
-if [[ ${try} -eq 5 ]]; then
-    echo "Backup failed uploading config.json"
-    btrfs subvolume delete "${app_data_snapshot}"
-    exit 3
+    for try in `seq 1 5`; do
+        echo "Uploading backup to ${s3_data_url} (try ${try})"
+        error_log=$(mktemp)
+
+        if tar -czf - -C "${app_data_snapshot}" . \
+               | openssl aes-256-cbc -e -pass "pass:${password}" \
+               |  aws s3 cp - "${s3_data_url}" 2>"${error_log}"; then
+            break
+        fi
+        cat "${error_log}" && rm "${error_log}"
+    done
 fi
 
-for try in `seq 1 5`; do
-    echo "Uploading backup to ${s3_data_url} (try ${try})"
-    error_log=$(mktemp)
+if [[ "$1" == "filesystem" ]]; then
+    mkdir -p "${backup_folder}"
 
-    if tar -czf - -C "${app_data_snapshot}" . \
-           | openssl aes-256-cbc -e -pass "pass:${password}" \
-           |  aws s3 cp - "${s3_data_url}" 2>"${error_log}"; then
-        break
-    fi
-    cat "${error_log}" && rm "${error_log}"
-done
+    echo "Storing backup config to ${backup_folder}/${backup_config_fileName}"
+    cat "${app_data_snapshot}/config.json" > "${backup_folder}/${backup_config_fileName}"
+
+    echo "Storing backup data to ${backup_folder}/${backup_data_fileName}"
+    tar -czf - -C "${app_data_snapshot}" . | openssl aes-256-cbc -e -pass "pass:${password}" > "${backup_folder}/${backup_data_fileName}"
+fi
 
 btrfs subvolume delete "${app_data_snapshot}"
 

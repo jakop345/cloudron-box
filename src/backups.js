@@ -128,6 +128,7 @@ function getBoxBackupCredentials(appBackupIds, callback) {
         api(backupConfig.provider).getBackupCredentials(backupConfig, function (error, result) {
             if (error) return callback(error);
 
+            result.provider = backupConfig.provider;
             result.id = filename;
             result.s3Url = 's3://' + backupConfig.bucket + '/' + backupConfig.prefix + '/' + filename;
             result.backupKey = backupConfig.key;
@@ -257,8 +258,13 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 
         debug('backupBoxWithAppBackupIds:  %j', result);
 
-        var args = [ result.s3Url, result.accessKeyId, result.secretAccessKey, result.region, result.backupKey ];
-        if (result.sessionToken) args.push(result.sessionToken);
+        var args;
+        if (result.provider === 'filesystem') {
+            args = [ 'filesystem', '/tmp/backups', result.id, result.backupKey ];
+        } else {
+            args = [ 's3', result.s3Url, result.accessKeyId, result.secretAccessKey, result.region, result.backupKey ];
+            if (result.sessionToken) args.push(result.sessionToken);
+        }
 
         shell.sudo('backupBox', [ BACKUP_BOX_CMD ].concat(args), function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
@@ -324,8 +330,13 @@ function createNewAppBackup(app, manifest, callback) {
 
         debugApp(app, 'createNewAppBackup: backup url:%s backup config url:%s', result.s3DataUrl, result.s3ConfigUrl);
 
-        var args = [ app.id, result.s3ConfigUrl, result.s3DataUrl, result.accessKeyId, result.secretAccessKey, result.region, result.backupKey ];
-        if (result.sessionToken) args.push(result.sessionToken);
+        var args;
+        if (result.provider === 'filesystem') {
+            args = [ 'filesystem', '/tmp/backups', result.id + '.json', result.id, result.backupKey ];
+        } else {
+            args = [ 's3', app.id, result.s3ConfigUrl, result.s3DataUrl, result.accessKeyId, result.secretAccessKey, result.region, result.backupKey ];
+            if (result.sessionToken) args.push(result.sessionToken);
+        }
 
         async.series([
             addons.backupAddons.bind(null, app, manifest.addons),
