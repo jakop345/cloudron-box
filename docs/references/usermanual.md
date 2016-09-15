@@ -294,6 +294,11 @@ Emails addressed to `<username>+tag@<domain>` will be delivered to the `username
 Each group on the Cloudron is also a forwarding address. Mails can be addressed to `group@<domain>` and the mail will
 be sent to each user who is part of the group.
 
+### Marking Spam
+
+The spam detection agent on the Cloudron requires training to identify spam. To do this, simply move your junk mails
+to a pre-created folder named `Spam`. Most mail clients have a Junk or Spam button which does this automatically.
+
 ## Graphs
 
 The Graphs view shows an overview of the disk and memory usage on your Cloudron.
