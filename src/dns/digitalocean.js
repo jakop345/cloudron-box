@@ -29,8 +29,6 @@ function getInternal(dnsConfig, zoneName, subdomain, type, callback) {
         if (error && !error.response) return callback(error);
         if (result.statusCode !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
 
-        console.log('----- getInternal', result.body.domain_records)
-
         var tmp = result.body.domain_records.filter(function (record) {
             return (record.type === type && record.name === subdomain);
         });
