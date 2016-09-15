@@ -238,7 +238,7 @@ The Cloudron has a built-in email server. The primary email address is the same 
 and received from `<username>@<domain>`. The Cloudron does not allow masquerading - one user cannot send email
 pretending to be another user.
 
-### Receiving email (IMAP)
+### Receiving email using IMAP
 
 Use the following settings to receive email.
 
@@ -247,7 +247,7 @@ Use the following settings to receive email.
   * Connection Security - TLS
   * Username/password - Same as your Cloudron credentials
 
-### Sending email (SMTP)
+### Sending email using SMTP
 
 Use the following settings to send email.
 
@@ -256,7 +256,7 @@ Use the following settings to send email.
   * Connection Security - STARTTLS
   * Username/password - Same as your Cloudron credentials
 
-### Email filters (Sieve)
+### Email filters using Sieve
 
 Use the following settings to setup email filtering users via Manage Sieve.
 
