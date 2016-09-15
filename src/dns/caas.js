@@ -1,10 +1,10 @@
 'use strict';
 
 exports = module.exports = {
-    del: del,
     upsert: upsert,
-    getChangeStatus: getChangeStatus,
-    get: get
+    get: get,
+    del: del,
+    getChangeStatus: getChangeStatus
 };
 
 var assert = require('assert'),

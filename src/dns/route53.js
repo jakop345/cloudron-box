@@ -1,9 +1,9 @@
 'use strict';
 
 exports = module.exports = {
+    upsert: upsert,
     get: get,
     del: del,
-    upsert: upsert,
     getChangeStatus: getChangeStatus,
 
     // not part of "dns" interface
@@ -54,7 +54,7 @@ function getHostedZone(dnsConfig, zoneName, callback) {
     assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof callback, 'function');
- 
+
     getZoneByName(dnsConfig, zoneName, function (error, zone) {
         if (error) return callback(error);
 
