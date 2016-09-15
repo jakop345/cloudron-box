@@ -49,6 +49,8 @@ function upsert(dnsConfig, zoneName, subdomain, type, values, callback) {
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
+    subdomain = subdomain || '@';
+
     debug('upsert: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
 
     getInternal(dnsConfig, zoneName, subdomain, type, function (error, result) {
@@ -95,6 +97,8 @@ function get(dnsConfig, zoneName, subdomain, type, callback) {
     assert.strictEqual(typeof type, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    subdomain = subdomain || '@';
+
     getInternal(dnsConfig, zoneName, subdomain, type, function (error, result) {
         if (error) return callback(error);
 
@@ -114,6 +118,8 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof type, 'string');
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
+
+    subdomain = subdomain || '@';
 
     getInternal(dnsConfig, zoneName, subdomain, type, function (error, result) {
         if (error) return callback(error);
