@@ -12,6 +12,7 @@ module.exports = exports = {
 var assert = require('assert'),
     caas = require('./dns/caas.js'),
     config = require('./config.js'),
+    digitalocean = require('./dns/digitalocean.js'),
     route53 = require('./dns/route53.js'),
     settings = require('./settings.js'),
     util = require('util');
@@ -51,6 +52,7 @@ function api(provider) {
     switch (provider) {
         case 'caas': return caas;
         case 'route53': return route53;
+        case 'digitalocean': return digitalocean;
         default: return null;
     }
 }
