@@ -15,7 +15,6 @@ exports = module.exports = {
 
 var assert = require('assert'),
     async = require('async'),
-    config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:mailboxes'),
     docker = require('./docker.js'),
@@ -156,7 +155,7 @@ function setAliases(name, aliases, callback) {
         if (error) return callback(error);
 
         mailboxdb.setAliases(name, aliases, function (error) {
-            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new MailboxError(MailboxError.ALREADY_EXISTS, error.message))
+            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new MailboxError(MailboxError.ALREADY_EXISTS, error.message));
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
             if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
 
