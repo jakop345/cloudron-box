@@ -192,5 +192,5 @@ function start(callback) {
 function stop(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    gHttpServer.close(callback);
+    if (gHttpServer) gHttpServer.close(callback);
 }

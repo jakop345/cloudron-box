@@ -269,7 +269,7 @@ function start(callback) {
 function stop(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    gServer.close();
+    if (gServer) gServer.close();
 
     callback();
 }
