@@ -15,35 +15,6 @@ var assert = require('assert'),
 
 var DIGITALOCEAN_ENDPOINT = 'https://api.digitalocean.com';
 
-function upsert(dnsConfig, zoneName, subdomain, type, values, callback) {
-    assert.strictEqual(typeof dnsConfig, 'object');
-    assert.strictEqual(typeof zoneName, 'string');
-    assert.strictEqual(typeof subdomain, 'string');
-    assert.strictEqual(typeof type, 'string');
-    assert(util.isArray(values));
-    assert.strictEqual(typeof callback, 'function');
-
-    debug('upsert: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
-
-    // FIXME currently we only support one record!
-    var data = {
-        type: type,
-        name: subdomain,
-        data: values[0]
-    };
-
-    superagent.post(DIGITALOCEAN_ENDPOINT + '/v2/domains/' + zoneName + '/records')
-      .set('Authorization', 'Bearer ' + dnsConfig.token)
-      .send(data)
-      .timeout(30 * 1000)
-      .end(function (error, result) {
-        if (error && !error.response) return callback(error);
-        if (result.statusCode !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
-
-        return callback(null, 'unused');
-    });
-}
-
 function getInternal(dnsConfig, zoneName, subdomain, type, callback) {
     assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
@@ -67,6 +38,53 @@ function getInternal(dnsConfig, zoneName, subdomain, type, callback) {
         debug('getInternal: %j', tmp);
 
         return callback(null, tmp);
+    });
+}
+
+function upsert(dnsConfig, zoneName, subdomain, type, values, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
+    assert.strictEqual(typeof zoneName, 'string');
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert(util.isArray(values));
+    assert.strictEqual(typeof callback, 'function');
+
+    debug('upsert: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
+
+    getInternal(dnsConfig, zoneName, subdomain, type, function (error, result) {
+        if (error) return callback(error);
+
+        // FIXME currently we only support one record!
+
+        var data = {
+            type: type,
+            name: subdomain,
+            data: values[0]
+        };
+
+        if (result.length === 0) {
+            superagent.post(DIGITALOCEAN_ENDPOINT + '/v2/domains/' + zoneName + '/records')
+              .set('Authorization', 'Bearer ' + dnsConfig.token)
+              .send(data)
+              .timeout(30 * 1000)
+              .end(function (error, result) {
+                if (error && !error.response) return callback(error);
+                if (result.statusCode !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
+
+                return callback(null, 'unused');
+            });
+        } else {
+            superagent.put(DIGITALOCEAN_ENDPOINT + '/v2/domains/' + zoneName + '/records/' + result[0].id)
+              .set('Authorization', 'Bearer ' + dnsConfig.token)
+              .send(data)
+              .timeout(30 * 1000)
+              .end(function (error, result) {
+                if (error && !error.response) return callback(error);
+                if (result.statusCode !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
+
+                return callback(null, 'unused');
+            });
+        }
     });
 }
 
