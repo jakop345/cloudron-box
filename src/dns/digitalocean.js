@@ -80,7 +80,7 @@ function upsert(dnsConfig, zoneName, subdomain, type, values, callback) {
               .timeout(30 * 1000)
               .end(function (error, result) {
                 if (error && !error.response) return callback(error);
-                if (result.statusCode !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
+                if (result.statusCode !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
 
                 return callback(null, 'unused');
             });
