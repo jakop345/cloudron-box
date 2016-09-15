@@ -202,14 +202,20 @@ the user and check the `Allow this user to manage apps, groups and other users` 
 
 ### Groups
 
-Groups provide a convenient way to restrict access to your apps. Simply add one or more users to a group
-and restrict the access for an app to that group. You can create a group by using the `Groups` menu item.
+Groups provide a convenient way to group users. It's purpose is two-fold:
+
+* You can assign one or more groups to apps to restrict who can access for an app.
+* Each group is a mailing list (forwarding address) constituting of it's members.
+
+You can create a group by using the `Groups` menu item.
 
 <img src="/docs/img/groups.png" class="shadow">
 
 To set the access restriction use the app's configure dialog.
 
 <img src="/docs/img/app_access_control.png" class="shadow">
+
+You can now send mails to `groupname@<domain>` to address all the group members.
 
 ## Login
 
@@ -282,6 +288,11 @@ your mail client but login using the Cloudron credentials.
 
 Emails addressed to `<username>+tag@<domain>` will be delivered to the `username` mailbox. You can use this feature to give out emails of the form
 `username+kayak@<domain>`, `username+aws@<domain>` and so on and have them all delivered to your mailbox.
+
+### Forwarding addresses
+
+Each group on the Cloudron is also a forwarding address. Mails can be addressed to `group@<domain>` and the mail will
+be sent to each user who is part of the group.
 
 ## Graphs
 
