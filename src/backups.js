@@ -30,6 +30,7 @@ var addons = require('./addons.js'),
     debug = require('debug')('box:backups'),
     eventlog = require('./eventlog.js'),
     locker = require('./locker.js'),
+    filesystem = require('./storage/filesystem.js'),
     path = require('path'),
     paths = require('./paths.js'),
     progress = require('./progress.js'),
@@ -83,6 +84,7 @@ function api(provider) {
     switch (provider) {
         case 'caas': return caas;
         case 's3': return s3;
+        case 'fs': return filesystem;
         default: return null;
     }
 }
