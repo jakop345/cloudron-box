@@ -1,12 +1,12 @@
 'use strict';
 
 exports = module.exports = {
-    getRestoreUrl: getRestoreUrl,
-
-    copyObject: copyObject,
+    getBackupDetails: getBackupDetails,
     getAllPaged: getAllPaged,
 
-    getBackupDetails: getBackupDetails
+    getRestoreUrl: getRestoreUrl,
+
+    copyObject: copyObject
 };
 
 var assert = require('assert'),
