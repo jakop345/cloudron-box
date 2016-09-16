@@ -624,3 +624,6 @@
 * Save user certs separately from automatic certs (#44)
 * Fix access control display for email apps (#45)
 
+[0.20.3]
+* Make DigitalOcean selfhosting independent
+
