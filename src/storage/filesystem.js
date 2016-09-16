@@ -15,7 +15,7 @@ var assert = require('assert'),
     fs = require('fs'),
     path = require('path');
 
-var FALLBACK_BACKUP_FOLDER = '/tmp/backups';
+var FALLBACK_BACKUP_FOLDER = '/var/backups';
 
 function getBoxBackupDetails(apiConfig, id, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
