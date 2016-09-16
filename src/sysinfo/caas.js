@@ -20,9 +20,10 @@ function getIp(callback) {
             return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found'));
         }
 
-        // first try to get the floating ip
-        var ip = safe.query(result.body, 'floating_ip.ipv4.ip_address');
-        if (!ip) ip = safe.query(result.body, 'interfaces.public[0].ipv4.ip_address');
+        // Note that we do not use a floating IP for 3 reasons:
+        // The PTR record is not set to floating IP, the outbound interface is not changeable to floating IP
+        // and there are reports that port 25 on floating IP is blocked.
+        var ip = safe.query(result.body, 'interfaces.public[0].ipv4.ip_address');
         if (!ip) return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found'));
 
         callback(null, ip);
