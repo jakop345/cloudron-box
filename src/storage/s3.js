@@ -5,6 +5,7 @@ exports = module.exports = {
     getAppBackupDetails: getAppBackupDetails,
 
     getRestoreUrl: getRestoreUrl,
+    getLocalFilePath: getLocalFilePath,
 
     copyObject: copyObject
 };
@@ -83,6 +84,14 @@ function getRestoreUrl(apiConfig, filename, callback) {
 
         callback(null, { url: url });
     });
+}
+
+function getLocalFilePath(apiConfig, filename, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof filename, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    callback(new Error('not supported'));
 }
 
 function copyObject(apiConfig, from, to, callback) {

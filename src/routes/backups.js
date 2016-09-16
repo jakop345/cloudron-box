@@ -3,7 +3,8 @@
 exports = module.exports = {
     get: get,
     create: create,
-    createDownloadUrl: createDownloadUrl
+    createDownloadUrl: createDownloadUrl,
+    download: download
 };
 
 var assert = require('assert'),
@@ -50,5 +51,15 @@ function createDownloadUrl(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, result));
+    });
+}
+
+function download(req, res, next) {
+    assert.strictEqual(typeof req.params.backupId, 'string');
+
+    backups.getLocalDownloadPath(req.params.backupId, function (error, result) {
+        if (error) return next(new HttpError(500, error));
+
+        res.sendFile(result);
     });
 }

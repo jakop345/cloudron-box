@@ -11,6 +11,7 @@ exports = module.exports = {
     getAppBackupDetails: getAppBackupDetails,
 
     getRestoreUrl: getRestoreUrl,
+    getLocalFilePath: getLocalFilePath,
 
     copyObject: copyObject
 };
@@ -48,6 +49,17 @@ function getRestoreUrl(apiConfig, filename, callback) {
 
     // Result: { url: <restoreUrl> }
     // The resulting url must work with curl as it is passed into start.sh and restoreapp.sh
+
+    callback(new Error('not implemented'));
+}
+
+function getLocalFilePath(apiConfig, filename, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof filename, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    // Result: { filePath: <localFilePath> }
+    // The resulting filePath is a local path to the backup file
 
     callback(new Error('not implemented'));
 }

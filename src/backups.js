@@ -15,7 +15,9 @@ exports = module.exports = {
     backupApp: backupApp,
     restoreApp: restoreApp,
 
-    backupBoxAndApps: backupBoxAndApps
+    backupBoxAndApps: backupBoxAndApps,
+
+    getLocalFilePath: getLocalFilePath
 };
 
 var addons = require('./addons.js'),
@@ -451,6 +453,23 @@ function restoreApp(app, addonsToRestore, backupId, callback) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
             addons.restoreAddons(app, addonsToRestore, callback);
+        });
+    });
+}
+
+function getLocalFilePath(backupId, callback) {
+    assert.strictEqual(typeof backupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        api(backupConfig.provider).getLocalFilePath(backupConfig, backupId, function (error, result) {
+            if (error) return callback(error);
+
+            debug('getLocalFilePath: id:%s path:%s', backupId, result.filePath);
+
+            callback(null, result.filePath);
         });
     });
 }
