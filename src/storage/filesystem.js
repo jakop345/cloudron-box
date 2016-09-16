@@ -53,7 +53,23 @@ function getAllPaged(apiConfig, page, perPage, callback) {
     assert.strictEqual(typeof perPage, 'number');
     assert.strictEqual(typeof callback, 'function');
 
-    return callback(null, []);
+    var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
+
+    fs.readdir(backupFolder, function (error, entries) {
+        if (error) return callback(error);
+
+        var results = entries.map(function (entry) {
+            return {
+                creationTime: Date.now(),   // FIXME extract from filename or stat?
+                restoreKey: entry,
+                dependsOn: [] // FIXME empty dependsOn is wrong and version property is missing!!
+            };
+        });
+
+        results.sort(function (a, b) { return a.creationTime < b.creationTime; });
+
+        return callback(null, results);
+    });
 }
 
 function getRestoreUrl(apiConfig, filename, callback) {
