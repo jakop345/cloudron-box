@@ -11,14 +11,18 @@ exports = module.exports = {
     copyObject: copyObject
 };
 
-var assert = require('assert');
+var assert = require('assert'),
+    fs = require('fs'),
+    path = require('path');
+
+var FALLBACK_BACKUP_FOLDER = '/tmp/backups';
 
 function getBoxBackupDetails(apiConfig, id, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var backupFolder = apiConfig.backupFolder || '/tmp/backups';
+    var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
 
     var details = {
         backupScriptArguments: [ 'filesystem', backupFolder, id, apiConfig.key ]
@@ -34,7 +38,7 @@ function getAppBackupDetails(apiConfig, appId, dataId, configId, callback) {
     assert.strictEqual(typeof configId, '');
     assert.strictEqual(typeof callback, 'function');
 
-    var backupFolder = apiConfig.backupFolder || '/tmp/backups';
+    var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
 
     var details = {
         backupScriptArguments: [ 'filesystem', appId, backupFolder, configId, dataId, apiConfig.key ]
@@ -66,5 +70,23 @@ function copyObject(apiConfig, from, to, callback) {
     assert.strictEqual(typeof to, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    callback(null);
+    var calledBack = false;
+    function done (error) {
+        if (!calledBack) callback(error);
+        calledBack = true;
+    }
+
+    var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
+    var readStream = fs.createReadStream(path.join(backupFolder, from));
+    var writeStream = fs.createWriteStream(path.join(backupFolder, to));
+
+    readStream.on('error', done);
+    writeStream.on('error', done);
+
+    writeStream.on('close', function () {
+        // avoid passing arguments
+        done(null);
+    });
+
+    readStream.pipe(writeStream);
 }
