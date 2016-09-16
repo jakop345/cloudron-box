@@ -4,8 +4,6 @@ exports = module.exports = {
     getBoxBackupDetails: getBoxBackupDetails,
     getAppBackupDetails: getAppBackupDetails,
 
-    getAllPaged: getAllPaged,
-
     getRestoreUrl: getRestoreUrl,
 
     copyObject: copyObject
@@ -45,31 +43,6 @@ function getAppBackupDetails(apiConfig, appId, dataId, configId, callback) {
     };
 
     callback(null, details);
-}
-
-function getAllPaged(apiConfig, page, perPage, callback) {
-    assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof page, 'number');
-    assert.strictEqual(typeof perPage, 'number');
-    assert.strictEqual(typeof callback, 'function');
-
-    var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
-
-    fs.readdir(backupFolder, function (error, entries) {
-        if (error) return callback(error);
-
-        var results = entries.map(function (entry) {
-            return {
-                creationTime: Date.now(),   // FIXME extract from filename or stat?
-                restoreKey: entry,
-                dependsOn: [] // FIXME empty dependsOn is wrong and version property is missing!!
-            };
-        });
-
-        results.sort(function (a, b) { return a.creationTime < b.creationTime; });
-
-        return callback(null, results);
-    });
 }
 
 function getRestoreUrl(apiConfig, filename, callback) {

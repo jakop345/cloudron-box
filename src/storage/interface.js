@@ -10,8 +10,6 @@ exports = module.exports = {
     getBoxBackupDetails: getBoxBackupDetails,
     getAppBackupDetails: getAppBackupDetails,
 
-    getAllPaged: getAllPaged,
-
     getRestoreUrl: getRestoreUrl,
 
     copyObject: copyObject
@@ -39,18 +37,6 @@ function getAppBackupDetails(apiConfig, appId, dataId, configId, callback) {
 
     // Result: { backupScriptArguments: [] }
     // The resulting array consists of string passed down 1to1 to the backupapp.sh
-
-    callback(new Error('not implemented'));
-}
-
-function getAllPaged(apiConfig, page, perPage, callback) {
-    assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof page, 'number');
-    assert.strictEqual(typeof perPage, 'number');
-    assert.strictEqual(typeof callback, 'function');
-
-    // Result: { backupScriptArguments: [ { creationTime: <timestamp> }, restoreKey: <filename>, dependsOn: [] ] }
-    // The resulting array consists of objects representing each backup
 
     callback(new Error('not implemented'));
 }

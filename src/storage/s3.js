@@ -4,8 +4,6 @@ exports = module.exports = {
     getBoxBackupDetails: getBoxBackupDetails,
     getAppBackupDetails: getAppBackupDetails,
 
-    getAllPaged: getAllPaged,
-
     getRestoreUrl: getRestoreUrl,
 
     copyObject: copyObject
@@ -63,41 +61,6 @@ function getAppBackupDetails(apiConfig, appId, dataId, configId, callback) {
     };
 
     callback(null, details);
-}
-
-function getAllPaged(apiConfig, page, perPage, callback) {
-    assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof page, 'number');
-    assert.strictEqual(typeof perPage, 'number');
-    assert.strictEqual(typeof callback, 'function');
-
-    getBackupCredentials(apiConfig, function (error, credentials) {
-        if (error) return callback(error);
-
-        var s3 = new AWS.S3(credentials);
-
-        var params = {
-            Bucket: apiConfig.bucket,
-            EncodingType: 'url',
-            Prefix: apiConfig.prefix + '/backup_'
-        };
-
-        s3.listObjects(params, function (error, data) {
-            if (error) return callback(error);
-
-            var results = data.Contents.map(function (backup) {
-                return {
-                    creationTime: backup.LastModified,
-                    restoreKey: backup.Key.slice(apiConfig.prefix.length + 1),
-                    dependsOn: [] // FIXME empty dependsOn is wrong and version property is missing!!
-                };
-            });
-
-            results.sort(function (a, b) { return a.creationTime < b.creationTime; });
-
-            return callback(null, results);
-        });
-    });
 }
 
 function getRestoreUrl(apiConfig, filename, callback) {

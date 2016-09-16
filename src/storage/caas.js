@@ -4,8 +4,6 @@ exports = module.exports = {
     getBoxBackupDetails: getBoxBackupDetails,
     getAppBackupDetails: getAppBackupDetails,
 
-    getAllPaged: getAllPaged,
-
     getRestoreUrl: getRestoreUrl,
 
     copyObject: copyObject
@@ -14,8 +12,7 @@ exports = module.exports = {
 var assert = require('assert'),
     AWS = require('aws-sdk'),
     config = require('../config.js'),
-    superagent = require('superagent'),
-    util = require('util');
+    superagent = require('superagent');
 
 function getBackupCredentials(apiConfig, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
@@ -80,22 +77,6 @@ function getAppBackupDetails(apiConfig, appId, dataId, configId, callback) {
         };
 
         callback(null, details);
-    });
-}
-
-function getAllPaged(apiConfig, page, perPage, callback) {
-    assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof page, 'number');
-    assert.strictEqual(typeof perPage, 'number');
-    assert.strictEqual(typeof callback, 'function');
-
-    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
-    superagent.get(url).query({ token: apiConfig.token }).timeout(30 * 1000).end(function (error, result) {
-        if (error && !error.response) return callback(error);
-        if (result.statusCode !== 200) return callback(new Error(result.text));
-        if (!result.body || !util.isArray(result.body.backups)) return callback(new Error('Unexpected response'));
-
-        return callback(null, result.body.backups);
     });
 }
 
