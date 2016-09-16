@@ -216,12 +216,12 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 
                 debug('backupBoxWithAppBackupIds: success');
 
-                backupdb.add({ id: result.id, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
+                backupdb.add({ id: filename, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
                     if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-                    webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
+                    webhooks.backupDone(filename, null /* app */, appBackupIds, function (error) {
                         if (error) return callback(error);
-                        callback(null, result.id);
+                        callback(null, filename);
                     });
                 });
             });
@@ -289,12 +289,12 @@ function createNewAppBackup(app, manifest, callback) {
             ], function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-                debugApp(app, 'createNewAppBackup: %s done', result.id);
+                debugApp(app, 'createNewAppBackup: %s done', dataFilename);
 
-                backupdb.add({ id: result.id, version: manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+                backupdb.add({ id: dataFilename, version: manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
                     if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-                    callback(null, result.id);
+                    callback(null, dataFilename);
                 });
             });
         });
