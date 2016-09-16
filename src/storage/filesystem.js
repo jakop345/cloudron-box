@@ -61,7 +61,10 @@ function getRestoreUrl(apiConfig, filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    callback(null, { url: '' });
+    var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
+    var restoreUrl = 'file://' + path.join(backupFolder, filename);
+
+    callback(null, { url: restoreUrl });
 }
 
 function copyObject(apiConfig, from, to, callback) {
