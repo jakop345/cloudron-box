@@ -14,12 +14,12 @@ fi
 
 
 # verify argument count
-if [[ "$1" === "s3" && $# -lt 6 ]]; then
+if [[ "$1" == "s3" && $# -lt 6 ]]; then
     echo "Usage: backupbox.sh s3 <s3 url> <access key id> <access key> <region> <password> [session token]"
     exit 1
 fi
 
-if [[ "$1" === "filesystem" && $# -lt 4 ]]; then
+if [[ "$1" == "filesystem" && $# -lt 4 ]]; then
     echo "Usage: backupbox.sh filesystem <backupFolder> <fileName> <password>"
     exit 1
 fi
