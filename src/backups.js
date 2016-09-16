@@ -84,7 +84,7 @@ function api(provider) {
     switch (provider) {
         case 'caas': return caas;
         case 's3': return s3;
-        case 'fs': return filesystem;
+        case 'filesystem': return filesystem;
         default: return null;
     }
 }

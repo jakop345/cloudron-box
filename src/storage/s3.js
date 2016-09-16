@@ -51,7 +51,7 @@ function getAppBackupDetails(apiConfig, appId, dataId, configId, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof dataId, 'string');
-    assert.strictEqual(typeof configId, '');
+    assert.strictEqual(typeof configId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var s3DataUrl = 's3://' + apiConfig.bucket + '/' + apiConfig.prefix + '/' + dataId;
