@@ -206,7 +206,7 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getBackupDetails(backupConfig, filename, function (error, result) {
+        api(backupConfig.provider).getBoxBackupDetails(backupConfig, filename, function (error, result) {
             if (error) return callback(error);
 
             debug('backupBoxWithAppBackupIds: backup details %j', result);

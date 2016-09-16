@@ -1,7 +1,7 @@
 'use strict';
 
 exports = module.exports = {
-    getBackupDetails: getBackupDetails,
+    getBoxBackupDetails: getBoxBackupDetails,
     getAppBackupDetails: getAppBackupDetails,
 
     getAllPaged: getAllPaged,
@@ -42,7 +42,7 @@ function getBackupCredentials(apiConfig, callback) {
     });
 }
 
-function getBackupDetails(apiConfig, id, callback) {
+function getBoxBackupDetails(apiConfig, id, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof callback, 'function');
