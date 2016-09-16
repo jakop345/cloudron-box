@@ -57,6 +57,9 @@ readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
 
 btrfs subvolume snapshot -r "${app_data_dir}" "${app_data_snapshot}"
 
+# will be checked at the end
+try=0
+
 if [[ "$1" == "s3" ]]; then
     # Upload config.json first because uploading tarball might take a lot of time, leading to token expiry
     for try in `seq 1 5`; do

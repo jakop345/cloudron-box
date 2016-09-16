@@ -55,6 +55,9 @@ mysqldump -u root -ppassword --single-transaction --routines --triggers box > "$
 echo "Snapshoting backup as backup-${now}"
 btrfs subvolume snapshot -r "${BOX_DATA_DIR}" "${box_snapshot_dir}"
 
+# will be checked at the end
+try=0
+
 if [[ "$1" == "s3" ]]; then
     for try in `seq 1 5`; do
         echo "Uploading backup to ${s3_url} (try ${try})"
