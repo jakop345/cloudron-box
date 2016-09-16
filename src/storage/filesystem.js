@@ -6,16 +6,23 @@ exports = module.exports = {
     copyObject: copyObject,
     getAllPaged: getAllPaged,
 
-    getBackupCredentials: getBackupCredentials
+    getBackupDetails: getBackupDetails
 };
 
 var assert = require('assert');
 
-function getBackupCredentials(apiConfig, callback) {
+function getBackupDetails(apiConfig, id, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    callback(null, {});
+    var backupFolder = apiConfig.backupFolder || '/tmp/backups';
+
+    var details = {
+        backupScriptArguments: [ 'filesystem', backupFolder, id, apiConfig.key ]
+    };
+
+    callback(null, details);
 }
 
 function getAllPaged(apiConfig, page, perPage, callback) {

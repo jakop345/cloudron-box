@@ -6,7 +6,7 @@ exports = module.exports = {
     copyObject: copyObject,
     getAllPaged: getAllPaged,
 
-    getBackupCredentials: getBackupCredentials
+    getBackupDetails: getBackupDetails
 };
 
 var assert = require('assert'),
@@ -28,6 +28,21 @@ function getBackupCredentials(apiConfig, callback) {
     if (apiConfig.endpoint) credentials.endpoint = new AWS.Endpoint(apiConfig.endpoint);
 
     callback(null, credentials);
+}
+
+function getBackupDetails(apiConfig, id, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var s3Url = 's3://' + apiConfig.bucket + '/' + apiConfig.prefix + '/' + id;
+    var region = apiConfig.region || 'us-east-1';
+
+    var details = {
+        backupScriptArguments: [ 's3', s3Url, apiConfig.accessKeyId, apiConfig.secretAccessKey, region, apiConfig.key ]
+    };
+
+    callback(null, details);
 }
 
 function getAllPaged(apiConfig, page, perPage, callback) {

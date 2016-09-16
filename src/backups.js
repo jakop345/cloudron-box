@@ -114,32 +114,6 @@ function getByAppIdPaged(page, perPage, appId, callback) {
     });
 }
 
-function getBoxBackupCredentials(appBackupIds, callback) {
-    assert(util.isArray(appBackupIds));
-    assert.strictEqual(typeof callback, 'function');
-
-    var now = new Date();
-    var filebase = util.format('backup_%s-v%s', now.toISOString(), config.version());
-    var filename = filebase + '.tar.gz';
-
-    settings.getBackupConfig(function (error, backupConfig) {
-        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
-
-        api(backupConfig.provider).getBackupCredentials(backupConfig, function (error, result) {
-            if (error) return callback(error);
-
-            result.provider = backupConfig.provider;
-            result.id = filename;
-            result.s3Url = 's3://' + backupConfig.bucket + '/' + backupConfig.prefix + '/' + filename;
-            result.backupKey = backupConfig.key;
-
-            debug('getBoxBackupCredentials: %j', result);
-
-            callback(null, result);
-        });
-    });
-}
-
 function getAppBackupCredentials(app, manifest, callback) {
     assert.strictEqual(typeof app, 'object');
     assert(manifest && typeof manifest === 'object');
@@ -252,31 +226,30 @@ function copyLastBackup(app, manifest, callback) {
 function backupBoxWithAppBackupIds(appBackupIds, callback) {
     assert(util.isArray(appBackupIds));
 
-    getBoxBackupCredentials(appBackupIds, function (error, result) {
-        if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error.message));
+    var now = new Date();
+    var filebase = util.format('backup_%s-v%s', now.toISOString(), config.version());
+    var filename = filebase + '.tar.gz';
+
+    settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        debug('backupBoxWithAppBackupIds:  %j', result);
+        api(backupConfig.provider).getBackupDetails(backupConfig, filename, function (error, result) {
+            if (error) return callback(error);
 
-        var args;
-        if (result.provider === 'filesystem') {
-            args = [ 'filesystem', '/tmp/backups', result.id, result.backupKey ];
-        } else {
-            args = [ 's3', result.s3Url, result.accessKeyId, result.secretAccessKey, result.region, result.backupKey ];
-            if (result.sessionToken) args.push(result.sessionToken);
-        }
+            debug('backupBoxWithAppBackupIds: backup details %j', result);
 
-        shell.sudo('backupBox', [ BACKUP_BOX_CMD ].concat(args), function (error) {
-            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
-
-            debug('backupBoxWithAppBackupIds: success');
-
-            backupdb.add({ id: result.id, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
+            shell.sudo('backupBox', [ BACKUP_BOX_CMD ].concat(result.backupScriptArguments), function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-                webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
-                    if (error) return callback(error);
-                    callback(null, result.id);
+                debug('backupBoxWithAppBackupIds: success');
+
+                backupdb.add({ id: result.id, version: config.version(), type: backupdb.BACKUP_TYPE_BOX, dependsOn: appBackupIds }, function (error) {
+                    if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+                    webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
+                        if (error) return callback(error);
+                        callback(null, result.id);
+                    });
                 });
             });
         });

@@ -5,7 +5,7 @@ exports = module.exports = {
 
     copyObject: copyObject,
 
-    getBackupCredentials: getBackupCredentials,
+    getBackupDetails: getBackupDetails,
 
     getAllPaged: getAllPaged
 };
@@ -28,6 +28,7 @@ function getBackupCredentials(apiConfig, callback) {
         if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
 
         var credentials = {
+            signatureVersion: 'v4',
             accessKeyId: result.body.credentials.AccessKeyId,
             secretAccessKey: result.body.credentials.SecretAccessKey,
             sessionToken: result.body.credentials.SessionToken,
@@ -37,6 +38,25 @@ function getBackupCredentials(apiConfig, callback) {
         if (apiConfig.endpoint) credentials.endpoint = new AWS.Endpoint(apiConfig.endpoint);
 
         callback(null, credentials);
+    });
+}
+
+function getBackupDetails(apiConfig, id, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    getBackupCredentials(apiConfig, function (error, result) {
+        if (error) return callback(error);
+
+        var s3Url = 's3://' + apiConfig.bucket + '/' + apiConfig.prefix + '/' + id;
+        var region = apiConfig.region || 'us-east-1';
+
+        var details = {
+            backupScriptArguments: [ 's3', s3Url, apiConfig.accessKeyId, apiConfig.secretAccessKey, region, apiConfig.key, result.sessionToken ]
+        };
+
+        callback(null, details);
     });
 }
 
