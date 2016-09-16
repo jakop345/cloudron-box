@@ -17,20 +17,20 @@ readonly DATA_DIR="${HOME}/data"
 # verify argument count
 if [[ "$1" == "s3" && $# -lt 8 ]]; then
     echo "Usage: backupapp.sh s3 <appId> <s3 config url> <s3 data url> <access key id> <access key> <region> <password> [session token]"
-    echo "Usage: backupapp.sh filesystem <backupFolder> <configFileName> <dataFileName> <password>"
     exit 1
 fi
 
-if [[ "$1" == "filesystem" && $# -lt 5 ]]; then
-    echo "Usage: backupapp.sh filesystem <backupFolder> <configFileName> <dataFileName> <password>"
+if [[ "$1" == "filesystem" && $# -lt 6 ]]; then
+    echo "Usage: backupapp.sh filesystem <appId> <backupFolder> <configFileName> <dataFileName> <password>"
     exit 1
 fi
 
 
 # extract arguments
+readonly app_id="$2"
+
 if [[ "$1" == "s3" ]]; then
     # env vars used by the awscli
-    readonly app_id="$2"
     readonly s3_config_url="$3"
     readonly s3_data_url="$4"
     export AWS_ACCESS_KEY_ID="$5"
@@ -44,10 +44,10 @@ if [[ "$1" == "s3" ]]; then
 fi
 
 if [[ "$1" == "filesystem" ]]; then
-    readonly backup_folder="$2"
-    readonly backup_config_fileName="$3"
-    readonly backup_data_fileName="$4"
-    readonly password="$5"
+    readonly backup_folder="$3"
+    readonly backup_config_fileName="$4"
+    readonly backup_data_fileName="$5"
+    readonly password="$6"
 fi
 
 # perform backup

@@ -114,33 +114,6 @@ function getByAppIdPaged(page, perPage, appId, callback) {
     });
 }
 
-function getAppBackupCredentials(app, manifest, callback) {
-    assert.strictEqual(typeof app, 'object');
-    assert(manifest && typeof manifest === 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    var now = new Date();
-    var filebase = util.format('appbackup_%s_%s-v%s', app.id, now.toISOString(), manifest.version);
-    var configFilename = filebase + '.json', dataFilename = filebase + '.tar.gz';
-
-    settings.getBackupConfig(function (error, backupConfig) {
-        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
-
-        api(backupConfig.provider).getBackupCredentials(backupConfig, function (error, result) {
-            if (error) return callback(error);
-
-            result.id = dataFilename;
-            result.s3ConfigUrl = 's3://' + backupConfig.bucket + '/' + backupConfig.prefix + '/' + configFilename;
-            result.s3DataUrl = 's3://' + backupConfig.bucket + '/' + backupConfig.prefix + '/' + dataFilename;
-            result.backupKey = backupConfig.key;
-
-            debug('getAppBackupCredentials: %j', result);
-
-            callback(null, result);
-        });
-    });
-}
-
 // backupId is the s3 filename. appbackup_%s_%s-v%s.tar.gz
 function getRestoreConfig(backupId, callback) {
     assert.strictEqual(typeof backupId, 'string');
@@ -298,31 +271,31 @@ function createNewAppBackup(app, manifest, callback) {
     assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    getAppBackupCredentials(app, manifest, function (error, result) {
-        if (error) return callback(error);
+    var now = new Date();
+    var filebase = util.format('appbackup_%s_%s-v%s', app.id, now.toISOString(), manifest.version);
+    var configFilename = filebase + '.json', dataFilename = filebase + '.tar.gz';
 
-        debugApp(app, 'createNewAppBackup: backup url:%s backup config url:%s', result.s3DataUrl, result.s3ConfigUrl);
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        var args;
-        if (result.provider === 'filesystem') {
-            args = [ 'filesystem', '/tmp/backups', result.id + '.json', result.id, result.backupKey ];
-        } else {
-            args = [ 's3', app.id, result.s3ConfigUrl, result.s3DataUrl, result.accessKeyId, result.secretAccessKey, result.region, result.backupKey ];
-            if (result.sessionToken) args.push(result.sessionToken);
-        }
+        api(backupConfig.provider).getAppBackupDetails(backupConfig, app.id, dataFilename, configFilename, function (error, result) {
+            if (error) return callback(error);
 
-        async.series([
-            addons.backupAddons.bind(null, app, manifest.addons),
-            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD ].concat(args))
-        ], function (error) {
-            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+            debug('createNewAppBackup: backup details %j', result);
 
-            debugApp(app, 'createNewAppBackup: %s done', result.id);
-
-            backupdb.add({ id: result.id, version: manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+            async.series([
+                addons.backupAddons.bind(null, app, manifest.addons),
+                shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD ].concat(result.backupScriptArguments))
+            ], function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-                callback(null, result.id);
+                debugApp(app, 'createNewAppBackup: %s done', result.id);
+
+                backupdb.add({ id: result.id, version: manifest.version, type: backupdb.BACKUP_TYPE_APP, dependsOn: [ ] }, function (error) {
+                    if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+                    callback(null, result.id);
+                });
             });
         });
     });

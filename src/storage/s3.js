@@ -2,6 +2,8 @@
 
 exports = module.exports = {
     getBackupDetails: getBackupDetails,
+    getAppBackupDetails: getAppBackupDetails,
+
     getAllPaged: getAllPaged,
 
     getRestoreUrl: getRestoreUrl,
@@ -40,6 +42,24 @@ function getBackupDetails(apiConfig, id, callback) {
 
     var details = {
         backupScriptArguments: [ 's3', s3Url, apiConfig.accessKeyId, apiConfig.secretAccessKey, region, apiConfig.key ]
+    };
+
+    callback(null, details);
+}
+
+function getAppBackupDetails(apiConfig, appId, dataId, configId, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof dataId, 'string');
+    assert.strictEqual(typeof configId, '');
+    assert.strictEqual(typeof callback, 'function');
+
+    var s3DataUrl = 's3://' + apiConfig.bucket + '/' + apiConfig.prefix + '/' + dataId;
+    var s3ConfigUrl = 's3://' + apiConfig.bucket + '/' + apiConfig.prefix + '/' + configId;
+    var region = apiConfig.region || 'us-east-1';
+
+    var details = {
+        backupScriptArguments: [ 's3', appId, s3ConfigUrl, s3DataUrl, apiConfig.accessKeyId, apiConfig.secretAccessKey, region, apiConfig.key ]
     };
 
     callback(null, details);
