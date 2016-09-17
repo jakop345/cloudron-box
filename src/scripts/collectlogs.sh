@@ -34,6 +34,7 @@ echo "------"
 journalctl --all --no-pager -u docker -n 50
 echo
 echo
-
-
-
+docker ps
+echo
+echo
+docker network inspect cloudron
