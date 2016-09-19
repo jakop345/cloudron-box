@@ -116,33 +116,23 @@ function getByAppIdPaged(page, perPage, appId, callback) {
     });
 }
 
-// backupId is the s3 filename. appbackup_%s_%s-v%s.tar.gz
+// backupId is the filename. appbackup_%s_%s-v%s.tar.gz
 function getRestoreConfig(backupId, callback) {
     assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var configFile = backupId.replace(/\.tar\.gz$/, '.json');
-
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).getRestoreUrl(backupConfig, configFile, function (error, result) {
-            if (error) return callback(error);
+        api(backupConfig.provider).getAppRestoreConfig(backupConfig, backupId, function (error, result) {
+            if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
 
-            superagent.get(result.url).buffer(true).timeout(30 * 1000).end(function (error, response) {
-                if (error && !error.response) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error.message));
-                if (response.statusCode !== 200) return callback(new Error('Invalid response code when getting config.json : ' + response.statusCode));
-
-                var config = safe.JSON.parse(response.text);
-                if (!config) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, 'Error in config:' + safe.error.message));
-
-                return callback(null, config);
-            });
+            callback(null, result);
         });
     });
 }
 
-// backupId is the s3 filename. appbackup_%s_%s-v%s.tar.gz
+// backupId is the filename. appbackup_%s_%s-v%s.tar.gz
 function getRestoreUrl(backupId, callback) {
     assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');

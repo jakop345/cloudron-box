@@ -5,6 +5,7 @@ exports = module.exports = {
     getAppBackupDetails: getAppBackupDetails,
 
     getRestoreUrl: getRestoreUrl,
+    getAppRestoreConfig: getAppRestoreConfig,
     getLocalFilePath: getLocalFilePath,
 
     copyObject: copyObject
@@ -12,7 +13,8 @@ exports = module.exports = {
 
 var assert = require('assert'),
     fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    safe = require('safetydance');
 
 var FALLBACK_BACKUP_FOLDER = '/var/backups';
 
@@ -55,6 +57,20 @@ function getRestoreUrl(apiConfig, filename, callback) {
     var restoreUrl = 'file://' + path.join(backupFolder, filename);
 
     callback(null, { url: restoreUrl });
+}
+
+function getAppRestoreConfig(apiConfig, backupId, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof backupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
+    var configFilename = backupId.replace(/\.tar\.gz$/, '.json');
+
+    var restoreConfig = safe.require(path.join(backupFolder, configFilename));
+    if (!restoreConfig) return callback(new Error('No app backup config found'));
+
+    callback(null, restoreConfig);
 }
 
 function getLocalFilePath(apiConfig, filename, callback) {

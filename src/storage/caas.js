@@ -5,6 +5,7 @@ exports = module.exports = {
     getAppBackupDetails: getAppBackupDetails,
 
     getRestoreUrl: getRestoreUrl,
+    getAppRestoreConfig: getAppRestoreConfig,
     getLocalFilePath: getLocalFilePath,
 
     copyObject: copyObject
@@ -13,6 +14,7 @@ exports = module.exports = {
 var assert = require('assert'),
     AWS = require('aws-sdk'),
     config = require('../config.js'),
+    safe = require('safetydance'),
     superagent = require('superagent');
 
 function getBackupCredentials(apiConfig, callback) {
@@ -103,6 +105,28 @@ function getRestoreUrl(apiConfig, filename, callback) {
         var url = s3.getSignedUrl('getObject', params);
 
         callback(null, { url: url });
+    });
+}
+
+function getAppRestoreConfig(apiConfig, backupId, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof backupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var configFilename = backupId.replace(/\.tar\.gz$/, '.json');
+
+    getRestoreUrl(apiConfig, configFilename, function (error, result) {
+        if (error) return callback(error);
+
+        superagent.get(result.url).buffer(true).timeout(30 * 1000).end(function (error, response) {
+            if (error && !error.response) return callback(new Error(error.message));
+            if (response.statusCode !== 200) return callback(new Error('Invalid response code when getting config.json : ' + response.statusCode));
+
+            var config = safe.JSON.parse(response.text);
+            if (!config) return callback(new Error('Error in config:' + safe.error.message));
+
+            return callback(null, config);
+        });
     });
 }
 
