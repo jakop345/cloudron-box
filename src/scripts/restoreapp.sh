@@ -31,9 +31,7 @@ for try in `seq 1 5`; do
     echo "Download backup from ${restore_url} (try ${try})"
     error_log=$(mktemp)
 
-    headers=("") # empty element required (http://stackoverflow.com/questions/7577052/bash-empty-array-expansion-with-set-u)
-
-    if $curl -L "${headers[@]}" "${restore_url}" \
+    if $curl -L "${restore_url}" \
         | openssl aes-256-cbc -d -pass "pass:${restore_key}" \
         | tar -zxf - -C "${DATA_DIR}/${app_id}" 2>"${error_log}"; then
         chown -R yellowtent:yellowtent "${DATA_DIR}/${app_id}"
