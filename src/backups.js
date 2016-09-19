@@ -17,7 +17,7 @@ exports = module.exports = {
 
     backupBoxAndApps: backupBoxAndApps,
 
-    getLocalFilePath: getLocalFilePath
+    getLocalDownloadPath: getLocalDownloadPath
 };
 
 var addons = require('./addons.js'),
@@ -457,7 +457,7 @@ function restoreApp(app, addonsToRestore, backupId, callback) {
     });
 }
 
-function getLocalFilePath(backupId, callback) {
+function getLocalDownloadPath(backupId, callback) {
     assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -467,7 +467,7 @@ function getLocalFilePath(backupId, callback) {
         api(backupConfig.provider).getLocalFilePath(backupConfig, backupId, function (error, result) {
             if (error) return callback(error);
 
-            debug('getLocalFilePath: id:%s path:%s', backupId, result.filePath);
+            debug('getLocalDownloadPath: id:%s path:%s', backupId, result.filePath);
 
             callback(null, result.filePath);
         });
