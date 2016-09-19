@@ -244,6 +244,15 @@ The Cloudron has a built-in email server. The primary email address is the same 
 and received from `<username>@<domain>`. The Cloudron does not allow masquerading - one user cannot send email
 pretending to be another user.
 
+### Enabling Email
+
+By default, Cloudron's email server only allows apps to send email. To enable users to send and receive email,
+turn on the option under `Settings`. Turning on this option also allows apps to _receive_ email.
+
+Once email is enabled, the Cloudron will keep the the `MX` DNS record updated.
+
+<img src="/docs/img/enable_email.png" class="shadow">
+
 ### Receiving email using IMAP
 
 Use the following settings to receive email.
