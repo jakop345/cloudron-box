@@ -127,7 +127,8 @@ function groupSearch(req, res, next) {
             };
 
             // ensure all filter values are also lowercase
-            var lowerCaseFilter = ldap.parseFilter(req.filter.toString().toLowerCase());
+            var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
+            if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
             if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
                 res.send(obj);
@@ -160,7 +161,8 @@ function mailboxSearch(req, res, next) {
             };
 
             // ensure all filter values are also lowercase
-            var lowerCaseFilter = ldap.parseFilter(req.filter.toString().toLowerCase());
+            var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
+            if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
             if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
                 res.send(obj);
