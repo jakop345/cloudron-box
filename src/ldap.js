@@ -14,7 +14,8 @@ var assert = require('assert'),
     UserError = user.UserError,
     ldap = require('ldapjs'),
     mailboxes = require('./mailboxes.js'),
-    MailboxError = mailboxes.MailboxError;
+    MailboxError = mailboxes.MailboxError,
+    safe = require('safetydance');
 
 var gServer = null;
 
@@ -86,7 +87,8 @@ function userSearch(req, res, next) {
             if (lastName.length !== 0) obj.attributes.sn = lastName;
 
             // ensure all filter values are also lowercase
-            var lowerCaseFilter = ldap.parseFilter(req.filter.toString().toLowerCase());
+            var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
+            if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
             if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
                 res.send(obj);
