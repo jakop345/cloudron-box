@@ -187,22 +187,22 @@ around the `secret` to prevent accidental shell expansion.
 <a id="requirements-1"></a>
 ### Requirements
 
-To run the Cloudron on DigitalOcean, first sign up with [DigitalOcean](https://m.do.co/c/933831d60a1e) (please use this link to support Cloudron development).
+To run the Cloudron on DigitalOcean, first sign up with [DigitalOcean](https://m.do.co/c/933831d60a1e) (Use this referral link to get $10 credit).
 
-The minimum requirements for a Cloudron depends on the apps installed. The absolute minimum required Droplet is `1gb`.
+The minimum requirements for a Cloudron depends on the apps installed. The absolute minimum Droplet required is `1gb`.
 
-All backups on DigitalOcean Cloudrons are currently stored locally at `/var/backups`. We recommend to download backups from time to time to a different location using `cloudron machine backup download --help`.
+All backups on DigitalOcean Cloudrons are stored locally at `/var/backups`. We recommend to download backups from time to time to a different location using `cloudron machine backup download`.
 
 <a id="setup-1"></a>
 ### Setup
 
-Open the DigitalOcean console and perform the following actions in case you have not done that yet:
+Open the DigitalOcean console and do the following:
 
-1. Create an API token with read+write access
+1. Create an API token with read+write access.
 
-2. Upload the SSH key which you intend to use for your Cloudron
+2. Upload the SSH key which you intend to use for your Cloudron.
 
-3. Add the domain you intend to use for your Cloudron. Due to how the DigitalOcean interface works, you have to provide a dummy IP to add a domain. This will be overwritten later by the Cloudron.
+3. Add the domain you intend to use for your Cloudron. Due to how the DigitalOcean interface works, you have to provide a dummy IPv4 to add a domain. This will be overwritten later by the Cloudron.
 
 <a id="create-the-cloudron-1"></a>
 ### Create the Cloudron
@@ -222,16 +222,18 @@ The `--region` is the region where your Cloudron is to be created. For example, 
 regions can be obtained <a href="https://developers.digitalocean.com/documentation/v2/#regions" target="_blank">here</a>.
 
 The `--ssh-key` is the path to a PEM file or the private SSH Key. If your key is located as `~/.ssh/id_rsa_<name>`, you can
-also simply provide the `name` as the argument.
+also simply provide `name` as the argument.
 
-The `--backup-key '<secret>'` will be used to encrypt all backups prior to uploading to S3. Keep that secret in a safe place, as you need it to restore your Cloudron from a backup! You can generate a random key using `pwgen -1y 64`. Be sure to put single quotes
+The `--backup-key '<secret>'` will be used to encrypt all backups. Keep that secret in a safe place, as you need it to restore your Cloudron from a backup! You can generate a random key using `pwgen -1y 64`. Be sure to put single quotes
 around the `secret` to prevent accidental shell expansion.
 
-**NOTE**: see `cloudron machine create digitalocean --help` for all available options.
+**NOTE**: See `cloudron machine create digitalocean --help` for all available options.
 
 ## First time setup
 
 Visit `https://my.<domain>` to do first time setup of your Cloudron.
+
+Please note the following:
 
 1. The website should already have a valid TLS certificate. If you see any certificate warnings, it means your Cloudron was not created correctly.
 2. If you see a login screen, instead of a setup screen, it means that someone else got to your Cloudron first and set it up
