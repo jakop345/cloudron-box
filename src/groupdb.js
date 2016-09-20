@@ -22,6 +22,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    constants = require('./constants.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror');
 
@@ -217,5 +218,5 @@ function isMember(groupId, userId, callback) {
 }
 
 function addDefaultGroups(callback) {
-    add('admin', 'admin', callback);
+    add(constants.ADMIN_GROUP_ID, 'admin', callback);
 }

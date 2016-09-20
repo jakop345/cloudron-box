@@ -288,7 +288,7 @@ function listUsers(callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         results.forEach(function (result) {
-            result.admin = result.groupIds.indexOf(groups.ADMIN_GROUP_ID) !== -1;
+            result.admin = result.groupIds.indexOf(constants.ADMIN_GROUP_ID) !== -1;
         });
         return callback(null, results);
     });
@@ -316,7 +316,7 @@ function getUser(userId, callback) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             result.groupIds = groupIds;
-            result.admin = groupIds.indexOf(groups.ADMIN_GROUP_ID) !== -1;
+            result.admin = groupIds.indexOf(constants.ADMIN_GROUP_ID) !== -1;
 
             return callback(null, result);
         });
@@ -387,8 +387,8 @@ function setGroups(userId, groupIds, callback) {
             if (error && error.reason === GroupError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, 'One or more groups not found'));
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            var isAdmin = groupIds.some(function (g) { return g === groups.ADMIN_GROUP_ID; });
-            var wasAdmin = oldGroupIds.some(function (g) { return g === groups.ADMIN_GROUP_ID; });
+            var isAdmin = groupIds.some(function (g) { return g === constants.ADMIN_GROUP_ID; });
+            var wasAdmin = oldGroupIds.some(function (g) { return g === constants.ADMIN_GROUP_ID; });
 
             if ((isAdmin && !wasAdmin) || (!isAdmin && wasAdmin)) {
                 getUser(userId, function (error, result) {
@@ -499,7 +499,7 @@ function createOwner(username, password, email, displayName, auditSource, callba
         createUser(username, password, email, displayName, auditSource, { owner: true }, function (error, user) {
             if (error) return callback(error);
 
-            groups.addMember(groups.ADMIN_GROUP_ID, user.id, function (error) {
+            groups.addMember(constants.ADMIN_GROUP_ID, user.id, function (error) {
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 callback(null, user);

@@ -14,13 +14,12 @@ exports = module.exports = {
 
 var assert = require('assert'),
     clients = require('../clients.js'),
+    constants = require('../constants.js'),
     generatePassword = require('../password.js').generate,
-    groups = require('../groups.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     oauth2 = require('./oauth2.js'),
     user = require('../user.js'),
-    tokendb = require('../tokendb.js'),
     UserError = user.UserError,
     _ = require('underscore');
 
@@ -182,7 +181,7 @@ function setGroups(req, res, next) {
     if (!Array.isArray(req.body.groupIds)) return next(new HttpError(400, 'API call requires a groups array.'));
 
     // this route is only allowed for admins, so req.user has to be an admin
-    if (req.user.id === req.params.userId && req.body.groupIds.indexOf(groups.ADMIN_GROUP_ID) === -1) return next(new HttpError(403, 'Admin removing itself from admins is not allowed'));
+    if (req.user.id === req.params.userId && req.body.groupIds.indexOf(constants.ADMIN_GROUP_ID) === -1) return next(new HttpError(403, 'Admin removing itself from admins is not allowed'));
 
     user.setGroups(req.params.userId, req.body.groupIds, function (error) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'One or more groups not found'));

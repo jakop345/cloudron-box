@@ -18,10 +18,10 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    constants = require('./constants.js'),
     database = require('./database.js'),
     debug = require('debug')('box:userdb'),
-    DatabaseError = require('./databaseerror'),
-    groups = require('./groups.js');
+    DatabaseError = require('./databaseerror');
 
 var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'resetToken', 'displayName', 'showTutorial' ].join(',');
 
@@ -76,7 +76,7 @@ function getOwner(callback) {
 
     // the first created user it the admin
     database.query('SELECT ' + USERS_FIELDS + ' FROM users, groupMembers WHERE groupMembers.groupId = ? AND users.id = groupMembers.userId ORDER BY createdAt LIMIT 1',
-            [ groups.ADMIN_GROUP_ID ], function (error, result) {
+            [ constants.ADMIN_GROUP_ID ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -119,7 +119,7 @@ function getAllWithGroupIds(callback) {
 function getAllAdmins(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + USERS_FIELDS + ' FROM users, groupMembers WHERE groupMembers.groupId = ? AND users.id = groupMembers.userId ORDER BY username', [ groups.ADMIN_GROUP_ID ], function (error, results) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users, groupMembers WHERE groupMembers.groupId = ? AND users.id = groupMembers.userId ORDER BY username', [ constants.ADMIN_GROUP_ID ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         results.forEach(postProcess);

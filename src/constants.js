@@ -14,6 +14,8 @@ exports = module.exports = {
     ADMIN_CLIENT_ID: 'webadmin', // oauth client id
     ADMIN_APPID: 'admin', // admin appid (settingsdb)
 
+    ADMIN_GROUP_ID: 'admin',
+
     GHOST_USER_FILE: '/tmp/cloudron_ghost.json',
 
     DEFAULT_TOKEN_EXPIRATION: 7 * 24 * 60 * 60 * 1000, // 1 week

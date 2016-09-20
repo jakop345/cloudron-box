@@ -6,6 +6,7 @@
 'use strict';
 
 var config = require('../../config.js'),
+    constants = require('../../constants.js'),
     database = require('../../database.js'),
     tokendb = require('../../tokendb.js'),
     expect = require('expect.js'),
@@ -294,7 +295,7 @@ describe('User API', function () {
     it('set second user as admin succeeds', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + user_1.id + '/groups')
                .query({ access_token: token })
-               .send({ groupIds: [ groups.ADMIN_GROUP_ID ] })
+               .send({ groupIds: [ constants.ADMIN_GROUP_ID ] })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(204);
 
@@ -319,7 +320,7 @@ describe('User API', function () {
 
             res.body.users.forEach(function (user) {
                 expect(user.admin).to.be(true);
-                expect(user.groupIds).to.eql([ groups.ADMIN_GROUP_ID ]);
+                expect(user.groupIds).to.eql([ constants.ADMIN_GROUP_ID ]);
             });
             done();
         });

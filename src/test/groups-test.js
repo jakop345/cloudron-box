@@ -7,6 +7,7 @@
 'use strict';
 
 var async = require('async'),
+    constants = require('../constants.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
     groups = require('../groups.js'),
@@ -287,7 +288,7 @@ describe('Admin group', function () {
     after(cleanup);
 
     it('cannot delete admin group ever', function (done) {
-        groups.remove(groups.ADMIN_GROUP_ID, function (error) {
+        groups.remove(constants.ADMIN_GROUP_ID, function (error) {
             expect(error.reason).to.equal(GroupError.NOT_ALLOWED);
 
             done();

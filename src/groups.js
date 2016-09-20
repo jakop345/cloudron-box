@@ -16,12 +16,11 @@ exports = module.exports = {
     isMember: isMember,
 
     getGroups: getGroups,
-    setGroups: setGroups,
-
-    ADMIN_GROUP_ID: 'admin' // see db migration code and groupdb._clear
+    setGroups: setGroups
 };
 
 var assert = require('assert'),
+    constants = require('./constants.js'),
     DatabaseError = require('./databaseerror.js'),
     groupdb = require('./groupdb.js'),
     util = require('util');
@@ -88,7 +87,7 @@ function remove(id, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     // never allow admin group to be deleted
-    if (id === exports.ADMIN_GROUP_ID) return callback(new GroupError(GroupError.NOT_ALLOWED));
+    if (id === constants.ADMIN_GROUP_ID) return callback(new GroupError(GroupError.NOT_ALLOWED));
 
     groupdb.del(id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));

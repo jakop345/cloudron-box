@@ -634,7 +634,7 @@ describe('User', function () {
 
                 user1.id = result.id;
 
-                user.setGroups(user1.id, [ groups.ADMIN_GROUP_ID ], function (error) {
+                user.setGroups(user1.id, [ constants.ADMIN_GROUP_ID ], function (error) {
                     expect(error).to.not.be.ok();
 
                     // one mail for user creation, one mail for admin change
@@ -644,7 +644,7 @@ describe('User', function () {
         });
 
         it('add user to non admin group does not trigger admin mail', function (done) {
-            user.setGroups(user1.id, [ groups.ADMIN_GROUP_ID, NON_ADMIN_GROUP ], function (error) {
+            user.setGroups(user1.id, [ constants.ADMIN_GROUP_ID, NON_ADMIN_GROUP ], function (error) {
                 expect(error).to.equal(null);
 
                 checkMails(0, done);
@@ -687,7 +687,7 @@ describe('User', function () {
 
                 user1.id = result.id;
 
-                groups.setGroups(user1.id, [ groups.ADMIN_GROUP_ID ], function (error) {
+                groups.setGroups(user1.id, [ constants.ADMIN_GROUP_ID ], function (error) {
                     expect(error).to.eql(null);
 
                     user.getAllAdmins(function (error, admins) {
