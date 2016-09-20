@@ -128,4 +128,4 @@ CREATE TABLE IF NOT EXISTS mailboxes(
     aliasTarget VARCHAR(128), /* the target name type is an alias */
     creationTime TIMESTAMP,
 
-    PRIMARY KEY (id));
+    PRIMARY KEY (name));
