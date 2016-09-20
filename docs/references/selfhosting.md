@@ -2,6 +2,8 @@
 
 The Cloudron platform can be installed on your own cloud server. The self hosted version comes with all the same features as the managed version.
 
+If you have any questions, join us at our [chat](https://chat.cloudron.io).
+
 ## CLI Tool
 
 The [Cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) is used for managing a Cloudron. It has a `machine`
@@ -362,7 +364,7 @@ If you are unable to connect, verify the following:
 
 Spammers frequently abuse EC2 public IP addresses and as a result your Cloudron might possibly start out with a bad
 reputation. The good news is that most IP based blacklisting services cool down over time. The Cloudron
-sets up DNS entries for SPF, DKIM automatically and reputation should be easy to get back.
+sets up DNS entries for SPF, DKIM, DMARC automatically and reputation should be easy to get back.
 
 * Once your Cloudron is ready, apply for a Reverse DNS record to be setup for your domain. You can find the AWS request
 form [here](https://aws-portal.amazon.com/gp/aws/html-forms-controller/contactus/ec2-email-limit-rdns-request).
@@ -383,6 +385,17 @@ You can also [SSH](#ssh) into your Cloudron and collect logs.
 * `journalctl -a -u box -u cloudron-installer` to get debug output of box related code.
 * `docker ps` will give you the list of containers. The addon containers are named as `mail`, `postgresql`, `mysql` etc. If you want to get a specific
    containers log output, `journalctl -a CONTAINER_ID=<container_id>`.
+
+## Hotfixing
+
+Hotfixing is the process of patching your Cloudron to run the latest git code. This is useful if require a patch urgently and for testing and development. Note that it is ot possible to hotfix between arbitrary git revisions (for example, if there is some
+db migration involved), so use this with care.
+
+To hotfix your cloudron, run the following from the `box` code checkout:
+
+```
+    cloudron machine hotfix --ssh-key <key> <domain>
+```
 
 ## Other Providers
 
