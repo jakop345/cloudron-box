@@ -2,7 +2,6 @@
 
 set -eu
 
-readonly ADMIN_LOCATION=admin
 readonly source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 
 ! "${source_dir}/src/test/checkInstall" && exit 1
@@ -16,21 +15,6 @@ mkdir -p data/appdata data/box/appicons data/mail data/nginx/cert data/nginx/app
 # put cert
 openssl req -x509 -newkey rsa:2048 -keyout data/nginx/cert/host.key -out data/nginx/cert/host.cert -days 3650 -subj '/CN=localhost' -nodes
 
-webadmin_scopes="cloudron,profile,users,apps,settings"
-webadmin_origin="https://${ADMIN_LOCATION}-localhost"
-
 # create docker network (while the infra code does this, most tests skip infra setup)
 docker network create --subnet=172.18.0.0/16 cloudron || true
 
-# !!!!!! check clientdb.js clear() to not nuke those entries
-echo "Add webadmin api client"
-mysql --user=root --password="" \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"Settings\", \"built-in\", \"secret-webadmin\", \"${webadmin_origin}\", \"${webadmin_scopes}\")" boxtest
-
-echo "Add SDK api client"
-mysql --user=root --password="" \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-sdk\", \"SDK\", \"built-in\", \"secret-sdk\", \"${webadmin_origin}\", \"*,roleSdk\")" boxtest
-
-echo "Add cli api client"
-mysql --user=root --password="" \
-    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-cli\", \"Cloudron Tool\", \"built-in\", \"secret-cli\", \"${webadmin_origin}\", \"*,roleSdk\")" boxtest

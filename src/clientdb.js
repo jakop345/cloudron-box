@@ -1,5 +1,3 @@
-/* jslint node:true */
-
 'use strict';
 
 exports = module.exports = {
@@ -15,10 +13,12 @@ exports = module.exports = {
     delByAppId: delByAppId,
     delByAppIdAndType: delByAppIdAndType,
 
-    _clear: clear
+    _clear: clear,
+    _addDefaultClients: addDefaultClients
 };
 
 var assert = require('assert'),
+    async = require('async'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js');
 
@@ -159,3 +159,10 @@ function clear(callback) {
     });
 }
 
+function addDefaultClients(callback) {
+    async.series([
+        add.bind(null, 'cid-webadmin', 'Settings', 'built-in', 'secret-webadmin', 'https://admin-localhost', 'cloudron,profile,users,apps,settings'),
+        add.bind(null, 'cid-sdk', 'SDK', 'built-in', 'secret-sdk', 'https://admin-localhost', '*,roleSdk'),
+        add.bind(null, 'cid-cli', 'Cloudron Tool', 'built-in', 'secret-cli', 'https://admin-localhost', '*,roleSdk')
+    ], callback);
+}

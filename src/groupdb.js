@@ -17,7 +17,8 @@ exports = module.exports = {
     getGroups: getGroups,
     setGroups: setGroups,
 
-    _clear: clear
+    _clear: clear,
+    _addDefaultGroups: addDefaultGroups
 };
 
 var assert = require('assert'),
@@ -213,4 +214,8 @@ function isMember(groupId, userId, callback) {
 
         callback(null, result.length !== 0);
     });
+}
+
+function addDefaultGroups(callback) {
+    add('admin', 'admin', callback);
 }

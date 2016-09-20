@@ -15,9 +15,10 @@ exports = module.exports = {
 
 var assert = require('assert'),
     async = require('async'),
-    once = require('once'),
+    child_process = require('child_process'),
     config = require('./config.js'),
     mysql = require('mysql'),
+    once = require('once'),
     util = require('util');
 
 var gConnectionPool = null,
@@ -93,18 +94,14 @@ function reconnect(callback) {
 function clear(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    // the clear funcs don't completely clear the db, they leave the migration code defaults
+    var cmd = util.format('mysql --host=%s --user="%s" --password="%s" -Nse "SHOW TABLES" %s | grep -v "^migrations$" | while read table; do mysql --host=%s --user="%s" --password="%s" -e "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE $table" %s; done',
+        config.database().hostname, config.database().username, config.database().password, config.database().name,
+        config.database().hostname, config.database().username, config.database().password, config.database().name);
+
     async.series([
-        require('./appdb.js')._clear,
-        require('./authcodedb.js')._clear,
-        require('./backupdb.js')._clear,
-        require('./clientdb.js')._clear,
-        require('./tokendb.js')._clear,
-        require('./groupdb.js')._clear,
-        require('./userdb.js')._clear,
-        require('./settingsdb.js')._clear,
-        require('./eventlogdb.js')._clear,
-        require('./mailboxdb.js')._clear
+        child_process.exec.bind(null, cmd),
+        require('./clientdb.js')._addDefaultClients,
+        require('./groupdb.js')._addDefaultGroups
     ], callback);
 }
 

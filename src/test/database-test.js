@@ -248,17 +248,6 @@ describe('database', function () {
                 done();
             });
         });
-
-        it('can clear table', function (done) {
-            userdb._clear(function (error) {
-                expect(error).to.not.be.ok();
-                userdb.count(function (error, count) {
-                    expect(error).to.not.be.ok();
-                    expect(count).to.equal(0);
-                    done();
-                });
-            });
-        });
     });
 
     describe('authcode', function () {
