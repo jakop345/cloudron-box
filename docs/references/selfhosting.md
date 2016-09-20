@@ -189,69 +189,20 @@ around the `secret` to prevent accidental shell expansion.
 
 To run the Cloudron on DigitalOcean, first sign up with [DigitalOcean](https://m.do.co/c/933831d60a1e) (please use this link to support Cloudron development).
 
-In addition to that, currently the Cloudron uses still the following AWS services:
-
-* **Route53** for DNS. The Cloudron will manage all app subdomains as well as the email related DNS records automatically.
-* **S3** to store encrypted Cloudron backups.
-
-
 The minimum requirements for a Cloudron depends on the apps installed. The absolute minimum required Droplet is `1gb`.
+
+All backups on DigitalOcean Cloudrons are currently stored locally at `/var/backups`. We recommend to download backups from time to time to a different location using `cloudron machine backup download --help`.
 
 <a id="setup-1"></a>
 ### Setup
 
 Open the DigitalOcean console and perform the following actions in case you have not done that yet:
 
-1. Create an API token
+1. Create an API token with read+write access
 
 2. Upload the SSH key which you intend to use for your Cloudron
 
-
-Open the AWS console and create the required resources:
-
-1. Create a Route53 zone for your domain. Be sure to set the Route53 nameservers for your domain in your name registrar. Note: Only Second Level Domains are supported.
-   For example, `example.com`, `example.co.uk` will work fine. Choosing a domain name at any other level like `cloudron.example.com` will not work.
-
-2. Create a S3 bucket for backups. The bucket region should be a similar geographic region as where you intend to create your Cloudron Droplet.
-
-3. Create AWS credentials. You can either use root **or** IAM credentials.
-  * For root credentials:
-    * In AWS Console, under your name in the menu bar, click `Security Credentials`
-    * Click on `Access Keys` and create a key pair.
-  * For IAM credentials:
-    * You can use the following policy to create IAM credentials:
-```
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": "route53:*",
-            "Resource": [
-                "arn:aws:route53:::hostedzone/<hosted zone id>"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "route53:ListHostedZones",
-                "route53:GetChange"
-            ],
-            "Resource": [
-                "*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": "s3:*",
-            "Resource": [
-                "arn:aws:s3:::<your bucket name>",
-                "arn:aws:s3:::<your bucket name>/*"
-            ]
-        }
-    ]
-}
-```
+3. Add the domain you intend to use for your Cloudron. Due to how the DigitalOcean interface works, you have to provide a dummy IP to add a domain. This will be overwritten later by the Cloudron.
 
 <a id="create-the-cloudron-1"></a>
 ### Create the Cloudron
@@ -263,11 +214,7 @@ cloudron machine create digitalocean \
         --fqdn <domain> \
         --region <digitalocean-region> \
         --token <digitalocean-api-token> \
-        --aws-region <aws-region> \
         --ssh-key <ssh-key-name-or-filepath> \
-        --access-key-id <aws-access-key-id> \
-        --secret-access-key <aws-access-key-secret> \
-        --backup-bucket <bucket-name> \
         --backup-key <backup-key>
 ```
 
@@ -288,7 +235,7 @@ Visit `https://my.<domain>` to do first time setup of your Cloudron.
 
 1. The website should already have a valid TLS certificate. If you see any certificate warnings, it means your Cloudron was not created correctly.
 2. If you see a login screen, instead of a setup screen, it means that someone else got to your Cloudron first and set it up
-already! In this unlikely case, simply delete the EC2 instance and create a new Cloudron again.
+already! In this unlikely case, simply delete the instance and create a new Cloudron again.
 
 Once the setup is done, you can access the admin page in the future at `https://my.<domain>`.
 
