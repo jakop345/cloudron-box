@@ -20,6 +20,8 @@ exports = module.exports = {
     getOwner: getOwner,
     sendInvite: sendInvite,
     setGroups: setGroups,
+    setAliases: setAliases,
+    getAliases: getAliases,
     setShowTutorial: setShowTutorial
 };
 
@@ -183,8 +185,6 @@ function createUser(username, password, email, displayName, auditSource, options
             };
 
             asyncIf(!!username, mailboxdb.add.bind(null, username, user.id /* owner */, mailboxdb.TYPE_USER), function (error) {
-                if (error) return callback(error);
-
                 if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
@@ -372,7 +372,7 @@ function updateUser(userId, data, auditSource, callback) {
         if (error) return callback(error);
     }
 
-    function doUpdate(error, callback) {
+    asyncIf(!!data.username, mailboxdb.upsertByOwner.bind(null, userId /* owner */, mailboxdb.TYPE_USER, data.username), function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
@@ -385,13 +385,7 @@ function updateUser(userId, data, auditSource, callback) {
 
             callback(null);
         });
-    }
-
-    if (data.username) {
-        mailboxdb.add(data.username, userId /* owner */, mailboxdb.TYPE_USER, doUpdate);  // TODO: do this only when username actually changes
-    } else {
-        doUpdate(null, callback);
-    }
+    });
 }
 
 function setGroups(userId, groupIds, callback) {
@@ -569,5 +563,49 @@ function setShowTutorial(userId, showTutorial, callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         callback(null);
+    });
+}
+
+function setAliases(userId, aliases, callback) {
+    assert.strictEqual(typeof userId, 'string');
+    assert(util.isArray(aliases));
+    assert.strictEqual(typeof callback, 'function');
+
+    for (var i = 0; i < aliases.length; i++) {
+        aliases[i] = aliases[i].toLowerCase();
+
+        var error = validateUsername(aliases[i]);
+        if (error) return callback(error);
+    }
+
+    userdb.get(userId, function (error, user) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        mailboxdb.setAliases(user.username, aliases, userId, mailboxdb.TYPE_USER, function (error) {
+            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+
+            callback(null);
+        });
+    });
+}
+
+function getAliases(userId, callback) {
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    userdb.get(userId, function (error, user) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        mailboxdb.getAliases(user.username, function (error, aliases) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            callback(null, aliases);
+        });
     });
 }

@@ -12,6 +12,7 @@ var async = require('async'),
     fs = require('fs'),
     groupdb = require('../groupdb.js'),
     groups = require('../groups.js'),
+    mailboxdb = require('../mailboxdb.js'),
     mailer = require('../mailer.js'),
     user = require('../user.js'),
     userdb = require('../userdb.js'),
@@ -33,6 +34,7 @@ function cleanupUsers(done) {
     async.series([
         groupdb._clear,
         userdb._clear,
+        mailboxdb._clear,
         mailer._clearMailQueue
     ], done);
 }

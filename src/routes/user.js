@@ -9,7 +9,9 @@ exports = module.exports = {
     verifyPassword: verifyPassword,
     requireAdmin: requireAdmin,
     sendInvite: sendInvite,
-    setGroups: setGroups
+    setGroups: setGroups,
+    setAliases: setAliases,
+    getAliases: getAliases
 };
 
 var assert = require('assert'),
@@ -21,6 +23,7 @@ var assert = require('assert'),
     oauth2 = require('./oauth2.js'),
     user = require('../user.js'),
     UserError = user.UserError,
+    util = require('util'),
     _ = require('underscore');
 
 function auditSource(req) {
@@ -188,5 +191,35 @@ function setGroups(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(204));
+    });
+}
+
+function setAliases(req, res, next) {
+    assert.strictEqual(typeof req.params.userId, 'string');
+
+    if (!util.isArray(req.body.aliases)) return next(new HttpError(400, 'aliases must be an array'));
+
+    for (var i = 0; i < req.body.aliases.length; i++) {
+        if (typeof req.body.aliases[i] !== 'string') return next(new HttpError(400, 'alias must be a string'));
+    }
+
+    user.setAliases(req.params.userId, req.body.aliases, function (error) {
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
+        if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'One or more aliases already exist'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200));
+    });
+}
+
+function getAliases(req, res, next) {
+    assert.strictEqual(typeof req.params.userId, 'string');
+
+    user.getAliases(req.params.userId, function (error, aliases) {
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, { aliases: aliases }));
     });
 }

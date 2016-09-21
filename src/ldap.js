@@ -8,13 +8,13 @@ exports = module.exports = {
 var assert = require('assert'),
     apps = require('./apps.js'),
     config = require('./config.js'),
+    DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:ldap'),
     eventlog = require('./eventlog.js'),
     user = require('./user.js'),
     UserError = user.UserError,
     ldap = require('ldapjs'),
-    mailboxes = require('./mailboxes.js'),
-    MailboxError = mailboxes.MailboxError,
+    mailboxdb = require('./mailboxdb.js'),
     safe = require('safetydance');
 
 var gServer = null;
@@ -232,8 +232,8 @@ function authorizeUserForMailbox(req, res, next) {
     assert(req.user);
 
     // We simply authorize the user to access a mailbox by his own name
-    mailboxes.get(req.user.username, function (error) {
-        if (error && error.reason === MailboxError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+    mailboxdb.get(req.user.username, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.message));
 
         eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', mailboxId: req.user.username }, { userId: req.user.username });

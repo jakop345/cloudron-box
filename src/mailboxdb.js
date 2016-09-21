@@ -3,6 +3,7 @@
 exports = module.exports = {
     add: add,
     del: del,
+    upsertByOwner: upsertByOwner,
     get: get,
     getAll: getAll,
     getAliases: getAliases,
@@ -29,7 +30,21 @@ function add(name, ownerId, ownerType, callback) {
     assert.strictEqual(typeof ownerType, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('INSERT INTO mailboxes (name, ownerId, ownerType) VALUES (?, ?, ?)', [ name, ownerId, ownerType ], function (error) {
+    database.query('INSERT INTO mailboxes (name, ownerId, ownerType) VALUES (?, ?, ?)', [ name, ownerId, ownerType, name ], function (error) {
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null);
+    });
+}
+
+function upsertByOwner(ownerId, ownerType, name, callback) {
+    assert.strictEqual(typeof ownerId, 'string');
+    assert.strictEqual(typeof ownerType, 'string');
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('INSERT INTO mailboxes (name, ownerId, ownerType) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name=?', [ name, ownerId, ownerType, name ], function (error) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 

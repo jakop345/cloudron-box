@@ -115,6 +115,8 @@ function initializeExpressSync() {
     router.del ('/api/v1/users/:userId', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.user.remove);
     router.post('/api/v1/users/:userId', usersScope, routes.user.requireAdmin, routes.user.update);
     router.put ('/api/v1/users/:userId/groups', usersScope, routes.user.requireAdmin, routes.user.setGroups);
+    router.get ('/api/v1/users/:userId/aliases', usersScope, routes.user.requireAdmin, routes.user.getAliases);
+    router.put ('/api/v1/users/:userId/aliases', usersScope, routes.user.requireAdmin, routes.user.setAliases);
     router.post('/api/v1/users/:userId/invite', usersScope, routes.user.requireAdmin, routes.user.sendInvite);
 
     // Group management
@@ -122,14 +124,6 @@ function initializeExpressSync() {
     router.post('/api/v1/groups', usersScope, routes.user.requireAdmin, routes.groups.create);
     router.get ('/api/v1/groups/:groupId', usersScope, routes.user.requireAdmin, routes.groups.get);
     router.del ('/api/v1/groups/:groupId', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.groups.remove);
-
-    // Mailbox management
-    router.get ('/api/v1/mailboxes', usersScope, routes.user.requireAdmin, routes.mailboxes.list);
-    router.post('/api/v1/mailboxes', usersScope, routes.user.requireAdmin, routes.mailboxes.create);
-    router.get ('/api/v1/mailboxes/:mailboxId', usersScope, routes.user.requireAdmin, routes.mailboxes.get);
-    router.del ('/api/v1/mailboxes/:mailboxId', usersScope, routes.user.requireAdmin, routes.mailboxes.remove);
-    router.put ('/api/v1/mailboxes/:mailboxId/aliases', usersScope, routes.user.requireAdmin, routes.mailboxes.setAliases);
-    router.get ('/api/v1/mailboxes/:mailboxId/aliases', usersScope, routes.user.requireAdmin, routes.mailboxes.getAliases);
 
     // form based login routes used by oauth2 frame
     router.get ('/api/v1/session/login', csrf, routes.oauth2.loginForm);
