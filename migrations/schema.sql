@@ -125,6 +125,8 @@ CREATE TABLE IF NOT EXISTS eventlog(
 */
 CREATE TABLE IF NOT EXISTS mailboxes(
     name VARCHAR(128) NOT NULL,
+    ownerId VARCHAR(128) NOT NULL, /* app id or user id or group id */
+    ownerType VARCHAR(16) NOT NULL, /* 'app' or 'user' or 'group' */
     aliasTarget VARCHAR(128), /* the target name type is an alias */
     creationTime TIMESTAMP,
 
