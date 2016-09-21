@@ -64,6 +64,9 @@ function validateGroupname(name) {
 
     if (RESERVED.indexOf(name) !== -1) return new GroupError(GroupError.BAD_FIELD, 'name is reserved');
 
+    // app emails are sent using the .app suffix
+    if (name.indexOf('.app') !== -1) return new GroupError(GroupError.BAD_FIELD, 'name pattern is reserved for apps');
+
     return null;
 }
 
