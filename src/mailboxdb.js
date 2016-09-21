@@ -16,7 +16,7 @@ var assert = require('assert'),
     DatabaseError = require('./databaseerror.js'),
     util = require('util');
 
-var MAILBOX_FIELDS = [ 'name', 'aliasTarget', 'creationTime' ].join(',');
+var MAILBOX_FIELDS = [ 'name', 'ownerId', 'ownerType', 'aliasTarget', 'creationTime' ].join(',');
 
 function add(name, callback) {
     assert.strictEqual(typeof name, 'string');
