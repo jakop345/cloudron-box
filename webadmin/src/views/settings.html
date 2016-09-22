@@ -252,7 +252,7 @@
     </div>
 
     <!-- If a backup is blocked (not triggered), the UI does not give feedback currently. This button is only available in dev at the moment! -->
-    <div class="row" ng-show="config.isDev">
+    <div class="row" ng-show="backupConfig.provider !== 'caas' || config.isDev">
         <br/>
         <div class="col-xs-9">
             <div ng-show="createBackup.busy" class="progress progress-striped active animateMe">
