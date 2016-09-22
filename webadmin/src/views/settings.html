@@ -235,7 +235,8 @@
             <span class="text-muted">Location</span>
         </div>
         <div class="col-xs-6 text-right">
-            <span>{{ backupConfig.backupFolder || (backupConfig.region + '   ' + backupConfig.bucket + '/' + bucketConfig.prefix) }}</span>
+            <span ng-show="backupConfig.provider === 'filesystem'">{{ backupConfig.backupFolder }}</span>
+            <span ng-show="backupConfig.provider === 's3'">{{ backupConfig.region + '   ' + backupConfig.bucket + '/' + bucketConfig.prefix }}</span>
         </div>
     </div>
 
