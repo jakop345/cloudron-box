@@ -66,11 +66,16 @@
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.fqdn }}</td>
                 </tr>
 
-                <tr ng-show="config.isCustomDomain">
+                <tr>
+                    <td class="text-muted" style="vertical-align: top;">DNS Provider</td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ dnsConfig.provider }}</td>
+                </tr>
+
+                <tr ng-show="config.isCustomDomain && (dnsConfig.provider === 'route53' || dnsConfig.provider === 'caas')">
                     <td class="text-muted" style="vertical-align: top;">Access Key Id</td>
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ dnsConfig.accessKeyId || 'unset' }}</td>
                 </tr>
-                <tr ng-show="config.isCustomDomain">
+                <tr ng-show="config.isCustomDomain && (dnsConfig.provider === 'route53' || dnsConfig.provider === 'caas')">
                     <td class="text-muted" style="vertical-align: top;">Secret Access Key</td>
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;"><i>hidden</i></td>
                 </tr>
