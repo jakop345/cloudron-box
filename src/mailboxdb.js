@@ -7,8 +7,13 @@ exports = module.exports = {
     getAll: getAll,
     getAliases: getAliases,
     setAliases: setAliases,
+    delByOwnerId: delByOwnerId,
 
-    _clear: clear
+    _clear: clear,
+
+    TYPE_USER: 'user',
+    TYPE_APP: 'app',
+    TYPE_GROUP: 'group'
 };
 
 var assert = require('assert'),
@@ -18,11 +23,13 @@ var assert = require('assert'),
 
 var MAILBOX_FIELDS = [ 'name', 'ownerId', 'ownerType', 'aliasTarget', 'creationTime' ].join(',');
 
-function add(name, callback) {
+function add(name, ownerId, ownerType, callback) {
     assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof ownerId, 'string');
+    assert.strictEqual(typeof ownerType, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('INSERT INTO mailboxes (name) VALUES (?)', [ name ], function (error) {
+    database.query('INSERT INTO mailboxes (name, ownerId, ownerType) VALUES (?, ?, ?)', [ name, ownerId, ownerType ], function (error) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -45,6 +52,19 @@ function del(name, callback) {
 
     // deletes aliases as well
     database.query('DELETE FROM mailboxes WHERE name=? OR aliasTarget = ?', [ name, name ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.affectedRows === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null);
+    });
+}
+
+function delByOwnerId(id, callback) {
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    // deletes aliases as well
+    database.query('DELETE FROM mailboxes WHERE ownerId=?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.affectedRows === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -94,16 +114,18 @@ function getAll(callback) {
     });
 }
 
-function setAliases(name, aliases, callback) {
+function setAliases(name, aliases, ownerId, ownerType, callback) {
     assert.strictEqual(typeof name, 'string');
     assert(util.isArray(aliases));
+    assert.strictEqual(typeof ownerId, 'string');
+    assert.strictEqual(typeof ownerType, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     // also cleanup the groupMembers table
     var queries = [];
     queries.push({ query: 'DELETE FROM mailboxes WHERE aliasTarget = ?', args: [ name ] });
     aliases.forEach(function (alias) {
-        queries.push({ query: 'INSERT INTO mailboxes (name, aliasTarget) VALUES (?, ?)', args: [ alias, name ] });
+        queries.push({ query: 'INSERT INTO mailboxes (name, aliasTarget, ownerId, ownerType) VALUES (?, ?, ?, ?)', args: [ alias, name, ownerId, ownerType ] });
     });
 
     database.transaction(queries, function (error) {

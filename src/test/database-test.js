@@ -1181,14 +1181,14 @@ describe('database', function () {
 
     describe('mailboxes', function () {
         it('add succeeds', function (done) {
-            mailboxdb.add('support', function (error, mailbox) {
+            mailboxdb.add('support', 'osticket', mailboxdb.TYPE_APP, function (error, mailbox) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('cannot add dup entry', function (done) {
-            mailboxdb.add('support', function (error, mailbox) {
+            mailboxdb.add('support', 'support', mailboxdb.TYPE_USER, function (error, mailbox) {
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
             });
@@ -1216,27 +1216,27 @@ describe('database', function () {
         });
 
         it('can set alias', function (done) {
-            mailboxdb.setAliases('support2', [ 'support2', 'help' ], function (error) {
+            mailboxdb.setAliases('support', [ 'support2', 'help' ], 'support', 'user', function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('can get alias', function (done) {
-            mailboxdb.getAliases('support2', function (error, results) {
+            mailboxdb.getAliases('support', function (error, results) {
                 expect(error).to.be(null);
                 expect(results.length).to.be(2);
                 expect(results[0]).to.be('help');
-                expect(results[1]).to.be('support2')
+                expect(results[1]).to.be('support2');
                 done();
             });
         });
 
         it('unset aliases', function (done) {
-            mailboxdb.setAliases('support2', [ ], function (error) {
+            mailboxdb.setAliases('support', [ ], 'support', 'user', function (error) {
                 expect(error).to.be(null);
 
-                mailboxdb.getAliases('support2', function (error, results) {
+                mailboxdb.getAliases('support', function (error, results) {
                     expect(error).to.be(null);
                     expect(results.length).to.be(0);
                     done();
@@ -1252,4 +1252,3 @@ describe('database', function () {
         });
     });
 });
-

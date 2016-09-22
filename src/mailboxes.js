@@ -8,16 +8,12 @@ exports = module.exports = {
     setAliases: setAliases,
     getAliases: getAliases,
 
-    setupAliases: setupAliases,
-
     MailboxError: MailboxError
 };
 
 var assert = require('assert'),
-    async = require('async'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:mailboxes'),
-    docker = require('./docker.js'),
     mailboxdb = require('./mailboxdb.js'),
     util = require('util');
 
@@ -85,35 +81,17 @@ function add(name, callback) {
     });
 }
 
-function pushAlias(name, aliases, callback) {
-    if (process.env.BOX_ENV === 'test') return callback();
-
-    var cmd = [ '/addons/mail/service.sh', 'set-alias', name ].concat(aliases);
-
-    debug('pushing alias for %s : %j', name, aliases);
-
-    docker.execContainer('mail', cmd, { }, function (error) {
-        if (error) return callback(new MailboxError(MailboxError.EXTERNAL_ERROR, error));
-
-        callback();
-    });
-}
-
 function del(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    pushAlias(name, [ ], function (error) {
-        if (error) return callback(error);
+    mailboxdb.del(name, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
+        if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
 
-        mailboxdb.del(name, function (error) {
-            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
-            if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
+        debug('deleted mailbox %s', name);
 
-            debug('deleted mailbox %s', name);
-
-            callback();
-        });
+        callback();
     });
 }
 
@@ -151,17 +129,13 @@ function setAliases(name, aliases, callback) {
         if (error) return callback(error);
     }
 
-    pushAlias(name, aliases, function (error) {
-        if (error) return callback(error);
-
-        mailboxdb.setAliases(name, aliases, function (error) {
-            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new MailboxError(MailboxError.ALREADY_EXISTS, error.message));
-            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
-            if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
+    mailboxdb.setAliases(name, aliases, function (error) {
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new MailboxError(MailboxError.ALREADY_EXISTS, error.message));
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new MailboxError(MailboxError.NOT_FOUND));
+        if (error) return callback(new MailboxError(MailboxError.INTERNAL_ERROR, error));
 
 
-            callback(null);
-        });
+        callback(null);
     });
 }
 
@@ -176,23 +150,3 @@ function getAliases(name, callback) {
         callback(null, aliases);
     });
 }
-
-// push aliases to the mail container on startup
-function setupAliases(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    getAll(function (error, mailboxes) {
-        if (error) return callback(error);
-
-        async.each(mailboxes, function (mailbox, iteratorDone) {
-            getAliases(mailbox.name, function (error, aliases) {
-                if (error) return iteratorDone(error);
-
-                if (aliases.length === 0) return iteratorDone();
-
-                pushAlias(mailbox.name, aliases, iteratorDone);
-            });
-        }, callback);
-    });
-}
-

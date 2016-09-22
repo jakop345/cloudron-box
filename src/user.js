@@ -35,7 +35,7 @@ var assert = require('assert'),
     GroupError = groups.GroupError,
     hat = require('hat'),
     mailer = require('./mailer.js'),
-    mailboxes = require('./mailboxes.js'),
+    mailboxdb = require('./mailboxdb.js'),
     safe = require('safetydance'),
     tokendb = require('./tokendb.js'),
     userdb = require('./userdb.js'),
@@ -50,6 +50,12 @@ var CRYPTO_ITERATIONS = 10000; // iterations
 var CRYPTO_KEY_LENGTH = 512; // bits
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
+
+function asyncIf(cond, func, next) {
+    if (!cond) return next();
+
+    func(next);
+}
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
@@ -176,17 +182,23 @@ function createUser(username, password, email, displayName, auditSource, options
                 showTutorial: true
             };
 
-            userdb.add(user.id, user, function (error) {
+            asyncIf(!!username, mailboxdb.add.bind(null, username, user.id /* owner */, mailboxdb.TYPE_USER), function (error) {
+                if (error) return callback(error);
+
                 if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-                eventlog.add(eventlog.ACTION_USER_ADD, auditSource, { userId: user.id, email: user.email });
-                if (username) mailboxes.add(username, NOOP_CALLBACK);
+                userdb.add(user.id, user, function (error) {
+                    if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
+                    if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-                callback(null, user);
+                    eventlog.add(eventlog.ACTION_USER_ADD, auditSource, { userId: user.id, email: user.email });
 
-                if (!owner) mailer.userAdded(user, sendInvite);
-                if (sendInvite) mailer.sendInvite(user, invitor);
+                    callback(null, user);
+
+                    if (!owner) mailer.userAdded(user, sendInvite);
+                    if (sendInvite) mailer.sendInvite(user, invitor);
+                });
             });
         });
     });
@@ -272,9 +284,8 @@ function removeUser(userId, auditSource, callback) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             eventlog.add(eventlog.ACTION_USER_REMOVE, auditSource, { userId: userId });
-            if (user.username) mailboxes.del(user.username, NOOP_CALLBACK);
 
-            callback(null);
+            if (user.username) mailboxdb.delByOwnerId(user.id, callback); else callback();
 
             mailer.userRemoved(user);
         });
@@ -361,16 +372,26 @@ function updateUser(userId, data, auditSource, callback) {
         if (error) return callback(error);
     }
 
-    userdb.update(userId, data, function (error) {
+    function doUpdate(error, callback) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId });
-        if (data.username) mailboxes.add(data.username, NOOP_CALLBACK); // TODO: do this only when username actually changes
+        userdb.update(userId, data, function (error) {
+            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        callback(null);
-    });
+            eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId });
+
+            callback(null);
+        });
+    }
+
+    if (data.username) {
+        mailboxdb.add(data.username, userId /* owner */, mailboxdb.TYPE_USER, doUpdate);  // TODO: do this only when username actually changes
+    } else {
+        doUpdate(null, callback);
+    }
 }
 
 function setGroups(userId, groupIds, callback) {

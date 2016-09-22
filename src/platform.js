@@ -19,7 +19,6 @@ var apps = require('./apps.js'),
     fs = require('fs'),
     hat = require('hat'),
     infra = require('./infra_version.js'),
-    mailboxes = require('./mailboxes.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     settings = require('./settings.js'),
@@ -262,22 +261,18 @@ function startMail(callback) {
 
             shell.execSync('startMail', cmd);
 
-            mailboxes.setupAliases(function (error) {
-                if (error) return callback(error);
+            if (!mailConfig.enabled || process.env.BOX_ENV === 'test') return callback();
 
-                if (!mailConfig.enabled || process.env.BOX_ENV === 'test') return callback();
+            // Add MX and DMARC record. Note that DMARC policy depends on DKIM signing and thus works
+            // only if we use our internal mail server.
+            var records = [
+                { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=reject; pct=100"' ] },
+                { subdomain: '', type: 'MX', values: [ '10 ' + config.mailFqdn() + '.' ] }
+            ];
 
-                // Add MX and DMARC record. Note that DMARC policy depends on DKIM signing and thus works
-                // only if we use our internal mail server.
-                var records = [
-                    { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=reject; pct=100"' ] },
-                    { subdomain: '', type: 'MX', values: [ '10 ' + config.mailFqdn() + '.' ] }
-                ];
-
-                async.mapSeries(records, function (record, iteratorCallback) {
-                    subdomains.upsert(record.subdomain, record.type, record.values, iteratorCallback);
-                }, callback);
-            });
+            async.mapSeries(records, function (record, iteratorCallback) {
+                subdomains.upsert(record.subdomain, record.type, record.values, iteratorCallback);
+            }, callback);
         });
     });
 }
