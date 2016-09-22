@@ -71,14 +71,20 @@
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ dnsConfig.provider }}</td>
                 </tr>
 
-                <tr ng-show="config.isCustomDomain && (dnsConfig.provider === 'route53' || dnsConfig.provider === 'caas')">
+                <tr ng-show="config.isCustomDomain && dnsConfig.provider === 'route53'">
                     <td class="text-muted" style="vertical-align: top;">Access Key Id</td>
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ dnsConfig.accessKeyId || 'unset' }}</td>
                 </tr>
-                <tr ng-show="config.isCustomDomain && (dnsConfig.provider === 'route53' || dnsConfig.provider === 'caas')">
+                <tr ng-show="config.isCustomDomain && dnsConfig.provider === 'route53'">
                     <td class="text-muted" style="vertical-align: top;">Secret Access Key</td>
-                    <td class="text-right" style="vertical-align: top; white-space: nowrap;"><i>hidden</i></td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;" ng-click-reveal="{{ dnsConfig.secretAccessKey }}"><i>hidden</i></td>
                 </tr>
+
+                <tr ng-show="config.isCustomDomain && dnsConfig.provider === 'digitalocean'">
+                    <td class="text-muted" style="vertical-align: top;">API Token</td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;" ng-click-reveal="{{ dnsConfig.token }}"><i>hidden</i></td>
+                </tr>
+
                 <!-- add some space -->
                 <tr>
                     <td><br/></td>
