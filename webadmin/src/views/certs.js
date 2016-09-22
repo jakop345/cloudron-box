@@ -33,6 +33,7 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         customDomain: '',
         accessKeyId: '',
         secretAccessKey: '',
+        digitalOceanToken: '',
         provider: 'route53',
         password: ''
     };
@@ -107,7 +108,8 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         var data = {
             provider: $scope.dnsCredentials.provider,
             accessKeyId: $scope.dnsCredentials.accessKeyId,
-            secretAccessKey: $scope.dnsCredentials.secretAccessKey
+            secretAccessKey: $scope.dnsCredentials.secretAccessKey,
+            token: $scope.dnsCredentials.digitalOceanToken
         };
 
         var func;
@@ -126,6 +128,7 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
 
                 $scope.dnsConfig.accessKeyId = $scope.dnsCredentials.accessKeyId;
                 $scope.dnsConfig.secretAccessKey = $scope.dnsCredentials.secretAccessKey;
+                $scope.dnsConfig.token = $scope.dnsCredentials.digitalOceanToken;
 
                 $('#dnsCredentialsModal').modal('hide');
 
@@ -143,9 +146,11 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         $scope.dnsCredentials.success = false;
         $scope.dnsCredentials.error = null;
 
+        $scope.dnsCredentials.provider = '';
         $scope.dnsCredentials.customDomain = '';
         $scope.dnsCredentials.accessKeyId = '';
         $scope.dnsCredentials.secretAccessKey = '';
+        $scope.dnsCredentials.digitalOceanToken = '';
         $scope.dnsCredentials.password = '';
 
         $scope.dnsCredentialsForm.$setPristine();
@@ -160,6 +165,8 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
         $scope.dnsCredentials.customDomain = $scope.dnsConfig.accessKeyId ? $scope.config.fqdn : '';
         $scope.dnsCredentials.accessKeyId = $scope.dnsConfig.accessKeyId;
         $scope.dnsCredentials.secretAccessKey = $scope.dnsConfig.secretAccessKey;
+        $scope.dnsCredentials.digitalOceanToken = $scope.dnsConfig.token;
+        $scope.dnsCredentials.provider = $scope.dnsConfig.provider === 'caas' ? 'route53' : $scope.dnsConfig.provider;
 
         $('#dnsCredentialsModal').modal('show');
     };

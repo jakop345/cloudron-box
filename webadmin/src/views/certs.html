@@ -14,14 +14,22 @@
                             <input type="text" class="form-control" ng-model="dnsCredentials.customDomain" id="customDomainId" name="customDomainId" ng-disabled="dnsCredentials.busy" ng-minlength="4" ng-maxlength="128" placeholder="example.com" required autofocus>
                         </div>
 
-                        <div class="form-group" ng-class="{ 'has-error': false }">
+                        <!-- Route53 -->
+                        <div class="form-group" ng-class="{ 'has-error': false }" ng-show="dnsCredentials.provider === 'route53'">
                             <label class="control-label" for="dnsCredentialsAccessKeyId">Access Key Id</label>
-                            <input type="text" class="form-control" ng-model="dnsCredentials.accessKeyId" id="dnsCredentialsAccessKeyId" name="accessKeyId" ng-disabled="dnsCredentials.busy" ng-minlength="16" ng-maxlength="32" required>
+                            <input type="text" class="form-control" ng-model="dnsCredentials.accessKeyId" id="dnsCredentialsAccessKeyId" name="accessKeyId" ng-disabled="dnsCredentials.busy" ng-minlength="16" ng-maxlength="32" ng-required="dnsCredentials.provider === 'route53'">
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': false }">
+                        <div class="form-group" ng-class="{ 'has-error': false }" ng-show="dnsCredentials.provider === 'route53'">
                             <label class="control-label" for="dnsCredentialsSecretAccessKey">Secret Access Key</label>
-                            <input type="text" class="form-control" ng-model="dnsCredentials.secretAccessKey" id="dnsCredentialsSecretAccessKey" name="secretAccessKey" ng-disabled="dnsCredentials.busy" required>
+                            <input type="text" class="form-control" ng-model="dnsCredentials.secretAccessKey" id="dnsCredentialsSecretAccessKey" name="secretAccessKey" ng-disabled="dnsCredentials.busy" ng-required="dnsCredentials.provider === 'route53'">
                         </div>
+
+                        <!-- DigitalOcean -->
+                        <div class="form-group" ng-class="{ 'has-error': false }" ng-show="dnsCredentials.provider === 'digitalocean'">
+                            <label class="control-label" for="dnsCredentialsDigitalOceanToken">API Token</label>
+                            <input type="text" class="form-control" ng-model="dnsCredentials.digitalOceanToken" id="dnsCredentialsDigitalOceanToken" name="digitalOceanToken" ng-disabled="dnsCredentials.busy" ng-required="dnsCredentials.provider === 'digitalocean'">
+                        </div>
+
                         <div class="form-group" ng-class="{ 'has-error': false }" ng-if="config.fqdn !== dnsCredentials.customDomain">
                             <label class="control-label" for="dnsCredentialsPassword">Provide your password to confirm this action</label>
                             <input type="password" class="form-control" ng-model="dnsCredentials.password" id="dnsCredentialsPassword" name="password" ng-disabled="dnsCredentials.busy" required>
@@ -77,12 +85,12 @@
                 </tr>
                 <tr ng-show="config.isCustomDomain && dnsConfig.provider === 'route53'">
                     <td class="text-muted" style="vertical-align: top;">Secret Access Key</td>
-                    <td class="text-right" style="vertical-align: top; white-space: nowrap;" ng-click-reveal="{{ dnsConfig.secretAccessKey }}"><i>hidden</i></td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;" ng-click-reveal="dnsConfig.secretAccessKey"><i>hidden</i></td>
                 </tr>
 
                 <tr ng-show="config.isCustomDomain && dnsConfig.provider === 'digitalocean'">
                     <td class="text-muted" style="vertical-align: top;">API Token</td>
-                    <td class="text-right" style="vertical-align: top; white-space: nowrap;" ng-click-reveal="{{ dnsConfig.token }}"><i>hidden</i></td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;" ng-click-reveal="dnsConfig.token"><i>hidden</i></td>
                 </tr>
 
                 <!-- add some space -->
