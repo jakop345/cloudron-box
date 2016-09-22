@@ -202,7 +202,11 @@ Open the DigitalOcean console and do the following:
 
 2. Upload the SSH key which you intend to use for your Cloudron.
 
-3. Add the domain you intend to use for your Cloudron. Due to how the DigitalOcean interface works, you have to provide a dummy IPv4 to add a domain. This will be overwritten later by the Cloudron.
+3. Add the domain you intend to use for your Cloudron.
+
+  * Due to how the DigitalOcean interface works, you have to provide a dummy IPv4 (like `1.2.3.4`) to add a domain.
+
+  * Click on the domain you created and delete the '@' dummy record created above.
 
 <a id="create-the-cloudron-1"></a>
 ### Create the Cloudron
