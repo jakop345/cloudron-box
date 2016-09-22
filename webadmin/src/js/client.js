@@ -413,6 +413,20 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.setBackupConfig = function (backupConfig, callback) {
+        post('/api/v1/settings/backup_config', backupConfig).success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
+    Client.prototype.getBackupConfig = function (callback) {
+        get('/api/v1/settings/backup_config').success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.setDnsConfig = function (dnsConfig, callback) {
         post('/api/v1/settings/dns_config', dnsConfig).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
