@@ -322,6 +322,19 @@ app.directive('ngClickSelect', function () {
     };
 });
 
+app.directive('ngClickReveal', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            element.addClass('hand');
+
+            element.bind('click', function () {
+                element.text(attrs.ngClickReveal);
+            });
+        }
+    };
+});
+
 // https://codepen.io/webmatze/pen/isuHh
 app.directive('tagInput', function () {
     return {
