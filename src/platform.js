@@ -267,9 +267,16 @@ function startMail(callback) {
 
                 if (!mailConfig.enabled || process.env.BOX_ENV === 'test') return callback();
 
-                // Add MX record
-                var mxRecord = { subdomain: '', type: 'MX', values: [ '10 ' + config.mailFqdn() + '.' ] };
-                subdomains.upsert(mxRecord.subdomain, mxRecord.type, mxRecord.values, callback);
+                // Add MX and DMARC record. Note that DMARC policy depends on DKIM signing and thus works
+                // only if we use our internal mail server.
+                var records = [
+                    { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=reject; pct=100"' ] },
+                    { subdomain: '', type: 'MX', values: [ '10 ' + config.mailFqdn() + '.' ] }
+                ];
+
+                async.mapSeries(records, function (record, iteratorCallback) {
+                    subdomains.upsert(record.subdomain, record.type, record.values, iteratorCallback);
+                }, callback);
             });
         });
     });

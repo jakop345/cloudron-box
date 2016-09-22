@@ -425,14 +425,11 @@ function addDnsRecords() {
         var webadminRecord = { subdomain: constants.ADMIN_LOCATION, type: 'A', values: [ ip ] };
         // t=s limits the domainkey to this domain and not it's subdomains
         var dkimRecord = { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', values: [ '"v=DKIM1; t=s; p=' + dkimKey + '"' ] };
-        // reject all mails that do not conform to our DKIM or SPF policy
-        var dmarcRecord = { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=reject; pct=100"' ] };
 
         var records = [ ];
         if (config.isCustomDomain()) {
             records.push(webadminRecord);
             records.push(dkimRecord);
-            records.push(dmarcRecord);
         } else {
             // for non-custom domains, we show a nakeddomain.html page
             var nakedDomainRecord = { subdomain: '', type: 'A', values: [ ip ] };
@@ -440,7 +437,6 @@ function addDnsRecords() {
             records.push(nakedDomainRecord);
             records.push(webadminRecord);
             records.push(dkimRecord);
-            records.push(dmarcRecord);
         }
 
         debug('addDnsRecords: %j', records);
