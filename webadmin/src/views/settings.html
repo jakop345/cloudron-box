@@ -222,6 +222,25 @@
 </div>
 
 <div class="card" style="margin-bottom: 15px;">
+    <div class="row" ng-show="backupConfig.provider !== 'caas' || config.isDev">
+        <div class="col-xs-6">
+            <span class="text-muted">Provider</span>
+        </div>
+        <div class="col-xs-6 text-right">
+            <span>{{ backupConfig.provider }}</span>
+        </div>
+    </div>
+    <div class="row" ng-show="backupConfig.provider !== 'caas' || config.isDev">
+        <div class="col-xs-6">
+            <span class="text-muted">Location</span>
+        </div>
+        <div class="col-xs-6 text-right">
+            <span>{{ backupConfig.backupFolder || (backupConfig.region + '   ' + backupConfig.bucket + '/' + bucketConfig.prefix) }}</span>
+        </div>
+    </div>
+
+    <br/>
+
     <div class="row">
         <div class="col-xs-6">
             <span class="text-muted">Last Backup</span>
@@ -231,6 +250,7 @@
             <span ng-hide="lastBackup">No backups have been made yet</span>
         </div>
     </div>
+
     <!-- If a backup is blocked (not triggered), the UI does not give feedback currently. This button is only available in dev at the moment! -->
     <div class="row" ng-show="config.isDev">
         <br/>
