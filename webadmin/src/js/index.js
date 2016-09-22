@@ -328,8 +328,17 @@ app.directive('ngClickReveal', function () {
         link: function (scope, element, attrs) {
             element.addClass('hand');
 
+            var value = '';
+
+            scope.$watch(attrs.ngClickReveal, function (newValue, oldValue) {
+                if (newValue !== oldValue) {
+                    element.html('<i>hidden</i>');
+                    value = newValue;
+                }
+            });
+
             element.bind('click', function () {
-                element.text(attrs.ngClickReveal);
+                element.text(value);
             });
         }
     };
