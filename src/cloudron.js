@@ -415,7 +415,6 @@ function addDnsRecords() {
     gUpdatingDns = true;
 
     var DKIM_SELECTOR = 'cloudron';
-    var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
 
     var dkimKey = readDkimPublicKeySync();
     if (!dkimKey) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, new Error('Failed to read dkim public key')));
