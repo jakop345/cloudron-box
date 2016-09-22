@@ -6,7 +6,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.client = Client;
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
-    $scope.dnsConfig = {};
+    $scope.backupConfig = {};
     $scope.appstoreConfig = {};
 
     $scope.mailConfig = null;
@@ -126,6 +126,14 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             if (error) return console.error(error);
 
             $scope.mailConfig = mailConfig;
+        });
+    }
+
+    function getBackupConfig() {
+        Client.getBackupConfig(function (error, backupConfig) {
+            if (error) return console.error(error);
+
+            $scope.backupConfig = backupConfig;
         });
     }
 
@@ -374,6 +382,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     Client.onReady(function () {
         fetchBackups();
         getMailConfig();
+        getBackupConfig();
 
         if ($scope.config.provider === 'caas') {
             getPlans();
