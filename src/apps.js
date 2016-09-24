@@ -58,6 +58,7 @@ var addons = require('./addons.js'),
     eventlog = require('./eventlog.js'),
     fs = require('fs'),
     groups = require('./groups.js'),
+    mailboxdb = require('./mailboxdb.js'),
     manifestFormat = require('cloudron-manifestformat'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -503,21 +504,26 @@ function install(data, auditSource, callback) {
                 oauthProxy: oauthProxy
             };
 
-            appdb.add(appId, appStoreId, manifest, location, portBindings, data, function (error) {
-                if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location, portBindings, error));
+            mailboxdb.add(location + '.app', appId, mailboxdb.TYPE_APP, function (error) {
+                if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS, 'Mailbox already exists'));
                 if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                // save cert to data/box/certs
-                if (cert && key) {
-                    if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.user.cert'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
-                    if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.user.key'), key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
-                }
+                appdb.add(appId, appStoreId, manifest, location, portBindings, data, function (error) {
+                    if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location, portBindings, error));
+                    if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                taskmanager.restartAppTask(appId);
+                    // save cert to data/box/certs
+                    if (cert && key) {
+                        if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.user.cert'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
+                        if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.user.key'), key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
+                    }
 
-                eventlog.add(eventlog.ACTION_APP_INSTALL, auditSource, { appId: appId, location: location, manifest: manifest });
+                    taskmanager.restartAppTask(appId);
 
-                callback(null, { id : appId });
+                    eventlog.add(eventlog.ACTION_APP_INSTALL, auditSource, { appId: appId, location: location, manifest: manifest });
+
+                    callback(null, { id : appId });
+                });
             });
         });
     });
@@ -850,14 +856,18 @@ function uninstall(appId, auditSource, callback) {
         unpurchase(appId, result.appStoreId, function (error) {
             if (error) return callback(error);
 
-            taskmanager.stopAppTask(appId, function () {
-                appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UNINSTALL, function (error) {
-                    if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
-                    if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+            mailboxdb.delByOwnerId(appId, function (error) {
+                if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                    eventlog.add(eventlog.ACTION_APP_UNINSTALL, auditSource, { appId: appId });
+                taskmanager.stopAppTask(appId, function () {
+                    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UNINSTALL, function (error) {
+                        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+                        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                    taskmanager.startAppTask(appId, callback);
+                        eventlog.add(eventlog.ACTION_APP_UNINSTALL, auditSource, { appId: appId });
+
+                        taskmanager.startAppTask(appId, callback);
+                    });
                 });
             });
         });
