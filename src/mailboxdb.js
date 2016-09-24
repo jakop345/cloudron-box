@@ -8,6 +8,7 @@ exports = module.exports = {
     getAll: getAll,
     getAliases: getAliases,
     setAliases: setAliases,
+    getByOwnerId: getByOwnerId,
     delByOwnerId: delByOwnerId,
 
     _clear: clear,
@@ -106,6 +107,18 @@ function get(name, callback) {
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         postProcess(results[0]);
+
+        callback(null, results[0]);
+    });
+}
+
+function getByOwnerId(ownerId, callback) {
+    assert.strictEqual(typeof ownerId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE ownerId = ? ', [ ownerId ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, results[0]);
     });
