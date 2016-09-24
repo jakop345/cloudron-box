@@ -28,6 +28,7 @@ var appdb = require('./appdb.js'),
     generatePassword = require('password-generator'),
     hat = require('hat'),
     infra = require('./infra_version.js'),
+    mailboxdb = require('./mailboxdb.js'),
     once = require('once'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -399,14 +400,19 @@ function setupSendMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/g, '')) + '.app';
+    debugApp(app, 'Setting up SendMail');
 
-    var cmd = [ '/addons/mail/service.sh', 'add-send', from ];
-
-    docker.execContainer('mail', cmd, { bufferStdout: true }, function (error, stdout) {
+    mailboxdb.getByOwnerId(app.id, function (error, mailbox) {
         if (error) return callback(error);
 
-        var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
+        var env = [
+            "MAIL_SMTP_SERVER=mail",
+            "MAIL_SMTP_PORT=2525",
+            "MAIL_SMTP_USERNAME=" + mailbox.name,
+            "MAIL_SMTP_PASSWORD=" + app.id,
+            "MAIL_FROM=" + mailbox.name + '@' + config.fqdn(),
+            "MAIL_DOMAIN=" + config.fqdn()
+        ];
         debugApp(app, 'Setting sendmail addon config to %j', env);
         appdb.setAddonConfig(app.id, 'sendmail', env, callback);
     });
@@ -417,17 +423,9 @@ function teardownSendMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var from = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/g, '')) + '.app';
+    debugApp(app, 'Tearing down sendmail');
 
-    var cmd = [ '/addons/mail/service.sh', 'remove-send', from ];
-
-    debugApp(app, 'Tearing down sendmail : %j', cmd);
-
-    docker.execContainer('mail', cmd, { }, function (error) {
-        if (error) return callback(error);
-
-        appdb.unsetAddonConfig(app.id, 'sendmail', callback);
-    });
+    appdb.unsetAddonConfig(app.id, 'sendmail', callback);
 }
 
 function setupRecvMail(app, options, callback) {
@@ -437,15 +435,19 @@ function setupRecvMail(app, options, callback) {
 
     debugApp(app, 'Setting up recvmail');
 
-    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/g, '')) + '.app';
-
-    var cmd = [ '/addons/mail/service.sh', 'add-recv', to ];
-
-    docker.execContainer('mail', cmd, { bufferStdout: true }, function (error, stdout) {
+    mailboxdb.getByOwnerId(app.id, function (error, mailbox) {
         if (error) return callback(error);
 
-        var env = stdout.toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-        debugApp(app, 'Setting recvmail addon config to %j', env);
+        var env = [
+            "MAIL_IMAP_SERVER=mail",
+            "MAIL_IMAP_PORT=9993",
+            "MAIL_IMAP_USERNAME=" + mailbox.name,
+            "MAIL_IMAP_PASSWORD=" + app.id,
+            "MAIL_TO=" + mailbox.name + '@' + config.fqdn(),
+            "MAIL_DOMAIN=" + config.fqdn()
+        ];
+
+        debugApp(app, 'Setting sendmail addon config to %j', env);
         appdb.setAddonConfig(app.id, 'recvmail', env, callback);
     });
 }
@@ -455,17 +457,9 @@ function teardownRecvMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var to = (app.location ? app.location : app.manifest.title.replace(/[^a-zA-Z0-9]/g, '')) + '.app';
+    debugApp(app, 'Tearing down recvmail');
 
-    var cmd = [ '/addons/mail/service.sh', 'remove-recv', to ];
-
-    debugApp(app, 'Tearing down recvmail: %j', cmd);
-
-    docker.execContainer('mail', cmd, { }, function (error) {
-        if (error) return callback(error);
-
-        appdb.unsetAddonConfig(app.id, 'recvmail', callback);
-    });
+    appdb.unsetAddonConfig(app.id, 'recvmail', callback);
 }
 
 function setupMySql(app, options, callback) {
