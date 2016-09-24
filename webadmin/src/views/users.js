@@ -8,7 +8,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     $scope.groups = [];
     $scope.config = Client.getConfig();
     $scope.userInfo = Client.getUserInfo();
-    $scope.mailboxes = [];
 
     $scope.userremove = {
         busy: false,
@@ -243,10 +242,12 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.useredit.superuser = userInfo.groupIds.indexOf('admin') !== -1;
 
         $scope.useredit.aliases = '';
-        for (var i = 0; i < $scope.mailboxes.length; i++) {
-            if ($scope.mailboxes[i].name !== userInfo.username) continue;
-            $scope.useredit.aliases = $scope.mailboxes[i].aliases.join(',');
-        }
+
+        Client.getAliases(userInfo.id, function (error, aliases) {
+            if (error) console.error(error);
+
+            $scope.useredit.aliases = aliases.join(',');
+        });
 
         $scope.useredit_form.$setPristine();
         $scope.useredit_form.$setUntouched();
@@ -288,7 +289,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 if (error) return console.error('Unable to update groups for user:', error);
 
                 var aliases = $scope.useredit.aliases ? $scope.useredit.aliases.split(',') : [ ];
-                var setAliasesFunc = Client.setAliases.bind(null, $scope.useredit.userInfo.username, aliases);
+                var setAliasesFunc = Client.setAliases.bind(null, $scope.useredit.userInfo.id, aliases);
 
                 // cannot set aliases without username
                 if (!$scope.useredit.userInfo.username) setAliasesFunc = function (next) { return next(); };
@@ -377,14 +378,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 if (error) return console.error('Unable to get user listing.', error);
 
                 $scope.users = result;
-
-                Client.getMailboxes(function (error, result) {
-                    if (error) return console.error('Unable to get mailboxes.', error);
-
-                    $scope.mailboxes = result;
-
-                    $scope.ready = true;
-                });
             });
         });
     }

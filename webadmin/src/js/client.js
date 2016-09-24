@@ -523,13 +523,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.getMailboxes = function (callback) {
-        get('/api/v1/mailboxes').success(function (data, status) {
-            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null, data.mailboxes);
-        }).error(defaultErrorHandler(callback));
-    };
-
     Client.prototype.setGroups = function (userId, groupIds, callback) {
         put('/api/v1/users/' + userId + '/groups', { groupIds: groupIds }).success(function (data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
@@ -767,39 +760,19 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.createMailbox = function (name, callback) {
-        var data = {
-            name: name
-        };
-
-        post('/api/v1/mailboxes', data).success(function(data, status) {
-            if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null, data);
+    Client.prototype.getAliases = function (userId, callback) {
+        get('/api/v1/users/' + userId + '/aliases').success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data.aliases);
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.removeMailbox = function (name, callback) {
-        var config = {
-            data: {
-                name: name
-            },
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
-        del('/api/v1/mailboxes/' + name, config).success(function(data, status) {
-            if (status !== 204) return callback(new ClientError(status, data));
-            callback(null);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.setAliases = function (name, aliases, callback) {
+    Client.prototype.setAliases = function (userId, aliases, callback) {
         var data = {
             aliases: aliases
         };
 
-        put('/api/v1/mailboxes/' + name + '/aliases', data).success(function(data, status) {
+        put('/api/v1/users/' + userId + '/aliases', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
