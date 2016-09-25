@@ -1204,18 +1204,7 @@ describe('database', function () {
             });
         });
 
-        it('getAll succeeds', function (done) {
-            mailboxdb.getAll(function (error, results) {
-                expect(error).to.be(null);
-                expect(results).to.be.an(Array);
-                expect(results.length).to.be(1);
-                expect(results[0].name).to.be('support');
-
-                done();
-            });
-        });
-
-        it('can set alias', function (done) {
+       it('can set alias', function (done) {
             mailboxdb.setAliases('support', [ 'support2', 'help' ], 'support', 'user', function (error) {
                 expect(error).to.be(null);
                 done();

@@ -5,7 +5,6 @@ exports = module.exports = {
     del: del,
     upsertByOwner: upsertByOwner,
     get: get,
-    getAll: getAll,
     getAliases: getAliases,
     setAliases: setAliases,
     getByOwnerId: getByOwnerId,
@@ -121,24 +120,6 @@ function getByOwnerId(ownerId, callback) {
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, results[0]);
-    });
-}
-
-function getAll(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    var query = 'SELECT m1.name, m1.creationTime, GROUP_CONCAT(m2.name) AS aliases ' +
-                'FROM mailboxes as m1 ' +
-                'LEFT OUTER JOIN mailboxes as m2 ON m1.name = m2.aliasTarget ' +
-                'WHERE m1.aliasTarget IS NULL ' +
-                'GROUP BY m1.name';
-
-    database.query(query, function (error, results) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
-        results.forEach(postProcess);
-
-        callback(null, results);
     });
 }
 
