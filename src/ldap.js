@@ -130,9 +130,12 @@ function groupSearch(req, res, next) {
     });
 }
 
-function mailboxSearch(req, res, next) {
-    debug('mailbox search: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
+function getMailbox(req, res, next) {
+    debug('mailbox get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
+    if (!req.dn.rdns[0].attrs.cn) return next(new ldap.OperationsError('CN is required'));
+
+    mailboxes.get(
     mailboxes.getAll(function (error, result) {
         if (error) return next(new ldap.OperationsError(error.toString()));
 
@@ -251,7 +254,7 @@ function start(callback) {
     gServer.search('ou=groups,dc=cloudron', groupSearch);
     gServer.bind('ou=users,dc=cloudron', authenticateUser, authorizeUserForApp);
 
-    gServer.search('ou=mailboxes,dc=cloudron', mailboxSearch);
+    gServer.search('ou=mailboxes,dc=cloudron', getMailbox);
     gServer.bind('ou=mailboxes,dc=cloudron', authenticateUser, authorizeUserForMailbox);
 
     // this is the bind for addons (after bind, they might search and authenticate)
