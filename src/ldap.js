@@ -21,15 +21,6 @@ var gServer = null;
 
 var NOOP = function () {};
 
-var gLogger = {
-    trace: NOOP,
-    debug: NOOP,
-    info: debug,
-    warn: debug,
-    error: console.error,
-    fatal: console.error
-};
-
 var GROUP_USERS_DN = 'cn=users,ou=groups,dc=cloudron';
 var GROUP_ADMINS_DN = 'cn=admins,ou=groups,dc=cloudron';
 
@@ -245,7 +236,16 @@ function authorizeUserForMailbox(req, res, next) {
 function start(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    gServer = ldap.createServer({ log: gLogger });
+    var logger = {
+        trace: NOOP,
+        debug: NOOP,
+        info: debug,
+        warn: debug,
+        error: console.error,
+        fatal: console.error
+    };
+
+    gServer = ldap.createServer({ log: logger });
 
     gServer.search('ou=users,dc=cloudron', userSearch);
     gServer.search('ou=groups,dc=cloudron', groupSearch);
