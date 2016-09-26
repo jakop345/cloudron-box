@@ -388,7 +388,7 @@ function updateUser(userId, data, auditSource, callback) {
                 eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId });
 
                 // delete old mailbox
-                asyncIf(user.username && user.username !== data.username, mailboxdb.del.bind(null, user.username), callback);
+                asyncIf(data.username && user.username && user.username !== data.username, mailboxdb.del.bind(null, user.username), callback);
             });
         });
     });
