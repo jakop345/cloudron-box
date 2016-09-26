@@ -250,8 +250,8 @@ function authenticateUser(req, res, next) {
     debug('user bind: %s (from %s)', req.dn.toString(), req.connection.ldap.id);
 
     // extract the common name which might have different attribute names
-    var attributeName = Object.keys(req.dn.rdns[0])[0];
-    var commonName = req.dn.rdns[0][attributeName];
+    var attributeName = Object.keys(req.dn.rdns[0].attrs)[0];
+    var commonName = req.dn.rdns[0].attrs[attributeName].value;
     if (!commonName) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
     var api;
