@@ -740,6 +740,36 @@ describe('User', function () {
         });
     });
 
+    describe('aliases', function () {
+        before(createOwner);
+        after(cleanupUsers);
+
+        it('can set aliases', function (done) {
+            user.setAliases(userObject.id, [ 'everything', 'is', 'awesome' ], function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('get get aliases', function (done) {
+            user.getAliases(userObject.id, function (error, aliases) {
+                expect(error).to.be(null);
+                expect(aliases.length).to.be(3);
+                expect(aliases[0]).to.be('awesome');
+                expect(aliases[1]).to.be('everything');
+                expect(aliases[2]).to.be('is');
+                done();
+            });
+        });
+
+        it('cannot create user with username conflicting with existing alias', function (done) {
+            user.create('awesome', PASSWORD, 'test@test.com', DISPLAY_NAME, AUDIT_SOURCE, function (error) {
+                expect(error.reason).to.be(UserError.ALREADY_EXISTS);
+                done();
+            });
+        });
+    });
+
     describe('set password', function () {
         before(createOwner);
         after(cleanupUsers);
