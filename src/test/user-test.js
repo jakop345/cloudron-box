@@ -624,6 +624,18 @@ describe('User', function () {
                 });
             });
         });
+
+        it('updated the mailbox', function (done) {
+            mailboxdb.getMailbox(USERNAME, function (error) {
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+
+                mailboxdb.getMailbox(USERNAME_NEW.toLowerCase(), function (error, mailbox) {
+                    expect(error).to.be(null);
+                    expect(mailbox.ownerId).to.be(userObject.id);
+                    done();
+                });
+            });
+        });
     });
 
     describe('admin change triggers mail', function () {
