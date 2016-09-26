@@ -305,15 +305,9 @@ function authorizeUserForApp(req, res, next) {
 function authorizeUserForMailbox(req, res, next) {
     assert(req.user);
 
-    // We simply authorize the user to access a mailbox by his own name (user could have logged via email)
-    mailboxdb.getMailbox(req.user.username, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
-        if (error) return next(new ldap.OperationsError(error.message));
-
-        eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', mailboxId: req.user.username }, { userId: req.user.username });
-
-        res.end();
-    });
+    // user is always authorized to access his mailbox
+    eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', mailboxId: req.user.username }, { userId: req.user.username });
+    res.end();
 }
 
 function start(callback) {
