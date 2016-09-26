@@ -225,9 +225,8 @@ function verify(userId, password, callback) {
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.get(userId, function (error, user) {
-        if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
-        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+    getUser(userId, function (error, user) {
+        if (error) return callback(error);
 
         if (verifyGhost(user.username, password)) return callback(null, user);
 
@@ -301,6 +300,7 @@ function listUsers(callback) {
         results.forEach(function (result) {
             result.admin = result.groupIds.indexOf(constants.ADMIN_GROUP_ID) !== -1;
         });
+
         return callback(null, results);
     });
 }
