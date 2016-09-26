@@ -646,4 +646,47 @@ describe('User API', function () {
             });
         });
     });
+
+    it('can set aliases', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id + '/aliases')
+               .query({ access_token: token })
+               .send({ aliases: [ 'give', 'me', 'more' ] })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(200);
+            done();
+        });
+    });
+
+    it('cannot set alias as another user', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id + '/aliases')
+               .query({ access_token: token })
+               .send({ aliases: [ 'give', 'me', 'more', USERNAME_2 ] })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(409);
+            done();
+        });
+    });
+
+    it('cannot set invalid alias', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id + '/aliases')
+               .query({ access_token: token })
+               .send({ aliases: [ 'apple-talk' ] })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('can get aliases', function (done) {
+        superagent.get(SERVER_URL + '/api/v1/users/' + user_0.id + '/aliases')
+               .query({ access_token: token })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(200);
+            expect(result.body.aliases.length).to.be(3);
+            expect(result.body.aliases[0]).to.be('give');
+            expect(result.body.aliases[1]).to.be('me');
+            expect(result.body.aliases[2]).to.be('more');
+            done();
+        });
+    });
 });
