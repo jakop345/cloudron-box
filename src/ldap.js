@@ -131,15 +131,13 @@ function groupSearch(req, res, next) {
     });
 }
 
-function getMailbox(req, res, next) {
-    debug('mailbox get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
+function mailboxSearch(req, res, next) {
+    debug('mailbox search: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
-    // http://www.zytrax.com/books/ldap/ape/courier.html
-    // http://www.ldapadmin.org/docs/postfix.schema
-    // https://wiki.zimbra.com/wiki/5.0.15_Directory_Schema
     var get = !!req.dn.rdns[0].attrs.cn;
-    var func = get ? mailboxdb.getMailbox.bind(null, req.dn.rdns[0].attrs.cn) : mailboxdb.getMailboxes;
+    var func = get ? mailboxdb.getMailbox.bind(null, req.dn.rdns[0].attrs.cn.value.toLowerCase()) : mailboxdb.listMailboxes;
     func(function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
         var results = util.isArray(result) ? result : [ result ];
@@ -148,13 +146,13 @@ function getMailbox(req, res, next) {
             var dn = ldap.parseDN('cn=' + mailbox.name + ',ou=mailboxes,dc=cloudron');
 
             var obj = {
-                dn: req.dn.toString(),
+                dn: dn.toString(),
                 attributes: {
                     objectclass: ['mailbox'],
                     objectcategory: 'mailbox',
-                    cn: name,
-                    uid: mailbox.ownerId,
-                    mail: name + '@' + config.fqdn()
+                    cn: mailbox.name,
+                    uid: mailbox.name,
+                    mail: mailbox.name + '@' + config.fqdn()
                 }
             };
 
@@ -162,7 +160,7 @@ function getMailbox(req, res, next) {
             var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
             if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
-            if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
+            if ((req.dn.toString().toLowerCase() === dn.toString().toLowerCase() || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
                 res.send(obj);
             }
         });
@@ -174,9 +172,13 @@ function getMailbox(req, res, next) {
 function getMailAlias(req, res, next) {
     debug('mail alias get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
+    // http://www.zytrax.com/books/ldap/ape/courier.html
+    // http://www.ldapadmin.org/docs/postfix.schema
+    // https://wiki.zimbra.com/wiki/5.0.15_Directory_Schema
     // https://wiki.debian.org/LDAP/MigrationTools/Examples
+    // https://docs.oracle.com/cd/E19455-01/806-5580/6jej518pp/index.html
     var get = !!req.dn.rdns[0].attrs.cn;
-    var func = get ? mailboxdb.getAlias.bind(null, req.dn.rdns[0].attrs.cn) : mailboxdb.getAliases;
+    var func = get ? mailboxdb.getAlias.bind(null, req.dn.rdns[0].attrs.cn.value) : mailboxdb.getAliases;
     func(function (error, result) {
         if (error) return next(new ldap.OperationsError(error.toString()));
 
@@ -211,9 +213,8 @@ function getMailAlias(req, res, next) {
 function getMailGroup(req, res, next) {
     debug('mailgroup get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
-    // https://docs.oracle.com/cd/E19455-01/806-5580/6jej518pp/index.html
     var get = !!req.dn.rdns[0].attrs.cn;
-    var func = get ? mailboxdb.getGroup.bind(null, req.dn.rdns[0].attrs.cn) : mailboxdb.getGroups;
+    var func = get ? mailboxdb.getGroup.bind(null, req.dn.rdns[0].attrs.cn.value) : mailboxdb.getGroups;
     func(function (error, result) {
         if (error) return next(new ldap.OperationsError(error.toString()));
 
@@ -304,8 +305,8 @@ function authorizeUserForApp(req, res, next) {
 function authorizeUserForMailbox(req, res, next) {
     assert(req.user);
 
-    // We simply authorize the user to access a mailbox by his own name
-    mailboxdb.get(req.user.username, function (error) {
+    // We simply authorize the user to access a mailbox by his own name (user could have logged via email)
+    mailboxdb.getMailbox(req.user.username, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.message));
 
@@ -334,7 +335,7 @@ function start(callback) {
     gServer.bind('ou=users,dc=cloudron', authenticateUser, authorizeUserForApp);
 
     // http://www.ietf.org/proceedings/43/I-D/draft-srivastava-ldap-mail-00.txt
-    gServer.search('ou=mailboxes,dc=cloudron', getMailbox);
+    gServer.search('ou=mailboxes,dc=cloudron', mailboxSearch);
     gServer.search('ou=mailaliases,dc=cloudron', getMailAlias);
     gServer.search('ou=mailgroups,dc=cloudron', getMailGroup);
 

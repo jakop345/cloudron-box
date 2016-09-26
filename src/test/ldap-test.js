@@ -422,4 +422,86 @@ describe('Ldap', function () {
             });
         });
     });
+
+    function ldapSearch(dn, filter, callback) {
+        var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+        var opts = {
+            filter: filter
+        };
+
+        client.search(dn, opts, function (error, result) {
+            expect(error).to.be(null);
+            expect(result).to.be.an(EventEmitter);
+
+            var entries = [];
+
+            result.on('searchEntry', function (entry) { entries.push(entry.object); });
+            result.on('error', callback);
+            result.on('end', function (result) {
+                expect(result.status).to.equal(0);
+                callback(null, entries);
+            });
+        });
+    }
+
+    describe('search mailbox', function () {
+        it ('succeeds with basic filter', function (done) {
+            ldapSearch('ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error, entries) {
+                if (error) return done(error);
+                expect(entries.length).to.equal(2);
+
+                // ensure order for testability
+                entries.sort(function (a, b) { return a.username < b.username; });
+
+                expect(entries[0].cn).to.equal(USER_0.username.toLowerCase());
+                expect(entries[1].cn).to.equal(USER_1.username.toLowerCase());
+                done();
+
+            });
+        });
+
+        it('get specific mailbox', function (done) {
+            ldapSearch('cn=' + USER_0.username + ',ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error, entries) {
+                if (error) return done(error);
+                expect(entries.length).to.equal(1);
+                expect(entries[0].cn).to.equal(USER_0.username.toLowerCase());
+                done();
+            });
+        });
+
+        it('non-existent mailbox', function (done) {
+            ldapSearch('cn=random,ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error, entries) {
+                expect(error).to.be.a(ldap.NoSuchObjectError);
+                done();
+            });
+        });
+    });
+
+    describe('bind mailbox', function () {
+        it('does not allow with invalid password', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            client.bind('cn=' + USER_0.username + ',ou=mailboxes,dc=cloudron', USER_0.password + 'nope', function (error) {
+                expect(error).to.be.a(ldap.InvalidCredentialsError);
+                done();
+            });
+        });
+
+        it('allows with valid password', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            client.bind('cn=' + USER_0.username + ',ou=mailboxes,dc=cloudron', USER_0.password, function (error) {
+                done(error);
+            });
+        });
+
+        it('allows with valid email', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            client.bind('cn=' + USER_0.email + ',ou=mailboxes,dc=cloudron', USER_0.password, function (error) {
+                done(error);
+            });
+        });
+    });
 });
