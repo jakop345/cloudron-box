@@ -7,6 +7,7 @@
 
 var async = require('async'),
     database = require('../database.js'),
+    DatabaseError = require('../databaseerror.js'),
     constants = require('../constants.js'),
     expect = require('expect.js'),
     fs = require('fs'),
@@ -850,5 +851,13 @@ describe('User', function () {
                 done();
             });
         });
+
+        it('did delete mailbox', function (done) {
+            mailboxdb.getMailbox(userObject.username.toLowerCase(), function (error, mailbox) {
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+
     });
 });
