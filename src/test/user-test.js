@@ -744,6 +744,13 @@ describe('User', function () {
         before(createOwner);
         after(cleanupUsers);
 
+        it('cannot set invalid alias', function (done) {
+            user.setAliases(userObject.id, [ 'a$scii' ], function (error) {
+                expect(error.reason).to.be(UserError.BAD_FIELD);
+                done();
+            });
+        });
+
         it('can set aliases', function (done) {
             user.setAliases(userObject.id, [ 'everything', 'is', 'awesome' ], function (error) {
                 expect(error).to.be(null);
