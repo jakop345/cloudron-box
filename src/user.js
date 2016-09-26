@@ -582,7 +582,7 @@ function setAliases(userId, aliases, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        mailboxdb.setAliases(user.username, aliases, userId, mailboxdb.TYPE_USER, function (error) {
+        mailboxdb.setAliasesOf(user.username, aliases, userId, mailboxdb.TYPE_USER, function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
@@ -601,7 +601,7 @@ function getAliases(userId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        mailboxdb.getAliases(user.username, function (error, aliases) {
+        mailboxdb.getAliasesOf(user.username, function (error, aliases) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 

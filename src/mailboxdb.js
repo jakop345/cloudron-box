@@ -5,8 +5,14 @@ exports = module.exports = {
     del: del,
     upsertByOwner: upsertByOwner,
     get: get,
+    getMailboxes: getMailboxes,
+    getMailbox: getMailbox,
+    getGroup: getGroup,
+    getGroups: getGroups,
     getAliases: getAliases,
-    setAliases: setAliases,
+    getAlias: getAlias,
+    getAliasesOf: getAliasesOf,
+    setAliasesOf: setAliasesOf,
     getByOwnerId: getByOwnerId,
     delByOwnerId: delByOwnerId,
 
@@ -99,6 +105,53 @@ function get(name, callback) {
     });
 }
 
+function getMailbox(name, callback) {
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE name = ? AND (ownerType = ? OR ownerType = ?)', [ name, exports.TYPE_APP, exports.TYPE_USER ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null, results[0]);
+    });
+}
+
+function getMailboxes(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE ownerType = ? OR ownerType = ?', [ exports.TYPE_APP, exports.TYPE_USER ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null, results);
+    });
+}
+
+function getGroup(name, callback) {
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    // FIXME: fix the query to return members
+    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE name = ? AND ownerType = ?', [ name, exports.TYPE_GROUP ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null, results[0]);
+    });
+}
+
+function getGroups(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    // FIXME: fix the query to return members
+    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE ownerType = ?',
+        [ exports.TYPE_GROUP ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null, results);
+    });
+}
+
 function getByOwnerId(ownerId, callback) {
     assert.strictEqual(typeof ownerId, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -111,7 +164,7 @@ function getByOwnerId(ownerId, callback) {
     });
 }
 
-function setAliases(name, aliases, ownerId, ownerType, callback) {
+function setAliasesOf(name, aliases, ownerId, ownerType, callback) {
     assert.strictEqual(typeof name, 'string');
     assert(util.isArray(aliases));
     assert.strictEqual(typeof ownerId, 'string');
@@ -133,7 +186,7 @@ function setAliases(name, aliases, ownerId, ownerType, callback) {
     });
 }
 
-function getAliases(name, callback) {
+function getAliasesOf(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -142,5 +195,27 @@ function getAliases(name, callback) {
 
         results = results.map(function (r) { return r.name; });
         callback(null, results);
+    });
+}
+
+function getAliases(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT name FROM mailboxes WHERE aliasTarget != null ORDER BY name', function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null, results);
+    });
+}
+
+function getAlias(name, callback) {
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT name FROM mailboxes WHERE name = ? AND aliasTarget != null', [ name ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null, results[0]);
     });
 }
