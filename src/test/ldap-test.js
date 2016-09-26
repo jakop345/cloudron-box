@@ -495,13 +495,5 @@ describe('Ldap', function () {
                 done(error);
             });
         });
-
-        it('allows with valid email', function (done) {
-            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
-
-            client.bind('cn=' + USER_0.email + ',ou=mailboxes,dc=cloudron', USER_0.password, function (error) {
-                done(error);
-            });
-        });
     });
 });

@@ -302,12 +302,29 @@ function authorizeUserForApp(req, res, next) {
     });
 }
 
-function authorizeUserForMailbox(req, res, next) {
-    assert(req.user);
+function authenticateMailbox(req, res, next) {
+    if (!req.dn.rdns[0].attrs.cn) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
-    // user is always authorized to access his mailbox
-    eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', mailboxId: req.user.username }, { userId: req.user.username });
-    res.end();
+    var name = req.dn.rdns[0].attrs.cn.value.toLowerCase();
+
+    mailboxdb.getMailbox(name, function (error, mailbox) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+        if (error) return next(new ldap.OperationsError(error.message));
+
+        if (mailbox.ownerType === mailboxdb.TYPE_APP) {
+            if (req.credentials !== mailbox.ownerId) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+            eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', mailboxId: name }, { appId: mailbox.ownerId });
+            res.end();
+        }
+
+        assert.strictEqual(mailbox.ownerType, mailboxdb.TYPE_USER);
+
+        authenticateUser(req, res, function (error) {
+            if (error) return next(error);
+            eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', mailboxId: name }, { userId: req.user.username });
+            res.end();
+        });
+    });
 }
 
 function start(callback) {
@@ -333,7 +350,7 @@ function start(callback) {
     gServer.search('ou=mailaliases,dc=cloudron', getMailAlias);
     gServer.search('ou=mailgroups,dc=cloudron', getMailGroup);
 
-    gServer.bind('ou=mailboxes,dc=cloudron', authenticateUser, authorizeUserForMailbox);
+    gServer.bind('ou=mailboxes,dc=cloudron', authenticateMailbox);
 
     // this is the bind for addons (after bind, they might search and authenticate)
     gServer.bind('ou=addons,dc=cloudron', function(req, res, next) {
