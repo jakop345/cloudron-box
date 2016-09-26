@@ -471,7 +471,46 @@ describe('Ldap', function () {
         });
 
         it('non-existent mailbox', function (done) {
-            ldapSearch('cn=random,ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error, entries) {
+            ldapSearch('cn=random,ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error) {
+                expect(error).to.be.a(ldap.NoSuchObjectError);
+                done();
+            });
+        });
+    });
+
+    describe('search aliases', function () {
+        before(function (done) {
+            user.setAliases(USER_0.id, [ 'Asterix', 'obelix' ], done);
+        });
+
+        it('succeeds with basic filter', function (done) {
+            ldapSearch('ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
+                if (error) return done(error);
+                expect(entries.length).to.equal(2);
+
+                // ensure order for testability
+                entries.sort(function (a, b) { return a.cn > b.cn; });
+
+                expect(entries[0].cn).to.equal('asterix');
+                expect(entries[0].rfc822MailMember).to.equal(USER_0.username.toLowerCase());
+                expect(entries[1].cn).to.equal('obelix');
+                expect(entries[1].rfc822MailMember).to.equal(USER_0.username.toLowerCase());
+                done();
+            });
+        });
+
+        it('get specific alias', function (done) {
+            ldapSearch('cn=asterix,ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
+                if (error) return done(error);
+                expect(entries.length).to.equal(1);
+                expect(entries[0].cn).to.equal('asterix');
+                expect(entries[0].rfc822MailMember).to.equal(USER_0.username.toLowerCase());
+                done();
+            });
+        });
+
+        it('non-existent alias', function (done) {
+            ldapSearch('cn=random,ou=mailaliases,dc=cloudron', 'objectclass=mailbox', function (error) {
                 expect(error).to.be.a(ldap.NoSuchObjectError);
                 done();
             });

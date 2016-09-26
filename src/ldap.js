@@ -169,17 +169,13 @@ function mailboxSearch(req, res, next) {
     });
 }
 
-function getMailAlias(req, res, next) {
+function mailAliasSearch(req, res, next) {
     debug('mail alias get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
-    // http://www.zytrax.com/books/ldap/ape/courier.html
-    // http://www.ldapadmin.org/docs/postfix.schema
-    // https://wiki.zimbra.com/wiki/5.0.15_Directory_Schema
-    // https://wiki.debian.org/LDAP/MigrationTools/Examples
-    // https://docs.oracle.com/cd/E19455-01/806-5580/6jej518pp/index.html
     var get = !!req.dn.rdns[0].attrs.cn;
-    var func = get ? mailboxdb.getAlias.bind(null, req.dn.rdns[0].attrs.cn.value) : mailboxdb.getAliases;
+    var func = get ? mailboxdb.getAlias.bind(null, req.dn.rdns[0].attrs.cn.value) : mailboxdb.listAliases;
     func(function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
         var results = util.isArray(result) ? result : [ result ];
@@ -187,6 +183,8 @@ function getMailAlias(req, res, next) {
         results.forEach(function (alias) {
             var dn = ldap.parseDN('cn=' + alias.name + ',ou=mailaliases,dc=cloudron');
 
+            // https://wiki.debian.org/LDAP/MigrationTools/Examples
+            // https://docs.oracle.com/cd/E19455-01/806-5580/6jej518pp/index.html
             var obj = {
                 dn: dn.toString(),
                 attributes: {
@@ -201,7 +199,7 @@ function getMailAlias(req, res, next) {
             var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
             if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
-            if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
+            if ((req.dn.toString().toLowerCase() === dn.toString().toLowerCase() || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
                 res.send(obj);
             }
         });
@@ -353,7 +351,7 @@ function start(callback) {
 
     // http://www.ietf.org/proceedings/43/I-D/draft-srivastava-ldap-mail-00.txt
     gServer.search('ou=mailboxes,dc=cloudron', mailboxSearch);
-    gServer.search('ou=mailaliases,dc=cloudron', getMailAlias);
+    gServer.search('ou=mailaliases,dc=cloudron', mailAliasSearch);
     gServer.search('ou=mailgroups,dc=cloudron', getMailGroup);
 
     gServer.bind('ou=mailboxes,dc=cloudron', authenticateMailbox);
