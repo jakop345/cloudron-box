@@ -285,7 +285,7 @@ function removeUser(userId, auditSource, callback) {
 
             eventlog.add(eventlog.ACTION_USER_REMOVE, auditSource, { userId: userId });
 
-            if (user.username) mailboxdb.delByOwnerId(user.id, callback); else callback();
+            asyncIf(!!user.username, mailboxdb.delByOwnerId.bind(null, user.id), callback);
 
             mailer.userRemoved(user);
         });
@@ -587,6 +587,8 @@ function setAliases(userId, aliases, callback) {
     userdb.get(userId, function (error, user) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        if (!user.username) return new UserError(UserError.BAD_FIELD, 'Username must be set before settings aliases');
 
         mailboxdb.setAliasesByName(user.username, aliases, function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
