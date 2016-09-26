@@ -187,6 +187,14 @@ describe('User', function () {
             });
         });
 
+        it('did create mailbox', function (done) {
+            mailboxdb.getMailbox(USERNAME.toLowerCase(), function (error, mailbox) {
+                expect(error).to.be(null);
+                expect(mailbox.ownerType).to.be(mailboxdb.TYPE_USER);
+                done();
+            });
+        });
+
         it('fails because of invalid BAD_FIELD', function (done) {
             expect(function () {
                 user.create(EMAIL, {}, function () {});

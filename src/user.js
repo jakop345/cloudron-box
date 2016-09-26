@@ -372,19 +372,24 @@ function updateUser(userId, data, auditSource, callback) {
         if (error) return callback(error);
     }
 
-    // TODO: maybe delete the old username mailbox
-    asyncIf(!!data.username, mailboxdb.add.bind(null, data.username, userId /* owner */, mailboxdb.TYPE_USER), function (error) {
-        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
+    userdb.get(userId, function (error, user) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        userdb.update(userId, data, function (error) {
+        asyncIf(data.username && user.username !== data.username, mailboxdb.add.bind(null, data.username, userId /* owner */, mailboxdb.TYPE_USER), function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
-            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId });
+            userdb.update(userId, data, function (error) {
+                if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
+                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
+                if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            callback(null);
+                eventlog.add(eventlog.ACTION_USER_UPDATE, auditSource, { userId: userId });
+
+                // delete old mailbox
+                asyncIf(user.username && user.username !== data.username, mailboxdb.del.bind(null, user.username), callback);
+            });
         });
     });
 }
