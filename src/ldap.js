@@ -307,6 +307,12 @@ function authenticateMailbox(req, res, next) {
 
     var name = req.dn.rdns[0].attrs.cn.value.toLowerCase();
 
+    // allow login via email
+    var parts = name.split('@');
+    if (parts[1] === config.fqdn()) {
+        name = parts[0];
+    }
+
     mailboxdb.getMailbox(name, function (error, mailbox) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.message));
