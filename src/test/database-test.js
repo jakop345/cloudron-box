@@ -1180,39 +1180,59 @@ describe('database', function () {
     });
 
     describe('mailboxes', function () {
-        it('add succeeds', function (done) {
-            mailboxdb.add('support', 'osticket', mailboxdb.TYPE_APP, function (error, mailbox) {
+        it('add user mailbox succeeds', function (done) {
+            mailboxdb.add('girish', 'uid-0', mailboxdb.TYPE_USER, function (error, mailbox) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('cannot add dup entry', function (done) {
-            mailboxdb.add('support', 'support', mailboxdb.TYPE_USER, function (error, mailbox) {
+            mailboxdb.add('girish', 'uid-1', mailboxdb.TYPE_APP, function (error, mailbox) {
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
             });
         });
 
+        it('add app mailbox succeeds', function (done) {
+            mailboxdb.add('support', 'osticket', mailboxdb.TYPE_APP, function (error, mailbox) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
         it('get succeeds', function (done) {
-            mailboxdb.get('support', function (error, mailbox) {
+            mailboxdb.getMailbox('support', function (error, mailbox) {
                 expect(error).to.be(null);
                 expect(mailbox.name).to.be('support');
+                expect(mailbox.ownerId).to.be('osticket');
                 expect(mailbox.creationTime).to.be.a(Date);
 
                 done();
             });
         });
 
-       it('can set alias', function (done) {
-            mailboxdb.setAliasesOf('support', [ 'support2', 'help' ], 'support', 'user', function (error) {
+        it('list mailboxes succeeds', function (done) {
+            mailboxdb.listMailboxes(function (error, mailboxes) {
+                expect(error).to.be(null);
+                expect(mailboxes.length).to.be(2);
+                expect(mailboxes[0].name).to.be('girish');
+                expect(mailboxes[0].ownerType).to.be(mailboxdb.TYPE_USER);
+                expect(mailboxes[1].name).to.be('support');
+
+                done();
+            });
+        });
+
+        it('can set alias', function (done) {
+            mailboxdb.setAliasesByName('support', [ 'support2', 'help' ], function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
-        it('can get alias', function (done) {
-            mailboxdb.getAliasesOf('support', function (error, results) {
+        it('can get aliases of name', function (done) {
+            mailboxdb.getAliasesByName('support', function (error, results) {
                 expect(error).to.be(null);
                 expect(results.length).to.be(2);
                 expect(results[0]).to.be('help');
@@ -1221,11 +1241,42 @@ describe('database', function () {
             });
         });
 
+        it('can get alias', function (done) {
+            mailboxdb.getAlias('support2', function (error, result) {
+                expect(error).to.be(null);
+                expect(result.name).to.be('support2');
+                expect(result.aliasTarget).to.be('support');
+                done();
+            });
+        });
+
+        it('can list aliases', function (done) {
+            mailboxdb.listAliases(function (error, results) {
+                expect(error).to.be(null);
+                expect(results.length).to.be(2);
+                expect(results[0].name).to.be('help');
+                expect(results[0].aliasTarget).to.be('support');
+                expect(results[1].name).to.be('support2');
+                done();
+            });
+        });
+
+        it('can get by owner id', function (done) {
+            mailboxdb.getByOwnerId('osticket', function (error, results) {
+                expect(error).to.be(null);
+                expect(results.length).to.be(3);
+                expect(results[0].name).to.be('help');
+                expect(results[1].name).to.be('support');
+                expect(results[2].name).to.be('support2');
+                done();
+            });
+        });
+
         it('unset aliases', function (done) {
-            mailboxdb.setAliasesOf('support', [ ], 'support', 'user', function (error) {
+            mailboxdb.setAliasesByName('support', [ ], function (error) {
                 expect(error).to.be(null);
 
-                mailboxdb.getAliases('support', function (error, results) {
+                mailboxdb.getAliasesByName('support', function (error, results) {
                     expect(error).to.be(null);
                     expect(results.length).to.be(0);
                     done();
@@ -1234,9 +1285,21 @@ describe('database', function () {
         });
 
         it('del succeeds', function (done) {
-            mailboxdb.del('support', function (error) {
+            mailboxdb.del('girish', function (error) {
                 expect(error).to.be(null);
                 done();
+            });
+        });
+
+        it('del by ownerId succeeds', function (done) {
+            mailboxdb.delByOwnerId('osticket', function (error) {
+                expect(error).to.be(null);
+
+                mailboxdb.getByOwnerId('osticket', function (error, results) {
+                    expect(error).to.be.ok();
+                    expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                    done();
+                });
             });
         });
     });

@@ -372,7 +372,8 @@ function updateUser(userId, data, auditSource, callback) {
         if (error) return callback(error);
     }
 
-    asyncIf(!!data.username, mailboxdb.upsertByOwner.bind(null, userId /* owner */, mailboxdb.TYPE_USER, data.username), function (error) {
+    // TODO: maybe delete the old username mailbox
+    asyncIf(!!data.username, mailboxdb.add.bind(null, data.username, userId /* owner */, mailboxdb.TYPE_USER), function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
