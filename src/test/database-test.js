@@ -1225,14 +1225,14 @@ describe('database', function () {
         });
 
         it('can set alias', function (done) {
-            mailboxdb.setAliasesByName('support', [ 'support2', 'help' ], function (error) {
+            mailboxdb.setAliasesForName('support', [ 'support2', 'help' ], function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('can get aliases of name', function (done) {
-            mailboxdb.getAliasesByName('support', function (error, results) {
+            mailboxdb.getAliasesForName('support', function (error, results) {
                 expect(error).to.be(null);
                 expect(results.length).to.be(2);
                 expect(results[0]).to.be('help');
@@ -1273,10 +1273,10 @@ describe('database', function () {
         });
 
         it('unset aliases', function (done) {
-            mailboxdb.setAliasesByName('support', [ ], function (error) {
+            mailboxdb.setAliasesForName('support', [ ], function (error) {
                 expect(error).to.be(null);
 
-                mailboxdb.getAliasesByName('support', function (error, results) {
+                mailboxdb.getAliasesForName('support', function (error, results) {
                     expect(error).to.be(null);
                     expect(results.length).to.be(0);
                     done();

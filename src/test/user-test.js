@@ -898,7 +898,7 @@ describe('User', function () {
             user.setAliases(userObject.id, [ 'everything', 'is', 'awesome' ], function (error) {
                 expect(error).to.be(null);
 
-                mailboxdb.getAliasesByName(USERNAME.toLowerCase(), function (error, results) {
+                mailboxdb.getAliasesForName(USERNAME.toLowerCase(), function (error, results) {
                     expect(error).to.be(null);
                     expect(results.length).to.be(3);
                     done();
@@ -917,7 +917,7 @@ describe('User', function () {
             mailboxdb.getMailbox(userObject.username.toLowerCase(), function (error, mailbox) {
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
 
-                mailboxdb.getAliasesByName(USERNAME.toLowerCase(), function (error, results) {
+                mailboxdb.getAliasesForName(USERNAME.toLowerCase(), function (error, results) {
                     expect(error).to.be(null);
                     expect(results.length).to.be(0);
                     done();

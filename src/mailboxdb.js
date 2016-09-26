@@ -12,8 +12,8 @@ exports = module.exports = {
     getGroup: getGroup,
     getAlias: getAlias,
 
-    getAliasesByName: getAliasesByName,
-    setAliasesByName: setAliasesByName,
+    getAliasesForName: getAliasesForName,
+    setAliasesForName: setAliasesForName,
 
     getByOwnerId: getByOwnerId,
     delByOwnerId: delByOwnerId,
@@ -139,7 +139,7 @@ function getByOwnerId(ownerId, callback) {
     });
 }
 
-function setAliasesByName(name, aliases, callback) {
+function setAliasesForName(name, aliases, callback) {
     assert.strictEqual(typeof name, 'string');
     assert(util.isArray(aliases));
     assert.strictEqual(typeof callback, 'function');
@@ -164,7 +164,7 @@ function setAliasesByName(name, aliases, callback) {
     });
 }
 
-function getAliasesByName(name, callback) {
+function getAliasesForName(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
