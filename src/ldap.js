@@ -65,7 +65,7 @@ function userSearch(req, res, next) {
                     uid: entry.id,
                     mail: entry.email,
                     // TODO: check mailboxes before we send this
-                    mailAlternateAddress: entry.username + '@' + config.fqdn(),
+                    mailAlternateAddress: entry.alternativeEmail,
                     displayname: displayName,
                     givenName: firstName,
                     username: entry.username,
@@ -244,13 +244,7 @@ function authenticateUser(req, res, next) {
     if (attributeName === 'mail') {
         api = user.verifyWithEmail;
     } else if (commonName.indexOf('@') !== -1) { // if mail is specified, enforce mail check
-        var parts = commonName.split('@');
-        if (parts[1] === config.fqdn()) { // internal email, verify with username
-            commonName = parts[0];
-            api = user.verifyWithUsername;
-        } else { // external email
-            api = user.verifyWithEmail;
-        }
+        api = user.verifyWithEmail;
     } else if (commonName.indexOf('uid-') === 0) {
         api = user.verify;
     } else {
