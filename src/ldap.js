@@ -134,8 +134,18 @@ function groupSearch(req, res, next) {
 function mailboxSearch(req, res, next) {
     debug('mailbox search: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
-    var get = !!req.dn.rdns[0].attrs.cn;
-    var func = get ? mailboxdb.getMailbox.bind(null, req.dn.rdns[0].attrs.cn.value.toLowerCase()) : mailboxdb.listMailboxes;
+    var func = mailboxdb.listMailboxes;
+    if (req.dn.rdns[0].attrs.cn) {
+        var name = req.dn.rdns[0].attrs.cn.value.toLowerCase();
+        // allow login via email
+        var parts = name.split('@');
+        if (parts[1] === config.fqdn()) {
+            name = parts[0];
+        }
+
+        func = mailboxdb.getMailbox.bind(null, name);
+    }
+
     func(function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
@@ -160,9 +170,7 @@ function mailboxSearch(req, res, next) {
             var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
             if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
-            if ((req.dn.toString().toLowerCase() === dn.toString().toLowerCase() || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
-                res.send(obj);
-            }
+            if (lowerCaseFilter.matches(obj.attributes)) res.send(obj);
         });
 
         res.end();
@@ -199,9 +207,7 @@ function mailAliasSearch(req, res, next) {
             var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
             if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
-            if ((req.dn.toString().toLowerCase() === dn.toString().toLowerCase() || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
-                res.send(obj);
-            }
+            if (lowerCaseFilter.matches(obj.attributes)) res.send(obj);
         });
 
         res.end();
@@ -236,9 +242,7 @@ function getMailGroup(req, res, next) {
             var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
             if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
-            if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && lowerCaseFilter.matches(obj.attributes)) {
-                res.send(obj);
-            }
+            if (lowerCaseFilter.matches(obj.attributes)) res.send(obj);
         });
 
         res.end();

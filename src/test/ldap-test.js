@@ -470,6 +470,15 @@ describe('Ldap', function () {
             });
         });
 
+        it('get specific mailbox by email', function (done) {
+            ldapSearch('cn=' + USER_0.username + '@' + config.fqdn() + ',ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error, entries) {
+                if (error) return done(error);
+                expect(entries.length).to.equal(1);
+                expect(entries[0].cn).to.equal(USER_0.username.toLowerCase());
+                done();
+            });
+        });
+
         it('non-existent mailbox', function (done) {
             ldapSearch('cn=random,ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error) {
                 expect(error).to.be.a(ldap.NoSuchObjectError);
