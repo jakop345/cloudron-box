@@ -56,11 +56,19 @@ function upsert(dnsConfig, zoneName, subdomain, type, values, callback) {
 
         // FIXME currently we only support one record!
 
+        var value = values[0];
+        var priority = null;
+
+        if (type === 'MX') {
+            priority = values[0].split(' ')[0];
+            value = values[0].split(' ')[1];
+        }
+
         var data = {
             type: type,
             name: subdomain,
-            data: values[0],
-            priority: type === 'MX' ? 0 : null
+            data: value,
+            priority: priority
         };
 
         if (result.length === 0) {
