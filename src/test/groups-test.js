@@ -9,10 +9,12 @@
 var async = require('async'),
     constants = require('../constants.js'),
     database = require('../database.js'),
+    DatabaseError = require('../databaseerror.js'),
     expect = require('expect.js'),
     groups = require('../groups.js'),
     GroupError = groups.GroupError,
     hat = require('hat'),
+    mailboxdb = require('../mailboxdb.js'),
     userdb = require('../userdb.js');
 
 var GROUP0_NAME = 'administrators',
@@ -87,6 +89,14 @@ describe('Groups', function () {
         });
     });
 
+    it('did create mailbox', function (done) {
+        mailboxdb.getGroup(GROUP0_NAME.toLowerCase(), function (error, mailbox) {
+            expect(error).to.be(null);
+            expect(mailbox.ownerType).to.be(mailboxdb.TYPE_GROUP);
+            done();
+        });
+    });
+
     it('cannot add existing group', function (done) {
         groups.create(GROUP0_NAME, function (error) {
             expect(error.reason).to.be(GroupError.ALREADY_EXISTS);
@@ -119,6 +129,13 @@ describe('Groups', function () {
     it('can delete valid group', function (done) {
         groups.remove(GROUP0_ID, function (error) {
             expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('did delete mailbox', function (done) {
+        mailboxdb.getGroup(GROUP0_NAME.toLowerCase(), function (error) {
+            expect(error.reason).to.be(DatabaseError.NOT_FOUND);
             done();
         });
     });
