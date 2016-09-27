@@ -576,10 +576,17 @@ describe('Ldap', function () {
         });
 
         it('allows with valid email', function (done) {
-            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+            // user settingsdb instead of settings, to not trigger further events
+            settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: true }), function (error) {
+                expect(error).not.to.be.ok();
 
-            client.bind('cn=' + USER_0.username + '@' + config.fqdn() + ',ou=mailboxes,dc=cloudron', USER_0.password, function (error) {
-                done(error);
+                var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+                client.bind('cn=' + USER_0.username + '@' + config.fqdn() + ',ou=mailboxes,dc=cloudron', USER_0.password, function (error) {
+                    expect(error).not.to.be.ok();
+
+                    settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
+                });
             });
         });
     });
