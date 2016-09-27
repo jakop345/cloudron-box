@@ -293,7 +293,7 @@ function authenticateMailbox(req, res, next) {
         if (mailbox.ownerType === mailboxdb.TYPE_APP) {
             if (req.credentials !== mailbox.ownerId) return next(new ldap.NoSuchObjectError(req.dn.toString()));
             eventlog.add(eventlog.ACTION_USER_LOGIN, { authType: 'ldap', mailboxId: name }, { appId: mailbox.ownerId });
-            res.end();
+            return res.end();
         }
 
         assert.strictEqual(mailbox.ownerType, mailboxdb.TYPE_USER);
