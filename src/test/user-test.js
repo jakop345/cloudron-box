@@ -597,10 +597,30 @@ describe('User', function () {
                 expect(result).to.be.ok();
                 expect(result.id).to.equal(userObject.id);
                 expect(result.email).to.equal(EMAIL.toLowerCase());
+                expect(result.alternativeEmail).not.to.be.ok();
                 expect(result.username).to.equal(USERNAME.toLowerCase());
                 expect(result.displayName).to.equal(DISPLAY_NAME);
 
                 done();
+            });
+        });
+
+        it('succeeds with email enabled', function (done) {
+            // user settingsdb instead of settings, to not trigger further events
+            settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: true }), function (error) {
+                expect(error).not.to.be.ok();
+
+                user.get(userObject.id, function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result).to.be.ok();
+                    expect(result.id).to.equal(userObject.id);
+                    expect(result.email).to.equal(USERNAME.toLowerCase() + '@' + config.fqdn());
+                    expect(result.alternativeEmail).to.equal(EMAIL.toLowerCase());
+                    expect(result.username).to.equal(USERNAME.toLowerCase());
+                    expect(result.displayName).to.equal(DISPLAY_NAME);
+
+                    settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
+                });
             });
         });
     });
