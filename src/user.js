@@ -264,16 +264,25 @@ function verifyWithEmail(email, password, callback) {
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    settings.getMailConfig(function (error, mailConfig) {
-        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-
-        if (mailConfig.enabled) return verifyWithUsername(email.split('@')[0], password, callback);
-
+    function checkWithEmailFromDatabase() {
         userdb.getByEmail(email.toLowerCase(), function (error, user) {
             if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             verify(user.id, password, callback);
+        });
+    }
+
+    settings.getMailConfig(function (error, mailConfig) {
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        if (!mailConfig.enabled) return checkWithEmailFromDatabase();
+
+        verifyWithUsername(email.split('@')[0], password, function (error, result) {
+            if (!error) return callback(null, result);
+            if (error.reason !== UserError.NOT_FOUND) return callback(error);
+
+            checkWithEmailFromDatabase();
         });
     });
 }

@@ -24,7 +24,7 @@ var async = require('async'),
 
 var USERNAME = 'noBody';
 var USERNAME_NEW = 'noBodyNew';
-var EMAIL = 'noBody@no.body';
+var EMAIL = 'else@no.body';
 var EMAIL_NEW = 'noBodyNew@no.body';
 var PASSWORD = 'sTrOnG#$34134';
 var NEW_PASSWORD = 'oTHER@#$235';
