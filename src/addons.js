@@ -402,8 +402,10 @@ function setupSendMail(app, options, callback) {
 
     debugApp(app, 'Setting up SendMail');
 
-    mailboxdb.getByOwnerId(app.id, function (error, mailbox) {
+    mailboxdb.getByOwnerId(app.id, function (error, results) {
         if (error) return callback(error);
+
+        var mailbox = results.filter(function (r) { return !r.aliasTarget; })[0];
 
         var env = [
             "MAIL_SMTP_SERVER=mail",
@@ -435,8 +437,10 @@ function setupRecvMail(app, options, callback) {
 
     debugApp(app, 'Setting up recvmail');
 
-    mailboxdb.getByOwnerId(app.id, function (error, mailbox) {
+    mailboxdb.getByOwnerId(app.id, function (error, results) {
         if (error) return callback(error);
+
+        var mailbox = results.filter(function (r) { return !r.aliasTarget; })[0];
 
         var env = [
             "MAIL_IMAP_SERVER=mail",
