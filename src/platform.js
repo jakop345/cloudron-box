@@ -223,14 +223,8 @@ function startMail(callback) {
 
     const tag = infra.images.mail.tag;
     const dataDir = paths.DATA_DIR;
-    const rootPassword = hat(8 * 128);
     const fqdn = config.fqdn();
     const mailFqdn = config.adminFqdn();
-
-    if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/mail_vars.sh',
-            'MAIL_ROOT_USERNAME=no-reply\nMAIL_ROOT_PASSWORD=' + rootPassword, 'utf8')) {
-        return callback(new Error('Could not create mail var file:' + safe.error.message));
-    }
 
     // TODO: watch for a signal here should the certificate path change. Note that haraka reloads
     // config automatically if the contents of the certificate changes (eg, renawal).
@@ -253,7 +247,6 @@ function startMail(callback) {
                         -e "MAIL_SERVER_NAME=${mailFqdn}" \
                         -v "${dataDir}/box/mail:/app/data" \
                         -v "${dataDir}/mail:/run" \
-                        -v "${dataDir}/addons/mail_vars.sh:/etc/mail/mail_vars.sh:ro" \
                         -v "${certFilePath}:/etc/tls_cert.pem:ro" \
                         -v "${keyFilePath}:/etc/tls_key.pem:ro" \
                         ${ports} \

@@ -84,16 +84,8 @@ function uninitialize(callback) {
 }
 
 function mailConfig() {
-    if (process.env.BOX_ENV === 'test' && !process.env.TEST_CREATE_INFRA) {
-        return { username: 'no-reply', from: 'no-reply@' + config.fqdn(), password: 'doesnotwork' };
-    }
-
-    var mail = ini.parse(fs.readFileSync(paths.DATA_DIR + '/addons/mail_vars.sh', 'utf8'));
-
     return {
-        username: mail.MAIL_ROOT_USERNAME,
-        from: '"Cloudron" <' + mail.MAIL_ROOT_USERNAME + '@' + config.fqdn() + '>',
-        password: mail.MAIL_ROOT_PASSWORD
+        from: '"Cloudron" <no-reply@' + config.fqdn() + '>'
     };
 }
 
@@ -176,11 +168,7 @@ function sendMails(queue) {
 
         var transport = nodemailer.createTransport(smtpTransport({
             host: mailServerIp,
-            port: config.get('smtpPort'),
-            auth: {
-                user: mailConfig().username,
-                pass: mailConfig().password
-            }
+            port: config.get('smtpPort')
         }));
 
         debug('Processing mail queue of size %d (through %s:2525)', queue.length, mailServerIp);
