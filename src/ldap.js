@@ -183,7 +183,7 @@ function mailAliasSearch(req, res, next) {
                 objectclass: ['nisMailAlias'],
                 objectcategory: 'nisMailAlias',
                 cn: alias.name,
-                rfc822MailMember: alias.aliasTarget
+                rfc822MailMember: alias.aliasTarget + '@' + config.fqdn()
             }
         };
 

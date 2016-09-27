@@ -547,7 +547,7 @@ describe('Ldap', function () {
                 if (error) return done(error);
                 expect(entries.length).to.equal(1);
                 expect(entries[0].cn).to.equal('asterix');
-                expect(entries[0].rfc822MailMember).to.equal(USER_0.username.toLowerCase());
+                expect(entries[0].rfc822MailMember).to.equal(USER_0.username.toLowerCase() + '@' + config.fqdn());
                 done();
             });
         });
@@ -566,7 +566,7 @@ describe('Ldap', function () {
                 if (error) return done(error);
                 expect(entries.length).to.equal(1);
                 expect(entries[0].cn).to.equal('asterix');
-                expect(entries[0].rfc822MailMember).to.equal(USER_0.username.toLowerCase());
+                expect(entries[0].rfc822MailMember).to.equal(USER_0.username.toLowerCase() + '@' + config.fqdn());
                 done();
             });
         });
