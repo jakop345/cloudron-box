@@ -6,6 +6,7 @@
 'use strict';
 
 var async = require('async'),
+    config = require('../config.js'),
     database = require('../database.js'),
     DatabaseError = require('../databaseerror.js'),
     constants = require('../constants.js'),
@@ -17,6 +18,8 @@ var async = require('async'),
     mailer = require('../mailer.js'),
     user = require('../user.js'),
     userdb = require('../userdb.js'),
+    settings = require('../settings.js'),
+    settingsdb = require('../settingsdb.js'),
     UserError = user.UserError;
 
 var USERNAME = 'noBody';
@@ -30,6 +33,11 @@ var DISPLAY_NAME_NEW = 'Somone cares';
 var userObject = null;
 var NON_ADMIN_GROUP = 'members';
 var AUDIT_SOURCE = { ip: '1.2.3.4' };
+
+var USERNAME_1 = 'secondUser';
+var EMAIL_1 = 'second@user.com';
+var PASSWORD_1 = 'Sup2345$@strong';
+var DISPLAY_NAME_1 = 'Second User';
 
 function cleanupUsers(done) {
     async.series([
@@ -69,12 +77,21 @@ function cleanup(done) {
     database._clear(done);
 }
 
-function checkMails(number, done) {
+function checkMails(number, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = null;
+    }
+
     // mails are enqueued async
     setTimeout(function () {
         expect(mailer._getMailQueue().length).to.equal(number);
+
+        if (options && options.sentTo) expect(mailer._getMailQueue().some(function (mail) { return mail.to === options.sentTo; }));
+
         mailer._clearMailQueue();
-        done();
+
+        callback();
     }, 500);
 }
 
@@ -182,6 +199,7 @@ describe('User', function () {
                 expect(result).to.be.ok();
                 expect(result.username).to.equal(USERNAME.toLowerCase());
                 expect(result.email).to.equal(EMAIL.toLowerCase());
+                expect(result.alternativeEmail).not.to.be.ok();
 
                 // first user is owner, do not send mail to admins
                 checkMails(0, done);
@@ -236,6 +254,28 @@ describe('User', function () {
                 expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
+            });
+        });
+
+        it('succeeds and attempts to send invite to alternativeEmail', function (done) {
+            // user settingsdb instead of settings, to not trigger further events
+            settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: true }), function (error) {
+                expect(error).not.to.be.ok();
+
+                user.create(USERNAME_1, PASSWORD_1, EMAIL_1, DISPLAY_NAME_1, AUDIT_SOURCE, { sendInvite: true }, function (error, result) {
+                    expect(error).not.to.be.ok();
+                    expect(result).to.be.ok();
+                    expect(result.username).to.equal(USERNAME_1.toLowerCase());
+                    expect(result.email).to.equal(USERNAME_1.toLowerCase() + '@' + config.fqdn());
+                    expect(result.alternativeEmail).to.equal(EMAIL_1.toLowerCase());
+
+                    // first user is owner, do not send mail to admins
+                    checkMails(2, { sentTo: EMAIL_1.toLowerCase() }, function (error) {
+                        expect(error).not.to.be.ok();
+
+                        settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
+                    });
+                });
             });
         });
     });
