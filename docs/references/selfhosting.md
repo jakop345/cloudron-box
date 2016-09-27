@@ -9,6 +9,10 @@ If you have any questions, join us at our [chat](https://chat.cloudron.io).
 The [Cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) is used for managing a Cloudron. It has a `machine`
 subcommand that can be used to create, update and maintain a self-hosted Cloudron.
 
+<br/>
+<b class="text-danger">The Cloudron CLI tool has to be run on a Laptop or PC, not on the cloud server!</b>
+<br/>
+
 ### Linux & OS X
 Installing the CLI tool requires node.js and npm. The CLI tool can be installed using the following command:
 
