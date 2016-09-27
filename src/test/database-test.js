@@ -255,13 +255,13 @@ describe('database', function () {
             authCode: 'authcode-0',
             clientId: 'clientid-0',
             userId: 'userid-0',
-            expiresAt: Date.now() + 5000
+            expiresAt: Date.now() + 500000
         };
         var AUTHCODE_1 = {
             authCode: 'authcode-1',
             clientId: 'clientid-1',
             userId: 'userid-1',
-            expiresAt: Date.now() + 5000
+            expiresAt: Date.now() + 500000
         };
         var AUTHCODE_2 = {
             authCode: 'authcode-2',
