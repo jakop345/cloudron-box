@@ -13,8 +13,7 @@ exports = module.exports = {
     RESERVED_NAMES: [
         // Reserved usernames
         // https://github.com/gogits/gogs/blob/52c8f691630548fe091d30bcfe8164545a05d3d5/models/repo.go#L393
-        'admin', // reserved for seding emails
-        'no-reply', 'postmaster', 'mailer-daemon', // apps like wordpress, gogs don't like these
+        'admin', 'no-reply', 'postmaster', 'mailer-daemon', // apps like wordpress, gogs don't like these
 
         // Reserved groups
         'admins', 'users'         // ldap code uses 'users' pseudo group
