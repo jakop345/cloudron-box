@@ -51,8 +51,6 @@ var CRYPTO_SALT_SIZE = 64; // 512-bit salt
 var CRYPTO_ITERATIONS = 10000; // iterations
 var CRYPTO_KEY_LENGTH = 512; // bits
 
-var NOOP_CALLBACK = function (error) { if (error) debug(error); };
-
 function asyncIf(cond, func, next) {
     if (!cond) return next();
 
