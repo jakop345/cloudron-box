@@ -579,6 +579,25 @@ describe('Ldap', function () {
         });
     });
 
+    describe('search mailing list', function () {
+        it('get specific list', function (done) {
+            ldapSearch('cn=developers,ou=mailinglists,dc=cloudron', 'objectclass=mailGroup', function (error, entries) {
+                if (error) return done(error);
+                expect(entries.length).to.equal(1);
+                expect(entries[0].cn).to.equal('developers');
+                expect(entries[0].mgrpRFC822MailMember).to.eql([ USER_0.username.toLowerCase(), USER_1.username.toLowerCase() ]);
+                done();
+            });
+        });
+
+        it('non-existent list', function (done) {
+            ldapSearch('cn=random,ou=mailinglists,dc=cloudron', 'objectclass=mailGroup', function (error) {
+                expect(error).to.be.a(ldap.NoSuchObjectError);
+                done();
+            });
+        });
+    });
+
     describe('bind mailbox', function () {
         it('does not allow with invalid password', function (done) {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });

@@ -106,11 +106,23 @@ function getGroup(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    // This can be merged into a single query but cannot get 'not found' information
+    // SELECT users.username FROM mailboxes
+    //    INNER JOIN groupMembers ON mailboxes.ownerId = groupMembers.groupId
+    //    INNER JOIN users ON groupMembers.userId = users.id
+    //    WHERE mailboxes.name = <name>
+
     database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE name = ? AND ownerType = ?', [ name, exports.TYPE_GROUP ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        callback(null, results[0]);
+        database.query('SELECT users.username FROM groupMembers INNER JOIN users ON groupMembers.userId = users.id WHERE groupMembers.groupId = ?', [ results[0].ownerId ], function (error, memberList) {
+            if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+            results[0].members = memberList.map(function (m) { return m.username; });
+
+            callback(null, results[0]);
+        });
     });
 }
 

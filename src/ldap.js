@@ -205,13 +205,14 @@ function mailingListSearch(req, res, next) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
+        // http://ldapwiki.willeke.com/wiki/Original%20Mailgroup%20Schema%20From%20Netscape
         var obj = {
             dn: req.dn.toString(),
             attributes: {
                 objectclass: ['mailGroup'],
                 objectcategory: 'mailGroup',
                 cn: group.name,
-                mail: group.name,
+                mail: group.name + '@' + config.fqdn(),
                 mgrpRFC822MailMember: group.members
             }
         };
