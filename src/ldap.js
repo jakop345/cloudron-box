@@ -146,10 +146,8 @@ function mailboxSearch(req, res, next) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
-        var dn = ldap.parseDN('cn=' + mailbox.name + ',ou=mailboxes,dc=cloudron');
-
         var obj = {
-            dn: dn.toString(),
+            dn: req.dn.toString(),
             attributes: {
                 objectclass: ['mailbox'],
                 objectcategory: 'mailbox',
@@ -177,12 +175,10 @@ function mailAliasSearch(req, res, next) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
-        var dn = ldap.parseDN('cn=' + alias.name + ',ou=mailaliases,dc=cloudron');
-
         // https://wiki.debian.org/LDAP/MigrationTools/Examples
         // https://docs.oracle.com/cd/E19455-01/806-5580/6jej518pp/index.html
         var obj = {
-            dn: dn.toString(),
+            dn: req.dn.toString(),
             attributes: {
                 objectclass: ['nisMailAlias'],
                 objectcategory: 'nisMailAlias',
