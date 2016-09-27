@@ -6,7 +6,7 @@ exports = module.exports = {
 
     listAliases: listAliases,
     listMailboxes: listMailboxes,
-    listGroups: listGroups,
+    // listGroups: listGroups, // this is beyond my SQL skillz
 
     getMailbox: getMailbox,
     getGroup: getGroup,
@@ -112,18 +112,6 @@ function getGroup(name, callback) {
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, results[0]);
-    });
-}
-
-function listGroups(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    // FIXME: fix the query to return members
-    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE ownerType = ?',
-        [ exports.TYPE_GROUP ], function (error, results) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
-        callback(null, results);
     });
 }
 
