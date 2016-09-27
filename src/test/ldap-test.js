@@ -13,6 +13,7 @@ var appdb = require('../appdb.js'),
     config = require('../config.js'),
     EventEmitter = require('events').EventEmitter,
     expect = require('expect.js'),
+    groups = require('../groups.js'),
     http = require('http'),
     ldapServer = require('../ldap.js'),
     settings = require('../settings.js'),
@@ -35,6 +36,8 @@ var USER_1 = {
     email: 'USER1@email.com',
     displayName: 'User 1'
 };
+
+var GROUP_ID = 'developers';
 
 var AUDIT_SOURCE = {
     ip: '1.2.3.4'
@@ -92,6 +95,14 @@ function setup(done) {
 
                 callback(null);
             });
+        },
+        function (callback) {
+            async.series([
+                user.setAliases.bind(null, USER_0.id, [ 'Asterix', 'obelix' ]),
+                groups.create.bind(null, GROUP_ID),
+                groups.addMember.bind(null, GROUP_ID, USER_0.id),
+                groups.addMember.bind(null, GROUP_ID, USER_1.id)
+            ], callback);
         }
     ], function (error) {
         if (error) return done(error);
@@ -531,10 +542,25 @@ describe('Ldap', function () {
     });
 
     describe('search aliases', function () {
-        before(function (done) {
-            user.setAliases(USER_0.id, [ 'Asterix', 'obelix' ], done);
+        it('get specific alias', function (done) {
+            ldapSearch('cn=asterix,ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
+                if (error) return done(error);
+                expect(entries.length).to.equal(1);
+                expect(entries[0].cn).to.equal('asterix');
+                expect(entries[0].rfc822MailMember).to.equal(USER_0.username.toLowerCase());
+                done();
+            });
         });
 
+        it('non-existent alias', function (done) {
+            ldapSearch('cn=random,ou=mailaliases,dc=cloudron', 'objectclass=mailbox', function (error) {
+                expect(error).to.be.a(ldap.NoSuchObjectError);
+                done();
+            });
+        });
+    });
+
+    describe('search groups', function () {
         it('get specific alias', function (done) {
             ldapSearch('cn=asterix,ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
                 if (error) return done(error);

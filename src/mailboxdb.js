@@ -106,7 +106,6 @@ function getGroup(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    // FIXME: fix the query to return members
     database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE name = ? AND ownerType = ?', [ name, exports.TYPE_GROUP ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
