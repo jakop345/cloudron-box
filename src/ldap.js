@@ -134,44 +134,36 @@ function groupSearch(req, res, next) {
 function mailboxSearch(req, res, next) {
     debug('mailbox search: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
-    var func = mailboxdb.listMailboxes;
-    if (req.dn.rdns[0].attrs.cn) {
-        var name = req.dn.rdns[0].attrs.cn.value.toLowerCase();
-        // allow login via email
-        var parts = name.split('@');
-        if (parts[1] === config.fqdn()) {
-            name = parts[0];
-        }
-
-        func = mailboxdb.getMailbox.bind(null, name);
+    if (!req.dn.rdns[0].attrs.cn) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+    var name = req.dn.rdns[0].attrs.cn.value.toLowerCase();
+    // allow login via email
+    var parts = name.split('@');
+    if (parts[1] === config.fqdn()) {
+        name = parts[0];
     }
 
-    func(function (error, result) {
+    mailboxdb.getMailbox(name, function (error, mailbox) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
-        var results = util.isArray(result) ? result : [ result ];
+        var dn = ldap.parseDN('cn=' + mailbox.name + ',ou=mailboxes,dc=cloudron');
 
-        results.forEach(function (mailbox) {
-            var dn = ldap.parseDN('cn=' + mailbox.name + ',ou=mailboxes,dc=cloudron');
+        var obj = {
+            dn: dn.toString(),
+            attributes: {
+                objectclass: ['mailbox'],
+                objectcategory: 'mailbox',
+                cn: mailbox.name,
+                uid: mailbox.name,
+                mail: mailbox.name + '@' + config.fqdn()
+            }
+        };
 
-            var obj = {
-                dn: dn.toString(),
-                attributes: {
-                    objectclass: ['mailbox'],
-                    objectcategory: 'mailbox',
-                    cn: mailbox.name,
-                    uid: mailbox.name,
-                    mail: mailbox.name + '@' + config.fqdn()
-                }
-            };
+        // ensure all filter values are also lowercase
+        var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
+        if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
-            // ensure all filter values are also lowercase
-            var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
-            if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
-
-            if (lowerCaseFilter.matches(obj.attributes)) res.send(obj);
-        });
+        if (lowerCaseFilter.matches(obj.attributes)) res.send(obj);
 
         res.end();
     });
@@ -180,35 +172,30 @@ function mailboxSearch(req, res, next) {
 function mailAliasSearch(req, res, next) {
     debug('mail alias get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
-    var get = !!req.dn.rdns[0].attrs.cn;
-    var func = get ? mailboxdb.getAlias.bind(null, req.dn.rdns[0].attrs.cn.value) : mailboxdb.listAliases;
-    func(function (error, result) {
+    if (!req.dn.rdns[0].attrs.cn) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+    mailboxdb.getAlias(req.dn.rdns[0].attrs.cn.value, function (error, alias) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
-        var results = util.isArray(result) ? result : [ result ];
+        var dn = ldap.parseDN('cn=' + alias.name + ',ou=mailaliases,dc=cloudron');
 
-        results.forEach(function (alias) {
-            var dn = ldap.parseDN('cn=' + alias.name + ',ou=mailaliases,dc=cloudron');
+        // https://wiki.debian.org/LDAP/MigrationTools/Examples
+        // https://docs.oracle.com/cd/E19455-01/806-5580/6jej518pp/index.html
+        var obj = {
+            dn: dn.toString(),
+            attributes: {
+                objectclass: ['nisMailAlias'],
+                objectcategory: 'nisMailAlias',
+                cn: alias.name,
+                rfc822MailMember: alias.aliasTarget
+            }
+        };
 
-            // https://wiki.debian.org/LDAP/MigrationTools/Examples
-            // https://docs.oracle.com/cd/E19455-01/806-5580/6jej518pp/index.html
-            var obj = {
-                dn: dn.toString(),
-                attributes: {
-                    objectclass: ['nisMailAlias'],
-                    objectcategory: 'nisMailAlias',
-                    cn: alias.name,
-                    rfc822MailMember: alias.aliasTarget
-                }
-            };
+        // ensure all filter values are also lowercase
+        var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
+        if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
-            // ensure all filter values are also lowercase
-            var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
-            if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
-
-            if (lowerCaseFilter.matches(obj.attributes)) res.send(obj);
-        });
+        if (lowerCaseFilter.matches(obj.attributes)) res.send(obj);
 
         res.end();
     });

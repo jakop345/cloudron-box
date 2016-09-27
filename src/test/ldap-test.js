@@ -446,21 +446,6 @@ describe('Ldap', function () {
     }
 
     describe('search mailbox', function () {
-        it ('succeeds with basic filter', function (done) {
-            ldapSearch('ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error, entries) {
-                if (error) return done(error);
-                expect(entries.length).to.equal(2);
-
-                // ensure order for testability
-                entries.sort(function (a, b) { return a.username < b.username; });
-
-                expect(entries[0].cn).to.equal(USER_0.username.toLowerCase());
-                expect(entries[1].cn).to.equal(USER_1.username.toLowerCase());
-                done();
-
-            });
-        });
-
         it('get specific mailbox', function (done) {
             ldapSearch('cn=' + USER_0.username + ',ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error, entries) {
                 if (error) return done(error);
@@ -490,22 +475,6 @@ describe('Ldap', function () {
     describe('search aliases', function () {
         before(function (done) {
             user.setAliases(USER_0.id, [ 'Asterix', 'obelix' ], done);
-        });
-
-        it('succeeds with basic filter', function (done) {
-            ldapSearch('ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
-                if (error) return done(error);
-                expect(entries.length).to.equal(2);
-
-                // ensure order for testability
-                entries.sort(function (a, b) { return a.cn > b.cn; });
-
-                expect(entries[0].cn).to.equal('asterix');
-                expect(entries[0].rfc822MailMember).to.equal(USER_0.username.toLowerCase());
-                expect(entries[1].cn).to.equal('obelix');
-                expect(entries[1].rfc822MailMember).to.equal(USER_0.username.toLowerCase());
-                done();
-            });
         });
 
         it('get specific alias', function (done) {
