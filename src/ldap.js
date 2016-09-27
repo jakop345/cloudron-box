@@ -197,36 +197,30 @@ function mailAliasSearch(req, res, next) {
     });
 }
 
-function getMailGroup(req, res, next) {
-    debug('mailgroup get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
+function mailingListSearch(req, res, next) {
+    debug('mailing list get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
-    var get = !!req.dn.rdns[0].attrs.cn;
-    var func = get ? mailboxdb.getGroup.bind(null, req.dn.rdns[0].attrs.cn.value) : mailboxdb.getGroups;
-    func(function (error, result) {
+    if (!req.dn.rdns[0].attrs.cn) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+    mailboxdb.getGroup(req.dn.rdns[0].attrs.cn.value, function (error, group) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
-        var results = util.isArray(result) ? result : [ result ];
+        var obj = {
+            dn: req.dn.toString(),
+            attributes: {
+                objectclass: ['mailGroup'],
+                objectcategory: 'mailGroup',
+                cn: group.name,
+                mail: group.name,
+                mgrpRFC822MailMember: group.members
+            }
+        };
 
-        results.forEach(function (group) {
-            var dn = ldap.parseDN('cn=' + group.name + ',ou=mailgroups,dc=cloudron');
+        // ensure all filter values are also lowercase
+        var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
+        if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
 
-            var obj = {
-                dn: dn.toString(),
-                attributes: {
-                    objectclass: ['mailGroup'],
-                    objectcategory: 'mailGroup',
-                    cn: group.name,
-                    mail: group.name,
-                    mgrpRFC822MailMember: group.members
-                }
-            };
-
-            // ensure all filter values are also lowercase
-            var lowerCaseFilter = safe(function () { return ldap.parseFilter(req.filter.toString().toLowerCase()); }, null);
-            if (!lowerCaseFilter) return next(new ldap.OperationsError(safe.error.toString()));
-
-            if (lowerCaseFilter.matches(obj.attributes)) res.send(obj);
-        });
+        if (lowerCaseFilter.matches(obj.attributes)) res.send(obj);
 
         res.end();
     });
@@ -333,7 +327,7 @@ function start(callback) {
     // http://www.ietf.org/proceedings/43/I-D/draft-srivastava-ldap-mail-00.txt
     gServer.search('ou=mailboxes,dc=cloudron', mailboxSearch);
     gServer.search('ou=mailaliases,dc=cloudron', mailAliasSearch);
-    gServer.search('ou=mailgroups,dc=cloudron', getMailGroup);
+    gServer.search('ou=mailinglists,dc=cloudron', mailingListSearch);
 
     gServer.bind('ou=mailboxes,dc=cloudron', authenticateMailbox);
 
