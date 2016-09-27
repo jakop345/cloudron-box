@@ -1272,6 +1272,13 @@ describe('database', function () {
             });
         });
 
+        it('cannot get non-existing group', function (done) {
+            mailboxdb.getGroup('random', function (error) {
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+
         it('unset aliases', function (done) {
             mailboxdb.setAliasesForName('support', [ ], function (error) {
                 expect(error).to.be(null);

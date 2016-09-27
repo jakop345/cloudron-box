@@ -197,6 +197,17 @@ describe('Group membership', function () {
         });
     });
 
+    it('can get list members', function (done) {
+        mailboxdb.getGroup(GROUP0_NAME.toLowerCase(), function (error, result) {
+            expect(error).to.be(null);
+            expect(result.name).to.be(GROUP0_NAME.toLowerCase());
+            expect(result.ownerType).to.be(mailboxdb.TYPE_GROUP);
+            expect(result.ownerId).to.be(GROUP0_ID);
+            expect(result.members).to.eql([ USER_0.username ]);
+            done();
+        });
+    });
+
     it('cannot get members of non-existent group', function (done) {
         groups.getMembers('randomgroup', function (error, result) {
             expect(result.length).to.be(0); // currently, we cannot differentiate invalid groups and empty groups
