@@ -15,6 +15,8 @@ var appdb = require('../appdb.js'),
     expect = require('expect.js'),
     http = require('http'),
     ldapServer = require('../ldap.js'),
+    settings = require('../settings.js'),
+    settingsdb = require('../settingsdb.js'),
     ldap = require('ldapjs'),
     user = require('../user.js');
 
@@ -198,6 +200,25 @@ describe('Ldap', function () {
             });
         });
 
+        it('succeeds with both emails and without accessRestriction when email is enabled', function (done) {
+            // user settingsdb instead of settings, to not trigger further events
+            settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: true }), function (error) {
+                expect(error).not.to.be.ok();
+
+                var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+                client.bind('cn=' + USER_0.email.toLowerCase() + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                    expect(error).to.be(null);
+
+                    client.bind('cn=' + USER_0.username.toLowerCase() + '@' + config.fqdn() + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                        expect(error).to.be(null);
+
+                        settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
+                    });
+                });
+            });
+        });
+
         it('fails with username for mail attribute and without accessRestriction', function (done) {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
@@ -276,8 +297,47 @@ describe('Ldap', function () {
                     expect(entries.length).to.equal(2);
                     entries.sort(function (a, b) { return a.username > b.username; });
                     expect(entries[0].username).to.equal(USER_0.username.toLowerCase());
+                    expect(entries[0].mail).to.equal(USER_0.email.toLowerCase());
                     expect(entries[1].username).to.equal(USER_1.username.toLowerCase());
+                    expect(entries[1].mail).to.equal(USER_1.email.toLowerCase());
                     done();
+                });
+            });
+        });
+
+        it ('succeeds with basic filter and email enabled', function (done) {
+            // user settingsdb instead of settings, to not trigger further events
+            settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: true }), function (error) {
+                expect(error).not.to.be.ok();
+
+                var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+                var opts = {
+                    filter: 'objectcategory=person'
+                };
+
+                client.search('ou=users,dc=cloudron', opts, function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an(EventEmitter);
+
+                    var entries = [];
+
+                    result.on('searchEntry', function (entry) { entries.push(entry.object); });
+                    result.on('error', done);
+                    result.on('end', function (result) {
+                        expect(result.status).to.equal(0);
+                        expect(entries.length).to.equal(2);
+                        entries.sort(function (a, b) { return a.username > b.username; });
+
+                        expect(entries[0].username).to.equal(USER_0.username.toLowerCase());
+                        expect(entries[0].mailAlternateAddress).to.equal(USER_0.email.toLowerCase());
+                        expect(entries[0].mail).to.equal(USER_0.username.toLowerCase() + '@' + config.fqdn());
+                        expect(entries[1].username).to.equal(USER_1.username.toLowerCase());
+                        expect(entries[1].mailAlternateAddress).to.equal(USER_1.email.toLowerCase());
+                        expect(entries[1].mail).to.equal(USER_1.username.toLowerCase() + '@' + config.fqdn());
+
+                        settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
+                    });
                 });
             });
         });
