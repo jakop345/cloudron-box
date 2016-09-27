@@ -577,21 +577,30 @@ describe('User', function () {
             });
         });
 
-        it('succeeds for both emails with cloudron mail', function (done) {
+        it('succeeds with cloudron mail enabled', function (done) {
             // user settingsdb instead of settings, to not trigger further events
             settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: true }), function (error) {
                 expect(error).not.to.be.ok();
 
-                user.verifyWithEmail(EMAIL, PASSWORD, function (error, result) {
+                user.verifyWithEmail(USERNAME + '@' + config.fqdn(), PASSWORD, function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
 
-                    user.verifyWithEmail(USERNAME + '@' + config.fqdn(), PASSWORD, function (error, result) {
-                        expect(error).to.not.be.ok();
-                        expect(result).to.be.ok();
+                    settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
+                });
+            });
+        });
 
-                        settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
-                    });
+        it('fails with cloudron mail enabled and invite email', function (done) {
+            // user settingsdb instead of settings, to not trigger further events
+            settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: true }), function (error) {
+                expect(error).not.to.be.ok();
+
+                user.verifyWithEmail(EMAIL, PASSWORD, function (error) {
+                    expect(error).to.be.a(UserError);
+                    expect(error.reason).to.equal(UserError.NOT_FOUND);
+
+                    settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
                 });
             });
         });

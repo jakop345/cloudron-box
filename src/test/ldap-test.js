@@ -200,21 +200,17 @@ describe('Ldap', function () {
             });
         });
 
-        it('succeeds with both emails and without accessRestriction when email is enabled', function (done) {
+        it('succeeds without accessRestriction when email is enabled', function (done) {
             // user settingsdb instead of settings, to not trigger further events
             settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: true }), function (error) {
                 expect(error).not.to.be.ok();
 
                 var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
-                client.bind('cn=' + USER_0.email.toLowerCase() + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                client.bind('cn=' + USER_0.username.toLowerCase() + '@' + config.fqdn() + ',ou=users,dc=cloudron', USER_0.password, function (error) {
                     expect(error).to.be(null);
 
-                    client.bind('cn=' + USER_0.username.toLowerCase() + '@' + config.fqdn() + ',ou=users,dc=cloudron', USER_0.password, function (error) {
-                        expect(error).to.be(null);
-
-                        settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
-                    });
+                    settingsdb.set(settings.MAIL_CONFIG_KEY, JSON.stringify({ enabled: false }), done);
                 });
             });
         });
