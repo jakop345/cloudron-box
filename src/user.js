@@ -264,11 +264,17 @@ function verifyWithEmail(email, password, callback) {
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.getByEmail(email.toLowerCase(), function (error, user) {
-        if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+    settings.getMailConfig(function (error, mailConfig) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        verify(user.id, password, callback);
+        if (mailConfig.enabled) return verifyWithUsername(email.split('@')[0], password, callback);
+
+        userdb.getByEmail(email.toLowerCase(), function (error, user) {
+            if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            verify(user.id, password, callback);
+        });
     });
 }
 
