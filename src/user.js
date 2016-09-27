@@ -39,6 +39,7 @@ var assert = require('assert'),
     mailer = require('./mailer.js'),
     mailboxdb = require('./mailboxdb.js'),
     safe = require('safetydance'),
+    settings = require('./settings.js'),
     tokendb = require('./tokendb.js'),
     userdb = require('./userdb.js'),
     util = require('util'),
@@ -186,12 +187,21 @@ function createUser(username, password, email, displayName, auditSource, options
                     if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS, error.message));
                     if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-                    eventlog.add(eventlog.ACTION_USER_ADD, auditSource, { userId: user.id, email: user.email });
+                    settings.getMailConfig(function (error, mailConfig) {
+                        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-                    callback(null, user);
+                        if (mailConfig.enabled) {
+                            user.alternativeEmail = user.email;
+                            user.email = user.username + '@' + config.fqdn();
+                        }
 
-                    if (!owner) mailer.userAdded(user, sendInvite);
-                    if (sendInvite) mailer.sendInvite(user, invitor);
+                        callback(null, user);
+
+                        eventlog.add(eventlog.ACTION_USER_ADD, auditSource, { userId: user.id, email: user.email });
+
+                        if (!owner) mailer.userAdded(user, sendInvite);
+                        if (sendInvite) mailer.sendInvite(user, invitor);
+                    });
                 });
             });
         });
@@ -291,11 +301,20 @@ function listUsers(callback) {
     userdb.getAllWithGroupIds(function (error, results) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        results.forEach(function (result) {
-            result.admin = result.groupIds.indexOf(constants.ADMIN_GROUP_ID) !== -1;
-        });
+        settings.getMailConfig(function (error, mailConfig) {
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        return callback(null, results);
+            results.forEach(function (result) {
+                result.admin = result.groupIds.indexOf(constants.ADMIN_GROUP_ID) !== -1;
+
+                if (mailConfig.enabled) {
+                    result.alternativeEmail = result.email;
+                    result.email = result.username + '@' + config.fqdn();
+                }
+            });
+
+            return callback(null, results);
+        });
     });
 }
 
@@ -323,7 +342,16 @@ function getUser(userId, callback) {
             result.groupIds = groupIds;
             result.admin = groupIds.indexOf(constants.ADMIN_GROUP_ID) !== -1;
 
-            return callback(null, result);
+            settings.getMailConfig(function (error, mailConfig) {
+                if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+                if (mailConfig.enabled) {
+                    result.alternativeEmail = result.email;
+                    result.email = result.username + '@' + config.fqdn();
+                }
+
+                return callback(null, result);
+            });
         });
     });
 }
@@ -339,7 +367,7 @@ function getByResetToken(resetToken, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        callback(null, result);
+        getUser(result.id, callback);
     });
 }
 
@@ -423,7 +451,19 @@ function getAllAdmins(callback) {
 
     userdb.getAllAdmins(function (error, admins) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-        callback(null, admins);
+
+        settings.getMailConfig(function (error, mailConfig) {
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            if (mailConfig.enabled) {
+                admins.forEach(function (admin) {
+                    admin.alternativeEmail = admin.email;
+                    admin.email = admin.username + '@' + config.fqdn();
+                });
+            }
+
+            callback(null, admins);
+        });
     });
 }
 
@@ -528,7 +568,16 @@ function getOwner(callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        return callback(null, owner);
+        settings.getMailConfig(function (error, mailConfig) {
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            if (mailConfig.enabled) {
+                owner.alternativeEmail = owner.email;
+                owner.email = owner.username + '@' + config.fqdn();
+            }
+
+            return callback(null, owner);
+        });
     });
 }
 
