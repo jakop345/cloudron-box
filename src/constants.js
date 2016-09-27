@@ -9,6 +9,17 @@ exports = module.exports = {
     MAIL_LOCATION: 'my', // not a typo! should be same as admin location until we figure out certificates
     POSTMAN_LOCATION: 'postman', // used in dovecot bounces
 
+    // These are combined into one array because users and groups become mailboxes
+    RESERVED_NAMES: [
+        // Reserved usernames
+        // https://github.com/gogits/gogs/blob/52c8f691630548fe091d30bcfe8164545a05d3d5/models/repo.go#L393
+        'admin', // reserved for seding emails
+        'no-reply', 'postmaster', 'mailer-daemon', // apps like wordpress, gogs don't like these
+
+        // Reserved groups
+        'admins', 'users'         // ldap code uses 'users' pseudo group
+    ],
+
     ADMIN_NAME: 'Settings',
 
     ADMIN_CLIENT_ID: 'webadmin', // oauth client id

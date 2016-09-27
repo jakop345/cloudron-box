@@ -56,14 +56,12 @@ GroupError.NOT_ALLOWED = 'Not Allowed';
 
 function validateGroupname(name) {
     assert.strictEqual(typeof name, 'string');
-    var RESERVED = [ 'admins', 'users' ]; // ldap code uses 'users' pseudo group
-
     if (name.length <= 2) return new GroupError(GroupError.BAD_FIELD, 'name must be atleast 2 chars');
     if (name.length >= 200) return new GroupError(GroupError.BAD_FIELD, 'name too long');
 
     if (!/^[A-Za-z0-9_-]*$/.test(name)) return new GroupError(GroupError.BAD_FIELD, 'name can only have A-Za-z0-9_-');
 
-    if (RESERVED.indexOf(name) !== -1) return new GroupError(GroupError.BAD_FIELD, 'name is reserved');
+    if (constants.RESERVED_NAMES.indexOf(name) !== -1) return new GroupError(GroupError.BAD_FIELD, 'name is reserved');
 
     // app emails are sent using the .app suffix
     if (name.indexOf('.app') !== -1) return new GroupError(GroupError.BAD_FIELD, 'name pattern is reserved for apps');
