@@ -821,6 +821,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.updateProfile = function (data, callback) {
+        post('/api/v1/profile', data).success(function(data, status) {
+            if (status !== 204) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.changePassword = function (currentPassword, newPassword, callback) {
         var data = {
             password: currentPassword,
