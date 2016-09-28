@@ -2,6 +2,11 @@
 
 var dbm = dbm || require('db-migrate');
 
+function LOG_ERROR(error, next) {
+    if (error) console.error(error);
+    next();
+}
+
 exports.up = function(db, callback) {
     async.series([
         db.runSql.bind(db, 'ALTER TABLE mailboxes ADD COLUMN ownerId VARCHAR(128)'),
@@ -14,7 +19,7 @@ exports.up = function(db, callback) {
                 if (error) return done(error);
 
                 async.eachSeries(results, function (g, next) {
-                    db.runSql('INSERT INTO mailboxes (ownerId, ownerType, name) VALUES (?, ?, ?)', [ g.id, 'group', g.name ], next);
+                    db.runSql('INSERT INTO mailboxes (ownerId, ownerType, name) VALUES (?, ?, ?)', [ g.id, 'group', g.name ], LOG_ERROR);
                 }, done);
             });
         },
@@ -29,7 +34,7 @@ exports.up = function(db, callback) {
                     if (!manifest.addons['sendmail'] && !manifest.addons['recvmail']) return next();
 
                     var mailboxName = (a.location ? a.location : manifest.title.replace(/[^a-zA-Z0-9]/g, '')) + '.app';
-                    db.runSql('INSERT INTO mailboxes (ownerId, ownerType, name) VALUES (?, ?, ?)', [ a.id, 'app', mailboxName ], next);
+                    db.runSql('INSERT INTO mailboxes (ownerId, ownerType, name) VALUES (?, ?, ?)', [ a.id, 'app', mailboxName ], LOG_ERROR);
                 }, done);
             });
         },
@@ -42,7 +47,7 @@ exports.up = function(db, callback) {
                 async.eachSeries(results, function (u,  next) {
                     if (!u.username) return next();
 
-                    db.runSql('UPDATE mailboxes SET ownerId = ?, ownerType = ? WHERE name = ? OR targetAlias = ?', [ u.id, 'user', u.username, u.username ], done);
+                    db.runSql('UPDATE mailboxes SET ownerId = ?, ownerType = ? WHERE name = ? OR targetAlias = ?', [ u.id, 'user', u.username, u.username ], LOG_ERROR);
                 }, done);
             });
         },
