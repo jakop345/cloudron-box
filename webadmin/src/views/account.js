@@ -135,11 +135,10 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
             $scope.displayNameChange.busy = true;
 
             var user = {
-                id: $scope.user.id,
                 displayName: $scope.displayNameChange.displayName
             };
 
-            Client.updateUser(user, function (error) {
+            Client.updateProfile(user, function (error) {
                 $scope.displayNameChange.busy = false;
 
                 if (error) {
