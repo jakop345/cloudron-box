@@ -268,9 +268,12 @@
                                 <td>
                                     <i class="fa fa-briefcase arrow" ng-show="user.admin" uib-tooltip="This user can manage apps, groups and other users"></i>
                                 </td>
-                                <td class="hand elide-table-cell" ng-click="showUserEdit(user)">
+                                <td class="hand elide-table-cell" ng-click="showUserEdit(user)" ng-show="user.username">
                                     {{ user.username }}
                                     <span class="text-muted">{{ user.email }}</span>
+                                </td>
+                                <td class="hand elide-table-cell" ng-click="showUserEdit(user)" ng-hide="user.username">
+                                    <span class="text-muted" uib-tooltip="User is not activated yet">{{ user.alternateEmail || user.email }}</span>
                                 </td>
                                 <td class="text-left hand elide-table-cell hidden-xs hidden-sm" ng-click="showUserEdit(user)">
                                     <span class="group-badge" ng-repeat="groupId in user.groupIds | ignoreAdminGroup">{{ groupId }}</span>
