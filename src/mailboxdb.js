@@ -39,7 +39,7 @@ function add(name, ownerId, ownerType, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     database.query('INSERT INTO mailboxes (name, ownerId, ownerType) VALUES (?, ?, ?)', [ name, ownerId, ownerType ], function (error) {
-        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, 'mailbox already exists'));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);

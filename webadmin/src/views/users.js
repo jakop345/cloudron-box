@@ -107,16 +107,15 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                         $scope.useradd.error.email = 'Email already taken';
                         $scope.useradd_form.email.$setPristine();
                         $('#inputUserAddEmail').focus();
-                        return;
-                    } else if (error.message.toLowerCase().indexOf('username') !== -1) {
+                    } else if (error.message.toLowerCase().indexOf('username') !== -1 || error.message.toLowerCase().indexOf('mailbox') !== -1) {
                         $scope.useradd.error.username = 'Username already taken';
                         $scope.useradd_form.username.$setPristine();
                         $('#inputUserAddUsername').focus();
                     } else {
                         // should not happen!!
                         console.error(error.message);
-                        return;
                     }
+                    return;
                 }
                 if (error && error.statusCode === 400) {
                     if (error.message.indexOf('email') !== -1) {
