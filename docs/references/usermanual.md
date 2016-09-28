@@ -98,6 +98,8 @@ of clicking the `Update` button (the green star) after you read about the change
 
 ### Backups
 
+<i>If you self-host, please refer to the [self-hosting documentation](/references/selfhosting.html#backups) for backups.</i>
+
 All apps are automatically backed up every day. Backups are stored encrypted in Amazon S3. You don't have
 to do anything about it. The [Cloudron CLI](https://git.cloudron.io/cloudron/cloudron-cli) tool can be used
 to download application backups.
@@ -124,7 +126,7 @@ Apps can be restored to a previous backup by clicking on the `Restore` button.
 
 <img src="/docs/img/app_restore_button.png" class="shadow">
 
-Note that restoring previous data might also restore the previous version of the software. For example, you might 
+Note that restoring previous data might also restore the previous version of the software. For example, you might
 be currently using Version 5 of the app. If you restore to a backup that was made with Version 3 of the app, then the restore
 operation will install Version 3 of the app. This is because the latest version may not be able to handle old data.
 
@@ -134,7 +136,7 @@ You can uninstall an app by clicking the `Uninstall` button.
 
 <img src="/docs/img/app_uninstall_button.png" class="shadow">
 
-Note that all data associated with the app will be immediately removed from the Cloudron. App data might still 
+Note that all data associated with the app will be immediately removed from the Cloudron. App data might still
 persist in your old backups and the [CLI tool](https://git.cloudron.io/cloudron/cloudron-cli) provides a way to
 restore from those old backups should it be required.
 
