@@ -206,8 +206,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         this._userInfo.displayName = userInfo.displayName;
         this._userInfo.admin = !!userInfo.admin;
         this._userInfo.showTutorial = !!userInfo.showTutorial;
-        this._userInfo.gravatar = 'https://www.gravatar.com/avatar/' + md5.createHash(userInfo.email.toLowerCase()) + '.jpg?s=24&d=mm';
-        this._userInfo.gravatarHuge = 'https://www.gravatar.com/avatar/' + md5.createHash(userInfo.email.toLowerCase()) + '.jpg?s=128&d=mm';
+        this._userInfo.gravatar = 'https://www.gravatar.com/avatar/' + md5.createHash(userInfo.alternateEmail || userInfo.email) + '.jpg?s=24&d=mm';
+        this._userInfo.gravatarHuge = 'https://www.gravatar.com/avatar/' + md5.createHash(userInfo.alternateEmail || userInfo.email) + '.jpg?s=128&d=mm';
     };
 
     Client.prototype.setConfig = function (config) {
