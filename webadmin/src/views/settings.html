@@ -205,11 +205,11 @@
     </div>
     <br/>
     <div class="row">
-        <p class="col-md-12" ng-show="!config.isCustomDomain">
+        <p class="col-md-12" ng-show="!config.isCustomDomain && !config.isDev">
             <b>Email can only be enabled for custom domains.</b>
         </p>
 
-        <div class="col-md-12" ng-show="config.isCustomDomain">
+        <div class="col-md-12" ng-show="config.isCustomDomain || config.isDev">
             <button ng-class="mailConfig.enabled ? 'btn btn-danger pull-right' : 'btn btn-primary pull-right'" ng-click="toggleEmail()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
         </div>
     </div>
