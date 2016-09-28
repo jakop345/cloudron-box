@@ -193,6 +193,8 @@ function createUser(username, password, email, displayName, auditSource, options
                         if (mailConfig.enabled) {
                             user.alternateEmail = user.email;
                             user.email = user.username + '@' + config.fqdn();
+                        } else {
+                            user.alternateEmail = null;
                         }
 
                         callback(null, user);
@@ -318,6 +320,8 @@ function listUsers(callback) {
                 if (mailConfig.enabled) {
                     result.alternateEmail = result.email;
                     result.email = result.username + '@' + config.fqdn();
+                } else {
+                    result.alternateEmail = null;
                 }
             });
 
@@ -356,6 +360,8 @@ function getUser(userId, callback) {
                 if (mailConfig.enabled) {
                     result.alternateEmail = result.email;
                     result.email = result.username + '@' + config.fqdn();
+                } else {
+                    result.alternateEmail = null;
                 }
 
                 return callback(null, result);
@@ -463,12 +469,14 @@ function getAllAdmins(callback) {
         settings.getMailConfig(function (error, mailConfig) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            if (mailConfig.enabled) {
-                admins.forEach(function (admin) {
+            admins.forEach(function (admin) {
+                if (mailConfig.enabled) {
                     admin.alternateEmail = admin.email;
                     admin.email = admin.username + '@' + config.fqdn();
-                });
-            }
+                } else {
+                    admin.alternateEmail = null;
+                }
+            });
 
             callback(null, admins);
         });
@@ -582,6 +590,8 @@ function getOwner(callback) {
             if (mailConfig.enabled) {
                 owner.alternateEmail = owner.email;
                 owner.email = owner.username + '@' + config.fqdn();
+            } else {
+                owner.alternateEmail = null;
             }
 
             return callback(null, owner);
