@@ -229,7 +229,7 @@ function mailUserEventToAdmins(user, event) {
         var mailOptions = {
             from: mailConfig().from,
             to: adminEmails.join(', '),
-            subject: util.format('%s %s in Cloudron %s', user.username || user.email, event, config.fqdn()),
+            subject: util.format('%s %s in Cloudron %s', user.username || user.alternateEmail || user.email, event, config.fqdn()),
             text: render('user_event.ejs', { fqdn: config.fqdn(), user: user, event: event, format: 'text' }),
         };
 
