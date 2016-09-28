@@ -60,7 +60,7 @@
                 <h4 class="modal-title">Delete user {{ userremove.userInfo.username }}</h4>
             </div>
             <div class="modal-body">
-                <form name="userremove_form" role="form" ng-submit="doUserRemove()" autocomplete="off">
+                <form name="userremove_form" role="form" ng-submit="userremove.submit()" autocomplete="off">
                     <input type="password" style="display: none;">
                     <div class="form-group" ng-class="{ 'has-error': (userremove_form.username.$dirty && userremove_form.username.$invalid) || (!userremove_form.username.$dirty && userremove.error.username) }">
                         <label class="control-label">Just to be sure you really want to delete this user, please type the username or email</label>
@@ -83,7 +83,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" ng-click="doUserRemove()" ng-disabled="userremove_form.$invalid || userremove.busy"><i class="fa fa-spinner fa-pulse" ng-show="userremove.busy"></i> Delete</button>
+                <button type="button" class="btn btn-danger" ng-click="userremove.submit()" ng-disabled="userremove_form.$invalid || userremove.busy"><i class="fa fa-spinner fa-pulse" ng-show="userremove.busy"></i> Delete</button>
             </div>
         </div>
     </div>
@@ -316,7 +316,7 @@
                                 <td class="text-right no-wrap" style="vertical-align: bottom">
                                     <button ng-show="!isMe(user)" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>
                                     <button class="btn btn-xs btn-default" ng-click="showUserEdit(user)" title="Edit User Profile"><i class="fa fa-pencil"></i></button>
-                                    <button ng-show="!isMe(user)" class="btn btn-xs btn-danger" ng-click="showUserRemove(user)" title="Remove User"><i class="fa fa-trash-o"></i></button>
+                                    <button ng-show="!isMe(user)" class="btn btn-xs btn-danger" ng-click="userremove.show(user)" title="Remove User"><i class="fa fa-trash-o"></i></button>
                                 </td>
                             </tr>
                         </tbody>

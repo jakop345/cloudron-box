@@ -15,7 +15,59 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         error: {},
         userInfo: {},
         username: '',
-        password: ''
+        password: '',
+
+        show: function (userInfo) {
+            $scope.userremove.error.username = null;
+            $scope.userremove.error.password = null;
+            $scope.userremove.username = '';
+            $scope.userremove.password = '';
+            $scope.userremove.userInfo = userInfo;
+
+            $scope.userremove_form.$setPristine();
+            $scope.userremove_form.$setUntouched();
+
+            $('#userRemoveModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.userremove.error.username = null;
+            $scope.userremove.error.password = null;
+
+            if ($scope.userremove.username !== $scope.userremove.userInfo.username && $scope.userremove.username !== $scope.userremove.userInfo.email && $scope.userremove.username !== $scope.userremove.userInfo.alternateEmail) {
+                $scope.userremove.error.username = true;
+                $scope.userremove.username = '';
+                $scope.userremove_form.username.$setPristine();
+                $('#inputUserRemoveUsername').focus();
+                return;
+            }
+
+            $scope.userremove.busy = true;
+
+            Client.removeUser($scope.userremove.userInfo.id, $scope.userremove.password, function (error) {
+                $scope.userremove.busy = false;
+
+                if (error && error.statusCode === 403) {
+                    $scope.userremove.error.password = 'Wrong password';
+                    $scope.userremove.password = '';
+                    $scope.userremove_form.password.$setPristine();
+                    $('#inputUserRemovePassword').focus();
+                    return;
+                }
+                if (error) return console.error('Unable to delete user.', error);
+
+                $scope.userremove.userInfo = {};
+                $scope.userremove.username = '';
+                $scope.userremove.password = '';
+
+                $scope.userremove_form.$setPristine();
+                $scope.userremove_form.$setUntouched();
+
+                refresh();
+
+                $('#userRemoveModal').modal('hide');
+            });
+        }
     };
 
     $scope.useradd = {
@@ -323,58 +375,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                     $('#userEditModal').modal('hide');
                 });
             });
-        });
-    };
-
-    $scope.showUserRemove = function (userInfo) {
-        $scope.userremove.error.username = null;
-        $scope.userremove.error.password = null;
-        $scope.userremove.username = '';
-        $scope.userremove.password = '';
-        $scope.userremove.userInfo = userInfo;
-
-        $scope.userremove_form.$setPristine();
-        $scope.userremove_form.$setUntouched();
-
-        $('#userRemoveModal').modal('show');
-    };
-
-    $scope.doUserRemove = function () {
-        $scope.userremove.error.username = null;
-        $scope.userremove.error.password = null;
-
-        if ($scope.userremove.username !== $scope.userremove.userInfo.username && $scope.userremove.username !== $scope.userremove.userInfo.email && $scope.userremove.username !== $scope.userremove.userInfo.alternateEmail) {
-            $scope.userremove.error.username = true;
-            $scope.userremove.username = '';
-            $scope.userremove_form.username.$setPristine();
-            $('#inputUserRemoveUsername').focus();
-            return;
-        }
-
-        $scope.userremove.busy = true;
-
-        Client.removeUser($scope.userremove.userInfo.id, $scope.userremove.password, function (error) {
-            $scope.userremove.busy = false;
-
-            if (error && error.statusCode === 403) {
-                $scope.userremove.error.password = 'Wrong password';
-                $scope.userremove.password = '';
-                $scope.userremove_form.password.$setPristine();
-                $('#inputUserRemovePassword').focus();
-                return;
-            }
-            if (error) return console.error('Unable to delete user.', error);
-
-            $scope.userremove.userInfo = {};
-            $scope.userremove.username = '';
-            $scope.userremove.password = '';
-
-            $scope.userremove_form.$setPristine();
-            $scope.userremove_form.$setUntouched();
-
-            refresh();
-
-            $('#userRemoveModal').modal('hide');
         });
     };
 
