@@ -202,6 +202,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         this._userInfo.id = userInfo.id;
         this._userInfo.username = userInfo.username;
         this._userInfo.email = userInfo.email;
+        this._userInfo.alternateEmail = userInfo.alternateEmail;
         this._userInfo.displayName = userInfo.displayName;
         this._userInfo.admin = !!userInfo.admin;
         this._userInfo.showTutorial = !!userInfo.showTutorial;
