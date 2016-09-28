@@ -99,13 +99,13 @@
             <div class="modal-body">
                 <form name="useredit_form" role="form" ng-submit="useredit.submit()" autocomplete="off">
                     <input type="password" style="display: none;">
-                    <div class="form-group" ng-show="useredit.userInfo.alternateEmail">
+                    <div class="form-group" ng-show="mailConfig.enabled">
                         <label class="control-label">Email</label>
-                        <input type="email" class="form-control" ng-model="useredit.userInfo.email" disabled>
+                        <input type="email" class="form-control" placeholder="Will be assigned when user signs up" ng-model="useredit.userInfo.email" disabled>
                     </div>
                     <div class="form-group" ng-class="{ 'has-error': (useredit_form.email.$dirty && useredit_form.email.$invalid) || (!useredit_form.email.$dirty && useredit.error.email) }">
-                        <label class="control-label" ng-show="useredit.userInfo.alternateEmail" uib-tooltip="Email used for password recovery">Alternate Email</label>
-                        <label class="control-label" ng-hide="useredit.userInfo.alternateEmail">Email</label>
+                        <label class="control-label" ng-show="mailConfig.enabled" uib-tooltip="Email used for password recovery">Alternate Email</label>
+                        <label class="control-label" ng-hide="mailConfig.enabled">Email</label>
                         <div class="control-label" ng-show="(!useredit_form.email.$dirty && useredit.error.email) || (useredit_form.email.$dirty && useredit_form.email.$invalid) || (!useredit_form.email.$dirty && useredit.error.email)">
                             <small ng-show="useredit_form.email.$error.required">An email is required</small>
                             <small ng-show="useredit_form.email.$error.email">This is not a valid email</small>
