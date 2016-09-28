@@ -32,7 +32,7 @@ function initialize(callback) {
         user.get(userId, function (error, result) {
             if (error) return callback(error);
 
-            var md5 = crypto.createHash('md5').update(result.email.toLowerCase()).digest('hex');
+            var md5 = crypto.createHash('md5').update(result.alternateEmail || result.email).digest('hex');
             result.gravatar = 'https://www.gravatar.com/avatar/' + md5 + '.jpg?s=24&d=mm';
 
             callback(null, result);
