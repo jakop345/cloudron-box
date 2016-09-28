@@ -407,7 +407,7 @@ app.directive('tagInput', function () {
             });
             element.bind('keyup', function (e) {
                 var key = e.which;
-                if (key === 9 || key === 13 || key === 188) {
+                if (key === 9 || key === 13 || key === 32 || key === 188) {
                     e.preventDefault();
                     return $scope.$apply('addTag()');
                 }
