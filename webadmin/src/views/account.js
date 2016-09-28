@@ -89,12 +89,11 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
             $scope.emailchange.error.email = null;
             $scope.emailchange.busy = true;
 
-            var user = {
-                id: $scope.user.id,
+            var data = {
                 email: $scope.emailchange.email
             };
 
-            Client.updateUser(user, function (error) {
+            Client.updateProfile(data, function (error) {
                 $scope.emailchange.busy = false;
 
                 if (error) {
