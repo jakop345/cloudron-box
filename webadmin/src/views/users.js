@@ -276,7 +276,16 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         Client.updateUser(data, function (error) {
             if (error) {
                 $scope.useredit.busy = false;
-                return console.error('Unable to update user:', error);
+
+                if (error.statusCode === 409) {
+                    $scope.useredit.error.email = 'Email already taken';
+                    $scope.useredit_form.email.$setPristine();
+                    $('#inputUserEditEmail').focus();
+                } else {
+                    console.error('Unable to update user:', error);
+                }
+
+                return;
             }
 
             if ($scope.useredit.superuser) {
