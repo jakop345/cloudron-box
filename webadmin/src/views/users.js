@@ -236,7 +236,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
     $scope.showUserEdit = function (userInfo) {
         $scope.useredit.error.email = null;
-        $scope.useredit.email = userInfo.email;
+        $scope.useredit.email = userInfo.alternateEmail || userInfo.email;
         $scope.useredit.userInfo = userInfo;
         $scope.useredit.groupIds = angular.copy(userInfo.groupIds);
         $scope.useredit.superuser = userInfo.groupIds.indexOf('admin') !== -1;
