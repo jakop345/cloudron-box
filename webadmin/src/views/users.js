@@ -379,7 +379,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     };
 
     $scope.sendInvite = function (user) {
-        $scope.inviteSent.email = user.email;
+        $scope.inviteSent.email = user.alternateEmail || user.email;
         $scope.inviteSent.setupLink = '';
 
         Client.sendInvite(user, function (error, resetToken) {
