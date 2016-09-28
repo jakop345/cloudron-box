@@ -175,6 +175,12 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $scope.useredit_form.$setPristine();
             $scope.useredit_form.$setUntouched();
 
+            // clear any alias error when the model changes. this is required because tagInput directive is not angular forms aware
+            // http://blog.revolunet.com/blog/2013/11/28/create-resusable-angularjs-input-component/ has some notes on how to do that
+            $scope.$watch('useredit.aliases', function () {
+                $scope.useredit.error.aliases = null;
+            });
+
             $('#userEditModal').modal('show');
         },
 
