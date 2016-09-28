@@ -6,7 +6,7 @@
                 <h4 class="modal-title">Add User</h4>
             </div>
             <div class="modal-body">
-                <form name="useradd_form" role="form" ng-submit="doAdd()" autocomplete="off">
+                <form name="useradd_form" role="form" ng-submit="useradd.submit()" autocomplete="off">
                     <input type="password" style="display: none;">
                     <div class="form-group" ng-class="{ 'has-error': (useradd_form.email.$dirty && useradd_form.email.$invalid) || (!useradd_form.email.$dirty && useradd.error.email) }">
                         <label class="control-label">Email</label>
@@ -46,7 +46,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doAdd()" ng-disabled="useradd_form.$invalid || useradd.busy"><i class="fa fa-spinner fa-pulse" ng-show="useradd.busy"></i> Add User</button>
+                <button type="button" class="btn btn-success" ng-click="useradd.submit()" ng-disabled="useradd_form.$invalid || useradd.busy"><i class="fa fa-spinner fa-pulse" ng-show="useradd.busy"></i> Add User</button>
             </div>
         </div>
     </div>
@@ -276,7 +276,7 @@
     <div>
         <div class="text-left">
             <h1>
-                Users <sup style="font-size: 14px;" ng-show="mailConfig.enabled"><a href="" ng-click="showUserHelp()"><i class="fa fa-question-circle"></i></a></sup> <button class="btn btn-primary btn-outline pull-right" ng-click="showUserAdd()"><i class="fa fa-user-plus"></i> New User</button>
+                Users <sup style="font-size: 14px;" ng-show="mailConfig.enabled"><a href="" ng-click="showUserHelp()"><i class="fa fa-question-circle"></i></a></sup> <button class="btn btn-primary btn-outline pull-right" ng-click="useradd.show()"><i class="fa fa-user-plus"></i> New User</button>
             </h1>
         </div>
     </div>

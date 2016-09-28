@@ -25,7 +25,77 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         email: '',
         username: '',
         displayName: '',
-        sendInvite: true
+        sendInvite: true,
+
+        show: function () {
+            $scope.useradd.error = {};
+            $scope.useradd.email = '';
+            $scope.useradd.username = '';
+            $scope.useradd.displayName = '';
+
+            $scope.useradd_form.$setUntouched();
+            $scope.useradd_form.$setPristine();
+
+            $('#userAddModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.useradd.busy = true;
+
+            $scope.useradd.alreadyTaken = false;
+            $scope.useradd.error.email = null;
+            $scope.useradd.error.username = null;
+            $scope.useradd.error.displayName = null;
+
+            Client.createUser($scope.useradd.username, $scope.useradd.email, $scope.useradd.displayName, $scope.useradd.sendInvite, function (error) {
+                $scope.useradd.busy = false;
+
+                if (error && error.statusCode === 409) {
+                    if (error.message.toLowerCase().indexOf('email') !== -1) {
+                        $scope.useradd.error.email = 'Email already taken';
+                        $scope.useradd_form.email.$setPristine();
+                        $('#inputUserAddEmail').focus();
+                        return;
+                    } else if (error.message.toLowerCase().indexOf('username') !== -1) {
+                        $scope.useradd.error.username = 'Username already taken';
+                        $scope.useradd_form.username.$setPristine();
+                        $('#inputUserAddUsername').focus();
+                    } else {
+                        // should not happen!!
+                        console.error(error.message);
+                        return;
+                    }
+                }
+                if (error && error.statusCode === 400) {
+                    if (error.message.indexOf('email') !== -1) {
+                        $scope.useradd.error.email = 'Invalid Email';
+                        $scope.useradd.error.emailAttempted = $scope.useradd.email;
+                        $scope.useradd_form.email.$setPristine();
+                        $('#inputUserAddEmail').focus();
+                    } else if (error.message.indexOf('username') !== -1) {
+                        $scope.useradd.error.username = 'Invalid Username';
+                        $scope.useradd_form.username.$setPristine();
+                        $('#inputUserAddUsername').focus();
+                    } else {
+                        console.error('Unable to create user.', error.statusCode, error.message);
+                    }
+                    return;
+                }
+                if (error) return console.error('Unable to create user.', error.statusCode, error.message);
+
+                $scope.useradd.error = {};
+                $scope.useradd.email = '';
+                $scope.useradd.username = '';
+                $scope.useradd.displayName = '';
+
+                $scope.useradd_form.$setUntouched();
+                $scope.useradd_form.$setPristine();
+
+                refresh();
+
+                $('#userAddModal').modal('hide');
+            });
+        }
     };
 
     $scope.useredit = {
@@ -162,76 +232,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
             $scope.inviteSent.setupLink = location.origin + '/api/v1/session/account/setup.html?reset_token=' + resetToken;
             $('#inviteSentModal').modal('show');
-        });
-    };
-
-    $scope.showUserAdd = function () {
-        $scope.useradd.error = {};
-        $scope.useradd.email = '';
-        $scope.useradd.username = '';
-        $scope.useradd.displayName = '';
-
-        $scope.useradd_form.$setUntouched();
-        $scope.useradd_form.$setPristine();
-
-        $('#userAddModal').modal('show');
-    };
-
-    $scope.doAdd = function () {
-        $scope.useradd.busy = true;
-
-        $scope.useradd.alreadyTaken = false;
-        $scope.useradd.error.email = null;
-        $scope.useradd.error.username = null;
-        $scope.useradd.error.displayName = null;
-
-        Client.createUser($scope.useradd.username, $scope.useradd.email, $scope.useradd.displayName, $scope.useradd.sendInvite, function (error) {
-            $scope.useradd.busy = false;
-
-            if (error && error.statusCode === 409) {
-                if (error.message.toLowerCase().indexOf('email') !== -1) {
-                    $scope.useradd.error.email = 'Email already taken';
-                    $scope.useradd_form.email.$setPristine();
-                    $('#inputUserAddEmail').focus();
-                    return;
-                } else if (error.message.toLowerCase().indexOf('username') !== -1) {
-                    $scope.useradd.error.username = 'Username already taken';
-                    $scope.useradd_form.username.$setPristine();
-                    $('#inputUserAddUsername').focus();
-                } else {
-                    // should not happen!!
-                    console.error(error.message);
-                    return;
-                }
-            }
-            if (error && error.statusCode === 400) {
-                if (error.message.indexOf('email') !== -1) {
-                    $scope.useradd.error.email = 'Invalid Email';
-                    $scope.useradd.error.emailAttempted = $scope.useradd.email;
-                    $scope.useradd_form.email.$setPristine();
-                    $('#inputUserAddEmail').focus();
-                } else if (error.message.indexOf('username') !== -1) {
-                    $scope.useradd.error.username = 'Invalid Username';
-                    $scope.useradd_form.username.$setPristine();
-                    $('#inputUserAddUsername').focus();
-                } else {
-                    console.error('Unable to create user.', error.statusCode, error.message);
-                }
-                return;
-            }
-            if (error) return console.error('Unable to create user.', error.statusCode, error.message);
-
-            $scope.useradd.error = {};
-            $scope.useradd.email = '';
-            $scope.useradd.username = '';
-            $scope.useradd.displayName = '';
-
-            $scope.useradd_form.$setUntouched();
-            $scope.useradd_form.$setPristine();
-
-            refresh();
-
-            $('#userAddModal').modal('hide');
         });
     };
 
