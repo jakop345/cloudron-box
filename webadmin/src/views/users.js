@@ -378,6 +378,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 if (error) return console.error('Unable to get user listing.', error);
 
                 $scope.users = result;
+
+                $scope.ready = true;
             });
         });
     }
