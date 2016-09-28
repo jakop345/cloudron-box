@@ -125,7 +125,11 @@
                     </tr>
                     <tr>
                         <td class="text-muted" style="vertical-align: top;">Email</td>
-                        <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ user.email }} <a href="" ng-click="emailchange.show()"><i class="fa fa-pencil text-small"></i></a></td>
+                        <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ user.email }} <a href="" ng-click="emailchange.show()" ng-show="!user.alternateEmail"><i class="fa fa-pencil text-small"></i></a></td>
+                    </tr>
+                    <tr ng-show="user.alternateEmail" uib-tooltip="Email used for password reset" tooltip-placement="left">
+                        <td class="text-muted" style="vertical-align: top;">Alternate Email</td>
+                        <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ user.alternateEmail }} <a href="" ng-click="emailchange.show()"><i class="fa fa-pencil text-small"></i></a></td>
                     </tr>
                     <tr>
                         <td class="text-right" colspan="2" style="vertical-align: top;">
