@@ -97,7 +97,13 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
                 $scope.emailchange.busy = false;
 
                 if (error) {
-                    console.error('Unable to change email.', error);
+                    if (error.statusCode === 409) {
+                        $scope.emailchange.error.email = 'Email already taken';
+                        $scope.emailChangeForm.email.$setPristine();
+                        $('#inputEmailChangeEmail').focus();
+                    } else {
+                        console.error('Unable to change email.', error);
+                    }
                     return;
                 }
 
@@ -142,7 +148,13 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
                 $scope.displayNameChange.busy = false;
 
                 if (error) {
-                    console.error('Unable to change displayName.', error);
+                    if (error.statusCode === 400) {
+                        $scope.displayNameChange.error.displayName = 'Invalid display name';
+                        $scope.displayNameChangeForm.email.$setPristine();
+                        $('#inputDisplayNameChangeDisplayName').focus();
+                    } else {
+                        console.error('Unable to change email.', error);
+                    }
                     return;
                 }
 

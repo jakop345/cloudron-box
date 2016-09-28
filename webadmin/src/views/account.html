@@ -52,11 +52,12 @@
             </div>
             <div class="modal-body">
                 <form name="emailChangeForm" role="form" novalidate ng-submit="emailchange.submit()" autocomplete="off">
-                    <div class="form-group" ng-class="{ 'has-error': (emailChangeForm.email.$dirty && emailChangeForm.email.$invalid) }">
+                    <div class="form-group" ng-class="{ 'has-error': (emailChangeForm.email.$dirty && emailChangeForm.email.$invalid) || (!emailChangeForm.email.$dirty && emailchange.error.email)}">
                         <label class="control-label" for="inputEmailChangeEmail">New Email Address</label>
                         <div class="control-label" ng-show="(!emailChangeForm.email.$dirty && emailchange.error.email) || (emailChangeForm.email.$dirty && emailChangeForm.email.$invalid)">
                             <small ng-show="emailChangeForm.email.$error.required">A valid email address is required</small>
                             <small ng-show="(emailChangeForm.email.$dirty && emailChangeForm.email.$invalid) && !emailChangeForm.email.$error.required">The Email address is not valid</small>
+                            <small ng-show="!emailChangeForm.email.$dirty && emailchange.error.email">{{ emailchange.error.email }}</small>
                         </div>
                         <input type="email" class="form-control" ng-model="emailchange.email" id="inputEmailChangeEmail" name="email" required autofocus>
                     </div>
@@ -80,13 +81,14 @@
             </div>
             <div class="modal-body">
                 <form name="displayNameChangeForm" role="form" novalidate ng-submit="displayNameChange.submit()" autocomplete="off">
-                    <div class="form-group" ng-class="{ 'has-error': (displayNameChangeForm.displayName.$dirty && displayNameChangeForm.displayName.$invalid) }">
+                    <div class="form-group" ng-class="{ 'has-error': (displayNameChangeForm.displayName.$dirty && displayNameChangeForm.displayName.$invalid) || (!displayNameChangeForm.displayName.$dirty && displayNameChange.error.displayName)}">
                         <label class="control-label">Display Name</label>
                         <div class="control-label" ng-show="(!displayNameChangeForm.displayName.$dirty && displayNameChange.error.displayName) || (displayNameChangeForm.displayName.$dirty && displayNameChangeForm.displayName.$invalid)">
                             <small ng-show="displayNameChangeForm.displayName.$error.required">A valid display name is required</small>
                             <small ng-show="(displayNameChangeForm.displayName.$dirty && displayNameChangeForm.displayName.$invalid) && !displayNameChangeForm.displayName.$error.required">This display name is not valid</small>
+                            <small ng-show="!displayNameChangeForm.email.$dirty && displayNameChange.error.displayName">{{ displayNameChange.error.displayName }}</small>
                         </div>
-                        <input type="text" class="form-control" ng-model="displayNameChange.displayName" name="displayName" required autofocus>
+                        <input type="text" class="form-control" ng-model="displayNameChange.displayName" id="inputDisplayNameChangeDisplayName" name="displayName" required autofocus>
                     </div>
                     <input class="ng-hide" type="submit" ng-disabled="displayNameChangeForm.$invalid"/>
                 </form>
