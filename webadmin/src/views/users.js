@@ -377,6 +377,14 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         });
     };
 
+    $scope.showUserHelp = function () {
+        $('#userHelpModal').modal('show');
+    };
+
+    $scope.showGroupHelp = function () {
+        $('#groupHelpModal').modal('show');
+    };
+
     function refresh() {
         Client.getGroups(function (error, result) {
             if (error) return console.error('Unable to get group listing.', error);

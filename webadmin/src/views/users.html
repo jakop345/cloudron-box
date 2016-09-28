@@ -235,13 +235,49 @@
     </div>
 </div>
 
+<!-- Modal user help -->
+<div class="modal fade" id="userHelpModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            </div>
+            <div class="modal-body">
+                <p>Each user will get its own mailbox at <b><i>username</i>@{{ config.fqdn }}</b></p>
+                <p>Please refer to the <a href="https://cloudron.io/references/usermanual.html#email" target="_blank">user documentation</a> how to use Cloudron email accounts.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal group help -->
+<div class="modal fade" id="groupHelpModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            </div>
+            <div class="modal-body">
+                <p>Each group additionally serves as an email list at <b><i>groupname</i>@{{ config.fqdn }}</b></p>
+                <p>Any email sent to this address will be forwarded to all group members.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="content-large">
 
     <br/>
 
     <div>
         <div class="text-left">
-            <h1>Users <button class="btn btn-primary btn-outline pull-right" ng-click="showUserAdd()"><i class="fa fa-user-plus"></i> New User</button></h1>
+            <h1>
+                Users <sup style="font-size: 14px;"><a href="" ng-click="showUserHelp()"><i class="fa fa-question-circle"></i></a></sup> <button class="btn btn-primary btn-outline pull-right" ng-click="showUserAdd()"><i class="fa fa-user-plus"></i> New User</button>
+            </h1>
         </div>
     </div>
 
@@ -294,7 +330,9 @@
 
     <div>
         <div class="text-left">
-            <h1>Groups <button class="btn btn-primary btn-outline pull-right" ng-click="groupAdd.show()"><i class="fa fa-plus"></i> New Group</button></h1>
+            <h1>
+                Groups <sup style="font-size: 14px;"><a href="" ng-click="showGroupHelp()"><i class="fa fa-question-circle"></i></a></sup> <button class="btn btn-primary btn-outline pull-right" ng-click="groupAdd.show()"><i class="fa fa-plus"></i> New Group</button>
+            </h1>
         </div>
     </div>
 
