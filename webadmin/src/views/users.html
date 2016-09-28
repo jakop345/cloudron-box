@@ -122,7 +122,7 @@
                         </div>
                         <div ng-show="groups.length <= 1">No groups available.</div>
                     </div>
-                    <div class="form-group" ng-show="useredit.userInfo.username && (config.isDev || config.isCustomDomain)">
+                    <div class="form-group" ng-show="useredit.userInfo.username && mailConfig.enabled">
                         <label class="control-label">Email aliases</label>
 
                         <div class="input-group form-inline">
