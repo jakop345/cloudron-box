@@ -97,7 +97,7 @@
                 <h4 class="modal-title">Edit user {{ useredit.userInfo.username }}</h4>
             </div>
             <div class="modal-body">
-                <form name="useredit_form" role="form" ng-submit="doUserEdit()" autocomplete="off">
+                <form name="useredit_form" role="form" ng-submit="useredit.submit()" autocomplete="off">
                     <input type="password" style="display: none;">
                     <div class="form-group" ng-show="useredit.userInfo.alternateEmail">
                         <label class="control-label">Email</label>
@@ -117,7 +117,7 @@
                         <label class="control-label">Groups</label>
                         <div>
                             <span ng-repeat="group in groups | ignoreAdminGroup" ng-show="group.id !== 'admin'">
-                                <button class="btn btn-default" type="button" ng-click="userEditToggleGroup(group);" ng-class="{ 'btn-primary': (useredit.groupIds.indexOf(group.id) !== -1) }">{{ group.name }}</button>
+                                <button class="btn btn-default" type="button" ng-click="useredit.toggleGroup(group);" ng-class="{ 'btn-primary': (useredit.groupIds.indexOf(group.id) !== -1) }">{{ group.name }}</button>
                             </span>
                         </div>
                         <div ng-show="groups.length <= 1">No groups available.</div>
@@ -145,7 +145,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" ng-click="doUserEdit()" ng-disabled="useredit_form.$invalid || useredit.busy"><i class="fa fa-spinner fa-pulse" ng-show="useredit.busy"></i> Save</button>
+                <button type="button" class="btn btn-success" ng-click="useredit.submit()" ng-disabled="useredit_form.$invalid || useredit.busy"><i class="fa fa-spinner fa-pulse" ng-show="useredit.busy"></i> Save</button>
             </div>
         </div>
     </div>
@@ -304,18 +304,18 @@
                                 <td>
                                     <i class="fa fa-briefcase arrow" ng-show="user.admin" uib-tooltip="This user can manage apps, groups and other users"></i>
                                 </td>
-                                <td class="hand elide-table-cell" ng-click="showUserEdit(user)" ng-show="user.username">
+                                <td class="hand elide-table-cell" ng-click="useredit.show(user)" ng-show="user.username">
                                     {{ user.username }}<span class="text-muted" ng-show="user.alternateEmail">{{ '@' + config.fqdn }}</span> &nbsp; <span class="text-muted" ng-hide="user.alternateEmail">{{ user.email }}</span>
                                 </td>
-                                <td class="hand elide-table-cell" ng-click="showUserEdit(user)" ng-hide="user.username">
+                                <td class="hand elide-table-cell" ng-click="useredit.show(user)" ng-hide="user.username">
                                     <span class="text-muted" uib-tooltip="User is not activated yet">{{ user.alternateEmail || user.email }}</span>
                                 </td>
-                                <td class="text-left hand elide-table-cell hidden-xs hidden-sm" ng-click="showUserEdit(user)">
+                                <td class="text-left hand elide-table-cell hidden-xs hidden-sm" ng-click="useredit.show(user)">
                                     <span class="group-badge" ng-repeat="groupId in user.groupIds | ignoreAdminGroup">{{ groupId }}</span>
                                 </td>
                                 <td class="text-right no-wrap" style="vertical-align: bottom">
                                     <button ng-show="!isMe(user)" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>
-                                    <button class="btn btn-xs btn-default" ng-click="showUserEdit(user)" title="Edit User Profile"><i class="fa fa-pencil"></i></button>
+                                    <button class="btn btn-xs btn-default" ng-click="useredit.show(user)" title="Edit User Profile"><i class="fa fa-pencil"></i></button>
                                     <button ng-show="!isMe(user)" class="btn btn-xs btn-danger" ng-click="userremove.show(user)" title="Remove User"><i class="fa fa-trash-o"></i></button>
                                 </td>
                             </tr>

@@ -156,7 +156,98 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         userInfo: {},
         email: '',
         aliases: '',
-        superuser: false
+        superuser: false,
+
+        show: function (userInfo) {
+            $scope.useredit.error.email = null;
+            $scope.useredit.email = userInfo.alternateEmail || userInfo.email;
+            $scope.useredit.userInfo = userInfo;
+            $scope.useredit.groupIds = angular.copy(userInfo.groupIds);
+            $scope.useredit.superuser = userInfo.groupIds.indexOf('admin') !== -1;
+
+            $scope.useredit.aliases = '';
+
+            Client.getAliases(userInfo.id, function (error, aliases) {
+                if (error) console.error(error);
+
+                $scope.useredit.aliases = aliases.join(',');
+            });
+
+            $scope.useredit_form.$setPristine();
+            $scope.useredit_form.$setUntouched();
+
+            $('#userEditModal').modal('show');
+        },
+
+        toggleGroup: function (group) {
+            var pos = $scope.useredit.groupIds.indexOf(group.id);
+            if (pos === -1) {
+                $scope.useredit.groupIds.push(group.id);
+            } else {
+                $scope.useredit.groupIds.splice(pos, 1);
+            }
+        },
+
+        submit: function () {
+            $scope.useredit.error.email = null;
+            $scope.useredit.busy = true;
+
+            var data = {
+                id: $scope.useredit.userInfo.id,
+                email: $scope.useredit.email
+            };
+
+            Client.updateUser(data, function (error) {
+                if (error) {
+                    $scope.useredit.busy = false;
+
+                    if (error.statusCode === 409) {
+                        $scope.useredit.error.email = 'Email already taken';
+                        $scope.useredit_form.email.$setPristine();
+                        $('#inputUserEditEmail').focus();
+                    } else {
+                        console.error('Unable to update user:', error);
+                    }
+
+                    return;
+                }
+
+                if ($scope.useredit.superuser) {
+                    if ($scope.useredit.groupIds.indexOf('admin') === -1) $scope.useredit.groupIds.push('admin');
+                } else {
+                    $scope.useredit.groupIds = $scope.useredit.groupIds.filter(function (groupId) { return groupId !== 'admin'; });
+                }
+
+                Client.setGroups(data.id, $scope.useredit.groupIds, function (error) {
+                    if (error) return console.error('Unable to update groups for user:', error);
+
+                    var aliases = $scope.useredit.aliases ? $scope.useredit.aliases.split(',') : [ ];
+                    var setAliasesFunc = Client.setAliases.bind(null, $scope.useredit.userInfo.id, aliases);
+
+                    // cannot set aliases without username
+                    if (!$scope.useredit.userInfo.username) setAliasesFunc = function (next) { return next(); };
+
+                    setAliasesFunc(function (error) {
+                        $scope.useredit.busy = false;
+
+                        if (error) return console.error('Unable to update aliases for user:', error);
+
+                        $scope.useredit.userInfo = {};
+                        $scope.useredit.email = '';
+                        $scope.useredit.superuser = false;
+                        $scope.useredit.groupIds = [];
+                        $scope.useredit.aliases = '';
+
+                        $scope.useredit_form.$setPristine();
+                        $scope.useredit_form.$setUntouched();
+
+                        refresh();
+
+                        $('#userEditModal').modal('hide');
+                    });
+                });
+            });
+        }
     };
 
     $scope.showBubble = function ($event) {
@@ -284,97 +375,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
             $scope.inviteSent.setupLink = location.origin + '/api/v1/session/account/setup.html?reset_token=' + resetToken;
             $('#inviteSentModal').modal('show');
-        });
-    };
-
-    $scope.showUserEdit = function (userInfo) {
-        $scope.useredit.error.email = null;
-        $scope.useredit.email = userInfo.alternateEmail || userInfo.email;
-        $scope.useredit.userInfo = userInfo;
-        $scope.useredit.groupIds = angular.copy(userInfo.groupIds);
-        $scope.useredit.superuser = userInfo.groupIds.indexOf('admin') !== -1;
-
-        $scope.useredit.aliases = '';
-
-        Client.getAliases(userInfo.id, function (error, aliases) {
-            if (error) console.error(error);
-
-            $scope.useredit.aliases = aliases.join(',');
-        });
-
-        $scope.useredit_form.$setPristine();
-        $scope.useredit_form.$setUntouched();
-
-        $('#userEditModal').modal('show');
-    };
-
-    $scope.userEditToggleGroup = function (group) {
-        var pos = $scope.useredit.groupIds.indexOf(group.id);
-        if (pos === -1) {
-            $scope.useredit.groupIds.push(group.id);
-        } else {
-            $scope.useredit.groupIds.splice(pos, 1);
-        }
-    };
-
-    $scope.doUserEdit = function () {
-        $scope.useredit.error.email = null;
-        $scope.useredit.busy = true;
-
-        var data = {
-            id: $scope.useredit.userInfo.id,
-            email: $scope.useredit.email
-        };
-
-        Client.updateUser(data, function (error) {
-            if (error) {
-                $scope.useredit.busy = false;
-
-                if (error.statusCode === 409) {
-                    $scope.useredit.error.email = 'Email already taken';
-                    $scope.useredit_form.email.$setPristine();
-                    $('#inputUserEditEmail').focus();
-                } else {
-                    console.error('Unable to update user:', error);
-                }
-
-                return;
-            }
-
-            if ($scope.useredit.superuser) {
-                if ($scope.useredit.groupIds.indexOf('admin') === -1) $scope.useredit.groupIds.push('admin');
-            } else {
-                $scope.useredit.groupIds = $scope.useredit.groupIds.filter(function (groupId) { return groupId !== 'admin'; });
-            }
-
-            Client.setGroups(data.id, $scope.useredit.groupIds, function (error) {
-                if (error) return console.error('Unable to update groups for user:', error);
-
-                var aliases = $scope.useredit.aliases ? $scope.useredit.aliases.split(',') : [ ];
-                var setAliasesFunc = Client.setAliases.bind(null, $scope.useredit.userInfo.id, aliases);
-
-                // cannot set aliases without username
-                if (!$scope.useredit.userInfo.username) setAliasesFunc = function (next) { return next(); };
-
-                setAliasesFunc(function (error) {
-                    $scope.useredit.busy = false;
-
-                    if (error) return console.error('Unable to update aliases for user:', error);
-
-                    $scope.useredit.userInfo = {};
-                    $scope.useredit.email = '';
-                    $scope.useredit.superuser = false;
-                    $scope.useredit.groupIds = [];
-                    $scope.useredit.aliases = '';
-
-                    $scope.useredit_form.$setPristine();
-                    $scope.useredit_form.$setUntouched();
-
-                    refresh();
-
-                    $('#userEditModal').modal('hide');
-                });
-            });
         });
     };
 
