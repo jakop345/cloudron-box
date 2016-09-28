@@ -627,3 +627,8 @@
 [0.20.3]
 * Make DigitalOcean selfhosting independent
 
+[0.21.0]
+* Delivery of email to aliases is now case insensitive (#35)
+* Mailing list support via Groups (#15)
+
+* 
