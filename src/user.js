@@ -191,7 +191,7 @@ function createUser(username, password, email, displayName, auditSource, options
                         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                         if (mailConfig.enabled) {
-                            user.alternativeEmail = user.email;
+                            user.alternateEmail = user.email;
                             user.email = user.username + '@' + config.fqdn();
                         }
 
@@ -316,7 +316,7 @@ function listUsers(callback) {
                 result.admin = result.groupIds.indexOf(constants.ADMIN_GROUP_ID) !== -1;
 
                 if (mailConfig.enabled) {
-                    result.alternativeEmail = result.email;
+                    result.alternateEmail = result.email;
                     result.email = result.username + '@' + config.fqdn();
                 }
             });
@@ -354,7 +354,7 @@ function getUser(userId, callback) {
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 if (mailConfig.enabled) {
-                    result.alternativeEmail = result.email;
+                    result.alternateEmail = result.email;
                     result.email = result.username + '@' + config.fqdn();
                 }
 
@@ -465,7 +465,7 @@ function getAllAdmins(callback) {
 
             if (mailConfig.enabled) {
                 admins.forEach(function (admin) {
-                    admin.alternativeEmail = admin.email;
+                    admin.alternateEmail = admin.email;
                     admin.email = admin.username + '@' + config.fqdn();
                 });
             }
@@ -580,7 +580,7 @@ function getOwner(callback) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             if (mailConfig.enabled) {
-                owner.alternativeEmail = owner.email;
+                owner.alternateEmail = owner.email;
                 owner.email = owner.username + '@' + config.fqdn();
             }
 

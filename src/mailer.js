@@ -254,7 +254,7 @@ function sendInvite(user, invitor) {
 
     var mailOptions = {
         from: mailConfig().from,
-        to: user.alternativeEmail || user.email,
+        to: user.alternateEmail || user.email,
         subject: util.format('Welcome to Cloudron %s', config.fqdn()),
         text: render('welcome_user.ejs', templateData)
     };
@@ -278,7 +278,7 @@ function userAdded(user, inviteSent) {
         var mailOptions = {
             from: mailConfig().from,
             to: adminEmails.join(', '),
-            subject: util.format('%s added in Cloudron %s', user.alternativeEmail || user.email, config.fqdn()),
+            subject: util.format('%s added in Cloudron %s', user.alternateEmail || user.email, config.fqdn()),
             text: render('user_added.ejs', { fqdn: config.fqdn(), user: user, inviteLink: inviteLink, format: 'text' }),
         };
 
@@ -312,7 +312,7 @@ function passwordReset(user) {
 
     var mailOptions = {
         from: mailConfig().from,
-        to: user.alternativeEmail || user.email,
+        to: user.alternateEmail || user.email,
         subject: 'Password Reset Request',
         text: render('password_reset.ejs', { fqdn: config.fqdn(), user: user, resetLink: resetLink, format: 'text' })
     };
