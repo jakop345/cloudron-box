@@ -158,7 +158,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         superuser: false,
 
         show: function (userInfo) {
-            $scope.useredit.error.email = null;
+            $scope.useredit.error = {};
             $scope.useredit.email = userInfo.alternateEmail || userInfo.email;
             $scope.useredit.userInfo = userInfo;
             $scope.useredit.groupIds = angular.copy(userInfo.groupIds);
@@ -188,7 +188,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         },
 
         submit: function () {
-            $scope.useredit.error.email = null;
+            $scope.useredit.error = {};
             $scope.useredit.busy = true;
 
             var data = {
@@ -229,7 +229,16 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                     setAliasesFunc(function (error) {
                         $scope.useredit.busy = false;
 
-                        if (error) return console.error('Unable to update aliases for user:', error);
+                        if (error) {
+                           if (error.statusCode === 400) {
+                                $scope.useredit.error.aliases = 'One or more aliases is invalid';
+                            } else if (error.statusCode === 409) {
+                                $scope.useredit.error.aliases = 'One or more aliases already taken';
+                            } else {
+                                console.error('Unable to update aliases for user:', error);
+                            }
+                            return;
+                        }
 
                         $scope.useredit.userInfo = {};
                         $scope.useredit.email = '';

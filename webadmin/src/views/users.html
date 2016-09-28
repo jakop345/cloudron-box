@@ -122,11 +122,15 @@
                         </div>
                         <div ng-show="groups.length <= 1">No groups available.</div>
                     </div>
-                    <div class="form-group" ng-show="useredit.userInfo.username && mailConfig.enabled">
+                    <div class="form-group" ng-show="useredit.userInfo.username && mailConfig.enabled" ng-class="{ 'has-error': useredit.error.aliases }">
                         <label class="control-label">Email aliases</label>
 
+                        <div class="control-label" ng-show="useredit.error.aliases">
+                            <small>{{ useredit.error.aliases }}</small>
+                        </div>
+
                         <div class="input-group form-inline">
-                            <tag-input class="form-group form-control" placeholder='Separate aliases by comma' taglist='useredit.aliases'></tag-input>
+                            <tag-input class="form-group form-control" placeholder='Separate aliases by comma' taglist='useredit.aliases' name="aliases"></tag-input>
                             <div class="input-group-addon">
                                     @{{ config.fqdn }}
                             </div>
