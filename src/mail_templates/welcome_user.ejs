@@ -1,6 +1,6 @@
 <%if (format === 'text') { %>
 
-Hi<%= ' ' + user.displayName %>,
+Hi <%= user.displayName || user.username || user.alternateEmail || user.email %>,
 
 Welcome to our Cloudron <%= fqdn %>!
 
