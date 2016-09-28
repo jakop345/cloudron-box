@@ -171,7 +171,7 @@ function mailAliasSearch(req, res, next) {
     debug('mail alias get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
     if (!req.dn.rdns[0].attrs.cn) return next(new ldap.NoSuchObjectError(req.dn.toString()));
-    mailboxdb.getAlias(req.dn.rdns[0].attrs.cn.value, function (error, alias) {
+    mailboxdb.getAlias(req.dn.rdns[0].attrs.cn.value.toLowerCase(), function (error, alias) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
@@ -201,7 +201,7 @@ function mailingListSearch(req, res, next) {
     debug('mailing list get: dn %s, scope %s, filter %s (from %s)', req.dn.toString(), req.scope, req.filter.toString(), req.connection.ldap.id);
 
     if (!req.dn.rdns[0].attrs.cn) return next(new ldap.NoSuchObjectError(req.dn.toString()));
-    mailboxdb.getGroup(req.dn.rdns[0].attrs.cn.value, function (error, group) {
+    mailboxdb.getGroup(req.dn.rdns[0].attrs.cn.value.toLowerCase(), function (error, group) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
         if (error) return next(new ldap.OperationsError(error.toString()));
 
