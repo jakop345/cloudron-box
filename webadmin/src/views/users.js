@@ -8,6 +8,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     $scope.groups = [];
     $scope.config = Client.getConfig();
     $scope.userInfo = Client.getUserInfo();
+    $scope.mailConfig = {};
 
     $scope.userremove = {
         busy: false,
@@ -401,7 +402,18 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         });
     }
 
-    Client.onReady(refresh);
+    function getMailConfig() {
+        Client.getMailConfig(function (error, mailConfig) {
+            if (error) return console.error(error);
+
+            $scope.mailConfig = mailConfig;
+        });
+    }
+
+    Client.onReady(function () {
+        getMailConfig();
+        refresh();
+    });
 
     // setup all the dialog focus handling
     ['userAddModal', 'userRemoveModal', 'userEditModal', 'groupAddModal', 'groupRemoveModal'].forEach(function (id) {
