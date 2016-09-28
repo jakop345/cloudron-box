@@ -64,7 +64,6 @@ function userSearch(req, res, next) {
                     cn: entry.id,
                     uid: entry.id,
                     mail: entry.email,
-                    // TODO: check mailboxes before we send this
                     mailAlternateAddress: entry.alternateEmail,
                     displayname: displayName,
                     givenName: firstName,
