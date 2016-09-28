@@ -84,7 +84,7 @@ function getMailbox(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE name = ? AND (ownerType = ? OR ownerType = ?)', [ name, exports.TYPE_APP, exports.TYPE_USER ], function (error, results) {
+    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE name = ? AND (ownerType = ? OR ownerType = ?) AND aliasTarget IS NULL', [ name, exports.TYPE_APP, exports.TYPE_USER ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -95,7 +95,7 @@ function getMailbox(name, callback) {
 function listMailboxes(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE ownerType = ? OR ownerType = ? ORDER BY name', [ exports.TYPE_APP, exports.TYPE_USER ], function (error, results) {
+    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE (ownerType = ? OR ownerType = ?) AND aliasTarget IS NULL ORDER BY name', [ exports.TYPE_APP, exports.TYPE_USER ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, results);
@@ -112,7 +112,7 @@ function getGroup(name, callback) {
     //    INNER JOIN users ON groupMembers.userId = users.id
     //    WHERE mailboxes.name = <name>
 
-    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE name = ? AND ownerType = ?', [ name, exports.TYPE_GROUP ], function (error, results) {
+    database.query('SELECT ' + MAILBOX_FIELDS + ' FROM mailboxes WHERE name = ? AND ownerType = ? AND aliasTarget IS NULL', [ name, exports.TYPE_GROUP ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 

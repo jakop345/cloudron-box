@@ -29,6 +29,8 @@ var USER_0 = {
     displayName: 'User 0'
 };
 
+var USER_0_ALIAS = 'Asterix';
+
 // normal user
 var USER_1 = {
     username: 'Username1',
@@ -98,7 +100,7 @@ function setup(done) {
         },
         function (callback) {
             async.series([
-                user.setAliases.bind(null, USER_0.id, [ 'Asterix', 'obelix' ]),
+                user.setAliases.bind(null, USER_0.id, [ USER_0_ALIAS, 'obelix' ]),
                 groups.create.bind(null, GROUP_ID),
                 groups.addMember.bind(null, GROUP_ID, USER_0.id),
                 groups.addMember.bind(null, GROUP_ID, USER_1.id)
@@ -533,6 +535,13 @@ describe('Ldap', function () {
             });
         });
 
+        it('cannot get alias as a mailbox', function (done) {
+            ldapSearch('cn=' + USER_0_ALIAS + ',ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error, entries) {
+                expect(error).to.be.a(ldap.NoSuchObjectError);
+                done();
+            });
+        });
+
         it('non-existent mailbox', function (done) {
             ldapSearch('cn=random,ou=mailboxes,dc=cloudron', 'objectclass=mailbox', function (error) {
                 expect(error).to.be.a(ldap.NoSuchObjectError);
@@ -543,11 +552,18 @@ describe('Ldap', function () {
 
     describe('search aliases', function () {
         it('get specific alias', function (done) {
-            ldapSearch('cn=asterix,ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
+            ldapSearch('cn=' + USER_0_ALIAS + ',ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
                 if (error) return done(error);
                 expect(entries.length).to.equal(1);
                 expect(entries[0].cn).to.equal('asterix');
                 expect(entries[0].rfc822MailMember).to.equal(USER_0.username.toLowerCase());
+                done();
+            });
+        });
+
+        it('cannot get mailbox as alias', function (done) {
+            ldapSearch('cn=' + USER_0.username + ',ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
+                expect(error).to.be.a(ldap.NoSuchObjectError);
                 done();
             });
         });
@@ -562,7 +578,7 @@ describe('Ldap', function () {
 
     describe('search groups', function () {
         it('get specific alias', function (done) {
-            ldapSearch('cn=asterix,ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
+            ldapSearch('cn=' + USER_0_ALIAS + ',ou=mailaliases,dc=cloudron', 'objectclass=nismailalias', function (error, entries) {
                 if (error) return done(error);
                 expect(entries.length).to.equal(1);
                 expect(entries[0].cn).to.equal('asterix');
