@@ -1,4 +1,3 @@
-/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
@@ -15,12 +14,52 @@ var appdb = require('../appdb.js'),
     DatabaseError = require('../databaseerror.js'),
     eventlogdb = require('../eventlogdb.js'),
     expect = require('expect.js'),
+    groupdb = require('../groupdb.js'),
     hat = require('hat'),
     mailboxdb = require('../mailboxdb.js'),
     settingsdb = require('../settingsdb.js'),
     tokendb = require('../tokendb.js'),
     userdb = require('../userdb.js'),
     _ = require('underscore');
+
+var USER_0 = {
+    id: 'uuid0',
+    username: 'uuid0',
+    password: 'secret',
+    email: 'safe@me.com',
+    salt: 'morton',
+    createdAt: 'sometime back',
+    modifiedAt: 'now',
+    resetToken: hat(256),
+    displayName: '',
+    showTutorial: false
+};
+
+var USER_1 = {
+    id: 'uuid1',
+    username: 'uuid1',
+    password: 'secret',
+    email: 'safe2@me.com',
+    salt: 'tata',
+    createdAt: 'sometime back',
+    modifiedAt: 'now',
+    resetToken: '',
+    displayName: 'Herbert 1',
+    showTutorial: false
+};
+
+var USER_2 = {
+    id: 'uuid2',
+    username: 'uuid2',
+    password: 'secret',
+    email: 'safe3@me.com',
+    salt: 'tata',
+    createdAt: 'sometime back',
+    modifiedAt: 'now',
+    resetToken: '',
+    displayName: 'Herbert 2',
+    showTutorial: false
+};
 
 describe('database', function () {
     before(function (done) {
@@ -35,45 +74,6 @@ describe('database', function () {
     });
 
     describe('user', function () {
-        var USER_0 = {
-            id: 'uuid0',
-            username: 'uuid0',
-            password: 'secret',
-            email: 'safe@me.com',
-            salt: 'morton',
-            createdAt: 'sometime back',
-            modifiedAt: 'now',
-            resetToken: hat(256),
-            displayName: '',
-            showTutorial: false
-        };
-
-        var USER_1 = {
-            id: 'uuid1',
-            username: 'uuid1',
-            password: 'secret',
-            email: 'safe2@me.com',
-            salt: 'tata',
-            createdAt: 'sometime back',
-            modifiedAt: 'now',
-            resetToken: '',
-            displayName: 'Herbert 1',
-            showTutorial: false
-        };
-
-        var USER_2 = {
-            id: 'uuid2',
-            username: 'uuid2',
-            password: 'secret',
-            email: 'safe3@me.com',
-            salt: 'tata',
-            createdAt: 'sometime back',
-            modifiedAt: 'now',
-            resetToken: '',
-            displayName: 'Herbert 2',
-            showTutorial: false
-        };
-
         it('can add user', function (done) {
             userdb.add(USER_0.id, USER_0, done);
         });
@@ -1175,6 +1175,126 @@ describe('database', function () {
 
                     done();
                 });
+            });
+        });
+    });
+
+    describe('groups', function () {
+        before(function (done) {
+            async.series([
+                database.initialize,
+                database._clear,
+                userdb.add.bind(null, USER_0.id, USER_0),
+                userdb.add.bind(null, USER_1.id, USER_1),
+                userdb.add.bind(null, USER_2.id, USER_2)
+            ], done);
+        });
+
+        var GROUP_ID_1 = 'foundersid';
+
+        it('can create a group', function (done) {
+            groupdb.add(GROUP_ID_1, 'founders', function (error, result) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('can get existing group', function (done) {
+            groupdb.get(GROUP_ID_1, function (error, result) {
+                expect(error).to.be(null);
+                expect(result.name).to.be('founders');
+                done();
+            });
+        });
+
+        it('can add member to the group', function (done) {
+            groupdb.addMember(GROUP_ID_1, USER_0.id, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('cannot add invalid user to group', function (done) {
+            groupdb.addMember(GROUP_ID_1, 'random', function (error) {
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('can set members', function (done) {
+            groupdb.setMembers(GROUP_ID_1, [ USER_1.id, USER_2.id ], function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('can list users of group', function (done) {
+            groupdb.getMembers(GROUP_ID_1, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.eql([ USER_1.id, USER_2.id ]);
+                done();
+            });
+        });
+
+        it('cannot delete non-existent member', function (done) {
+            groupdb.removeMember(GROUP_ID_1, 'random', function (error) {
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('can remove existing member', function (done) {
+            groupdb.removeMember(GROUP_ID_1, USER_1.id, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('can getWithMembers', function (done) {
+            groupdb.getWithMembers(GROUP_ID_1, function (error, result) {
+                expect(error).to.be(null);
+                expect(result.name).to.be('founders');
+                expect(result.userIds).to.eql([ USER_2.id ]);
+                done();
+            });
+        });
+
+        it('can getAll', function (done) {
+            groupdb.getAll(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.length).to.be(2); // admin!
+                expect(result[0].name).to.be('admin');
+                expect(result[1].name).to.be('founders');
+                done();
+            });
+        });
+
+        it('can getAllWithMembers', function (done) {
+            groupdb.getAllWithMembers(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.length).to.be(2); // admin!
+                expect(result[0].name).to.be('admin');
+                expect(result[0].userIds).to.eql([ ]);
+
+                expect(result[1].name).to.be('founders');
+                expect(result[1].userIds).to.eql([ USER_2.id ]);
+
+                done();
+            });
+        });
+
+        it('can set groups', function (done) {
+            groupdb.setGroups(USER_0.id, [ 'admin', GROUP_ID_1 ], function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('can get groups', function (done) {
+            groupdb.getGroups(USER_0.id, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.eql([ 'admin', GROUP_ID_1 ]);
+                done();
             });
         });
     });
