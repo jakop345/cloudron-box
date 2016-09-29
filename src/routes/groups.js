@@ -4,7 +4,8 @@ exports = module.exports = {
     get: get,
     list: list,
     create: create,
-    remove: remove
+    remove: remove,
+    update: update
 };
 
 var assert = require('assert'),
@@ -41,6 +42,20 @@ function get(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, result));
+    });
+}
+
+function update(req, res, next) {
+    assert.strictEqual(typeof req.params.groupId, 'string');
+
+    if (!req.body.userIds) return next(new HttpError(404, 'missing or invalid userIds fields'));
+    if (!Array.isArray(req.body.userIds)) return next(new HttpError(404, 'userIds must be an array'));
+
+    groups.setMembers(req.params.groupId, req.body.userIds, function (error) {
+        if (error && error.reason === GroupError.NOT_FOUND) return next(new HttpError(404, 'Invalid group or user id'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200));
     });
 }
 

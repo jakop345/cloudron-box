@@ -12,6 +12,7 @@ exports = module.exports = {
     getMembers: getMembers,
     addMember: addMember,
     removeMember: removeMember,
+    setMembers: setMembers,
     isMember: isMember,
 
     getGroups: getGroups,
@@ -144,6 +145,25 @@ function getMembers(groupId, callback) {
         // if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND)); // need to differentiate group with no members and invalid groupId
 
         callback(error, result.map(function (r) { return r.userId; }));
+    });
+}
+
+function setMembers(groupId, userIds, callback) {
+    assert.strictEqual(typeof groupId, 'string');
+    assert(Array.isArray(userIds));
+    assert.strictEqual(typeof callback, 'function');
+
+    var queries = [];
+    queries.push({ query: 'DELETE FROM groupMembers WHERE groupId = ?', args: [ groupId ] });
+    for (var i = 0; i < userIds.length; i++) {
+        queries.push({ query: 'INSERT INTO groupMembers (groupId, userId) VALUES (?, ?)', args: [ groupId, userIds[i] ] });
+    }
+
+    database.transaction(queries, function (error) {
+        if (error && error.code === 'ER_NO_REFERENCED_ROW_2') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(error);
     });
 }
 

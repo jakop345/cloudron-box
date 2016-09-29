@@ -12,6 +12,7 @@ exports = module.exports = {
 
     getMembers: getMembers,
     addMember: addMember,
+    setMembers: setMembers,
     removeMember: removeMember,
     isMember: isMember,
 
@@ -197,6 +198,19 @@ function addMember(groupId, userId, callback) {
 
     groupdb.addMember(groupId, userId, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        return callback(null);
+    });
+}
+
+function setMembers(groupId, userIds, callback) {
+    assert.strictEqual(typeof groupId, 'string');
+    assert(Array.isArray(userIds));
+    assert.strictEqual(typeof callback, 'function');
+
+    groupdb.setMembers(groupId, userIds, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND, 'Invalid group or user id'));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
         return callback(null);

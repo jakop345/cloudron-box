@@ -860,6 +860,19 @@ Response (200):
 }
 ```
 
+### Set members
+
+PUT `/api/v1/groups/:groupId` <scope>admin</scope>
+
+Sets the members of an existing group with id `groupId`.
+
+Request:
+```
+{
+    userIds: [ <string>, ... ] // list of users to be part of this group
+}
+```
+
 ### List groups
 
 GET `/api/v1/groups` <scope>admin</scope>
