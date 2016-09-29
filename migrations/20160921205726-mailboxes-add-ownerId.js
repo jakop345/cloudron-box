@@ -48,7 +48,7 @@ exports.up = function(db, callback) {
                 async.eachSeries(results, function (u,  next) {
                     if (!u.username) return next();
 
-                    db.runSql('UPDATE mailboxes SET ownerId = ?, ownerType = ? WHERE name = ? OR targetAlias = ?', [ u.id, 'user', u.username, u.username ], function (error) {
+                    db.runSql('UPDATE mailboxes SET ownerId = ?, ownerType = ? WHERE name = ? OR aliasTarget = ?', [ u.id, 'user', u.username, u.username ], function (error) {
                         if (error) console.error('Error setting ownerid ' + JSON.stringify(u) + error);
                         next();
                     });
