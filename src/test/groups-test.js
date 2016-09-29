@@ -229,6 +229,13 @@ describe('Group membership', function () {
         });
     });
 
+    it('can set groups', function (done) {
+        groups.setMembers(GROUP0_ID, [ USER_0.id ], function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
     it('can remove member', function (done) {
         groups.removeMember(GROUP0_ID, USER_0.id, function (error) {
             expect(error).to.be(null);
