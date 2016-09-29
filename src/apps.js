@@ -37,6 +37,9 @@ exports = module.exports = {
 
     getAppConfig: getAppConfig,
 
+    getMailbox: getMailbox,
+    setMailbox: setMailbox,
+
     // exported for testing
     _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings,
@@ -107,6 +110,7 @@ AppsError.BILLING_REQUIRED = 'Billing Required';
 AppsError.ACCESS_DENIED = 'Access denied';
 AppsError.USER_REQUIRED = 'User required';
 AppsError.BAD_CERTIFICATE = 'Invalid certificate';
+AppsError.NO_MAILBOX = 'No mailbox';
 
 // Hostname validation comes from RFC 1123 (section 2.1)
 // Domain name validation comes from RFC 2181 (Name syntax)
@@ -1104,5 +1108,31 @@ function configureInstalledApps(callback) {
                 iteratorDone(); // always succeed
             });
         }, callback);
+    });
+}
+
+function getMailbox(appId, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    mailboxdb.getByOwnerId(appId, function (error, results) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NO_MAILBOX, 'No mailbox for this app'));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        callback(null, results[0].name);
+    });
+}
+
+function setMailbox(appId, mailboxName, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof mailboxName, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    mailboxdb.updateByOwnerId(appId, mailboxName, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        callback();
     });
 }

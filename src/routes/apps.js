@@ -14,6 +14,9 @@ exports = module.exports = {
     getLogStream: getLogStream,
     listBackups: listBackups,
 
+    setMailbox: setMailbox,
+    getMailbox: getMailbox,
+
     stopApp: stopApp,
     startApp: startApp,
     exec: exec,
@@ -447,5 +450,28 @@ function listBackups(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { backups: result }));
+    });
+}
+
+function setMailbox(req, res, next) {
+    assert.strictEqual(typeof req.params.id, 'string');
+
+    apps.setMailbox(req.params.id, req.body.mailbox, function (error) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'Mailbox is in use'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(204));
+    });
+}
+
+function getMailbox(req, res, next) {
+    assert.strictEqual(typeof req.params.id, 'string');
+
+    apps.getMailbox(req.params.id, function (error, name) {
+        if (error && error.reason === AppsError.NO_MAILBOX) return next(new HttpError(409, 'App cannot have a mailbox'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, { mailbox: name }));
     });
 }

@@ -170,6 +170,8 @@ function initializeExpressSync() {
     router.get ('/api/v1/apps/:id/logs',      appsScope, routes.user.requireAdmin, routes.apps.getLogs);
     router.get ('/api/v1/apps/:id/exec',      routes.developer.enabled, appsScope, routes.user.requireAdmin, routes.apps.exec);
     router.post('/api/v1/apps/:id/clone',     appsScope, routes.user.requireAdmin, routes.apps.cloneApp);
+    router.get ('/api/v1/apps/:id/mailbox',   appsScope, routes.user.requireAdmin, routes.apps.getMailbox);
+    router.post('/api/v1/apps/:id/mailbox',   appsScope, routes.user.requireAdmin, routes.apps.setMailbox);
 
     // settings routes (these are for the settings tab - avatar & name have public routes for normal users. see above)
     router.get ('/api/v1/settings/autoupdate_pattern', settingsScope, routes.user.requireAdmin, routes.settings.getAutoupdatePattern);

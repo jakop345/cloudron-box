@@ -1381,12 +1381,26 @@ describe('database', function () {
             });
         });
 
+        it('can update the mailbox name', function (done) {
+            mailboxdb.updateByOwnerId('osticket', 'contact', function (error) {
+                expect(error).to.be(null);
+
+                mailboxdb.getAliasesForName('contact', function (error, results) {
+                    expect(error).to.be(null);
+                    expect(results.length).to.be(2);
+                    expect(results[0]).to.be('help');
+                    expect(results[1]).to.be('support2');
+                    done();
+                });
+            });
+        });
+
         it('can get by owner id', function (done) {
             mailboxdb.getByOwnerId('osticket', function (error, results) {
                 expect(error).to.be(null);
                 expect(results.length).to.be(3);
-                expect(results[0].name).to.be('help');
-                expect(results[1].name).to.be('support');
+                expect(results[0].name).to.be('contact');
+                expect(results[1].name).to.be('help');
                 expect(results[2].name).to.be('support2');
                 done();
             });
@@ -1400,10 +1414,10 @@ describe('database', function () {
         });
 
         it('unset aliases', function (done) {
-            mailboxdb.setAliasesForName('support', [ ], function (error) {
+            mailboxdb.setAliasesForName('contact', [ ], function (error) {
                 expect(error).to.be(null);
 
-                mailboxdb.getAliasesForName('support', function (error, results) {
+                mailboxdb.getAliasesForName('contact', function (error, results) {
                     expect(error).to.be(null);
                     expect(results.length).to.be(0);
                     done();

@@ -24,6 +24,7 @@ var appdb = require('../../appdb.js'),
     https = require('https'),
     js2xml = require('js2xmlparser'),
     ldap = require('../../ldap.js'),
+    mailboxdb = require('../../mailboxdb.js'),
     net = require('net'),
     nock = require('nock'),
     paths = require('../../paths.js'),
@@ -821,6 +822,15 @@ describe('Apps', function () {
             checkRedis('redis-' + APP_ID, done);
         });
 
+        it('installation - created a mailbox', function (done) {
+            mailboxdb.getMailbox(APP_LOCATION + '.app', function (error, result) {
+                expect(error).to.be(null);
+                expect(result.ownerId).to.be(APP_ID);
+                expect(result.ownerType).to.be(mailboxdb.TYPE_APP);
+                done();
+            });
+        });
+
         xit('logs - stdout and stderr', function (done) {
             superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logs')
                 .query({ access_token: token })
@@ -1303,6 +1313,16 @@ describe('Apps', function () {
             });
         });
 
+        it('can change the mailbox', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/mailbox')
+                  .query({ access_token: token })
+                  .send({ mailbox: 'smartwater' })
+                  .end(function (err, res) {
+                expect(res.statusCode).to.equal(204);
+                done();
+            });
+        });
+
         it('changed container id after reconfigure', function (done) {
             var oldContainerId = appEntry.containerId;
             apps.get(appResult.id, function (error, app) {
@@ -1327,6 +1347,16 @@ describe('Apps', function () {
 
         it('reconfiguration - redis addon recreated', function (done) {
             checkRedis('redis-' + APP_ID, done);
+        });
+
+        it('did change the mailbox', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/mailbox')
+                  .query({ access_token: token })
+                  .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.mailbox).to.be('smartwater');
+                done();
+            });
         });
 
         it('installation - app can check addons', function (done) {

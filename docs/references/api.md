@@ -469,6 +469,39 @@ Request:
 
 All values are optional. See [Install app](/references/api.html#install-app) API for field descriptions.
 
+### Get Mailbox
+
+GET `/api/v1/apps/:appId/mailbox` <scope>admin</scope>
+
+Gets the name of the mailbox used to send and receive email.
+
+Only apps that have the capablity of processing mail (via the `sendmail` and `recvmail` addons) have a
+mailbox.
+
+Response (200):
+```
+{
+    mailbox: <string>
+}
+```
+
+### Set Mailbox
+
+POST `/api/v1/apps/:appId/mailbox` <scope>admin</scope>
+
+Sets the name of the mailbox used to send and receive mail.
+
+The name of the mailbox cannot conflict with existing user and group names. In addition, only apps
+that have the capablity of processing mail (via the `sendmail` and `recvmail` addons) can have a
+mailbox. A 409 is either of these cases.
+
+Request:
+```
+{
+        mailbox: <string>
+}
+```
+
 ### Update app
 
 POST `/api/v1/apps/:appId/update` <scope>admin</scope>

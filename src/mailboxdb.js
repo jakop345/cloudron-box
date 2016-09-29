@@ -16,6 +16,7 @@ exports = module.exports = {
     setAliasesForName: setAliasesForName,
 
     getByOwnerId: getByOwnerId,
+    updateByOwnerId: updateByOwnerId,
     delByOwnerId: delByOwnerId,
 
     _clear: clear,
@@ -135,6 +136,26 @@ function getByOwnerId(ownerId, callback) {
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, results);
+    });
+}
+
+function updateByOwnerId(ownerId, name, callback) {
+    assert.strictEqual(typeof ownerId, 'string');
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    // assumes that there is only one concrete mailbox for an owner
+    var queries = [
+        { query: 'UPDATE mailboxes SET name = ? WHERE ownerId = ? AND aliasTarget IS NULL', args: [ name, ownerId ] },
+        { query: 'UPDATE mailboxes SET aliasTarget = ? WHERE ownerId = ? AND aliasTarget IS NOT NULL', args: [ name, ownerId ] }
+    ];
+
+    database.transaction(queries, function (error, result) {
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, 'mailbox already exists'));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result[0].affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null);
     });
 }
 
