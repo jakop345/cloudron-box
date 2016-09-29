@@ -319,17 +319,25 @@ If you are unable to connect, verify the following:
 
 ## Mail
 
-Spammers frequently abuse EC2 public IP addresses and as a result your Cloudron might possibly start out with a bad
-reputation. The good news is that most IP based blacklisting services cool down over time. The Cloudron
-sets up DNS entries for SPF, DKIM, DMARC automatically and reputation should be easy to get back.
+Your server's IP plays a big role in how emails from our Cloudron get handled. Spammers frequently abuse public IP addresses
+and as a result your Cloudron might possibly start out with a bad reputation. The good news is that most IP based 
+blacklisting services cool down over time. The Cloudron sets up DNS entries for SPF, DKIM, DMARC automatically and
+reputation should be easy to get back.
 
-* Once your Cloudron is ready, apply for a Reverse DNS record to be setup for your domain. You can find the AWS request
-form [here](https://aws-portal.amazon.com/gp/aws/html-forms-controller/contactus/ec2-email-limit-rdns-request).
+### Checklist
+
+* Once your Cloudron is ready, setup a Reverse DNS PTR record to be setup for the `my` subdomain.
+
+    * For AWS/EC2, you can find the request form [here](https://aws-portal.amazon.com/gp/aws/html-forms-controller/contactus/ec2-email-limit-rdns-request.
+
+    * For Digital Ocean this is automatic. Digital Ocean sets up a PTR record based on the droplet's name. For this reason, it is important that you do not rename your server and keep it at `my.<domain>`.
+
 
 * Check if your IP is listed in any DNSBL list [here](http://multirbl.valli.org/). In most cases, you can apply for removal
 of your IP by filling out a form at the DNSBL manager site.
 
-* Finally, check your spam score at [mail-tester.com](https://www.mail-tester.com/).
+* Finally, check your spam score at [mail-tester.com](https://www.mail-tester.com/). The Cloudron should get 100%, if not please let
+us know.
 
 ## Debugging
 
