@@ -91,6 +91,12 @@
 
                         <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser || appConfigure.app.manifest.customAuth || appConfigure.app.manifest.addons.email">
                             <label class="control-label">Access control</label>
+                            <div class="radio" ng-show="appConfigure.needsOAuthProxy">
+                                <label>
+                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="unrestricted">
+                                    Unrestricted
+                                </label>
+                            </div>
                             <div class="radio">
                                 <label>
                                     <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="any">
@@ -111,12 +117,6 @@
                                         <button class="btn btn-default" type="button" ng-disabled="appConfigure.accessRestrictionOption !== 'groups'" ng-click="appConfigureToggleGroup(group);" ng-class="{ 'btn-primary': (appConfigure.accessRestriction.groups && appConfigure.accessRestriction.groups.indexOf(group.id) !== -1) }">{{ group.name }}</button>
                                     </span>
                                 </div>
-                            </div>
-                            <div class="radio" ng-show="appConfigure.needsOAuthProxy">
-                                <label>
-                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="unrestricted">
-                                    Unrestricted
-                                </label>
                             </div>
                         </div>
 
