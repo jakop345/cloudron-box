@@ -97,6 +97,14 @@ describe('Groups', function () {
         });
     });
 
+    it('cannot create existing group with mixed case', function (done) {
+        var name = GROUP0_NAME[0].toUpperCase() + GROUP0_NAME.substr(1);
+        groups.create(name, function (error, result) {
+            expect(error.reason).to.be(GroupError.ALREADY_EXISTS);
+            done();
+        });
+    });
+
     it('did create mailbox', function (done) {
         mailboxdb.getGroup(GROUP0_NAME.toLowerCase(), function (error, mailbox) {
             expect(error).to.be(null);

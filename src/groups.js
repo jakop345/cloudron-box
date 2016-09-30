@@ -78,6 +78,9 @@ function create(name, callback) {
     assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    // we store names in lowercase
+    name = name.toLowerCase();
+
     var error = validateGroupname(name);
     if (error) return callback(error);
 
