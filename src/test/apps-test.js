@@ -1,4 +1,3 @@
-/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
@@ -14,6 +13,7 @@ var appdb = require('../appdb.js'),
     constants = require('../constants.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
+    groupdb = require('../groupdb.js'),
     groups = require('../groups.js'),
     hat = require('hat'),
     userdb = require('../userdb.js');
@@ -58,8 +58,14 @@ describe('Apps', function () {
         showTutorial: false
     };
 
-    var GROUP_0 = 'somegroup';
-    var GROUP_1 = 'someothergroup';
+    var GROUP_0 = {
+        id: 'somegroup',
+        name: 'group0'
+    };
+    var GROUP_1 = {
+        id: 'anothergroup',
+        name: 'group1'
+    };
 
     var APP_0 = {
         id: 'appid-0',
@@ -88,7 +94,7 @@ describe('Apps', function () {
             tcpPorts: {}
         },
         portBindings: null,
-        accessRestriction: { users: [ 'someuser' ], groups: [ GROUP_0 ] },
+        accessRestriction: { users: [ 'someuser' ], groups: [ GROUP_0.id ] },
         memoryLimit: 0
     };
 
@@ -101,7 +107,7 @@ describe('Apps', function () {
             tcpPorts: {}
         },
         portBindings: null,
-        accessRestriction: { users: [ 'someuser', USER_0.id ], groups: [ GROUP_1 ] },
+        accessRestriction: { users: [ 'someuser', USER_0.id ], groups: [ GROUP_1.id ] },
         memoryLimit: 0
     };
 
@@ -112,10 +118,10 @@ describe('Apps', function () {
             userdb.add.bind(null, ADMIN_0.id, ADMIN_0),
             userdb.add.bind(null, USER_0.id, USER_0),
             userdb.add.bind(null, USER_1.id, USER_1),
-            groups.create.bind(null, GROUP_0),
-            groups.create.bind(null, GROUP_1),
+            groupdb.add.bind(null, GROUP_0.id, GROUP_0.name),
+            groupdb.add.bind(null, GROUP_1.id, GROUP_1.name),
             groups.addMember.bind(null, constants.ADMIN_GROUP_ID, ADMIN_0.id),
-            groups.addMember.bind(null, GROUP_0, USER_1.id),
+            groups.addMember.bind(null, GROUP_0.id, USER_1.id),
             appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0),
             appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1),
             appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2)
