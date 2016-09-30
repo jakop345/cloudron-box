@@ -86,13 +86,14 @@ UserError.WRONG_PASSWORD = 'Wrong User or Password';
 UserError.BAD_FIELD = 'Bad field';
 UserError.BAD_TOKEN = 'Bad token';
 
+// keep this in sync with validateGroupname
 function validateUsername(username) {
     assert.strictEqual(typeof username, 'string');
     // allow empty usernames
     if (username === '') return null;
 
     if (username.length <= 1) return new UserError(UserError.BAD_FIELD, 'Username must be atleast 2 chars');
-    if (username.length > 256) return new UserError(UserError.BAD_FIELD, 'Username too long');
+    if (username.length >= 200) return new UserError(UserError.BAD_FIELD, 'name too long');
 
     if (constants.RESERVED_NAMES.indexOf(username) !== -1) return new UserError(UserError.BAD_FIELD, 'Username is reserved');
 

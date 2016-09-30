@@ -56,14 +56,17 @@ GroupError.BAD_FIELD = 'Field error';
 GroupError.NOT_EMPTY = 'Not Empty';
 GroupError.NOT_ALLOWED = 'Not Allowed';
 
+// keep this in sync with validateUsername
 function validateGroupname(name) {
     assert.strictEqual(typeof name, 'string');
+
     if (name.length < 2) return new GroupError(GroupError.BAD_FIELD, 'name must be atleast 2 chars');
     if (name.length >= 200) return new GroupError(GroupError.BAD_FIELD, 'name too long');
 
-    if (!/^[A-Za-z0-9_-]*$/.test(name)) return new GroupError(GroupError.BAD_FIELD, 'name can only have A-Za-z0-9_-');
-
     if (constants.RESERVED_NAMES.indexOf(name) !== -1) return new GroupError(GroupError.BAD_FIELD, 'name is reserved');
+
+    // +/- can be tricky in emails
+    if (/[^a-zA-Z0-9.]/.test(name)) return new GroupError(GroupError.BAD_FIELD, 'name can only contain alphanumerals and dot');
 
     // app emails are sent using the .app suffix
     if (name.indexOf('.app') !== -1) return new GroupError(GroupError.BAD_FIELD, 'name pattern is reserved for apps');

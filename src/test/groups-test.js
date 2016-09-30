@@ -82,6 +82,13 @@ describe('Groups', function () {
         });
     });
 
+    it('cannot create group - invalid', function (done) {
+        groups.create('cloudron-admin', function (error) {
+            expect(error.reason).to.be(GroupError.BAD_FIELD);
+            done();
+        });
+    });
+
     it('can create valid group', function (done) {
         groups.create(GROUP0_NAME, function (error, result) {
             expect(error).to.be(null);
