@@ -154,7 +154,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         $scope.installedApps.forEach(function (app) {
             targets.push('summarize(collectd.localhost.table-' + app.id + '-memory.gauge-rss, "1min", "avg")');
             targetsInfo.push({
-                label: app.location,
+                label: app.location || 'naked domain',
                 color: getRandomColor(),
                 app: app
             });
