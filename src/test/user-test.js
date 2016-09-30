@@ -31,6 +31,7 @@ var NEW_PASSWORD = 'oTHER@#$235';
 var DISPLAY_NAME = 'Nobody cares';
 var DISPLAY_NAME_NEW = 'Somone cares';
 var userObject = null;
+var groupObject = null;
 var NON_ADMIN_GROUP = 'members';
 var AUDIT_SOURCE = { ip: '1.2.3.4' };
 
@@ -50,7 +51,10 @@ function cleanupUsers(done) {
 
 function createOwner(done) {
     groups.create('admin', function () { // ignore error since it might already exist
-        groups.create(NON_ADMIN_GROUP, function () { // ignore error since it might already exist
+        groups.create(NON_ADMIN_GROUP, function (error, result) { // ignore error since it might already exist
+            expect(error).to.be(null);
+            groupObject = result;
+
             user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, AUDIT_SOURCE, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
@@ -755,7 +759,7 @@ describe('User', function () {
         });
 
         it('add user to non admin group does not trigger admin mail', function (done) {
-            user.setGroups(user1.id, [ constants.ADMIN_GROUP_ID, NON_ADMIN_GROUP ], function (error) {
+            user.setGroups(user1.id, [ constants.ADMIN_GROUP_ID, groupObject.id ], function (error) {
                 expect(error).to.equal(null);
 
                 checkMails(0, done);
@@ -763,7 +767,7 @@ describe('User', function () {
         });
 
         it('succeeds to remove admin flag', function (done) {
-            user.setGroups(user1.id, [ NON_ADMIN_GROUP ], function (error) {
+            user.setGroups(user1.id, [ groupObject.id ], function (error) {
                 expect(error).to.eql(null);
 
                 checkMails(1, done);

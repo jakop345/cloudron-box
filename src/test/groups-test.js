@@ -18,10 +18,10 @@ var async = require('async'),
     userdb = require('../userdb.js');
 
 var GROUP0_NAME = 'administrators',
-    GROUP0_ID = GROUP0_NAME;
+    group0Object;
 
 var GROUP1_NAME = 'externs',
-    GROUP1_ID = GROUP1_NAME;
+    group1Object;
 
 var USER_0 = {
     id: 'uuid213',
@@ -83,8 +83,9 @@ describe('Groups', function () {
     });
 
     it('can create valid group', function (done) {
-        groups.create(GROUP0_NAME, function (error) {
+        groups.create(GROUP0_NAME, function (error, result) {
             expect(error).to.be(null);
+            group0Object = result;
             done();
         });
     });
@@ -112,7 +113,7 @@ describe('Groups', function () {
     });
 
     it('can get valid group', function (done) {
-        groups.get(GROUP0_ID, function (error, group) {
+        groups.get(group0Object.id, function (error, group) {
             expect(error).to.be(null);
             expect(group.name).to.equal(GROUP0_NAME);
             done();
@@ -127,7 +128,7 @@ describe('Groups', function () {
     });
 
     it('can delete valid group', function (done) {
-        groups.remove(GROUP0_ID, function (error) {
+        groups.remove(group0Object.id, function (error) {
             expect(error).to.be(null);
             done();
         });
@@ -145,14 +146,20 @@ describe('Group membership', function () {
     before(function (done) {
         async.series([
             setup,
-            groups.create.bind(null, GROUP0_NAME),
+            function (next) {
+                groups.create(GROUP0_NAME, function (error, result) {
+                    if (error) return next(error);
+                    group0Object = result;
+                    next();
+                });
+            },
             userdb.add.bind(null, USER_0.id, USER_0)
         ], done);
     });
     after(cleanup);
 
     it('cannot add non-existent user', function (done) {
-        groups.addMember(GROUP0_ID, 'randomuser', function (error) {
+        groups.addMember(group0Object.id, 'randomuser', function (error) {
             expect(error.reason).to.be(GroupError.NOT_FOUND);
             done();
         });
@@ -166,7 +173,7 @@ describe('Group membership', function () {
     });
 
     it('isMember returns false', function (done) {
-        groups.isMember(GROUP0_ID, USER_0.id, function (error, member) {
+        groups.isMember(group0Object.id, USER_0.id, function (error, member) {
             expect(error).to.be(null);
             expect(member).to.be(false);
             done();
@@ -174,14 +181,14 @@ describe('Group membership', function () {
     });
 
     it('can add member', function (done) {
-        groups.addMember(GROUP0_ID, USER_0.id, function (error) {
+        groups.addMember(group0Object.id, USER_0.id, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('isMember returns true', function (done) {
-        groups.isMember(GROUP0_ID, USER_0.id, function (error, member) {
+        groups.isMember(group0Object.id, USER_0.id, function (error, member) {
             expect(error).to.be(null);
             expect(member).to.be(true);
             done();
@@ -189,7 +196,7 @@ describe('Group membership', function () {
     });
 
     it('can get members', function (done) {
-        groups.getMembers(GROUP0_ID, function (error, result) {
+        groups.getMembers(group0Object.id, function (error, result) {
             expect(error).to.be(null);
             expect(result.length).to.be(1);
             expect(result[0]).to.be(USER_0.id);
@@ -202,7 +209,7 @@ describe('Group membership', function () {
             expect(error).to.be(null);
             expect(result.name).to.be(GROUP0_NAME.toLowerCase());
             expect(result.ownerType).to.be(mailboxdb.TYPE_GROUP);
-            expect(result.ownerId).to.be(GROUP0_ID);
+            expect(result.ownerId).to.be(group0Object.id);
             expect(result.members).to.eql([ USER_0.username ]);
             done();
         });
@@ -216,7 +223,7 @@ describe('Group membership', function () {
     });
 
     it('cannot remove non-existent user', function (done) {
-        groups.removeMember(GROUP0_ID, 'randomuser', function (error) {
+        groups.removeMember(group0Object.id, 'randomuser', function (error) {
             expect(error.reason).to.be(GroupError.NOT_FOUND);
             done();
         });
@@ -230,21 +237,21 @@ describe('Group membership', function () {
     });
 
     it('can set groups', function (done) {
-        groups.setMembers(GROUP0_ID, [ USER_0.id ], function (error) {
+        groups.setMembers(group0Object.id, [ USER_0.id ], function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('can remove member', function (done) {
-        groups.removeMember(GROUP0_ID, USER_0.id, function (error) {
+        groups.removeMember(group0Object.id, USER_0.id, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('has no members', function (done) {
-        groups.getMembers(GROUP0_ID, function (error, result) {
+        groups.getMembers(group0Object.id, function (error, result) {
             expect(error).to.be(null);
             expect(result.length).to.be(0);
             done();
@@ -252,20 +259,21 @@ describe('Group membership', function () {
     });
 
     it('can remove group with no members', function (done) {
-        groups.remove(GROUP0_ID, function (error) {
+        groups.remove(group0Object.id, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('can remove group with member', function (done) {
-        groups.create(GROUP0_NAME, function (error) {
+        groups.create(GROUP0_NAME, function (error, result) {
             expect(error).to.eql(null);
+            group0Object = result;
 
-            groups.addMember(GROUP0_ID, USER_0.id, function (error) {
+            groups.addMember(group0Object.id, USER_0.id, function (error) {
                 expect(error).to.be(null);
 
-                groups.remove(GROUP0_ID, function (error) {
+                groups.remove(group0Object.id, function (error) {
                     expect(error).to.eql(null);
                     done();
                 });
@@ -278,35 +286,46 @@ describe('Set user groups', function () {
     before(function (done) {
         async.series([
             setup,
-            groups.create.bind(null, GROUP0_NAME),
-            groups.create.bind(null, GROUP1_NAME),
+            function (next) {
+                groups.create(GROUP0_NAME, function (error, result) {
+                    if (error) return next(error);
+                    group0Object = result;
+                    next();
+                });
+            },
+            function (next) {
+                groups.create(GROUP1_NAME, function (error, result) {
+                    if (error) return next(error);
+                    group1Object = result;
+                    next();
+                });
+            },
             userdb.add.bind(null, USER_0.id, USER_0)
         ], done);
     });
     after(cleanup);
 
     it('can set user to single group', function (done) {
-        groups.setGroups(USER_0.id, [ GROUP0_ID ], function (error) {
+        groups.setGroups(USER_0.id, [ group0Object.id ], function (error) {
             expect(error).to.be(null);
 
             groups.getGroups(USER_0.id, function (error, groupIds) {
                 expect(error).to.be(null);
                 expect(groupIds.length).to.be(1);
-                expect(groupIds[0]).to.be(GROUP0_ID);
+                expect(groupIds[0]).to.be(group0Object.id);
                 done();
             });
         });
     });
 
     it('can set user to multiple groups', function (done) {
-        groups.setGroups(USER_0.id, [ GROUP0_ID, GROUP1_ID ], function (error) {
+        groups.setGroups(USER_0.id, [ group0Object.id, group1Object.id ], function (error) {
             expect(error).to.be(null);
 
             groups.getGroups(USER_0.id, function (error, groupIds) {
                 expect(error).to.be(null);
                 expect(groupIds.length).to.be(2);
-                expect(groupIds[0]).to.be(GROUP0_ID);
-                expect(groupIds[1]).to.be(GROUP1_ID);
+                expect(groupIds.sort()).to.eql([ group0Object.id, group1Object.id ].sort());
                 done();
             });
         });

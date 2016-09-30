@@ -33,7 +33,7 @@ function get(groupId, callback) {
     assert.strictEqual(typeof groupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + GROUPS_FIELDS + ' FROM groups WHERE id = ?', [ groupId ], function (error, result) {
+    database.query('SELECT ' + GROUPS_FIELDS + ' FROM groups WHERE id = ? ORDER BY name', [ groupId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 

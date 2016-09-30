@@ -39,7 +39,7 @@ var USER_1 = {
     displayName: 'User 1'
 };
 
-var GROUP_ID = 'developers';
+var GROUP_ID, GROUP_NAME = 'developers';
 
 var AUDIT_SOURCE = {
     ip: '1.2.3.4'
@@ -99,9 +99,17 @@ function setup(done) {
             });
         },
         function (callback) {
+            groups.create(GROUP_NAME, function (error, result) {
+                if (error) return callback(error);
+
+                GROUP_ID = result.id;
+
+                callback();
+            });
+        },
+        function (callback) {
             async.series([
                 user.setAliases.bind(null, USER_0.id, [ USER_0_ALIAS, 'obelix' ]),
-                groups.create.bind(null, GROUP_ID),
                 groups.addMember.bind(null, GROUP_ID, USER_0.id),
                 groups.addMember.bind(null, GROUP_ID, USER_1.id)
             ], callback);

@@ -25,7 +25,8 @@ var assert = require('assert'),
     DatabaseError = require('./databaseerror.js'),
     groupdb = require('./groupdb.js'),
     mailboxdb = require('./mailboxdb.js'),
-    util = require('util');
+    util = require('util'),
+    uuid = require('node-uuid');
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
@@ -77,15 +78,16 @@ function create(name, callback) {
     var error = validateGroupname(name);
     if (error) return callback(error);
 
-    mailboxdb.add(name, name /* owner */, mailboxdb.TYPE_GROUP, function (error) {
+    var id = 'gid-' + uuid.v4();
+    mailboxdb.add(name, id /* owner */, mailboxdb.TYPE_GROUP, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(GroupError.ALREADY_EXISTS));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
-        groupdb.add(name /* id */, name, function (error) {
+        groupdb.add(id, name, function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(GroupError.ALREADY_EXISTS));
             if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
-            callback(null, { id: name, name: name });
+            callback(null, { id: id, name: name });
         });
     });
 }
