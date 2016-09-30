@@ -23,6 +23,9 @@ var USERNAME_1 = 'user', PASSWORD_1 = 'Foobar?1337', EMAIL_1 ='happy@me.com';
 var token, token_1 = null;
 var userId, userId_1 = null;
 
+var GROUP_NAME = 'externals';
+var groupObject;
+
 var server;
 function setup(done) {
     async.series([
@@ -125,7 +128,7 @@ describe('Groups API', function () {
     describe('create', function () {
         it('fails due to mising token', function (done) {
             superagent.post(SERVER_URL + '/api/v1/groups')
-                  .send({ name: 'externals'})
+                  .send({ name: GROUP_NAME})
                   .end(function (error, result) {
                 expect(result.statusCode).to.equal(401);
                 done();
@@ -135,9 +138,10 @@ describe('Groups API', function () {
         it('succeeds', function (done) {
             superagent.post(SERVER_URL + '/api/v1/groups')
                   .query({ access_token: token })
-                  .send({ name: 'externals'})
+                  .send({ name: GROUP_NAME})
                   .end(function (error, result) {
                 expect(result.statusCode).to.equal(201);
+                groupObject = result.body;
                 done();
             });
         });
@@ -145,7 +149,7 @@ describe('Groups API', function () {
         it('fails for already exists', function (done) {
             superagent.post(SERVER_URL + '/api/v1/groups')
                   .query({ access_token: token })
-                  .send({ name: 'externals'})
+                  .send({ name: GROUP_NAME})
                   .end(function (error, result) {
                 expect(result.statusCode).to.equal(409);
                 done();
@@ -195,7 +199,7 @@ describe('Groups API', function () {
         });
 
         it('can remove empty group', function (done) {
-            superagent.del(SERVER_URL + '/api/v1/groups/externals')
+            superagent.del(SERVER_URL + '/api/v1/groups/' + groupObject.id)
                   .send({ password: PASSWORD })
                   .query({ access_token: token })
                   .end(function (error, result) {
@@ -216,11 +220,15 @@ describe('Groups API', function () {
     });
 
     describe('Set groups', function () {
+      var group0Object, group1Object;
         before(function (done) {
-            async.series([
-                groups.create.bind(null, 'group0'),
-                groups.create.bind(null, 'group1')
-            ], done);
+            groups.create('group0', function (e, r) {
+                group0Object = r; 
+                groups.create('group1', function (e, r) {
+                  group1Object = r;
+                  done();
+                });
+            });
         });
 
         it('cannot add user to invalid group', function (done) {
@@ -236,7 +244,7 @@ describe('Groups API', function () {
         it('can add user to valid group', function (done) {
             superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/groups')
                   .query({ access_token: token })
-                  .send({ groupIds: [ 'admin', 'group0', 'group1' ]})
+                  .send({ groupIds: [ 'admin', group0Object.id, group1Object.id ]})
                   .end(function (error, result) {
                 expect(result.statusCode).to.equal(204);
                 done();
@@ -246,7 +254,7 @@ describe('Groups API', function () {
         it('cannot remove self from admin', function (done) {
             superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/groups')
                   .query({ access_token: token })
-                  .send({ groupIds: [ 'group0', 'group1' ]})
+                  .send({ groupIds: [ group0Object.id, group1Object.id ]})
                   .end(function (error, result) {
                 expect(result.statusCode).to.equal(403); // not allowed
                 done();
@@ -278,7 +286,7 @@ describe('Groups API', function () {
         it('remove activation user from admin', function (done) {
             superagent.put(SERVER_URL + '/api/v1/users/' + userId + '/groups')
                   .query({ access_token: token_1 })
-                  .send({ groupIds: [ 'group0', 'group1' ]})
+                  .send({ groupIds: [ group1Object.id, group0Object.id ]})
                   .end(function (error, result) {
                 expect(result.statusCode).to.equal(204); // user_1 is still admin, so we can remove the other person
                 done();

@@ -23,6 +23,8 @@ var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'taO@zen.mac';
 var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'USER@foo.bar', EMAIL_2_NEW = 'happy@ME.com';
 var USERNAME_3 = 'ut', EMAIL_3 = 'user3@FOO.bar';
 
+var groupObject;
+
 function setup(done) {
     server.start(function (error) {
         expect(!error).to.be.ok();
@@ -32,7 +34,10 @@ function setup(done) {
         database._clear(function (error) {
             expect(error).to.eql(null);
 
-            groups.create('somegroupid', done);
+            groups.create('somegroupname', function (e, r) {
+                groupObject = r;
+                done();
+            });
         });
     });
 }
@@ -329,7 +334,7 @@ describe('User API', function () {
     it('remove itself from admins fails', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + user_0.id + '/groups')
                .query({ access_token: token })
-               .send({ groupIds: [ 'somegroupid' ] })
+               .send({ groupIds: [ groupObject.id ] })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done();
@@ -339,7 +344,7 @@ describe('User API', function () {
     it('remove second user from admins succeeds', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + user_1.id + '/groups')
                .query({ access_token: token })
-               .send({ groupIds: [ 'somegroupid' ] })
+               .send({ groupIds: [ groupObject.id ] })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(204);
 
