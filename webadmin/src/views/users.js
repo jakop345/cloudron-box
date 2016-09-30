@@ -6,6 +6,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     $scope.ready = false;
     $scope.users = [];
     $scope.groups = [];
+    $scope.groupsById = { };
     $scope.config = Client.getConfig();
     $scope.userInfo = Client.getUserInfo();
     $scope.mailConfig = {};
@@ -405,6 +406,10 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             if (error) return console.error('Unable to get group listing.', error);
 
             $scope.groups = result;
+            $scope.groupsById = { };
+            for (var i = 0; i < result.length; i++) {
+                $scope.groupsById[result[i].id] = result[i];
+            }
 
             Client.getUsers(function (error, result) {
                 if (error) return console.error('Unable to get user listing.', error);

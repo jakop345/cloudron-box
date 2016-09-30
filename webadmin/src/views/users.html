@@ -315,7 +315,11 @@
                                     <span class="text-muted" uib-tooltip="User is not activated yet">{{ user.alternateEmail || user.email }}</span>
                                 </td>
                                 <td class="text-left hand elide-table-cell hidden-xs hidden-sm" ng-click="useredit.show(user)">
-                                    <span class="group-badge" ng-repeat="groupId in user.groupIds | ignoreAdminGroup">{{ groupId }}</span>
+                                    <span class="group-badge" ng-repeat="groupId in user.groupIds | ignoreAdminGroup">
+                                        {{ groupsById[groupId].name }}
+                                    </span>
+                                </td>
+
                                 </td>
                                 <td class="text-right no-wrap" style="vertical-align: bottom">
                                     <button ng-show="!isMe(user)" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>
