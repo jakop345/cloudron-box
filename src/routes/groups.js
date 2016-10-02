@@ -5,7 +5,7 @@ exports = module.exports = {
     list: list,
     create: create,
     remove: remove,
-    update: update
+    update: updateMembers
 };
 
 var assert = require('assert'),

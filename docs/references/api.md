@@ -862,9 +862,10 @@ Response (200):
 
 ### Set members
 
-PUT `/api/v1/groups/:groupId` <scope>admin</scope>
+PUT `/api/v1/groups/:groupId/members` <scope>admin</scope>
 
-Sets the members of an existing group with id `groupId`.
+Sets the members of an existing group with id `groupId`. Note that this replaces the
+existing users with the provided userIds.
 
 Request:
 ```
