@@ -16,6 +16,7 @@ exports = module.exports = {
     setAliasesForName: setAliasesForName,
 
     getByOwnerId: getByOwnerId,
+    updateByOwnerId: updateByOwnerId,
     delByOwnerId: delByOwnerId,
 
     _clear: clear,
@@ -135,6 +136,19 @@ function getByOwnerId(ownerId, callback) {
         if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, results);
+    });
+}
+
+function updateByOwnerId(ownerId, name, callback) {
+    assert.strictEqual(typeof ownerId, 'string');
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('UPDATE mailboxes SET name = ? WHERE ownerId = ? AND aliasTarget IS NULL', [ name, ownerId ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null);
     });
 }
 

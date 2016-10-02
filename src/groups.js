@@ -4,6 +4,7 @@ exports = module.exports = {
     GroupError: GroupError,
 
     create: create,
+    update: update,
     remove: remove,
     get: get,
     getWithMembers: getWithMembers,
@@ -94,6 +95,30 @@ function create(name, callback) {
             if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
             callback(null, { id: id, name: name });
+        });
+    });
+}
+
+function update(id, name, callback) {
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    // we store names in lowercase
+    name = name.toLowerCase();
+
+    var error = validateGroupname(name);
+    if (error) return callback(error);
+
+    mailboxdb.update(id, name, function (error) {
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(GroupError.ALREADY_EXISTS));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        groupdb.update(id, name, function (error) {
+            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(GroupError.ALREADY_EXISTS));
+            if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+            callback(null);
         });
     });
 }

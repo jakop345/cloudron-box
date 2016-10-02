@@ -5,7 +5,8 @@ exports = module.exports = {
     list: list,
     create: create,
     remove: remove,
-    update: updateMembers
+    update: update,
+    updateMembers: updateMembers
 };
 
 var assert = require('assert'),
@@ -46,6 +47,21 @@ function get(req, res, next) {
 }
 
 function update(req, res, next) {
+    assert.strictEqual(typeof req.params.groupId, 'string');
+
+    if (!req.body.name) return next(new HttpError(404, 'missing group name'));
+
+    groups.update(req.params.groupId, req.body.name, function (error) {
+        if (error && error.reason === GroupError.NOT_FOUND) return next(new HttpError(404, 'Invalid group or user id'));
+        if (error && error.reason === GroupError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === GroupError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(204));
+    });
+}
+
+function updateMembers(req, res, next) {
     assert.strictEqual(typeof req.params.groupId, 'string');
 
     if (!req.body.userIds) return next(new HttpError(404, 'missing or invalid userIds fields'));

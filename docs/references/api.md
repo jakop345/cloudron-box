@@ -860,12 +860,32 @@ Response (200):
 }
 ```
 
+### Update group
+
+POST `/api/v1/groups/:groupId` <scope>admin</scope>
+
+Modify the group's name.
+
+Request:
+```
+{
+    name: <name>   // optional
+}
+
+```
+
+Response (204):
+```
+{}
+```
+
 ### Set members
 
 PUT `/api/v1/groups/:groupId/members` <scope>admin</scope>
 
-Sets the members of an existing group with id `groupId`. Note that this replaces the
-existing users with the provided userIds.
+Sets the members of an existing group with id `groupId`.
+
+Note that this replaces the existing users with the provided userIds.
 
 Request:
 ```

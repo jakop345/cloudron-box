@@ -6,6 +6,7 @@ exports = module.exports = {
     getAll: getAll,
     getAllWithMembers: getAllWithMembers,
     add: add,
+    update: update,
     del: del,
     count: count,
 
@@ -90,6 +91,19 @@ function add(id, name, callback) {
     var data = [ id, name ];
     database.query('INSERT INTO groups (id, name) VALUES (?, ?)',
            data, function (error, result) {
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null);
+    });
+}
+
+function update(id, name, callback) {
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('UPDATE groups SET name = ? WHERE id = ?', [ name, id ], function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
