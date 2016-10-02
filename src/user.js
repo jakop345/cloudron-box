@@ -97,7 +97,7 @@ function validateUsername(username) {
 
     if (constants.RESERVED_NAMES.indexOf(username) !== -1) return new UserError(UserError.BAD_FIELD, 'Username is reserved');
 
-    // +/- can be tricky in emails
+    // +/- can be tricky in emails. also need to consider valid LDAP characters here (e.g '+' is reserved)
     if (/[^a-zA-Z0-9.]/.test(username)) return new UserError(UserError.BAD_FIELD, 'Username can only contain alphanumerals and dot');
 
     // app emails are sent using the .app suffix

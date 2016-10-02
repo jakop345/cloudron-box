@@ -65,7 +65,7 @@ function validateGroupname(name) {
 
     if (constants.RESERVED_NAMES.indexOf(name) !== -1) return new GroupError(GroupError.BAD_FIELD, 'name is reserved');
 
-    // +/- can be tricky in emails
+    // +/- can be tricky in emails. also need to consider valid LDAP characters here (e.g '+' is reserved)
     if (/[^a-zA-Z0-9.]/.test(name)) return new GroupError(GroupError.BAD_FIELD, 'name can only contain alphanumerals and dot');
 
     // app emails are sent using the .app suffix
