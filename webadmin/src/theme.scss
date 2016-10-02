@@ -146,7 +146,11 @@ html {
 }
 
 sup {
-    top: -1.5em;
+    top: -1.3em;
+}
+
+sup.help a {
+    color: #757c82;
 }
 
 // ----------------------------
@@ -966,7 +970,6 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 
 // ----------------------------
 // Upgrade
