@@ -66,7 +66,7 @@ function pullImage(manifest, callback) {
     var docker = exports.connection;
 
     docker.pull(manifest.dockerImage, function (err, stream) {
-        if (err) return callback(new Error('Error connecting to docker. statusCode: %s' + err.statusCode));
+        if (err) return callback(new Error('Error connecting to docker. statusCode: ' + err.statusCode));
 
         // https://github.com/dotcloud/docker/issues/1074 says each status message
         // is emitted as a chunk
