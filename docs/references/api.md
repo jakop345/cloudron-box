@@ -315,7 +315,7 @@ GET `/api/v1/apps/:appId/backups` <scope>admin</scope>
 
 Gets the backups of the application with id `appId`.
 
-Use the [Backup](/references/api.html#download-backup) API to download the backup.
+Use the [Backup](/references/api.html#download-backup) API to download the backup. Use the [Clone](/references/api.html#clone) API to create another instance of this app from a backup.
 
 Response (200):
 
