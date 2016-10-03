@@ -828,15 +828,20 @@ function clone(appId, data, auditSource, callback) {
                     lastBackupId: backupId
                 };
 
-                appdb.add(newAppId, appStoreId, manifest, location, portBindings, data, function (error) {
-                    if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location, portBindings, error));
+                mailboxdb.add(location + '.app', appId, mailboxdb.TYPE_APP, function (error) {
+                    if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS, 'Mailbox already exists'));
                     if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                    taskmanager.restartAppTask(newAppId);
+                    appdb.add(newAppId, appStoreId, manifest, location, portBindings, data, function (error) {
+                        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location, portBindings, error));
+                        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                    eventlog.add(eventlog.ACTION_APP_CLONE, auditSource, { appId: newAppId, oldAppId: appId, backupId: backupId, location: location, manifest: manifest });
+                        taskmanager.restartAppTask(newAppId);
 
-                    callback(null, { id : newAppId });
+                        eventlog.add(eventlog.ACTION_APP_CLONE, auditSource, { appId: newAppId, oldAppId: appId, backupId: backupId, location: location, manifest: manifest });
+
+                        callback(null, { id : newAppId });
+                    });
                 });
             });
         });
