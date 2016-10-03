@@ -217,6 +217,8 @@ Open the DigitalOcean console and do the following:
 
 Create the Cloudron using the `cloudron machine` command:
 
+Note: Only Second Level Domains are supported. For example, `example.com`, `example.co.uk` will work fine. Choosing a domain name at any other level like `cloudron.example.com` will not work.
+
 ```
 cloudron machine create digitalocean \
         --fqdn <domain> \
