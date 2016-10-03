@@ -5,7 +5,7 @@ exports = module.exports = {
     list: list,
     create: create,
     remove: remove,
-    update: updateMembers
+    updateMembers: updateMembers
 };
 
 var assert = require('assert'),
@@ -45,7 +45,7 @@ function get(req, res, next) {
     });
 }
 
-function update(req, res, next) {
+function updateMembers(req, res, next) {
     assert.strictEqual(typeof req.params.groupId, 'string');
 
     if (!req.body.userIds) return next(new HttpError(404, 'missing or invalid userIds fields'));
