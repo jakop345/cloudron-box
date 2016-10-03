@@ -828,7 +828,7 @@ function clone(appId, data, auditSource, callback) {
                     lastBackupId: backupId
                 };
 
-                mailboxdb.add(location + '.app', appId, mailboxdb.TYPE_APP, function (error) {
+                mailboxdb.add(location + '.app', newAppId, mailboxdb.TYPE_APP, function (error) {
                     if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS, 'Mailbox already exists'));
                     if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
