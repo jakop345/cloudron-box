@@ -632,3 +632,7 @@
 * Mailing list support via Groups (#15)
 * Fix issue where non-admin users could not update their profile
 
+[0.21.1]
+* Fix app clone error (mailbox was not allocated)
+* Do not allow "-" in group names
+
