@@ -13,6 +13,7 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
 fi
 
 if [[ "${BOX_ENV}" == "cloudron" ]]; then
+    sync
     shutdown -r now
 fi
 
