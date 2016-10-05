@@ -24,7 +24,7 @@ exports = module.exports = {
     stop: stop
 };
 
-var PROVISION_CONFIG_FILE = '/root/provision.json';
+var PROVISION_CONFIG_FILE = '/root/userdata.json';
 var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
 
 var gHttpServer = null; // update server; used for updates
