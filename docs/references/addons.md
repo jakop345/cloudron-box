@@ -221,7 +221,7 @@ MAIL_IMAP_SERVER=     # the IMAP server. this can be an IP or DNS name
 MAIL_IMAP_PORT=       # the IMAP server port
 MAIL_IMAP_USERNAME=   # the username to use for authentication
 MAIL_IMAP_PASSWORD=   # the password to use for authentication
-MAIL_TO=              # the to address to use
+MAIL_TO=              # the "To" address to use
 MAIL_DOMAIN=          # the mail for which email will be received
 ```
 
@@ -307,7 +307,7 @@ MAIL_SMTP_SERVER=     # the mail server (relay) that apps can use. this can be a
 MAIL_SMTP_PORT=       # the mail server port
 MAIL_SMTP_USERNAME=   # the username to use for authentication as well as the `from` username when sending emails
 MAIL_SMTP_PASSWORD=   # the password to use for authentication
-MAIL_FROM=            # the from address to use
+MAIL_FROM=            # the "From" address to use
 MAIL_DOMAIN=          # the domain name to use for email sending (i.e username@domain)
 ```
 
