@@ -301,7 +301,7 @@ The Cloudron platform itself updates in two ways:
 
 * An **upgrade** requires a new OS image and thus has to be performed using the CLI tool. This process involves creating a new EC2 instance is created using the latest image and all the data and apps are restored. The `cloudron machine update` command can be used when an _upgrade_ is available (you will get a notification in the UI).
 ```
-    cloudron machine update --ssh-key <ssh-key> <domain>
+    cloudron machine update <domain>
 ```
 Once the upgrade is complete, you can safely terminate the old EC2 instance.
 
@@ -322,7 +322,7 @@ If you are unable to connect, verify the following:
 ## Mail
 
 Your server's IP plays a big role in how emails from our Cloudron get handled. Spammers frequently abuse public IP addresses
-and as a result your Cloudron might possibly start out with a bad reputation. The good news is that most IP based 
+and as a result your Cloudron might possibly start out with a bad reputation. The good news is that most IP based
 blacklisting services cool down over time. The Cloudron sets up DNS entries for SPF, DKIM, DMARC automatically and
 reputation should be easy to get back.
 
