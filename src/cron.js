@@ -25,6 +25,7 @@ var gAutoupdaterJob = null,
     gHeartbeatJob = null,
     gBackupJob = null,
     gCleanupTokensJob = null,
+    gCleanupBackupsJob = null,
     gDockerVolumeCleanerJob = null,
     gSchedulerSyncJob = null,
     gCertificateRenewJob = null,
@@ -102,6 +103,14 @@ function recreateJobs(unusedTimeZone, callback) {
         gCleanupTokensJob = new CronJob({
             cronTime: '00 */30 * * * *', // every 30 minutes
             onTick: janitor.cleanupTokens,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
+        if (gCleanupBackupsJob) gCleanupBackupsJob.stop();
+        gCleanupBackupsJob = new CronJob({
+            cronTime: '00 */30 * * * *', // every 30 minutes
+            onTick: janitor.cleanupBackups,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
@@ -203,6 +212,9 @@ function uninitialize(callback) {
 
     if (gCleanupTokensJob) gCleanupTokensJob.stop();
     gCleanupTokensJob = null;
+
+    if (gCleanupBackupsJob) gCleanupBackupsJob.stop();
+    gCleanupBackupsJob = null;
 
     if (gCleanupEventlogJob) gCleanupEventlogJob.stop();
     gCleanupEventlogJob = null;

@@ -3,13 +3,16 @@
 var assert = require('assert'),
     async = require('async'),
     authcodedb = require('./authcodedb.js'),
+    backups = require('./backups.js'),
     debug = require('debug')('box:src/janitor'),
     docker = require('./docker.js').connection,
+    settings = require('./settings.js'),
     tokendb = require('./tokendb.js');
 
 exports = module.exports = {
     cleanupTokens: cleanupTokens,
-    cleanupDockerVolumes: cleanupDockerVolumes
+    cleanupDockerVolumes: cleanupDockerVolumes,
+    cleanupBackups: cleanupBackups
 };
 
 var NOOP_CALLBACK = function () { };
@@ -99,5 +102,28 @@ function cleanupDockerVolumes(callback) {
                 iteratorDone(); // intentionally ignore error
             });
         }, callback);
+    });
+}
+
+function cleanupBackups(callback) {
+    assert(!callback || typeof callback === 'function'); // callback is null when called from cronjob
+
+    callback = callback || NOOP_CALLBACK;
+
+    debug('Cleaning backups');
+
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(error);
+
+        // nothing to do here
+        if (backupConfig.provider !== 'filesystem') return callback();
+
+        backups.getPaged(1, 1000, function (error, result) {
+            if (error) return callback(error);
+
+            debug('Current backups:', result);
+
+            callback();
+        });
     });
 }
