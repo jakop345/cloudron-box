@@ -94,22 +94,6 @@ function provision(callback) {
     });
 }
 
-function provisionLocal(callback) {
-    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) {
-        debug('provisionLocal: already provisioned');
-        return callback(null); // already provisioned
-    }
-
-    if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
-        console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
-        return callback(new Error('No provisioning data found'));
-    }
-
-    var userData = require(PROVISION_CONFIG_FILE);
-
-    installer.provision(userData, callback);
-}
-
 function update(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
@@ -162,23 +146,12 @@ function stopUpdateServer(callback) {
 function start(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var actions;
+    debug('Starting Installer');
 
-    if (process.env.PROVISION === 'local') {
-        debug('Starting Installer in selfhost mode');
-
-        actions = [
-            startUpdateServer,
-            provisionLocal
-        ];
-    } else {    // current fallback, should be 'digitalocean' eventually, see initializeBaseUbuntuImage.sh
-        debug('Starting Installer in managed mode');
-
-        actions = [
-            startUpdateServer,
-            provision
-        ];
-    }
+    var actions = [
+        startUpdateServer,
+        provision
+    ];
 
     async.series(actions, callback);
 }
