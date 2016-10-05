@@ -29,6 +29,17 @@ var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
 
 var gHttpServer = null; // update server; used for updates
 
+function provisionLocal(callback) {
+    if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
+        console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
+        return callback(new Error('No provisioning data found'));
+    }
+
+    var userData = require(PROVISION_CONFIG_FILE);
+
+    installer.provision(userData, callback);
+}
+
 function provisionDigitalOcean(callback) {
     superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
         if (error || result.statusCode !== 200) {
@@ -59,21 +70,26 @@ function provision(callback) {
     }
 
     async.retry({ times: 5, interval: 30000 }, function (done) {
-        // try first digitalocean, then ec2
-        provisionDigitalOcean(function (error1, userData) {
+        // try first locally then digitalocean then ec2
+        provisionLocal(function (error1, userData) {
             if (!error1) return done(null, userData);
 
-            provisionEC2(function (error2, userData) {
+            provisionDigitalOcean(function (error2, userData) {
                 if (!error2) return done(null, userData);
 
-                console.error('Unable to get meta data: ', error1.message + ' ' + error2.message);
+                provisionEC2(function (error3, userData) {
+                    if (!error3) return done(null, userData);
 
-                callback(new Error(error1.message + ' ' + error2.message));
+                    console.error('Unable to get meta data: ', error1.message, error2.message, error3.message);
+
+                    callback(new Error(error1.message + ' ' + error2.message + ' ' + error3.message));
+                });
             });
         });
     }, function (error, userData) {
         if (error) return callback(error);
 
+        // TODO can we somehow verify the data to some extent?
         installer.provision(userData, callback);
     });
 }
