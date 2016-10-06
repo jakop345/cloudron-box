@@ -46,9 +46,9 @@ function provision(callback) {
         return callback(null); // already provisioned
     }
 
-    async.retry({ times: 100, interval: 5000 }, function (done) {
+    async.retry({ times: 100, interval: 5000 }, function (callback) {
         provisionLocal(function (error, userData) {
-            if (!error) return done(null, userData);
+            if (!error) return callback(null, userData);
 
             callback(new Error(error.message));
         });
