@@ -16,8 +16,7 @@ var assert = require('assert'),
     json = require('body-parser').json,
     lastMile = require('connect-lastmile'),
     morgan = require('morgan'),
-    request = require('request'),
-    superagent = require('superagent');
+    safe = require('safetydance');
 
 exports = module.exports = {
     start: start,
@@ -29,17 +28,6 @@ var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
 
 var gHttpServer = null; // update server; used for updates
 
-function provisionLocal(callback) {
-    if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
-        console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
-        return callback(new Error('No provisioning data found'));
-    }
-
-    var userData = require(PROVISION_CONFIG_FILE);
-
-    installer.provision(userData, callback);
-}
-
 function provision(callback) {
     if (fs.existsSync(CLOUDRON_CONFIG_FILE)) {
         debug('provision: already provisioned');
@@ -47,11 +35,15 @@ function provision(callback) {
     }
 
     async.retry({ times: 100, interval: 5000 }, function (callback) {
-        provisionLocal(function (error, userData) {
-            if (!error) return callback(null, userData);
+        if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
+            console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
+            return callback(new Error('No provisioning data found'));
+        }
 
-            callback(new Error(error.message));
-        });
+        var userData = safe.require(PROVISION_CONFIG_FILE);
+        if (!userData) return callback(new Error('Provisioning data invalid'));
+
+        callback(null, userData);
     }, function (error, userData) {
         if (error) return callback(error);
 
