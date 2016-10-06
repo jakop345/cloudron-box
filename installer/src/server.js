@@ -40,51 +40,17 @@ function provisionLocal(callback) {
     installer.provision(userData, callback);
 }
 
-function provisionDigitalOcean(callback) {
-    superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
-        if (error || result.statusCode !== 200) {
-            console.error('Error getting metadata', error);
-            return callback(new Error('Error getting metadata'));
-        }
-
-        callback(null, JSON.parse(result.body.user_data));
-    });
-}
-
-function provisionEC2(callback) {
-    // need to use request, since octet-stream data
-    request('http://169.254.169.254/latest/user-data', { timeout: 5000 }, function (error, response, body) {
-        if (error || response.statusCode !== 200) {
-            console.error('Error getting metadata', error);
-            return callback(new Error('Error getting metadata'));
-        }
-
-        callback(null, JSON.parse(body));
-    });
-}
-
 function provision(callback) {
     if (fs.existsSync(CLOUDRON_CONFIG_FILE)) {
         debug('provision: already provisioned');
         return callback(null); // already provisioned
     }
 
-    async.retry({ times: 5, interval: 30000 }, function (done) {
-        // try first locally then digitalocean then ec2
-        provisionLocal(function (error1, userData) {
-            if (!error1) return done(null, userData);
+    async.retry({ times: 100, interval: 5000 }, function (done) {
+        provisionLocal(function (error, userData) {
+            if (!error) return done(null, userData);
 
-            provisionDigitalOcean(function (error2, userData) {
-                if (!error2) return done(null, userData);
-
-                provisionEC2(function (error3, userData) {
-                    if (!error3) return done(null, userData);
-
-                    console.error('Unable to get meta data: ', error1.message, error2.message, error3.message);
-
-                    callback(new Error(error1.message + ' ' + error2.message + ' ' + error3.message));
-                });
-            });
+            callback(new Error(error.message));
         });
     }, function (error, userData) {
         if (error) return callback(error);
