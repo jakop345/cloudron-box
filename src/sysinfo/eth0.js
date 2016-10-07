@@ -14,7 +14,7 @@ function getIp(callback) {
     try {
         var ip = os.networkInterfaces().eth0[0].address;
         return callback(null, ip);
-    } catch (e) 
+    } catch (e) {
         return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, e));
     }
 }

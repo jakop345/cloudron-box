@@ -10,7 +10,7 @@ exports = module.exports = {
 var assert = require('assert'),
     debug = require('debug')('box:dns/wildcard'),
     SubdomainError = require('../subdomains.js').SubdomainError,
-    sysinfo = require('..sysinfo.js'),
+    sysinfo = require('../sysinfo.js'),
     util = require('util');
 
 function upsert(dnsConfig, zoneName, subdomain, type, values, callback) {
