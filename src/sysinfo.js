@@ -45,7 +45,7 @@ function getApi(callback) {
         case 'digitalocean': return callback(null, caas);
         case 'ec2': return callback(null, ec2);
         case 'eth0': return callback(null, eth0);
-        default: return callback(new Error('Unkown provider ' + config.provider()));
+        default: return callback(new Error('Unknown provider ' + config.provider()));
     }
 }
 
