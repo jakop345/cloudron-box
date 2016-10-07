@@ -636,3 +636,5 @@
 * Fix app clone error (mailbox was not allocated)
 * Do not allow "-" in group names
 
+[0.22.0]
+* Rebuild server instances instead of recreating
