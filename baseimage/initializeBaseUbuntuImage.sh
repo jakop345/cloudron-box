@@ -137,7 +137,7 @@ mkdir /etc/iptables && iptables-save > /etc/iptables/rules.v4
 echo "=== Enable memory accounting =="
 if [[ "${PROVIDER}" == "digitalocean" ]] || [[ "${PROVIDER}" == "caas" ]]; then
     sed -e 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="console=tty1 root=LABEL=DOROOT notsc clocksource=kvm-clock net.ifnames=0 cgroup_enable=memory swapaccount=1 panic_on_oops=1 panic=5"/' -i /etc/default/grub
-else
+elif [[ "${PROVIDER}" == "ec2" ]]; then
     sed -e 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1 panic_on_oops=1 panic=5"/' -i /etc/default/grub
 fi
 update-grub
