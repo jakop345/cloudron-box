@@ -23,7 +23,7 @@ function upsert(dnsConfig, zoneName, subdomain, type, values, callback) {
 
     debug('upsert: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
 
-    return callback();
+    return callback(null, 'noop-record-id');
 }
 
 function get(dnsConfig, zoneName, subdomain, type, callback) {
@@ -33,13 +33,7 @@ function get(dnsConfig, zoneName, subdomain, type, callback) {
     assert.strictEqual(typeof type, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (type !== 'A') return callback(null, [ ]);
-
-    sysinfo.getIp(function (error, ip) {
-        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error.message));
-
-        return callback(null, [ ip ]);
-    });
+    callback(null, [ ]); // returning ip confuses apptask into thinking the entry already exists
 }
 
 function del(dnsConfig, zoneName, subdomain, type, values, callback) {
