@@ -10,7 +10,7 @@ var assert = require('assert'),
     caas = require('./sysinfo/caas.js'),
     config = require('./config.js'),
     ec2 = require('./sysinfo/ec2.js'),
-    eth0 = require('./sysinfo/eth0.js'),
+    generic = require('./sysinfo/generic.js'),
     util = require('util');
 
 var gCachedIp = null;
@@ -44,7 +44,7 @@ function getApi(callback) {
         case 'caas': return callback(null, caas);
         case 'digitalocean': return callback(null, caas);
         case 'ec2': return callback(null, ec2);
-        case 'generic': return callback(null, eth0);
+        case 'generic': return callback(null, generic);
         default: return callback(new Error('Unknown provider ' + config.provider()));
     }
 }
