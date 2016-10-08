@@ -16,7 +16,7 @@ var assert = require('assert'),
     route53 = require('./dns/route53.js'),
     settings = require('./settings.js'),
     util = require('util'),
-    wildcard = require('./dns/wildcard.js');
+    noopDns = require('./dns/noop.js');
 
 function SubdomainError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -54,7 +54,7 @@ function api(provider) {
         case 'caas': return caas;
         case 'route53': return route53;
         case 'digitalocean': return digitalocean;
-        case 'wildcard': return wildcard;
+        case 'noop': return noopDns;
         default: return null;
     }
 }
