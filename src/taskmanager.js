@@ -27,7 +27,7 @@ var appdb = require('./appdb.js'),
 var gActiveTasks = { };
 var gPendingTasks = [ ];
 
-var TASK_CONCURRENCY = 5;
+var TASK_CONCURRENCY = 3;
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
 function initialize(callback) {
