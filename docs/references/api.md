@@ -1087,8 +1087,7 @@ This is currently internal API and is documented here for completeness.
 Response(200):
 ```
 {
-  "provider": <string>,  // 'caas'
-  "token": <string>     // caas specific token
+  "provider": <string>  // 'caas' or 'route53' or 'digitalocean'
 }
 ```
 
