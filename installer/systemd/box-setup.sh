@@ -17,7 +17,7 @@ sed -e 's/.* \(ssh-rsa.*\)/\1/' -i /root/.ssh/authorized_keys
 readonly physical_memory=$(free -m | awk '/Mem:/ { print $2 }')
 readonly swap_size="${physical_memory}" # if you change this, fix enoughResourcesAvailable() in client.js
 readonly app_count=$((${physical_memory} / 200)) # estimated app count
-readonly disk_size_gb=$(fdisk -l ${disk_device} | grep "Disk ${disk_device}" | awk '{ print $3 }')
+readonly disk_size_gb=$(fdisk -l ${disk_device} | grep "Disk ${disk_device}" | awk '{ printf "%.0f", $3 }')
 readonly disk_size=$((disk_size_gb * 1024))
 readonly system_size=10240 # 10 gigs for system libs, apps images, installer, box code and tmp
 readonly ext4_reserved=$((disk_size * 5 / 100)) # this can be changes using tune2fs -m percent /dev/vda1
