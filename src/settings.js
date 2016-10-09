@@ -321,6 +321,8 @@ function setDnsConfig(dnsConfig, callback) {
         };
         validator = function (caasConfig, next) { return next(); };
     } else if (dnsConfig.provider === 'digitalocean') {
+        if (typeof dnsConfig.token !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'token must be a string'));
+
         credentials = {
             provider: dnsConfig.provider,
             token: dnsConfig.token
