@@ -26,12 +26,94 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         busy: false,
         error: {},
         password: '',
-        requestedPlan: null
+        requestedPlan: null,
+
+        showChangePlan: function () {
+            $('#planChangeModal').modal('show');
+        },
+
+        planChangeReset: function () {
+            $scope.planChange.error.password = null;
+            $scope.planChange.password = '';
+
+            $scope.planChangeForm.$setPristine();
+            $scope.planChangeForm.$setUntouched();
+        },
+
+        doChangePlan: function () {
+            $scope.planChange.busy = true;
+
+            var options = {
+                size: $scope.planChange.requestedPlan.slug,
+                name: $scope.planChange.requestedPlan.name,
+                price: $scope.planChange.requestedPlan.price,
+                region: $scope.currentRegionSlug
+            };
+
+            Client.migrate(options, $scope.planChange.password, function (error) {
+                $scope.planChange.busy = false;
+
+                if (error) {
+                    if (error.statusCode === 403) {
+                        $scope.planChange.error.password = true;
+                        $scope.planChange.password = '';
+                        $scope.planChangeForm.password.$setPristine();
+                        $('#inputPlanChangePassword').focus();
+                    } else {
+                        console.error('Unable to change plan.', error);
+                    }
+                } else {
+                    $scope.planChange.planChangeReset();
+
+                    $('#planChangeModal').modal('hide');
+
+                    window.location.href = '/update.html';
+                }
+
+                $scope.planChange.busy = false;
+            });
+        }
     };
 
     $scope.createBackup = {
         busy: false,
-        percent: 100
+        percent: 100,
+
+        doCreateBackup: function () {
+            $('#createBackupModal').modal('hide');
+            $scope.createBackup.busy = true;
+            $scope.createBackup.percent = 100;
+
+            Client.backup(function (error) {
+                if (error) {
+                    console.error(error);
+                    $scope.createBackup.busy = false;
+                }
+
+                function checkIfDone() {
+                    Client.progress(function (error, data) {
+                        if (error) return window.setTimeout(checkIfDone, 250);
+
+                        // check if we are done
+                        if (!data.backup || data.backup.percent >= 100) {
+                            if (data.backup && data.backup.message) console.error('Backup message: ' + data.backup.message); // backup error message
+                            fetchBackups();
+                            $scope.createBackup.busy = false;
+                            return;
+                        }
+
+                        $scope.createBackup.percent = data.backup.percent;
+                        window.setTimeout(checkIfDone, 250);
+                    });
+                }
+
+                checkIfDone();
+            });
+        },
+
+        showCreateBackup: function () {
+            $('#createBackupModal').modal('show');
+        }
     };
 
     $scope.avatarChange = {
@@ -90,22 +172,82 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             file: null,
             data: null,
             url: '/img/avatars/jar.png'
-        }]
-    };
+        }],
 
-    $scope.setPreviewAvatar = function (avatar) {
-        $scope.avatarChange.avatar = avatar;
-    };
+        getBlobFromImg: function (img, callback) {
+            var size = 256;
 
-    $scope.showCustomAvatarSelector = function () {
-        $('#avatarFileInput').click();
-    };
+            var canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
 
-    function avatarChangeReset() {
-        $scope.avatarChange.error.avatar = null;
-        $scope.avatarChange.avatar = null;
-        $scope.avatarChange.busy = false;
-    }
+            var imageDimensionRatio = img.width / img.height;
+            var canvasDimensionRatio = canvas.width / canvas.height;
+            var renderableHeight, renderableWidth, xStart, yStart;
+
+            if (imageDimensionRatio > canvasDimensionRatio) {
+                renderableHeight = canvas.height;
+                renderableWidth = img.width * (renderableHeight / img.height);
+                xStart = (canvas.width - renderableWidth) / 2;
+                yStart = 0;
+            } else if (imageDimensionRatio < canvasDimensionRatio) {
+                renderableWidth = canvas.width;
+                renderableHeight = img.height * (renderableWidth / img.width);
+                xStart = 0;
+                yStart = (canvas.height - renderableHeight) / 2;
+            } else {
+                renderableHeight = canvas.height;
+                renderableWidth = canvas.width;
+                xStart = 0;
+                yStart = 0;
+            }
+
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, xStart, yStart, renderableWidth, renderableHeight);
+
+            canvas.toBlob(callback);
+        },
+
+        doChangeAvatar: function () {
+            $scope.avatarChange.error.avatar = null;
+            $scope.avatarChange.busy = true;
+
+            var img = document.getElementById('previewAvatar');
+            $scope.avatarChange.avatar.file = $scope.avatarChange.getBlobFromImg(img, function (blob) {
+                Client.changeCloudronAvatar(blob, function (error) {
+                    if (error) {
+                        console.error('Unable to change cloudron avatar.', error);
+                    } else {
+                        Client.resetAvatar();
+                    }
+
+                    $('#avatarChangeModal').modal('hide');
+                    $scope.avatarChange.avatarChangeReset();
+                });
+            });
+        },
+
+        setPreviewAvatar: function (avatar) {
+            $scope.avatarChange.avatar = avatar;
+        },
+
+        avatarChangeReset: function () {
+            $scope.avatarChange.error.avatar = null;
+            $scope.avatarChange.avatar = null;
+            $scope.avatarChange.busy = false;
+        },
+
+        showChangeAvatar: function () {
+            $scope.avatarChange.avatarChangeReset();
+            $('#avatarChangeModal').modal('show');
+        },
+
+        showCustomAvatarSelector: function () {
+            $('#avatarFileInput').click();
+        }
+
+    };
 
     function fetchBackups() {
         Client.getBackups(function (error, backups) {
@@ -174,147 +316,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     }
 
-    $scope.showChangePlan = function () {
-        $('#planChangeModal').modal('show');
-    };
-
-    function planChangeReset() {
-        $scope.planChange.error.password = null;
-        $scope.planChange.password = '';
-
-        $scope.planChangeForm.$setPristine();
-        $scope.planChangeForm.$setUntouched();
-    }
-
-    $scope.doChangePlan = function () {
-        $scope.planChange.busy = true;
-
-        var options = {
-            size: $scope.planChange.requestedPlan.slug,
-            name: $scope.planChange.requestedPlan.name,
-            price: $scope.planChange.requestedPlan.price,
-            region: $scope.currentRegionSlug
-        };
-
-        Client.migrate(options, $scope.planChange.password, function (error) {
-            $scope.planChange.busy = false;
-
-            if (error) {
-                if (error.statusCode === 403) {
-                    $scope.planChange.error.password = true;
-                    $scope.planChange.password = '';
-                    $scope.planChangeForm.password.$setPristine();
-                    $('#inputPlanChangePassword').focus();
-                } else {
-                    console.error('Unable to change plan.', error);
-                }
-            } else {
-                planChangeReset();
-
-                $('#planChangeModal').modal('hide');
-
-                window.location.href = '/update.html';
-            }
-
-            $scope.planChange.busy = false;
-        });
-    };
-
-    function getBlobFromImg(img, callback) {
-        var size = 256;
-
-        var canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-
-        var imageDimensionRatio = img.width / img.height;
-        var canvasDimensionRatio = canvas.width / canvas.height;
-        var renderableHeight, renderableWidth, xStart, yStart;
-
-        if (imageDimensionRatio > canvasDimensionRatio) {
-            renderableHeight = canvas.height;
-            renderableWidth = img.width * (renderableHeight / img.height);
-            xStart = (canvas.width - renderableWidth) / 2;
-            yStart = 0;
-        } else if (imageDimensionRatio < canvasDimensionRatio) {
-            renderableWidth = canvas.width;
-            renderableHeight = img.height * (renderableWidth / img.width);
-            xStart = 0;
-            yStart = (canvas.height - renderableHeight) / 2;
-        } else {
-            renderableHeight = canvas.height;
-            renderableWidth = canvas.width;
-            xStart = 0;
-            yStart = 0;
-        }
-
-        var ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, xStart, yStart, renderableWidth, renderableHeight);
-
-        canvas.toBlob(callback);
-    }
-
-    $scope.doChangeAvatar = function () {
-        $scope.avatarChange.error.avatar = null;
-        $scope.avatarChange.busy = true;
-
-        var img = document.getElementById('previewAvatar');
-        $scope.avatarChange.avatar.file = getBlobFromImg(img, function (blob) {
-            Client.changeCloudronAvatar(blob, function (error) {
-                if (error) {
-                    console.error('Unable to change cloudron avatar.', error);
-                } else {
-                    Client.resetAvatar();
-                }
-
-                $('#avatarChangeModal').modal('hide');
-                avatarChangeReset();
-            });
-        });
-    };
-
-    $scope.doCreateBackup = function () {
-        $('#createBackupModal').modal('hide');
-        $scope.createBackup.busy = true;
-        $scope.createBackup.percent = 100;
-
-        Client.backup(function (error) {
-            if (error) {
-                console.error(error);
-                $scope.createBackup.busy = false;
-            }
-
-            function checkIfDone() {
-                Client.progress(function (error, data) {
-                    if (error) return window.setTimeout(checkIfDone, 250);
-
-                    // check if we are done
-                    if (!data.backup || data.backup.percent >= 100) {
-                        if (data.backup && data.backup.message) console.error('Backup message: ' + data.backup.message); // backup error message
-                        fetchBackups();
-                        $scope.createBackup.busy = false;
-                        return;
-                    }
-
-                    $scope.createBackup.percent = data.backup.percent;
-                    window.setTimeout(checkIfDone, 250);
-                });
-            }
-
-            checkIfDone();
-        });
-    };
-
-    $scope.showCreateBackup = function () {
-        $('#createBackupModal').modal('show');
-    };
-
-    $scope.showChangeAvatar = function () {
-        avatarChangeReset();
-        $('#avatarChangeModal').modal('show');
-    };
-
     $('#avatarFileInput').get(0).onchange = function (event) {
         var fr = new FileReader();
         fr.onload = function () {
@@ -326,7 +327,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 };
 
                 $scope.avatarChange.availableAvatars.push(tmp);
-                $scope.setPreviewAvatar(tmp);
+                $scope.avatarChange.setPreviewAvatar(tmp);
             });
         };
         fr.readAsDataURL(event.target.files[0]);
