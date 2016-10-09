@@ -172,6 +172,9 @@ function createSubcontainer(app, name, cmd, options, callback) {
         memoryLimit = constants.DEFAULT_MEMORY_LIMIT;
     }
 
+    // apparmor is disabled on few servers
+    var enableSecurityOpt = config.CLOUDRON && safe(function () { return child_process.spawnSync('aa-enabled').status === 0; }, false);
+
     addons.getEnvironment(app, function (error, addonEnv) {
         if (error) return callback(new Error('Error getting addon environment : ' + error));
 
@@ -210,7 +213,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
                 CpuShares: 512, // relative to 1024 for system processes
                 VolumesFrom: isAppContainer ? null : [ app.containerId + ":rw" ],
                 NetworkMode: isAppContainer ? 'cloudron' : ('container:' + app.containerId), // share network namespace with parent
-                SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
+                SecurityOpt: enableSecurityOpt ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
             }
         };
         containerOptions = _.extend(containerOptions, options);
