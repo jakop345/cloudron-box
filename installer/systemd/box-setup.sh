@@ -10,12 +10,14 @@ readonly USER_DATA_DIR="/home/yellowtent/data"
 # detect device of rootfs (http://forums.fedoraforum.org/showthread.php?t=270316)
 disk_device="$(for d in $(find /dev -type b); do [ "$(mountpoint -d /)" = "$(mountpoint -x $d)" ] && echo $d && break; done)"
 
+existing_swap=$(cat /proc/meminfo | grep SwapTotal | awk '{ printf "%.0f", $2/1024 }')
+
 # allow root access over ssh
 sed -e 's/.* \(ssh-rsa.*\)/\1/' -i /root/.ssh/authorized_keys
 
 # all sizes are in mb
 readonly physical_memory=$(free -m | awk '/Mem:/ { print $2 }')
-readonly swap_size="${physical_memory}" # if you change this, fix enoughResourcesAvailable() in client.js
+readonly swap_size=$((${physical_memory} - ${existing_swap})) # if you change this, fix enoughResourcesAvailable() in client.js
 readonly app_count=$((${physical_memory} / 200)) # estimated app count
 readonly disk_size_gb=$(fdisk -l ${disk_device} | grep "Disk ${disk_device}" | awk '{ printf "%.0f", $3 }')
 readonly disk_size=$((disk_size_gb * 1024))
