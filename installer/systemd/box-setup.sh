@@ -7,14 +7,8 @@ readonly APPS_SWAP_FILE="/apps.swap"
 readonly USER_DATA_FILE="/root/user_data.img"
 readonly USER_DATA_DIR="/home/yellowtent/data"
 
-# detect device
-if [[ -b "/dev/vda1" ]]; then
-    disk_device="/dev/vda1"
-fi
-
-if [[ -b "/dev/xvda1" ]]; then
-    disk_device="/dev/xvda1"
-fi
+# detect device of rootfs (http://forums.fedoraforum.org/showthread.php?t=270316)
+disk_device="$(for d in $(find /dev -type b); do [ "$(mountpoint -d /)" = "$(mountpoint -x $d)" ] && echo $d && break; done)"
 
 # allow root access over ssh
 sed -e 's/.* \(ssh-rsa.*\)/\1/' -i /root/.ssh/authorized_keys
