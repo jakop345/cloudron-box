@@ -246,7 +246,56 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         showCustomAvatarSelector: function () {
             $('#avatarFileInput').click();
         }
+    };
 
+    $scope.configureBackup = {
+        busy: false,
+        error: {},
+
+        password: '',
+        provider: 's3',
+        bucket: '',
+        prefix: '',
+        accessKeyId: '',
+        secretAccessKey: '',
+
+        show: function () {
+            $('#configureBackupModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.configureBackup.error.name = null;
+            $scope.configureBackup.busy = true;
+
+            var backupConfig = {
+                provider: $scope.backupConfig.provider,
+                bucket: $scope.backupConfig.bucket,
+                prefix: $scope.backupConfig.prefix,
+                accessKeyId: $scope.backupConfig.accessKeyId,
+                secretAccessKey: $scope.backupConfig.secretAccessKey
+            };
+
+            Client.setBackupConfig(backupConfig, function (error) {
+                $scope.configureBackup.busy = false;
+
+                if (error) {
+                    if (error.statusCode === 400) {
+                        $scope.cloudronNameChange.error.name = 'Invalid name';
+                        $scope.cloudronNameChange.name = '';
+                        $('#inputCloudronName').focus();
+                        $scope.cloudronNameChangeForm.password.$setPristine();
+                    } else {
+                        console.error('Unable to change name.', error);
+                        return;
+                    }
+                }
+
+                $scope.cloudronNameChange.reset();
+                $('#cloudronNameChangeModal').modal('hide');
+
+                Client.refreshConfig();
+            });
+        }
     };
 
     function fetchBackups() {
@@ -408,7 +457,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     });
 
     // setup all the dialog focus handling
-    ['planChangeModal', 'appstoreLoginModal', 'cloudronNameChangeModal'].forEach(function (id) {
+    ['planChangeModal', 'appstoreLoginModal', 'cloudronNameChangeModal', 'configureBackupModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
