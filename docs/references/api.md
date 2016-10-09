@@ -1059,12 +1059,13 @@ This is currently internal API and is documented here for completeness.
 Response(200):
 ```
 {
-  "provider": <string>,  // 'caas'
+  "provider": <string>,  // 'caas' or 's3' or 'filesystem'
   "key": <string>,       // encryption key
   "region": <string>,    // s3 region
   "bucket": <string>,    // s3 bucket name
   "prefix": <string>,    // s3 bucket prefix
-  "token": <string>      // caas specific token
+  "token": <string>,     // 'caas' specific token
+  "backupFolder": <string> // 'filesystem' specific backup directory
 }
 ```
 

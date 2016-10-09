@@ -388,8 +388,13 @@ function setBackupConfig(backupConfig, callback) {
     assert.strictEqual(typeof backupConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (backupConfig.provider !== 'caas') {
-        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be caas'));
+    if (backupConfig.provider === 'caas') {
+        if (config.provider() !== 'caas') return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be caas'));
+    } else if (backupConfig.provider === 'filesystem') {
+        if (typeof backupConfig.backupFolder !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'backupFolder must be string'));
+    } else if (backupConfig.provider === 's3') {
+        if (typeof backupConfig.accessKeyId !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'accessKeyId must be a string'));
+        if (typeof backupConfig.secretAccessKey !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'secretAccessKey must be a string'));
     }
 
     settingsdb.set(exports.BACKUP_CONFIG_KEY, JSON.stringify(backupConfig), function (error) {
