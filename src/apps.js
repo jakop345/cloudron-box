@@ -749,6 +749,7 @@ function restore(appId, data, auditSource, callback) {
         var func = data.backupId ? backups.getRestoreConfig.bind(null, data.backupId) : function (next) { return next(null, { manifest: app.manifest }); };
 
         func(function (error, restoreConfig) {
+            if (error && error.reason === BackupsError.NOT_FOUND) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
             if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

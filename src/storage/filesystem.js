@@ -12,6 +12,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    BackupsError = require('../backups.js').BackupsError,
     fs = require('fs'),
     path = require('path'),
     safe = require('safetydance');
@@ -68,7 +69,7 @@ function getAppRestoreConfig(apiConfig, backupId, callback) {
     var configFilename = backupId.replace(/\.tar\.gz$/, '.json');
 
     var restoreConfig = safe.require(path.join(backupFolder, configFilename));
-    if (!restoreConfig) return callback(new Error('No app backup config found'));
+    if (!restoreConfig) return callback(new BackupsError(BackupsError.NOT_FOUND, 'No app backup config found for ' + configFilename));
 
     callback(null, restoreConfig);
 }

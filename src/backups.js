@@ -79,6 +79,7 @@ util.inherits(BackupsError, Error);
 BackupsError.EXTERNAL_ERROR = 'external error';
 BackupsError.INTERNAL_ERROR = 'internal error';
 BackupsError.BAD_STATE = 'bad state';
+BackupsError.NOT_FOUND = 'not found';
 BackupsError.MISSING_CREDENTIALS = 'missing credentials';
 
 // choose which storage backend we use for test purpose we use s3
@@ -125,6 +126,7 @@ function getRestoreConfig(backupId, callback) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
         api(backupConfig.provider).getAppRestoreConfig(backupConfig, backupId, function (error, result) {
+            if (error && error.reason === BackupsError.NOT_FOUND) return callback(error);
             if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
 
             callback(null, result);
