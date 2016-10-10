@@ -40,7 +40,6 @@ var addons = require('./addons.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
     settings = require('./settings.js'),
-    superagent = require('superagent'),
     util = require('util'),
     webhooks = require('./webhooks.js');
 
