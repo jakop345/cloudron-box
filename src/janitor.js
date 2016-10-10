@@ -121,7 +121,7 @@ function cleanupBackups(callback) {
         backups.getPaged(1, 1000, function (error, result) {
             if (error) return callback(error);
 
-            var TIME_OFFSET = 1000 * 60 * 60 * 24 * 5; // 5 days
+            var TIME_OFFSET = 1000 * 60 * 60 * 24 * 2; // 2 days = 2 backups
             var TIME_THRESHOLD = Date.now() - TIME_OFFSET;
 
             var toCleanup = result.filter(function (backup) { return backup.creationTime.getTime() <= TIME_THRESHOLD; });
