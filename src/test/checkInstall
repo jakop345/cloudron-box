@@ -14,6 +14,7 @@ scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
          "${SOURCE_DIR}/src/scripts/reloadnginx.sh" \
          "${SOURCE_DIR}/src/scripts/backupbox.sh" \
          "${SOURCE_DIR}/src/scripts/backupapp.sh" \
+         "${SOURCE_DIR}/src/scripts/rmbackup.sh" \
          "${SOURCE_DIR}/src/scripts/restoreapp.sh" \
          "${SOURCE_DIR}/src/scripts/reboot.sh" \
          "${SOURCE_DIR}/src/scripts/collectlogs.sh" \
