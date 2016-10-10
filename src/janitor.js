@@ -121,8 +121,6 @@ function cleanupBackups(callback) {
         backups.getPaged(1, 1000, function (error, result) {
             if (error) return callback(error);
 
-            debug('Current backups:', result);
-
             var TIME_OFFSET = 1000 * 60 * 60 * 24 * 5; // 5 days
             var TIME_THRESHOLD = Date.now() - TIME_OFFSET;
 
