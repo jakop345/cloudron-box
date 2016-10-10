@@ -122,8 +122,9 @@ function removeBackup(apiConfig, backupId, appBackupIds, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
+    var appBackupJSONFiles = appBackupIds.map(function (id) { return id.replace(/\.tar\.gz$/, '.json'); });
 
-    async.each([backupId].concat(appBackupIds), function (id, callback) {
+    async.each([backupId].concat(appBackupIds).concat(appBackupJSONFiles), function (id, callback) {
         var filePath = path.join(backupFolder, id);
 
         shell.sudo('deleteBackup', [ RMBACKUP_CMD, filePath ], function (error) {
