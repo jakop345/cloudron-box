@@ -1,6 +1,4 @@
-# Authentication
-
-## Overview
+# Overview
 
 Cloudron provides a centralized dashboard to manage users, roles and permissions. Applications
 do not create or manage user credentials on their own and instead use one of the various
@@ -10,7 +8,7 @@ Note that authentication only identifies a user and does not indicate if the use
 to perform an action in the application. Authorizing users is application specific and must be
 implemented by the application.
 
-## Users & Admins
+# Users & Admins
 
 Cloudron user management is intentionally very simple. The owner (first user) of the
 Cloudron is `admin` by default. The `admin` role allows one to install, uninstall and reconfigure
@@ -25,7 +23,7 @@ A Cloudron `admin` can give admin privileges to one or more Cloudron users.
 
 Each Cloudron user has an unique `username` and an `email`.
 
-## Strategies
+# Strategies
 
 Cloudron provides multiple authentication strategies.
 
@@ -33,7 +31,7 @@ Cloudron provides multiple authentication strategies.
 * LDAP provided by the [LDAP addon](/references/addons.html#ldap)
 * Simple Auth provided by [Simple Auth addon](/references/addons.html#simpleauth)
 
-## Choosing a strategy
+# Choosing a strategy
 
 Applications can be broadly categorized based on their user management as follows:
 
@@ -60,7 +58,7 @@ Applications can be broadly categorized based on their user management as follow
   * Such apps _must_ set the `singleUser` property in the manifest which will restrict login to a single user
     (configurable through the Cloudron's admin panel).
 
-## Public and Private apps
+# Public and Private apps
 
 `Private` apps display content only when they have a signed-in user. These apps can choose one of the
 authentication strategies listed above.
@@ -77,7 +75,7 @@ from a settings ui in the app, it's better to simply put some sensible defaults 
 the settings. In the case where such settings cannot be changed dynamically, it is best to simply publish two
 separate apps in the Cloudron store each with a different configuration.
 
-## External User Registration
+# External User Registration
 
 Some apps allow external users to register and create accounts. For example, a public company chat that
 can invite anyone to join or a blog allowing registered commenters.
@@ -92,14 +90,14 @@ Naively handling user registration enables attacks of the following kind:
 * When a user named `foo` logs in, the app cannot determine the correct `foo` anymore. Making separate login buttons for each
 login source clears the confusion for both the user and the app.
 
-## Userid
+# Userid
 
 The preferred approach to track users in an application is a uuid or the Cloudron `username`.
 The `username` in Cloudron is unique and cannot be changed.
 
 Tracking users using `email` field is error prone since that may be changed by the user anytime.
 
-## Single Sign-on
+# Single Sign-on
 
 Single sign-on (SSO) is a property where a user logged in one application automatically logs into
 another application without having to re-enter his credentials. When applications implement the
@@ -108,7 +106,7 @@ OAuth, they will automatically log into any other app implementing OAuth.
 
 Conversely, signing off from one app, logs them off from all the apps.
 
-## Security
+# Security
 
 The LDAP and Simple Auth strategies require the user to provide their plain text passwords to the
 application. This might be a cause of concern and app developers are thus highly encouraged to integrate

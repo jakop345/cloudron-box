@@ -1,6 +1,4 @@
-# Base Image
-
-## Overview
+# Overview
 
 The application's Dockerfile must specify the FROM base image to be `cloudron/base:0.9.0`.
 
@@ -12,7 +10,7 @@ are not configured in any way and it's up to the application to configure them a
 For example, while `apache` is installed, there are no meaningful site configurations that the
 application can use.
 
-## Packages
+# Packages
 
 The following packages are part of the base image. If you need another version, you will have to
 install it yourself.
@@ -37,7 +35,7 @@ install it yourself.
 * Supervisor 3.2.0
 * uwsgi 2.0.12
 
-## Inspecting the base image
+# Inspecting the base image
 
 The base image can be inspected by installing [Docker](https://docs.docker.com/installation/).
 
@@ -54,40 +52,40 @@ To inspect the base image:
 *Note:* Please use `docker 1.9.0` or above to pull the base image. Doing otherwise results in a base
 image with an incorrect image id. The image id of `cloudron/base:0.9.0` is `d038af182821`.
 
-## The `cloudron` user
+# The `cloudron` user
 
 The base image contains a user named `cloudron` that apps can use to run their app.
 
 It is good security practice to run apps as a non-previleged user.
 
-## Env vars
+# Env vars
 
 The following environment variables are set as part of the application runtime.
 
-### API_ORIGIN
+## API_ORIGIN
 
 API_ORIGIN is set to the HTTP(S) origin of this Cloudron's API. For example,
 `https://my-girish.cloudron.us`.
 
-### APP_DOMAIN
+## APP_DOMAIN
 
 APP_DOMAIN is set to the domain name of the application. For example, `app-girish.cloudron.us`.
 
-### APP_ORIGIN
+## APP_ORIGIN
 
 APP_ORIGIN is set to the HTTP(S) origin on the application. This is origin which the
 user can use to reach the application. For example, `https://app-girish.cloudron.us`.
 
-### CLOUDRON
+## CLOUDRON
 
 CLOUDRON is always set to '1'. This is useful to write Cloudron specific code.
 
-### WEBADMIN_ORIGIN
+## WEBADMIN_ORIGIN
 
 WEBADMIN_ORIGIN is set to the HTTP(S) origin of the Cloudron's web admin. For example,
 `https://my-girish.cloudron.us`.
 
-## Node.js
+# Node.js
 
 The base image comes pre-installed with various node.js versions.
 

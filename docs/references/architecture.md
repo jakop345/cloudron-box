@@ -1,6 +1,4 @@
-# Architecture
-
-## Introduction
+# Introduction
 
 The Cloudron platform is designed to easily install and run web applications.
 The application architecture is designed to let the Cloudron take care of system 
@@ -17,7 +15,7 @@ Web applications like blogs, wikis, password managers, code hosting, document ed
 file syncers, notes, email, forums are a natural fit for the Cloudron. Decentralized "social" 
 networks are also good app candidates for the Cloudron.
 
-## Image
+# Image
 
 Application images are created using [Docker](https://www.docker.io). Docker provides a way
 to package (and containerize) the application as a filesystem which contains it's code, system libraries 
@@ -34,7 +32,7 @@ and packages that are independent of the host OS.
 
 The [base image](/references/baseimage.html) is the parent of all app images.
 
-## Cloudron Manifest
+# Cloudron Manifest
 
 Each app provides a `CloudronManifest.json` that specifies information required for the
 `Cloudron Store` and for the installation of the image in the Cloudron.
@@ -53,7 +51,7 @@ Information required for the Cloudron Store includes:
 
 See the [manifest reference](/references/manifest.html) for more information.
 
-## Addons
+# Addons
 
 Addons are services like database, authentication, email, caching that are part of the
 Cloudron. Setup, provisioning, scaling and maintenance of addons is taken care of by the
@@ -67,7 +65,7 @@ Addons are opt-in and must be specified in the Cloudron Manifest. When the app r
 variables contain the necessary information to access the addon. See the
 [addon reference](/references/addons.html) for more information.
 
-## Authentication
+# Authentication
 
 The Cloudron provides a centralized dashboard to manage users, roles and permissions. Applications
 do not create or manage user credentials on their own and instead use one of the various
@@ -79,12 +77,12 @@ Authentication strategies include OAuth 2.0, LDAP or Simple Auth. See the
 Authorizing users is application specific and it is only authentication that is delegated to the
 Cloudron.
 
-## Cloudron Store
+# Cloudron Store
 
 Cloudron Store provides a market place to publish and optionally monetize your app. Submitting to the
 Cloudron Store enables any Cloudron user to discover, purchase and install your application with
 a few clicks.
 
-## What next?
+# What next?
 
 * [Package an existing app for the Cloudron](/tutorials/packaging.html)

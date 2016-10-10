@@ -1,10 +1,10 @@
-# Self host Cloudron
+# Overview
 
 The Cloudron platform can be installed on your own cloud server. The self hosted version comes with all the same features as the managed version.
 
 If you have any questions, join us at our [chat](https://chat.cloudron.io).
 
-## CLI Tool
+# CLI Tool
 
 The [Cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) is used for managing a Cloudron. It has a `machine`
 subcommand that can be used to create, update and maintain a self-hosted Cloudron.
@@ -13,7 +13,7 @@ subcommand that can be used to create, update and maintain a self-hosted Cloudro
 <b class="text-danger">The Cloudron CLI tool has to be run on a Laptop or PC, not on the cloud server!</b>
 <br/>
 
-### Linux & OS X
+## Linux & OS X
 Installing the CLI tool requires node.js and npm. The CLI tool can be installed using the following command:
 
 ```
@@ -26,11 +26,11 @@ On OS X, it is known to work with the `openssl` package from homebrew.
 
 See [#14](https://git.cloudron.io/cloudron/cloudron-cli/issues/14) for more information.
 
-### Windows
+## Windows
 
 The CLI tool does not work on Windows.
 
-### Machine subcommands
+## Machine subcommands
 
 You should now be able to run the `cloudron machine help` command in a shell.
 
@@ -45,9 +45,9 @@ ssh         Get remote SSH connection
 backup      Manage Cloudron backups
 ```
 
-## AWS EC2
+# AWS EC2
 
-### Requirements
+## Requirements
 
 To run the Cloudron on AWS, first sign up with [Amazon AWS](https://aws.amazon.com/).
 
@@ -63,7 +63,7 @@ The Cloudron runs best on instances which do not have a burst mode VCPU.
 
 The system disk space usage of a Cloudron is around 15GB. This results in a minimum requirement of about 30GB to give some headroom for app installations and user data.
 
-### Cost Estimation
+## Cost Estimation
 
 Taking the minimal requirements of hosting on EC2, with a backup retention of 2 days, the cost estimation per month is as follows:
 
@@ -78,7 +78,7 @@ Total:      $ 24.75/mth
 
 For custom cost estimation, please use the [AWS Cost Calculator](http://calculator.s3.amazonaws.com/index.html)
 
-### Setup
+## Setup
 
 Open the AWS console and create the required resources:
 
@@ -154,7 +154,7 @@ The supported regions are:
 }
 ```
 
-### Create the Cloudron
+## Create the Cloudron
 
 Create the Cloudron using the `cloudron machine` command:
 
@@ -186,10 +186,10 @@ around the `secret` to prevent accidental shell expansion.
 
 **NOTE**: See `cloudron machine create ec2 --help` for all available options.
 
-## DigitalOcean
+# DigitalOcean
 
 <a id="requirements-1"></a>
-### Requirements
+## Requirements
 
 To run the Cloudron on DigitalOcean, first sign up with [DigitalOcean](https://m.do.co/c/933831d60a1e) (Use this referral link to get $10 credit).
 
@@ -198,7 +198,7 @@ The minimum requirements for a Cloudron depends on the apps installed. The absol
 All backups on DigitalOcean Cloudrons are stored locally at `/var/backups`. We recommend to download backups from time to time to a different location using `cloudron machine backup download`.
 
 <a id="setup-1"></a>
-### Setup
+## Setup
 
 Open the DigitalOcean console and do the following:
 
@@ -213,7 +213,7 @@ Open the DigitalOcean console and do the following:
   * Click on the domain you created and delete the '@' dummy record created above.
 
 <a id="create-the-cloudron-1"></a>
-### Create the Cloudron
+## Create the Cloudron
 
 Create the Cloudron using the `cloudron machine` command:
 
@@ -239,7 +239,7 @@ around the `secret` to prevent accidental shell expansion.
 
 **NOTE**: See `cloudron machine create digitalocean --help` for all available options.
 
-## First time setup
+# First time setup
 
 Visit `https://my.<domain>` to do first time setup of your Cloudron.
 
@@ -251,7 +251,7 @@ already! In this unlikely case, simply delete the instance and create a new Clou
 
 Once the setup is done, you can access the admin page in the future at `https://my.<domain>`.
 
-## Backups
+# Backups
 
 The Cloudron has a backup schedule of creating one once a day. In addition to regularly scheduled backups, a backup is also created if you update the Cloudron or any of the apps (in this case only the app in question will get backed up).
 
@@ -272,7 +272,7 @@ cloudron machine backup list --provider ec2 \
         <domain>
 ```
 
-## Restore
+# Restore
 
 The Cloudron can restore itself from a backup using the following command:
 ```
@@ -291,7 +291,7 @@ cloudron machine create ec2 \
 
 The backup id can be obtained by [listing the backup](/references/selfhosting.html#backups). Other arguments are similar to [Cloudron creation](/references/selfhosting.html#create-the-cloudron). Once the new instance has completely restored, you can safely terminate the old Cloudron from the AWS console.
 
-## Updates
+# Updates
 
 Apps installed from the Cloudron Store are updated automatically every night.
 
@@ -307,7 +307,7 @@ Once the upgrade is complete, you can safely terminate the old EC2 instance.
 
 The Cloudron will always make a complete backup before attempting an update or upgrade. In the unlikely case an update fails, it can be [restored](/references/selfhosting.html#restore).
 
-## SSH
+# SSH
 
 If you want to SSH into your Cloudron, you can
 ```
@@ -319,14 +319,14 @@ If you are unable to connect, verify the following:
 * The SSH Key should be in PEM format. If you are using Putty PPK files, follow [this article](http://stackoverflow.com/questions/2224066/how-to-convert-ssh-keypairs-generated-using-puttygenwindows-into-key-pairs-use) to convert it to PEM format.
 * The SSH Key must have correct permissions (400) set (this is a requirement of the ssh client).
 
-## Mail
+# Mail
 
 Your server's IP plays a big role in how emails from our Cloudron get handled. Spammers frequently abuse public IP addresses
 and as a result your Cloudron might possibly start out with a bad reputation. The good news is that most IP based
 blacklisting services cool down over time. The Cloudron sets up DNS entries for SPF, DKIM, DMARC automatically and
 reputation should be easy to get back.
 
-### Checklist
+## Checklist
 
 * Once your Cloudron is ready, setup a Reverse DNS PTR record to be setup for the `my` subdomain.
 
@@ -341,7 +341,7 @@ of your IP by filling out a form at the DNSBL manager site.
 * Finally, check your spam score at [mail-tester.com](https://www.mail-tester.com/). The Cloudron should get 100%, if not please let
 us know.
 
-## Debugging
+# Debugging
 
 To debug the Cloudron CLI tool:
 
@@ -353,7 +353,7 @@ You can also [SSH](#ssh) into your Cloudron and collect logs.
 * `docker ps` will give you the list of containers. The addon containers are named as `mail`, `postgresql`, `mysql` etc. If you want to get a specific
    containers log output, `journalctl -a CONTAINER_ID=<container_id>`.
 
-## Hotfixing
+# Hotfixing
 
 Hotfixing is the process of patching your Cloudron to run the latest git code. This is useful if require a patch urgently and for testing and development. Note that it is ot possible to hotfix between arbitrary git revisions (for example, if there is some
 db migration involved), so use this with care.
@@ -364,11 +364,11 @@ To hotfix your cloudron, run the following from the `box` code checkout:
     cloudron machine hotfix --ssh-key <key> <domain>
 ```
 
-## Other Providers
+# Other Providers
 
 Currently, we do not support other cloud server provider. Please let us know at [support@cloudron.io](mailto:support@cloudron.io), if you want to see other providers supported.
 
-## Help
+# Help
 
 If you run into any problems, join us in our [chat](https://chat.cloudron.io) or [email us](mailto:support@cloudron.io).
 
