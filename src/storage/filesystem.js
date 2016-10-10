@@ -15,10 +15,12 @@ exports = module.exports = {
 var assert = require('assert'),
     async = require('async'),
     BackupsError = require('../backups.js').BackupsError,
+    checksum = require('checksum'),
     fs = require('fs'),
     path = require('path'),
     safe = require('safetydance'),
-    shell = require('../shell.js');
+    shell = require('../shell.js'),
+    util = require('util');
 
 var FALLBACK_BACKUP_FOLDER = '/var/backups';
 var RMBACKUP_CMD = path.join(__dirname, '../scripts/rmbackup.sh');
@@ -61,7 +63,11 @@ function getRestoreUrl(apiConfig, filename, callback) {
     var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
     var restoreUrl = 'file://' + path.join(backupFolder, filename);
 
-    callback(null, { url: restoreUrl });
+    checksum.file(path.join(backupFolder, filename), function (error, result) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, util.format('Failed to calculate checksum:', error)));
+
+        callback(null, { url: restoreUrl, sha1: result });
+    });
 }
 
 function getAppRestoreConfig(apiConfig, backupId, callback) {

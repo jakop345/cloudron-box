@@ -49,7 +49,7 @@ function getRestoreUrl(apiConfig, filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    // Result: { url: <restoreUrl> }
+    // Result: { url: <restoreUrl>, sha1: <optional> }
     // The resulting url must work with curl as it is passed into start.sh and restoreapp.sh
 
     callback(new Error('not implemented'));

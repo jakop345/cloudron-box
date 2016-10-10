@@ -149,10 +149,11 @@ function getRestoreUrl(backupId, callback) {
             var obj = {
                 id: backupId,
                 url: result.url,
-                backupKey: backupConfig.key
+                backupKey: backupConfig.key,
+                sha1: result.sha1 || null       // not supported by all backends
             };
 
-            debug('getRestoreUrl: id:%s url:%s backupKey:%s', obj.id, obj.url, obj.backupKey);
+            debug('getRestoreUrl: id:%s url:%s backupKey:%s sha1:%s', obj.id, obj.url, obj.backupKey, obj.sha1);
 
             callback(null, obj);
         });
