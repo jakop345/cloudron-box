@@ -1054,17 +1054,15 @@ GET `/api/v1/settings/backup_config` <scope>admin</scope> <scope>internal</scope
 
 Gets the credentials used to upload backups.
 
-This is currently internal API and is documented here for completeness.
-
 Response(200):
 ```
 {
-  "provider": <string>,  // 'caas' or 's3' or 'filesystem'
-  "key": <string>,       // encryption key
-  "region": <string>,    // s3 region
-  "bucket": <string>,    // s3 bucket name
-  "prefix": <string>,    // s3 bucket prefix
-  "token": <string>,     // 'caas' specific token
+  "provider": <string>,    // 'caas' or 's3' or 'filesystem'
+  "key": <string>,         // encryption key
+  "region": <string>,      // s3 region
+  "bucket": <string>,      // s3 bucket name
+  "prefix": <string>,      // s3 bucket prefix
+  "token": <string>,       // 'caas' specific token
   "backupFolder": <string> // 'filesystem' specific backup directory
 }
 ```
@@ -1075,7 +1073,20 @@ POST `/api/v1/settings/backup_config` <scope>admin</scope> <scope>internal</scop
 
 Sets the credentials used to upload backups.
 
-This is currently internal API and is documented here for completeness.
+Request:
+```
+{
+    "provider": "s3|filesystem",
+    "key": <string>,             // backup encryption key
+
+    "bucket": <string>,          // S3: bucket
+    "prefix": <string>,          // S3: prefix in bucket
+    "accessKeyId": <string>,     // S3: access key id
+    "secretAccessKey": <string>, // S3: secret access key
+
+    "backupFolder": <string>     // filesystem: directory inside cloudron to store backups
+}
+```
 
 ### Get DNS Configuration
 
