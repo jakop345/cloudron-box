@@ -239,6 +239,50 @@ around the `secret` to prevent accidental shell expansion.
 
 **NOTE**: See `cloudron machine create digitalocean --help` for all available options.
 
+# Generic
+
+<a id="requirements-2"></a>
+## Requirements
+
+The Cloudron does not support servers other than EC2 and Digital Ocean. However, it is possible to install & run
+the Cloudron easily on any cloud server (Vultr, Linode, Hetzner, OVH etc) with SSH access.
+
+The following requirements must be met:
+* Create a server with Ubuntu 16.04. Do not make any changes to vanilla ubuntu.
+* The minimum requirements for a Cloudron depends on the apps installed. The absolute minimum Droplet required is `1gb`.
+
+**NOTE**: Cloudron created on a generic machine cannot be easily updated or restored.
+
+<a id="setup-2"></a>
+## Setup
+
+1. Setup a wildcard DNS entry (`*.domain.com`) for your domain to point to the IP of the server you have created.
+
+2. If your server does not have a SSH key installed, be sure to add the public key to `/root/.ssh/authorized_keys`.
+
+<a id="create-the-cloudron-2"></a>
+## Create the Cloudron
+
+Create the Cloudron using the `cloudron machine` command:
+
+Note: Only Second Level Domains are supported. For example, `example.com`, `example.co.uk` will work fine. Choosing a domain name at any other level like `cloudron.example.com` will not work.
+
+```
+cloudron machine create generic \
+        --ip <ip> \
+        --fqdn <domain> \
+        --ssh-key <ssh-key-name-or-filepath> \
+        --backup-key <backup-key>
+```
+
+The `--ip` is the public IP of your server.
+
+The `--ssh-key` is the path to a PEM file or the private SSH Key. If your key is located as `~/.ssh/id_rsa_<name>`, you can
+also simply provide `name` as the argument.
+
+The `--backup-key '<secret>'` will be used to encrypt all backups. Keep that secret in a safe place, as you need it to restore your Cloudron from a backup! You can generate a random key using `pwgen -1y 64`. Be sure to put single quotes
+around the `secret` to prevent accidental shell expansion.
+
 # First time setup
 
 Visit `https://my.<domain>` to do first time setup of your Cloudron.
