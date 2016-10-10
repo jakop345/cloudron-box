@@ -14,7 +14,8 @@ exports = module.exports = {
     getAppRestoreConfig: getAppRestoreConfig,
     getLocalFilePath: getLocalFilePath,
 
-    copyObject: copyObject
+    copyObject: copyObject,
+    removeBackup: removeBackup
 };
 
 var assert = require('assert');
@@ -82,6 +83,16 @@ function copyObject(apiConfig, from, to, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof from, 'string');
     assert.strictEqual(typeof to, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    // Result: none
+
+    callback(new Error('not implemented'));
+}
+
+function removeBackup(apiConfig, backupId, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     // Result: none

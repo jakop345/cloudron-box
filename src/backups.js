@@ -17,7 +17,9 @@ exports = module.exports = {
 
     backupBoxAndApps: backupBoxAndApps,
 
-    getLocalDownloadPath: getLocalDownloadPath
+    getLocalDownloadPath: getLocalDownloadPath,
+
+    removeBackup: removeBackup
 };
 
 var addons = require('./addons.js'),
@@ -459,6 +461,25 @@ function getLocalDownloadPath(backupId, callback) {
             if (error) return callback(error);
 
             debug('getLocalDownloadPath: id:%s path:%s', backupId, result.filePath);
+
+            callback(null, result.filePath);
+        });
+    });
+}
+
+function removeBackup(backupId, callback) {
+    assert.strictEqual(typeof backupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    debug('removeBackup: %s', backupId);
+
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        api(backupConfig.provider).removeBackup(backupConfig, backupId, function (error, result) {
+            if (error) return callback(error);
+
+            debug('removeBackup: %s done', backupId);
 
             callback(null, result.filePath);
         });

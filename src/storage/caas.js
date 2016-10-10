@@ -8,7 +8,8 @@ exports = module.exports = {
     getAppRestoreConfig: getAppRestoreConfig,
     getLocalFilePath: getLocalFilePath,
 
-    copyObject: copyObject
+    copyObject: copyObject,
+    removeBackup: removeBackup
 };
 
 var assert = require('assert'),
@@ -158,4 +159,14 @@ function copyObject(apiConfig, from, to, callback) {
         var s3 = new AWS.S3(credentials);
         s3.copyObject(params, callback);
     });
+}
+
+function removeBackup(apiConfig, backupId, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof backupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    // Result: none
+
+    callback(new Error('not implemented'));
 }
