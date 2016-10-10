@@ -13,12 +13,15 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    async = require('async'),
     BackupsError = require('../backups.js').BackupsError,
     fs = require('fs'),
     path = require('path'),
-    safe = require('safetydance');
+    safe = require('safetydance'),
+    shell = require('../shell.js');
 
 var FALLBACK_BACKUP_FOLDER = '/var/backups';
+var RMBACKUP_CMD = path.join(__dirname, '../scripts/rmbackup.sh');
 
 function getBoxBackupDetails(apiConfig, id, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
@@ -120,12 +123,12 @@ function removeBackup(apiConfig, backupId, appBackupIds, callback) {
 
     var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
 
-    var tmp = [backupId].concat(appBackupIds);
-    tmp.forEach(function (id) {
+    async.each([backupId].concat(appBackupIds), function (id, callback) {
         var filePath = path.join(backupFolder, id);
-        var success = safe.fs.unlinkSync(filePath);
-        if (!success) console.error('Unable to remove %s. Not fatal.', filePath, safe.error);
-    });
 
-    callback();
+        shell.sudo('deleteBackup', [ RMBACKUP_CMD, filePath ], function (error) {
+            if (error) console.error('Unable to remove %s. Not fatal.', filePath, safe.error);
+            callback();
+        });
+    }, callback);
 }
