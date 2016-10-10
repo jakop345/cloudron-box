@@ -467,8 +467,9 @@ function getLocalDownloadPath(backupId, callback) {
     });
 }
 
-function removeBackup(backupId, callback) {
+function removeBackup(backupId, appBackupIds, callback) {
     assert.strictEqual(typeof backupId, 'string');
+    assert(util.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
     debug('removeBackup: %s', backupId);
@@ -476,7 +477,7 @@ function removeBackup(backupId, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).removeBackup(backupConfig, backupId, function (error, result) {
+        api(backupConfig.provider).removeBackup(backupConfig, backupId, appBackupIds, function (error, result) {
             if (error) return callback(error);
 
             debug('removeBackup: %s done', backupId);

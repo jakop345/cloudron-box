@@ -112,12 +112,20 @@ function copyObject(apiConfig, from, to, callback) {
     readStream.pipe(writeStream);
 }
 
-function removeBackup(apiConfig, backupId, callback) {
+function removeBackup(apiConfig, backupId, appBackupIds, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof backupId, 'string');
+    assert(Array.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
-    // Result: none
+    var backupFolder = apiConfig.backupFolder || FALLBACK_BACKUP_FOLDER;
 
-    callback(new Error('not implemented'));
+    var tmp = [backupId].concat(appBackupIds);
+    tmp.forEach(function (id) {
+        var filePath = path.join(backupFolder, id);
+        var success = safe.fs.unlinkSync(filePath);
+        if (!success) console.error('Unable to remove %s. Not fatal.', filePath, safe.error);
+    });
+
+    callback();
 }

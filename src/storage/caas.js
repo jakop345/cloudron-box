@@ -161,9 +161,10 @@ function copyObject(apiConfig, from, to, callback) {
     });
 }
 
-function removeBackup(apiConfig, backupId, callback) {
+function removeBackup(apiConfig, backupId, appBackupIds, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof backupId, 'string');
+    assert(Array.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
     // Result: none
