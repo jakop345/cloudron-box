@@ -477,12 +477,12 @@ function removeBackup(backupId, appBackupIds, callback) {
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).removeBackup(backupConfig, backupId, appBackupIds, function (error, result) {
+        api(backupConfig.provider).removeBackup(backupConfig, backupId, appBackupIds, function (error) {
             if (error) return callback(error);
 
             debug('removeBackup: %s done', backupId);
 
-            callback(null, result.filePath);
+            callback(null);
         });
     });
 }
