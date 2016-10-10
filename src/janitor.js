@@ -128,9 +128,17 @@ function cleanupBackups(callback) {
 
             var toCleanup = result.filter(function (backup) { return backup.creationTime.getTime() <= TIME_THRESHOLD; });
 
-            debug('Backups to clean: ', toCleanup);
+            debug('cleanupBackups: about to clean: ', toCleanup);
 
-            callback();
+            async.each(toCleanup, function (backup, callback) {
+                backups.removeBackup(backup.id, backup.dependsOn, function (error) {
+                    if (error) console.error(error);
+
+                    debug('cleanupBackups: %s, %s done', backup.id, backup.dependsOn.join(', '));
+
+                    callback();
+                });
+            }, callback);
         });
     });
 }
