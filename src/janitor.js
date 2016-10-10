@@ -123,6 +123,13 @@ function cleanupBackups(callback) {
 
             debug('Current backups:', result);
 
+            var TIME_OFFSET = 1000 * 60 * 60 * 24 * 5; // 5 days
+            var TIME_THRESHOLD = Date.now() - TIME_OFFSET;
+
+            var toCleanup = result.filter(function (backup) { return backup.creationTime.getTime() <= TIME_THRESHOLD; });
+
+            debug('Backups to clean: ', toCleanup);
+
             callback();
         });
     });
