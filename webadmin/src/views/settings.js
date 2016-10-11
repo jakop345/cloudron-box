@@ -294,6 +294,16 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                             $scope.configureBackup.accessKeyId = '';
                             $scope.configureBackupForm.accessKeyId.$setPristine();
                             $('#inputConfigureBackupAccessKeyId').focus();
+                        } else if (error.message.indexOf('not match the signature') !== -1 ) {
+                            $scope.configureBackup.error.secretAccessKey = true;
+                            $scope.configureBackup.secretAccessKey = '';
+                            $scope.configureBackupForm.secretAccessKey.$setPristine();
+                            $('#inputConfigureBackupSecretAccessKey').focus();
+                        } else if (error.message.toLowerCase() === 'access denied') {
+                            $scope.configureBackup.error.bucket = true;
+                            $scope.configureBackup.bucket = '';
+                            $scope.configureBackupForm.bucket.$setPristine();
+                            $('#inputConfigureBackupBucket').focus();
                         } else {
                             $('#inputConfigureBackupBucket').focus();
                         }
