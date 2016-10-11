@@ -116,15 +116,6 @@ SettingsError.EXTERNAL_ERROR = 'External Error';
 SettingsError.NOT_FOUND = 'Not Found';
 SettingsError.BAD_FIELD = 'Bad Field';
 
-function validateBackupConfig(backupConfig, callback) {
-    assert.strictEqual(typeof backupConfig, 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    if (process.env.BOX_ENV === 'test') return callback();
-
-    backups.testConfig(backupConfig, callback);
-}
-
 function setAutoupdatePattern(pattern, callback) {
     assert.strictEqual(typeof pattern, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -398,7 +389,7 @@ function setBackupConfig(backupConfig, callback) {
     assert.strictEqual(typeof backupConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    validateBackupConfig(backupConfig, function (error) {
+    backups.testConfig(backupConfig, function (error) {
         if (error) return callback(error);
 
         settingsdb.set(exports.BACKUP_CONFIG_KEY, JSON.stringify(backupConfig), function (error) {
