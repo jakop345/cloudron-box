@@ -260,6 +260,11 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         secretAccessKey: '',
 
         show: function () {
+            $scope.configureBackup.bucket = $scope.backupConfig.bucket;
+            $scope.configureBackup.prefix = $scope.backupConfig.prefix;
+            $scope.configureBackup.accessKeyId = $scope.backupConfig.accessKeyId;
+            $scope.configureBackup.secretAccessKey = $scope.backupConfig.secretAccessKey;
+
             $('#configureBackupModal').modal('show');
         },
 
@@ -268,11 +273,11 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             $scope.configureBackup.busy = true;
 
             var backupConfig = {
-                provider: $scope.backupConfig.provider,
-                bucket: $scope.backupConfig.bucket,
-                prefix: $scope.backupConfig.prefix,
-                accessKeyId: $scope.backupConfig.accessKeyId,
-                secretAccessKey: $scope.backupConfig.secretAccessKey
+                provider: $scope.configureBackup.provider,
+                bucket: $scope.configureBackup.bucket,
+                prefix: $scope.configureBackup.prefix,
+                accessKeyId: $scope.configureBackup.accessKeyId,
+                secretAccessKey: $scope.configureBackup.secretAccessKey
             };
 
             Client.setBackupConfig(backupConfig, function (error) {
