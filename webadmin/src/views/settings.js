@@ -259,6 +259,9 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         secretAccessKey: '',
 
         show: function () {
+            $scope.configureBackup.error = {};
+            $scope.configureBackup.busy = false;
+
             $scope.configureBackup.bucket = $scope.backupConfig.bucket;
             $scope.configureBackup.prefix = $scope.backupConfig.prefix;
             $scope.configureBackup.accessKeyId = $scope.backupConfig.accessKeyId;
@@ -268,7 +271,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         },
 
         submit: function () {
-            $scope.configureBackup.error.name = null;
+            $scope.configureBackup.error = {};
             $scope.configureBackup.busy = true;
 
             var backupConfig = {
@@ -283,19 +286,26 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 $scope.configureBackup.busy = false;
 
                 if (error) {
-                    if (error.statusCode === 400) {
-                        $scope.cloudronNameChange.error.name = 'Invalid name';
-                        $scope.cloudronNameChange.name = '';
-                        $('#inputCloudronName').focus();
-                        $scope.cloudronNameChangeForm.password.$setPristine();
+                    if (error.statusCode === 402) {
+                        $scope.configureBackup.error.generic = error.message;
+
+                        if (error.message.indexOf('AWS Access Key Id') !== -1) {
+                            $scope.configureBackup.error.accessKeyId = true;
+                            $scope.configureBackup.accessKeyId = '';
+                            $scope.configureBackupForm.accessKeyId.$setPristine();
+                            $('#inputConfigureBackupAccessKeyId').focus();
+                        } else {
+                            $('#inputConfigureBackupBucket').focus();
+                        }
                     } else {
                         console.error('Unable to change name.', error);
-                        return;
                     }
+
+                    return;
                 }
 
-                $scope.cloudronNameChange.reset();
-                $('#cloudronNameChangeModal').modal('hide');
+                // $scope.configureBackup.reset();
+                $('#configureBackupModal').modal('hide');
 
                 Client.refreshConfig();
             });
