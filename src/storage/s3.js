@@ -163,5 +163,30 @@ function testConfig(apiConfig, callback) {
     if (typeof apiConfig.bucket !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'bucket must be a string'));
     if (typeof apiConfig.prefix !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'prefix must be a string'));
 
-    callback();
+    // attempt to upload and delete a file with new credentials
+    getBackupCredentials(apiConfig, function (error, credentials) {
+        if (error) return callback(error);
+
+        var params = {
+            Bucket: apiConfig.bucket,
+            Key: apiConfig.prefix + '/testfile',
+            Body: 'testcontent'
+        };
+
+        var s3 = new AWS.S3(credentials);
+        s3.putObject(params, function (error) {
+            if (error) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, error.message));
+
+            var params = {
+                Bucket: apiConfig.bucket,
+                Key: apiConfig.prefix + '/testfile'
+            };
+
+            s3.deleteObject(params, function (error) {
+                if (error) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, error.message));
+
+                callback();
+            });
+        });
+    });
 }
