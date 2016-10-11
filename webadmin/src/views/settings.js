@@ -257,6 +257,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         prefix: '',
         accessKeyId: '',
         secretAccessKey: '',
+        region: '',
 
         show: function () {
             $scope.configureBackup.error = {};
@@ -264,6 +265,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
             $scope.configureBackup.bucket = $scope.backupConfig.bucket;
             $scope.configureBackup.prefix = $scope.backupConfig.prefix;
+            $scope.configureBackup.region = $scope.backupConfig.region;
             $scope.configureBackup.accessKeyId = $scope.backupConfig.accessKeyId;
             $scope.configureBackup.secretAccessKey = $scope.backupConfig.secretAccessKey;
 
@@ -281,6 +283,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 accessKeyId: $scope.configureBackup.accessKeyId,
                 secretAccessKey: $scope.configureBackup.secretAccessKey
             };
+
+            if ($scope.configureBackup.region) backupConfig.region = $scope.configureBackup.region;
 
             Client.setBackupConfig(backupConfig, function (error) {
                 $scope.configureBackup.busy = false;
@@ -304,6 +308,12 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                             $scope.configureBackup.bucket = '';
                             $scope.configureBackupForm.bucket.$setPristine();
                             $('#inputConfigureBackupBucket').focus();
+                        } else if (error.message.indexOf('ECONNREFUSED') !== -1) {
+                            $scope.configureBackup.error.generic = 'Unknown region';
+                            $scope.configureBackup.error.region = true;
+                            $scope.configureBackup.region = '';
+                            $scope.configureBackupForm.region.$setPristine();
+                            $('#inputConfigureBackupRegion').focus();
                         } else {
                             $('#inputConfigureBackupBucket').focus();
                         }
@@ -317,7 +327,9 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 // $scope.configureBackup.reset();
                 $('#configureBackupModal').modal('hide');
 
+                // now refresh the ui
                 Client.refreshConfig();
+                getBackupConfig();
             });
         }
     };
