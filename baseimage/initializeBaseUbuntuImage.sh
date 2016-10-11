@@ -115,7 +115,7 @@ WantedBy=multi-user.target
 EOF
 
 echo "=== Setup btrfs data ==="
-if [[ ! grep -q loop.ko /lib/modules/`uname -r`/modules.builtin ]]; then
+if ! grep -q loop.ko /lib/modules/`uname -r`/modules.builtin; then
     # on scaleway loop is not built-in
     echo "loop" >> /etc/modules
     modprobe loop
