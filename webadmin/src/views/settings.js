@@ -252,7 +252,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         busy: false,
         error: {},
 
-        password: '',
         provider: 's3',
         bucket: '',
         prefix: '',

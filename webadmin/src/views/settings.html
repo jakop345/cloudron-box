@@ -123,7 +123,7 @@
                     <fieldset>
                         <p class="has-error text-center" ng-show="configureBackup.error">{{ configureBackup.error.name }}</p>
 
-                        <!-- Route53 -->
+                        <!-- S3 -->
                         <div class="form-group" ng-class="{ 'has-error': false }">
                             <label class="control-label" for="inputConfigureBackupBucket">Bucket name</label>
                             <input type="text" class="form-control" ng-model="configureBackup.bucket" id="inputConfigureBackupBucket" name="bucket" ng-disabled="configureBackup.busy" required autofocus>
@@ -131,21 +131,17 @@
 
                         <div class="form-group" ng-class="{ 'has-error': false }">
                             <label class="control-label" for="inputConfigureBackupPrefix">Prefix</label>
-                            <input type="text" class="form-control" ng-model="configureBackup.prefix" id="inputConfigureBackupPrefix" name="prefix" ng-disabled="configureBackup.busy">
+                            <input type="text" class="form-control" ng-model="configureBackup.prefix" id="inputConfigureBackupPrefix" name="prefix" ng-disabled="configureBackup.busy" required>
                         </div>
 
                         <div class="form-group" ng-class="{ 'has-error': false }">
                             <label class="control-label" for="inputConfigureBackupAccessKeyId">Access Key Id</label>
                             <input type="text" class="form-control" ng-model="configureBackup.accessKeyId" id="inputConfigureBackupAccessKeyId" name="accessKeyId" ng-disabled="configureBackup.busy" required>
                         </div>
+
                         <div class="form-group" ng-class="{ 'has-error': false }">
                             <label class="control-label" for="inputConfigureBackupSecretAccessKey">Secret Access Key</label>
                             <input type="text" class="form-control" ng-model="configureBackup.secretAccessKey" id="inputConfigureBackupSecretAccessKey" name="secretAccessKey" ng-disabled="configureBackup.busy" required>
-                        </div>
-
-                        <div class="form-group" ng-class="{ 'has-error': false }">
-                            <label class="control-label" for="inputConfigureBackupPassword">Provide your password to confirm this action</label>
-                            <input type="password" class="form-control" ng-model="configureBackup.password" id="inputConfigureBackupPassword" name="password" ng-disabled="configureBackup.busy" required>
                         </div>
 
                         <input class="ng-hide" type="submit" ng-disabled="configureBackupForm.$invalid"/>
