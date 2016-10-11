@@ -9,7 +9,9 @@ exports = module.exports = {
     getLocalFilePath: getLocalFilePath,
 
     copyObject: copyObject,
-    removeBackup: removeBackup
+    removeBackup: removeBackup,
+
+    testConfig: testConfig
 };
 
 var assert = require('assert'),
@@ -19,6 +21,7 @@ var assert = require('assert'),
     fs = require('fs'),
     path = require('path'),
     safe = require('safetydance'),
+    SettingsError = require('../settings.js').SettingsError,
     shell = require('../shell.js'),
     util = require('util');
 
@@ -138,4 +141,13 @@ function removeBackup(apiConfig, backupId, appBackupIds, callback) {
             callback();
         });
     }, callback);
+}
+
+function testConfig(apiConfig, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (typeof apiConfig.backupFolder !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'backupFolder must be string'));
+
+    callback();
 }

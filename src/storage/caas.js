@@ -9,13 +9,16 @@ exports = module.exports = {
     getLocalFilePath: getLocalFilePath,
 
     copyObject: copyObject,
-    removeBackup: removeBackup
+    removeBackup: removeBackup,
+
+    testConfig: testConfig
 };
 
 var assert = require('assert'),
     AWS = require('aws-sdk'),
     config = require('../config.js'),
     safe = require('safetydance'),
+    SettingsError = require('../settings.js').SettingsError,
     superagent = require('superagent');
 
 function getBackupCredentials(apiConfig, callback) {
@@ -170,4 +173,13 @@ function removeBackup(apiConfig, backupId, appBackupIds, callback) {
     // Result: none
 
     callback(new Error('not implemented'));
+}
+
+function testConfig(apiConfig, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (config.provider() !== 'caas') return callback(new SettingsError(SettingsError.BAD_FIELD, 'instance provider must be caas'));
+
+    callback();
 }

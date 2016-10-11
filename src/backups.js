@@ -3,6 +3,8 @@
 exports = module.exports = {
     BackupsError: BackupsError,
 
+    testConfig: testConfig,
+
     getPaged: getPaged,
     getByAppIdPaged: getByAppIdPaged,
 
@@ -42,6 +44,7 @@ var addons = require('./addons.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
     settings = require('./settings.js'),
+    SettingsError = require('./settings.js').SettingsError,
     util = require('util'),
     webhooks = require('./webhooks.js');
 
@@ -91,6 +94,16 @@ function api(provider) {
         case 'filesystem': return filesystem;
         default: return null;
     }
+}
+
+function testConfig(backupConfig, callback) {
+    assert.strictEqual(typeof backupConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var func = api(backupConfig.provider);
+    if (!func) return callback(new SettingsError(SettingsError.BAD_FIELD, 'unkown storage provider'));
+
+    api(backupConfig.provider).testConfig(backupConfig, callback);
 }
 
 function getPaged(page, perPage, callback) {

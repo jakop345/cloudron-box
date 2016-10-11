@@ -54,6 +54,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    backups = require('./backups.js'),
     config = require('./config.js'),
     CronJob = require('cron').CronJob,
     DatabaseError = require('./databaseerror.js'),
@@ -114,6 +115,15 @@ SettingsError.INTERNAL_ERROR = 'Internal Error';
 SettingsError.EXTERNAL_ERROR = 'External Error';
 SettingsError.NOT_FOUND = 'Not Found';
 SettingsError.BAD_FIELD = 'Bad Field';
+
+function validateBackupConfig(backupConfig, callback) {
+    assert.strictEqual(typeof backupConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (process.env.BOX_ENV === 'test') return callback();
+
+    backups.testConfig(backupConfig, callback);
+}
 
 function setAutoupdatePattern(pattern, callback) {
     assert.strictEqual(typeof pattern, 'string');
@@ -388,23 +398,16 @@ function setBackupConfig(backupConfig, callback) {
     assert.strictEqual(typeof backupConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (backupConfig.provider === 'caas') {
-        if (config.provider() !== 'caas') return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be caas'));
-    } else if (backupConfig.provider === 'filesystem') {
-        if (typeof backupConfig.backupFolder !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'backupFolder must be string'));
-    } else if (backupConfig.provider === 's3') {
-        if (typeof backupConfig.accessKeyId !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'accessKeyId must be a string'));
-        if (typeof backupConfig.secretAccessKey !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'secretAccessKey must be a string'));
-        if (typeof backupConfig.bucket !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'bucket must be a string'));
-        if (typeof backupConfig.prefix !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'prefix must be a string'));
-    }
+    validateBackupConfig(backupConfig, function (error) {
+        if (error) return callback(error);
 
-    settingsdb.set(exports.BACKUP_CONFIG_KEY, JSON.stringify(backupConfig), function (error) {
-        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+        settingsdb.set(exports.BACKUP_CONFIG_KEY, JSON.stringify(backupConfig), function (error) {
+            if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
-        exports.events.emit(exports.BACKUP_CONFIG_KEY, backupConfig);
+            exports.events.emit(exports.BACKUP_CONFIG_KEY, backupConfig);
 
-        callback(null);
+            callback(null);
+        });
     });
 }
 

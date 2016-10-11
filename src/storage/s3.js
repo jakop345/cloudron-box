@@ -9,12 +9,15 @@ exports = module.exports = {
     getLocalFilePath: getLocalFilePath,
 
     copyObject: copyObject,
-    removeBackup: removeBackup
+    removeBackup: removeBackup,
+
+    testConfig: testConfig
 };
 
 var assert = require('assert'),
     AWS = require('aws-sdk'),
     safe = require('safetydance'),
+    SettingsError = require('../settings.js').SettingsError,
     superagent = require('superagent');
 
 function getBackupCredentials(apiConfig, callback) {
@@ -149,4 +152,16 @@ function removeBackup(apiConfig, backupId, appBackupIds, callback) {
     // Result: none
 
     callback(new Error('not implemented'));
+}
+
+function testConfig(apiConfig, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (typeof apiConfig.accessKeyId !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'accessKeyId must be a string'));
+    if (typeof apiConfig.secretAccessKey !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'secretAccessKey must be a string'));
+    if (typeof apiConfig.bucket !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'bucket must be a string'));
+    if (typeof apiConfig.prefix !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'prefix must be a string'));
+
+    callback();
 }
