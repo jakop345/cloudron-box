@@ -47,7 +47,7 @@ echo "=== Setting up firewall ==="
 iptables -F # flush all chains
 iptables -X # delete all chains
 # default policy for filter table
-iptables -P INPUT DROP
+iptables -P INPUT ACCEPT # accept by default to allow network drives to persist
 iptables -P FORWARD ACCEPT # TODO: disable icc and make this as reject
 iptables -P OUTPUT ACCEPT
 
@@ -69,7 +69,7 @@ iptables -A OUTPUT -o lo -j ACCEPT
 
 # log dropped incoming. keep this at the end of all the rules
 iptables -N LOGGING # new chain
-iptables -A INPUT -j LOGGING # last rule in INPUT chain
+iptables -A INPUT -j LOGGING # last rule in INPUT chain (log and drop)
 iptables -A LOGGING -m limit --limit 2/min -j LOG --log-prefix "IPTables Packet Dropped: " --log-level 7
 iptables -A LOGGING -j DROP
 
@@ -115,6 +115,11 @@ WantedBy=multi-user.target
 EOF
 
 echo "=== Setup btrfs data ==="
+if [[ ! grep -q loop.ko /lib/modules/`uname -r`/modules.builtin ]]; then
+    # on scaleway loop is not built-in
+    echo "loop" >> /etc/modules
+    modprobe loop
+fi
 truncate -s "8192m" "${USER_DATA_FILE}" # 8gb start (this will get resized dynamically by box-setup.service)
 mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
 mkdir -p "${USER_DATA_DIR}"
