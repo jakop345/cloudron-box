@@ -638,3 +638,12 @@
 
 [0.22.0]
 * Rebuild server instances instead of recreating
+
+[0.5.0]
+* Add UI to configure backup location
+* Add DNS backend to make it easy to run on any server with SSH access
+* Update wildcard certificate
+* Fix crash in mail container with SPF plugin
+* Fix postgresql addon to restore correctly
+* Periodically cleanup file system backups
+
