@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Application').controller('MainController', ['$scope', '$route', '$interval', 'Client', 'AppStore', function ($scope, $route, $interval, Client, AppStore) {
+angular.module('Application').controller('MainController', ['$scope', '$route', '$interval', 'Client', function ($scope, $route, $interval, Client) {
     $scope.initialized = false;
     $scope.user = Client.getUserInfo();
     $scope.installedApps = Client.getInstalledApps();
