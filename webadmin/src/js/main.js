@@ -101,6 +101,20 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         });
     };
 
+    function runConfigurationChecks() {
+        // Check if a proper storage backend is configured
+        Client.getBackupConfig(function (error, result) {
+            if (error) return console.error(error);
+
+            if (result.provider === 'filesystem') {
+                var actionScope = $scope.$new(true);
+                actionScope.action = '/#/settings';
+
+                Client.notify('Backup Configuration', 'Please setup an external backup storage to avoid data loss', true, 'info', actionScope);
+            }
+        });
+    }
+
     Client.getStatus(function (error, status) {
         if (error) return $scope.error(error);
 
@@ -160,6 +174,9 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
 
                     // welcome screen
                     if ($scope.user.showTutorial && $scope.user.admin) $scope.startTutorial();
+
+                    // configuration checks
+                    if ($scope.user.admin) runConfigurationChecks();
                 });
             });
         });

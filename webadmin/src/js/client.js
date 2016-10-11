@@ -165,6 +165,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         if (type === 'error') Notification.error(options);
         else if (type === 'success') Notification.success(options);
         else if (type === 'info') Notification.info(options);
+        else if (type === 'warning') Notification.warning(options);
         else throw('Invalid notification type "' + type + '"');
     };
 
