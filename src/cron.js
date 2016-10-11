@@ -109,7 +109,7 @@ function recreateJobs(unusedTimeZone, callback) {
 
         if (gCleanupBackupsJob) gCleanupBackupsJob.stop();
         gCleanupBackupsJob = new CronJob({
-            cronTime: '00 */1 * * * *', // every 30 minutes
+            cronTime: '00 */30 * * * *', // every 30 minutes
             onTick: janitor.cleanupBackups,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
