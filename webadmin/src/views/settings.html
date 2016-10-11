@@ -154,7 +154,7 @@
             </div>
             <div class="modal-footer ">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-outline btn-success pull-right" ng-click="submit()" ng-disabled="configureBackupForm.$invalid || configureBackup.busy">
+                <button type="submit" class="btn btn-outline btn-success pull-right" ng-click="configureBackup.submit()" ng-disabled="configureBackupForm.$invalid || configureBackup.busy">
                     <i class="fa fa-spinner fa-pulse" ng-show="configureBackup.busy"></i><span>Save</span>
                 </button>
             </div>
