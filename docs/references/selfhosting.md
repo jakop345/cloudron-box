@@ -245,7 +245,7 @@ around the `secret` to prevent accidental shell expansion.
 ## Requirements
 
 The Cloudron does not support servers other than EC2 and Digital Ocean. However, it is possible to install & run
-the Cloudron easily on any cloud server (Vultr, Linode, Hetzner, OVH etc) with SSH access.
+the Cloudron easily on any cloud server (Vultr, Linode, Hetzner, OVH, etc) with SSH access.
 
 The following requirements must be met:
 * Create a server with Ubuntu 16.04. Do not make any changes to vanilla ubuntu.
@@ -256,9 +256,15 @@ The following requirements must be met:
 <a id="setup-2"></a>
 ## Setup
 
-1. Setup a wildcard DNS entry (`*.domain.com`) for your domain to point to the IP of the server you have created.
+* Setup a wildcard DNS entry (`*.domain.com`) for your domain to point to the IP of the server you have created.
 
-2. If your server does not have a SSH key installed, be sure to add the public key to `/root/.ssh/authorized_keys`.
+### Linode
+
+Since Linode does not manage SSH keys, be sure to add the public key to `/root/.ssh/authorized_keys`.
+
+### Scaleway
+
+* Use the [boot script](https://github.com/scaleway-community/scaleway-docker/issues/2) to enable memory accouting.
 
 <a id="create-the-cloudron-2"></a>
 ## Create the Cloudron
