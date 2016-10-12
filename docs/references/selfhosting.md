@@ -4,6 +4,20 @@ The Cloudron platform can be installed on your own cloud server. The self hosted
 
 If you have any questions, join us at our [chat](https://chat.cloudron.io).
 
+# Understand
+
+Before we install anything, it is helpful to understand what the Cloudron is and what exactly it is that you are installing.
+
+The Cloudron intends to make self-hosting effortless. It takes care of everything - updates, backups, firewall, dns setup,
+certificate management, just about everything. Once you install it on your server, you will never have to ssh into it again. There is a web interface to manage the users and apps on the server.
+
+This approach to self-hosting means that the Cloudron takes complete ownership of your server and
+you should not use your server for anything other than what is allowed using the web interface. For example, 
+currently the Cloudron is based on  Ubunutu 16. When Ubuntu 18 is released, Cloudron will help you migrate your
+apps and data from 16 to 18 easily. Anything you run or install on the server beside the Cloudron will be lost
+after an update. If you want to run anything on your server, it's best to make it a Cloudron app. This way the app 
+will persist across updates.
+
 # CLI Tool
 
 The [Cloudron tool](https://git.cloudron.io/cloudron/cloudron-cli) is used for managing a Cloudron. It has a `machine`
@@ -384,6 +398,8 @@ reputation should be easy to get back.
 
     * For Digital Ocean this is automatic. Digital Ocean sets up a PTR record based on the droplet's name. For this reason, it is important that you do not rename your server and keep it at `my.<domain>`.
 
+    * For Scaleway, edit your security group to allow email. You can also set a PTR record on the interface with your
+    `my.<domain>`.
 
 * Check if your IP is listed in any DNSBL list [here](http://multirbl.valli.org/). In most cases, you can apply for removal
 of your IP by filling out a form at the DNSBL manager site.
