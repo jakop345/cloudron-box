@@ -269,7 +269,7 @@ Acme.prototype.waitForChallenge = function (challenge, callback) {
                 return retryCallback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Bad response code:' + result.statusCode));
             }
 
-            debug('waitForChallenge: status is "%s"', result.body.status);
+            debug('waitForChallenge: status is "%s %j', result.body.status, result.body);
 
             if (result.body.status === 'pending') return retryCallback(new AcmeError(AcmeError.NOT_COMPLETED));
             else if (result.body.status === 'valid') return retryCallback();
