@@ -19,6 +19,7 @@ var apps = require('./apps.js'),
     fs = require('fs'),
     hat = require('hat'),
     infra = require('./infra_version.js'),
+    os = require('os'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     settings = require('./settings.js'),
@@ -149,6 +150,7 @@ function startMysql(callback) {
     const tag = infra.images.mysql.tag;
     const dataDir = paths.DATA_DIR;
     const rootPassword = hat(8 * 128);
+    const memoryLimit = (1 + Math.round(os.totalmem()/(1024*1024*1024)/4)) * 256;
 
     if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh',
             'MYSQL_ROOT_PASSWORD=' + rootPassword +'\nMYSQL_ROOT_HOST=172.18.0.1', 'utf8')) {
@@ -158,8 +160,8 @@ function startMysql(callback) {
     const cmd = `docker run --restart=always -d --name="mysql" \
                 --net cloudron \
                 --net-alias mysql \
-                -m 256m \
-                --memory-swap 512m \
+                -m ${memoryLimit}m \
+                --memory-swap ${memoryLimit * 2}m \
                 -v "${dataDir}/mysql:/var/lib/mysql" \
                 -v "${dataDir}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:ro" \
                 --read-only -v /tmp -v /run "${tag}"`;
@@ -173,6 +175,7 @@ function startPostgresql(callback) {
     const tag = infra.images.postgresql.tag;
     const dataDir = paths.DATA_DIR;
     const rootPassword = hat(8 * 128);
+    const memoryLimit = (1 + Math.round(os.totalmem()/(1024*1024*1024)/4)) * 256;
 
     if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/postgresql_vars.sh', 'POSTGRESQL_ROOT_PASSWORD=' + rootPassword, 'utf8')) {
         return callback(new Error('Could not create postgresql var file:' + safe.error.message));
@@ -181,8 +184,8 @@ function startPostgresql(callback) {
     const cmd = `docker run --restart=always -d --name="postgresql" \
                 --net cloudron \
                 --net-alias postgresql \
-                -m 256m \
-                --memory-swap 512m \
+                -m ${memoryLimit}m \
+                --memory-swap ${memoryLimit * 2}m \
                 -v "${dataDir}/postgresql:/var/lib/postgresql" \
                 -v "${dataDir}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:ro" \
                 --read-only -v /tmp -v /run "${tag}"`;
@@ -196,6 +199,7 @@ function startMongodb(callback) {
     const tag = infra.images.mongodb.tag;
     const dataDir = paths.DATA_DIR;
     const rootPassword = hat(8 * 128);
+    const memoryLimit = (1 + Math.round(os.totalmem()/(1024*1024*1024)/4)) * 200;
 
     if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/mongodb_vars.sh', 'MONGODB_ROOT_PASSWORD=' + rootPassword, 'utf8')) {
         return callback(new Error('Could not create mongodb var file:' + safe.error.message));
@@ -204,8 +208,8 @@ function startMongodb(callback) {
     const cmd = `docker run --restart=always -d --name="mongodb" \
                 --net cloudron \
                 --net-alias mongodb \
-                -m 100m \
-                --memory-swap 200m \
+                -m ${memoryLimit}m \
+                --memory-swap ${memoryLimit * 2}m \
                 -v "${dataDir}/mongodb:/var/lib/mongodb" \
                 -v "${dataDir}/addons/mongodb_vars.sh:/etc/mongodb_vars.sh:ro" \
                 --read-only -v /tmp -v /run "${tag}"`;
@@ -225,6 +229,7 @@ function startMail(callback) {
     const dataDir = paths.DATA_DIR;
     const fqdn = config.fqdn();
     const mailFqdn = config.adminFqdn();
+    const memoryLimit = (1 + Math.round(os.totalmem()/(1024*1024*1024)/4)) * 128;
 
     // TODO: watch for a signal here should the certificate path change. Note that haraka reloads
     // config automatically if the contents of the certificate changes (eg, renawal).
@@ -241,8 +246,8 @@ function startMail(callback) {
             const cmd = `docker run --restart=always -d --name="mail" \
                         --net cloudron \
                         --net-alias mail \
-                        -m 256m \
-                        --memory-swap 256m \
+                        -m ${memoryLimit}m \
+                        --memory-swap ${memoryLimit * 2}m \
                         -e "MAIL_DOMAIN=${fqdn}" \
                         -e "MAIL_SERVER_NAME=${mailFqdn}" \
                         -v "${dataDir}/box/mail:/app/data" \
