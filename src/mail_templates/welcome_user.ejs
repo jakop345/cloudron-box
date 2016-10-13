@@ -4,12 +4,15 @@ Hi <%= user.displayName || user.username || user.alternateEmail || user.email %>
 
 Welcome to <%= cloudronName %>!
 
-To get started, activate your account by visiting the following page:
+To get started, activate your account:
 <%= setupLink %>
 
 <% if (invitor && invitor.email) { %>
-Your <%= invitor.email %>
+You are receiving this email because you were invited by <%= invitor.email %>.
 <% } %>
+
+
+Powered by Cloudron.io
 
 <% } else { %>
 
@@ -22,10 +25,23 @@ Your <%= invitor.email %>
 <h2>Welcome to <%= cloudronName %>!</h2>
 
 <p>
-<% if (invitor && invitor.email) { %>
-    You got invited by <%= invitor.email %>.<br/>
-<% } %>
     To get started, <a href="<%= setupLink %>">activate your account</a>.
 </p>
 
+<br/>
+<br/>
+
+<div style="font-size: 10px; color: #333333; background: #ffffff;">
+    Powered by <a href="https://cloudron.io">Cloudron</a>.
+
+    <br/>
+
+    <% if (invitor && invitor.email) { %>
+        You are receiving this email because you were invited by <%= invitor.email %>.
+    <% } %>
+</div>
+
 <% } %>
+
+</center>
+
