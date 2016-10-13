@@ -13,6 +13,7 @@ var appdb = require('../../appdb.js'),
     superagent = require('superagent'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
+    settingsdb = require('../../settingsdb.js'),
     nock = require('nock');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
@@ -55,7 +56,7 @@ function setup(done) {
         },
 
         function createSettings(callback) {
-            settings.setBackupConfig({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' }, callback);
+            settingsdb.set(settings.BACKUP_CONFIG_KEY, JSON.stringify({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' }), callback);
         }
     ], done);
 }
