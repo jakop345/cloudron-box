@@ -14,6 +14,8 @@ var async = require('async'),
     os = require('os'),
     superagent = require('superagent'),
     server = require('../../server.js'),
+    settings = require('../../settings.js'),
+    settingsdb = require('../../settingsdb.js'),
     shell = require('../../shell.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
@@ -27,7 +29,11 @@ function setup(done) {
     config._reset();
     config.set('version', '0.5.0');
     config.set('fqdn', 'localhost');
-    server.start(done);
+
+    server.start(function (error) {
+        if (error) return done(error);
+        settingsdb.set(settings.BACKUP_CONFIG_KEY, JSON.stringify({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' }), done);
+    });
 }
 
 function cleanup(done) {
@@ -285,19 +291,7 @@ describe('Cloudron', function () {
 
                         callback();
                     });
-                },
-
-                function setupBackupConfig(callback) {
-                    superagent.post(SERVER_URL + '/api/v1/settings/backup_config')
-                           .send({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' })
-                           .query({ access_token: token })
-                           .end(function (error, result) {
-                        expect(result.statusCode).to.equal(200);
-
-                        callback();
-                    });
                 }
-
             ], done);
         });
 
