@@ -16,6 +16,8 @@ var appdb = require('../appdb.js'),
     groupdb = require('../groupdb.js'),
     groups = require('../groups.js'),
     hat = require('hat'),
+    settings = require('../settings.js'),
+    settingsdb = require('../settingsdb.js'),
     userdb = require('../userdb.js');
 
 describe('Apps', function () {
@@ -124,7 +126,8 @@ describe('Apps', function () {
             groups.addMember.bind(null, GROUP_0.id, USER_1.id),
             appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0),
             appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1),
-            appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2)
+            appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2),
+            settingsdb.set.bind(null, settings.BACKUP_CONFIG_KEY, JSON.stringify({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' }))
         ], done);
     });
 
