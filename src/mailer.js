@@ -251,18 +251,24 @@ function sendInvite(user, invitor) {
             user: user,
             webadminUrl: config.adminOrigin(),
             setupLink: config.adminOrigin() + '/api/v1/session/account/setup.html?reset_token=' + user.resetToken,
-            format: 'text',
             fqdn: config.fqdn(),
             invitor: invitor,
             cloudronName: cloudronName,
             cloudronAvatarUrl: config.adminOrigin() + '/api/v1/cloudron/avatar'
         };
 
+        var templateDataText = JSON.parse(JSON.stringify(templateData));
+        templateDataText.format = 'text';
+
+        var templateDataHTML = JSON.parse(JSON.stringify(templateData));
+        templateDataHTML.format = 'html';
+
         var mailOptions = {
             from: mailConfig().from,
             to: user.alternateEmail || user.email,
             subject: util.format('Welcome to %s', cloudronName),
-            text: render('welcome_user.ejs', templateData)
+            text: render('welcome_user.ejs', templateDataText),
+            html: render('welcome_user.ejs', templateDataHTML)
         };
 
         enqueue(mailOptions);
