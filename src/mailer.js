@@ -39,12 +39,12 @@ var assert = require('assert'),
     dns = require('native-dns'),
     docker = require('./docker.js').connection,
     ejs = require('ejs'),
-    fs = require('fs'),
     ini = require('ini'),
     nodemailer = require('nodemailer'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    settings = require('./settings.js'),
     smtpTransport = require('nodemailer-smtp-transport'),
     users = require('./user.js'),
     util = require('util'),
@@ -243,23 +243,32 @@ function sendInvite(user, invitor) {
 
     debug('Sending invite mail');
 
-    var templateData = {
-        user: user,
-        webadminUrl: config.adminOrigin(),
-        setupLink: config.adminOrigin() + '/api/v1/session/account/setup.html?reset_token=' + user.resetToken,
-        format: 'text',
-        fqdn: config.fqdn(),
-        invitor: invitor
-    };
+    settings.getCloudronName(function (error, cloudronName) {
+        if (error) {
+            console.error(error);
+            cloudronName = 'Cloudron';
+        }
 
-    var mailOptions = {
-        from: mailConfig().from,
-        to: user.alternateEmail || user.email,
-        subject: util.format('Welcome to Cloudron %s', config.fqdn()),
-        text: render('welcome_user.ejs', templateData)
-    };
+        var templateData = {
+            user: user,
+            webadminUrl: config.adminOrigin(),
+            setupLink: config.adminOrigin() + '/api/v1/session/account/setup.html?reset_token=' + user.resetToken,
+            format: 'text',
+            fqdn: config.fqdn(),
+            invitor: invitor,
+            cloudronName: cloudronName,
+            cloudronAvatarUrl: config.adminOrigin() + '/api/v1/cloudron/avatar'
+        };
 
-    enqueue(mailOptions);
+        var mailOptions = {
+            from: mailConfig().from,
+            to: user.alternateEmail || user.email,
+            subject: util.format('Welcome to %s', cloudronName),
+            text: render('welcome_user.ejs', templateData)
+        };
+
+        enqueue(mailOptions);
+    });
 }
 
 function userAdded(user, inviteSent) {
