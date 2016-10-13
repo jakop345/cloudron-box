@@ -504,7 +504,8 @@ function install(data, auditSource, callback) {
                 oauthProxy: oauthProxy
             };
 
-            mailboxdb.add(location + '.app', appId, mailboxdb.TYPE_APP, function (error) {
+            var from = (location ? location : manifest.title.toLowerCase().replace(/[^a-zA-Z0-9]/g, '')) + '.app';
+            mailboxdb.add(from, appId, mailboxdb.TYPE_APP, function (error) {
                 if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS, 'Mailbox already exists'));
                 if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -829,7 +830,8 @@ function clone(appId, data, auditSource, callback) {
                     lastBackupId: backupId
                 };
 
-                mailboxdb.add(location + '.app', newAppId, mailboxdb.TYPE_APP, function (error) {
+                var from = (location ? location : manifest.title.toLowerCase().replace(/[^a-zA-Z0-9]/g, '')) + '.app';
+                mailboxdb.add(from, newAppId, mailboxdb.TYPE_APP, function (error) {
                     if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS, 'Mailbox already exists'));
                     if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
