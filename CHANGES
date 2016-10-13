@@ -646,4 +646,6 @@
 * Fix crash in mail container with SPF plugin
 * Fix postgresql addon to restore correctly
 * Periodically cleanup file system backups
+* Improve invitation emails
+* Fix bug where mailbox name was generated incorrectly for nake domain (#81)
 
