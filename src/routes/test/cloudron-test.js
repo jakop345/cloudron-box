@@ -15,7 +15,6 @@ var async = require('async'),
     superagent = require('superagent'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
-    settingsdb = require('../../settingsdb.js'),
     shell = require('../../shell.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
@@ -32,7 +31,7 @@ function setup(done) {
 
     server.start(function (error) {
         if (error) return done(error);
-        settingsdb.set(settings.BACKUP_CONFIG_KEY, JSON.stringify({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' }), done);
+        settings.setBackupConfig({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' }, done);
     });
 }
 

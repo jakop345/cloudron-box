@@ -7,8 +7,7 @@
 
 var database = require('../database.js'),
     expect = require('expect.js'),
-    settings = require('../settings.js'),
-    settingsdb = require('../settingsdb.js');
+    settings = require('../settings.js');
 
 function setup(done) {
     // ensure data/config/mount paths
@@ -16,7 +15,7 @@ function setup(done) {
         expect(error).to.be(null);
 
         // a cloudron must have a backup config to startup
-        settingsdb.set(settings.BACKUP_CONFIG_KEY, JSON.stringify({ provider: 'caas', token: 'foo', key: 'key'}), function (error) {
+        settings.setBackupConfig({ provider: 'caas', token: 'foo', key: 'key'}, function (error) {
             expect(error).to.be(null);
             done();
         });
