@@ -334,16 +334,36 @@ function passwordReset(user) {
 
     debug('Sending mail for password reset for user %s.', user.email, user.id);
 
-    var resetLink = config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token=' + user.resetToken;
+    settings.getCloudronName(function (error, cloudronName) {
+        if (error) {
+            console.error(error);
+            cloudronName = 'Cloudron';
+        }
 
-    var mailOptions = {
-        from: mailConfig().from,
-        to: user.alternateEmail || user.email,
-        subject: 'Password Reset Request',
-        text: render('password_reset.ejs', { fqdn: config.fqdn(), user: user, resetLink: resetLink, format: 'text' })
-    };
+        var templateData = {
+            fqdn: config.fqdn(),
+            user: user,
+            resetLink: config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token=' + user.resetToken,
+            cloudronName: cloudronName,
+            cloudronAvatarUrl: config.adminOrigin() + '/api/v1/cloudron/avatar'
+        };
 
-    enqueue(mailOptions);
+        var templateDataText = JSON.parse(JSON.stringify(templateData));
+        templateDataText.format = 'text';
+
+        var templateDataHTML = JSON.parse(JSON.stringify(templateData));
+        templateDataHTML.format = 'html';
+
+        var mailOptions = {
+            from: mailConfig().from,
+            to: user.alternateEmail || user.email,
+            subject: 'Password Reset Request',
+            text: render('password_reset.ejs', templateDataText),
+            html: render('password_reset.ejs', templateDataHTML)
+        };
+
+        enqueue(mailOptions);
+    });
 }
 
 function appDied(app) {
