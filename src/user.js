@@ -600,8 +600,9 @@ function getOwner(callback) {
     });
 }
 
-function sendInvite(userId, callback) {
+function sendInvite(userId, options, callback) {
     assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     userdb.get(userId, function (error, userObject) {
@@ -614,7 +615,7 @@ function sendInvite(userId, callback) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            mailer.sendInvite(userObject, null);
+            mailer.sendInvite(userObject, options.invitor || null);
 
             callback(null, userObject.resetToken);
         });
