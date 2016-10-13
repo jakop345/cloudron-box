@@ -15,20 +15,17 @@ Your <%= invitor.email %>
 
 <center>
 
+<img src="<%= cloudronAvatarUrl %>"/>
+
 <h3>Hi <%= user.displayName || user.username || user.alternateEmail || user.email %>,</h3>
 
-<img src="<%= cloudronAvatarUrl %>"/>
-<h1>Welcome to <%= cloudronName %>!</h1>
+<h2>Welcome to <%= cloudronName %>!</h2>
 
 <p>
-    To get started, activate your account by visiting the following page:<br/>
-    <a href="<%= setupLink %>"><%= setupLink %></a>
-</p>
-
-<p>
-    <% if (invitor && invitor.email) { %>
-    Your <%= invitor.email %>
-    <% } %>
+<% if (invitor && invitor.email) { %>
+    You got invited by <%= invitor.email %>.<br/>
+<% } %>
+    To get started, <a href="<%= setupLink %>">activate your account</a>.
 </p>
 
 <% } %>

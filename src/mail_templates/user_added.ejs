@@ -2,9 +2,7 @@
 
 Dear Admin,
 
-User with email <%= user.alternateEmail || user.email %> was added in the Cloudron at <%= fqdn %>.
-
-You are receiving this email because you are an Admin of the Cloudron at <%= fqdn %>.
+User with email <%= user.alternateEmail || user.email %> was added to your <%= cloudronName %> Cloudron.
 
 <% if (inviteLink) { %>
 As requested, this user has not been sent an invitation email.
@@ -13,9 +11,6 @@ To set a password and perform any configuration on behalf of the user, please us
 <%= inviteLink %>
 
 <% } %>
-
-Thank you,
-User Manager
 
 <% } else { %>
 
