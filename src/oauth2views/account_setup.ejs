@@ -17,7 +17,7 @@ app.controller('Controller', ['$scope', function ($scope) {
 
 <center>
     <br/>
-    <h4>Hello <%= (user && user.email) ? user.email : '' %>, welcome to your Cloudron.</h4>
+    <h4>Hello <%= (user && user.email) ? user.email : '' %>, welcome to <%= cloudronName %>.</h4>
     <h2>Setup your account and password.</h2>
 </center>
 
