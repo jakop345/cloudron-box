@@ -18,6 +18,7 @@ var appdb = require('../appdb'),
     passport = require('passport'),
     querystring = require('querystring'),
     session = require('connect-ensure-login'),
+    settings = require('../settings'),
     tokendb = require('../tokendb'),
     url = require('url'),
     user = require('../user.js'),
@@ -207,11 +208,22 @@ function loginForm(req, res) {
         });
     }
 
+    function renderBuiltIn() {
+        settings.getCloudronName(function (error, cloudronName) {
+            if (error) {
+                console.error(error);
+                cloudronName = 'Cloudron';
+            }
+
+            render(cloudronName, '/api/v1/cloudron/avatar');
+        });
+    }
+
     clients.get(u.query.client_id, function (error, result) {
         if (error) return sendError(req, res, 'Unknown OAuth client');
 
         switch (result.type) {
-            case clients.TYPE_BUILT_IN: return render(result.appId, '/api/v1/cloudron/avatar');
+            case clients.TYPE_BUILT_IN: return renderBuiltIn();
             case clients.TYPE_EXTERNAL: return render(result.appId, '/api/v1/cloudron/avatar');
             case clients.TYPE_SIMPLE_AUTH: return sendError(req, res, 'Unknown OAuth client');
             default: break;
