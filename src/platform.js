@@ -150,7 +150,7 @@ function startMysql(callback) {
     const dataDir = paths.DATA_DIR;
     const rootPassword = hat(8 * 128);
 
-    if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh', 
+    if (!safe.fs.writeFileSync(paths.DATA_DIR + '/addons/mysql_vars.sh',
             'MYSQL_ROOT_PASSWORD=' + rootPassword +'\nMYSQL_ROOT_HOST=172.18.0.1', 'utf8')) {
         return callback(new Error('Could not create mysql var file:' + safe.error.message));
     }
@@ -241,7 +241,7 @@ function startMail(callback) {
             const cmd = `docker run --restart=always -d --name="mail" \
                         --net cloudron \
                         --net-alias mail \
-                        -m 128m \
+                        -m 256m \
                         --memory-swap 256m \
                         -e "MAIL_DOMAIN=${fqdn}" \
                         -e "MAIL_SERVER_NAME=${mailFqdn}" \
