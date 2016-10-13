@@ -392,11 +392,11 @@ function setBackupConfig(backupConfig, callback) {
     backups.testConfig(backupConfig, function (error) {
         if (error) return callback(error);
 
-        settingsdb.get(exports.BACKUP_CONFIG_KEY, function (error, result) {
-            if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+        getBackupConfig(function (error, result) {
+            if (error) return callback(error);
 
             // preserve the backup key!
-            backupConfig.key = JSON.parse(result).key;
+            backupConfig.key = backupConfig.key || result.key;
 
             settingsdb.set(exports.BACKUP_CONFIG_KEY, JSON.stringify(backupConfig), function (error) {
                 if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
