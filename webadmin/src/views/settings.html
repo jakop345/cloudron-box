@@ -13,7 +13,7 @@
                 <br/>
 
                 <div class="grid">
-                    <div class="item" ng-repeat="avatar in avatarChange.availableAvatars" style="background-image: url('{{avatar.data || avatar.url}}');" ng-click="setPreviewAvatar(avatar)"></div>
+                    <div class="item" ng-repeat="avatar in avatarChange.availableAvatars" style="background-image: url('{{avatar.data || avatar.url}}');" ng-click="avatarChange.setPreviewAvatar(avatar)"></div>
                     <div class="item add" ng-click="avatarChange.showCustomAvatarSelector()"></div>
                 </div>
             </div>
