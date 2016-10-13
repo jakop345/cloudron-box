@@ -357,7 +357,7 @@ function passwordReset(user) {
         var mailOptions = {
             from: mailConfig().from,
             to: user.alternateEmail || user.email,
-            subject: 'Password Reset Request',
+            subject: cloudronName + ': Password Reset',
             text: render('password_reset.ejs', templateDataText),
             html: render('password_reset.ejs', templateDataHTML)
         };
