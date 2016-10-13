@@ -286,16 +286,29 @@ function userAdded(user, inviteSent) {
 
         adminEmails = _.difference(adminEmails, [ user.email ]);
 
-        var inviteLink = inviteSent ? null : config.adminOrigin() + '/api/v1/session/account/setup.html?reset_token=' + user.resetToken;
+        settings.getCloudronName(function (error, cloudronName) {
+            if (error) {
+                console.error(error);
+                cloudronName = 'Cloudron';
+            }
 
-        var mailOptions = {
-            from: mailConfig().from,
-            to: adminEmails.join(', '),
-            subject: util.format('%s added in Cloudron %s', user.alternateEmail || user.email, config.fqdn()),
-            text: render('user_added.ejs', { fqdn: config.fqdn(), user: user, inviteLink: inviteLink, format: 'text' }),
-        };
+            var templateData = {
+                fqdn: config.fqdn(),
+                user: user,
+                inviteLink: inviteSent ? null : config.adminOrigin() + '/api/v1/session/account/setup.html?reset_token=' + user.resetToken,
+                format: 'text',
+                cloudronName: cloudronName
+            };
 
-        enqueue(mailOptions);
+            var mailOptions = {
+                from: mailConfig().from,
+                to: adminEmails.join(', '),
+                subject: util.format('%s: user %s added', cloudronName, user.alternateEmail || user.email),
+                text: render('user_added.ejs', templateData)
+            };
+
+            enqueue(mailOptions);
+        });
     });
 }
 
