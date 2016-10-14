@@ -35,8 +35,9 @@ var addons = require('./addons.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:backups'),
     eventlog = require('./eventlog.js'),
-    locker = require('./locker.js'),
     filesystem = require('./storage/filesystem.js'),
+    locker = require('./locker.js'),
+    mailer = require('./mailer.js'),
     path = require('path'),
     paths = require('./paths.js'),
     progress = require('./progress.js'),
@@ -418,7 +419,10 @@ function backup(auditSource, callback) {
     progress.set(progress.BACKUP, 0, 'Starting'); // ensure tools can 'wait' on progress
 
     backupBoxAndApps(auditSource, function (error) { // start the backup operation in the background
-        if (error) debug('backup failed.', error);
+        if (error) {
+            debug('backup failed.', error);
+            mailer.backupFailed(JSON.stringify(error));
+        }
 
         locker.unlock(locker.OP_FULL_BACKUP);
     });

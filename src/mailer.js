@@ -17,6 +17,7 @@ exports = module.exports = {
     appDied: appDied,
 
     outOfDiskSpace: outOfDiskSpace,
+    backupFailed: backupFailed,
 
     certificateRenewalError: certificateRenewalError,
 
@@ -435,6 +436,21 @@ function outOfDiskSpace(message) {
         };
 
         sendMails([ mailOptions ]);
+    });
+}
+
+function backupFailed(message) {
+    getAdminEmails(function (error, adminEmails) {
+        if (error) return console.log('Error getting admins', error);
+
+        var mailOptions = {
+            from: mailConfig().from,
+            to: config.provider() === 'caas' ? 'support@cloudron.io' : adminEmails.concat('support@cloudron.io').join(', '),
+            subject: util.format('[%s] Failed to backup', config.fqdn()),
+            text: render('backup_failed.ejs', { fqdn: config.fqdn(), message: message, format: 'text' })
+        };
+
+        enqueue(mailOptions);
     });
 }
 
