@@ -959,7 +959,7 @@ describe('User', function () {
         after(cleanupUsers);
 
         it('fails for unknown user', function (done) {
-            user.sendInvite('unknown user', function (error) {
+            user.sendInvite('unknown user', { }, function (error) {
                 expect(error).to.be.a(UserError);
                 expect(error.reason).to.equal(UserError.NOT_FOUND);
 
@@ -968,7 +968,7 @@ describe('User', function () {
         });
 
         it('succeeds', function (done) {
-            user.sendInvite(userObject.id, function (error) {
+            user.sendInvite(userObject.id, { }, function (error) {
                 expect(error).to.eql(null);
                 checkMails(1, done);
             });
