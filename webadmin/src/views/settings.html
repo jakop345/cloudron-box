@@ -283,7 +283,7 @@
             <span class="text-muted">Provider</span>
         </div>
         <div class="col-xs-6 text-right">
-            <span>{{ backupConfig.provider }}</span>
+            <span>{{ backupConfig.provider === 'caas' ? 'cloudron.io' : backupConfig.provider }}</span>
         </div>
     </div>
     <div class="row" ng-show="backupConfig.provider !== 'caas' || config.isDev">
