@@ -2746,27 +2746,20 @@
       "from": "underscore@>=1.7.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.8.3.tgz"
     },
-    "ursa-purejs": {
-      "version": "0.0.3",
-      "from": "ursa-purejs@*",
-      "resolved": "https://registry.npmjs.org/ursa-purejs/-/ursa-purejs-0.0.3.tgz",
+    "ursa": {
+      "version": "0.9.4",
+      "from": "ursa@>=0.9.3 <0.10.0",
+      "resolved": "https://registry.npmjs.org/ursa/-/ursa-0.9.4.tgz",
       "dependencies": {
-        "node-rsa": {
-          "version": "0.2.30",
-          "from": "node-rsa@>=0.2.23 <0.3.0",
-          "resolved": "https://registry.npmjs.org/node-rsa/-/node-rsa-0.2.30.tgz",
-          "dependencies": {
-            "asn1": {
-              "version": "0.2.3",
-              "from": "asn1@0.2.3",
-              "resolved": "https://registry.npmjs.org/asn1/-/asn1-0.2.3.tgz"
-            },
-            "lodash": {
-              "version": "3.3.0",
-              "from": "lodash@3.3.0",
-              "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.3.0.tgz"
-            }
-          }
+        "bindings": {
+          "version": "1.2.1",
+          "from": "bindings@>=1.2.1 <2.0.0",
+          "resolved": "https://registry.npmjs.org/bindings/-/bindings-1.2.1.tgz"
+        },
+        "nan": {
+          "version": "2.4.0",
+          "from": "nan@>=2.3.3 <3.0.0",
+          "resolved": "https://registry.npmjs.org/nan/-/nan-2.4.0.tgz"
         }
       }
     },

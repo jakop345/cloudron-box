@@ -64,7 +64,7 @@
     "tail-stream": "https://registry.npmjs.org/tail-stream/-/tail-stream-0.2.1.tgz",
     "tldjs": "^1.6.2",
     "underscore": "^1.7.0",
-    "ursa-purejs": "0.0.3",
+    "ursa": "^0.9.3",
     "valid-url": "^1.0.9",
     "validator": "^4.9.0",
     "x509": "^0.2.4"

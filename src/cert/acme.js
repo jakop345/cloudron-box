@@ -10,7 +10,7 @@ var assert = require('assert'),
     paths = require('../paths.js'),
     safe = require('safetydance'),
     superagent = require('superagent'),
-    ursa = require('ursa-purejs'),
+    ursa = require('ursa'),
     util = require('util'),
     _ = require('underscore');
 
@@ -97,7 +97,7 @@ Acme.prototype.sendSignedRequest = function (url, payload, callback) {
             n: b64(privateKey.getModulus())
         }
     };
-
+ 
     var payload64 = b64(payload);
 
     this.getNonce(function (error, nonce) {
@@ -345,7 +345,7 @@ Acme.prototype.downloadChain = function (linkHeader, callback) {
     if (!linkHeader) return new AcmeError(AcmeError.EXTERNAL_ERROR, 'Empty link header when downloading certificate chain');
 
     var linkInfo = parseLinks(linkHeader);
-    if (!linkInfo || !linkInfo.up) return new AcmeError(AcmeError.EXTERNAL_ERROR, 'Failed to parse link header when downloading certificate chain');
+    if (!linkInfo || !linkInfo.up) return new AcmeError(AcmeError.EXTERNAL_ERROR, 'Failed to parse link header when downloading certificate chain'); 
 
     debug('downloadChain: downloading from %s', this.caOrigin + linkInfo.up);
 
