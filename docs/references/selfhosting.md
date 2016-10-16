@@ -15,8 +15,8 @@ This approach to self-hosting means that the Cloudron takes complete ownership o
 you should not use your server for anything other than what is allowed using the web interface. For example, 
 currently the Cloudron is based on  Ubunutu 16. When Ubuntu 18 is released, Cloudron will help you migrate your
 apps and data from 16 to 18 easily. Anything you run or install on the server beside the Cloudron will be lost
-after an update. If you want to run anything on your server, it's best to make it a Cloudron app. This way the app 
-will persist across updates.
+after an update. If you want to run anything on your server, it's best to make it a Cloudron app (read more on
+how to create apps in the [packaging guide](/tutorials/packaging.html). This way the app will persist across updates.
 
 # CLI Tool
 
