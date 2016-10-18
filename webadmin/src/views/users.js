@@ -119,12 +119,12 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                     return;
                 }
                 if (error && error.statusCode === 400) {
-                    if (error.message.indexOf('email') !== -1) {
+                    if (error.message.toLowerCase().indexOf('email') !== -1) {
                         $scope.useradd.error.email = 'Invalid Email';
                         $scope.useradd.error.emailAttempted = $scope.useradd.email;
                         $scope.useradd_form.email.$setPristine();
                         $('#inputUserAddEmail').focus();
-                    } else if (error.message.indexOf('username') !== -1) {
+                    } else if (error.message.toLowerCase().indexOf('username') !== -1) {
                         $scope.useradd.error.username = 'Invalid Username';
                         $scope.useradd_form.username.$setPristine();
                         $('#inputUserAddUsername').focus();
