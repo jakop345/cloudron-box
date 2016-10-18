@@ -93,7 +93,7 @@ function validateUsername(username) {
     if (username === '') return null;
 
     if (username.length <= 1) return new UserError(UserError.BAD_FIELD, 'Username must be atleast 2 chars');
-    if (username.length >= 200) return new UserError(UserError.BAD_FIELD, 'name too long');
+    if (username.length >= 200) return new UserError(UserError.BAD_FIELD, 'Username too long');
 
     if (constants.RESERVED_NAMES.indexOf(username) !== -1) return new UserError(UserError.BAD_FIELD, 'Username is reserved');
 

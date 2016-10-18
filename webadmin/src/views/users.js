@@ -125,7 +125,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                         $scope.useradd_form.email.$setPristine();
                         $('#inputUserAddEmail').focus();
                     } else if (error.message.toLowerCase().indexOf('username') !== -1) {
-                        $scope.useradd.error.username = 'Invalid Username';
+                        $scope.useradd.error.username = error.message;
                         $scope.useradd_form.username.$setPristine();
                         $('#inputUserAddUsername').focus();
                     } else {
