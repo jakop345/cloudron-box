@@ -30,7 +30,7 @@ echo "Estimated app count: ${app_count}"
 echo "Disk size: ${disk_size}"
 
 # Allocate swap for general app usage
-if [[ ! -f "${APPS_SWAP_FILE}" ]]; then
+if [[ ! -f "${APPS_SWAP_FILE}" && ${swap_size} -gt 0 ]]; then
     echo "Creating Apps swap file of size ${swap_size}M"
     fallocate -l "${swap_size}m" "${APPS_SWAP_FILE}"
     chmod 600 "${APPS_SWAP_FILE}"
