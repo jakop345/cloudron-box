@@ -66,7 +66,9 @@ while true; do
         arg_tls_cert=$(echo "$2" | $json tlsCert)
         arg_tls_key=$(echo "$2" | $json tlsKey)
         arg_token=$(echo "$2" | $json token)
+
         arg_provider=$(echo "$2" | $json provider)
+        [[ "${arg_provider}" == "" ]] && arg_provider="generic"
 
         arg_tls_config=$(echo "$2" | $json tlsConfig)
         [[ "${arg_tls_config}" == "null" ]] && arg_tls_config=""
