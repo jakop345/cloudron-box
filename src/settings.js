@@ -77,11 +77,15 @@ var gDefaults = (function () {
     result[exports.TIME_ZONE_KEY] = 'America/Los_Angeles';
     result[exports.CLOUDRON_NAME_KEY] = 'Cloudron';
     result[exports.DEVELOPER_MODE_KEY] = true;
-    result[exports.DNS_CONFIG_KEY] = { };
-    result[exports.BACKUP_CONFIG_KEY] = { };
+    result[exports.DNS_CONFIG_KEY] = { provider: 'noop' };
+    result[exports.BACKUP_CONFIG_KEY] = {
+        provider: 'filesystem',
+        key: '',
+        backupFolder: '/var/backups'
+    };
     result[exports.TLS_CONFIG_KEY] = { provider: 'caas' };
     result[exports.UPDATE_CONFIG_KEY] = { prerelease: false };
-    result[exports.APPSTORE_CONFIG_KEY] = { };
+    result[exports.APPSTORE_CONFIG_KEY] = {};
     result[exports.MAIL_CONFIG_KEY] = { enabled: false };
 
     return result;
