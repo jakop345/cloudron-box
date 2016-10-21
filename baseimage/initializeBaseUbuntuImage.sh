@@ -5,7 +5,7 @@ set -euv -o pipefail
 readonly USER=yellowtent
 readonly USER_HOME="/home/${USER}"
 readonly INSTALLER_SOURCE_DIR="${USER_HOME}/installer"
-readonly INSTALLER_REVISION="$1"
+readonly INSTALLER_REVISION="${1:-master}"
 readonly PROVIDER="${2:-generic}"
 readonly USER_DATA_FILE="/root/user_data.img"
 readonly USER_DATA_DIR="/home/yellowtent/data"
@@ -23,15 +23,6 @@ echo "==== Create User ${USER} ===="
 if ! id "${USER}"; then
     useradd "${USER}" -m
 fi
-
-echo "=== Yellowtent base image preparation (installer revision - ${INSTALLER_REVISION}) ==="
-
-echo "=== Prepare installer source ==="
-rm -rf "${INSTALLER_SOURCE_DIR}" && mkdir -p "${INSTALLER_SOURCE_DIR}"
-rm -rf /tmp/box && mkdir -p /tmp/box
-tar xvf /tmp/box.tar.gz -C /tmp/box && rm /tmp/box.tar.gz
-cp -rf /tmp/box/installer/* "${INSTALLER_SOURCE_DIR}"
-echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -201,7 +192,12 @@ echo "==== Install logrotate ==="
 apt-get install -y cron logrotate
 systemctl enable cron
 
-echo "=== Rebuilding npm packages ==="
+echo "=== Prepare installer revision - ${INSTALLER_REVISION}) ==="
+rm -rf /tmp/box && mkdir -p /tmp/box
+curl "https://git.cloudron.io/cloudron/box/repository/archive.tar.gz?ref=${INSTALLER_REVISION}" | tar xvf - -C /tmp/box
+cp -rf /tmp/box/installer/* "${INSTALLER_SOURCE_DIR}" && rm -rf /tmp/box
+echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
+
 cd "${INSTALLER_SOURCE_DIR}" && while ! npm install --production; do sleep 1; done
 chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
