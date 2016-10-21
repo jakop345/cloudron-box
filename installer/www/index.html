@@ -1,0 +1,70 @@
+<html>
+<head>
+    <title> Cloudron Setup </title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- jQuery 3 minified -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-offset-2 col-md-8">
+            <h1>Cloudron Setup</h1>
+
+            <h4>Prior to submitting this form, setup a wildcard or at least a <i><b>my.</b>example.com<i> DNS record, pointing to this IP!</h4>
+
+            <form id="setupForm">
+                <div class="form-group">
+                    <label for="inputDomain">Domain</label>
+                    <input type="text" class="form-control" id="inputDomain" name="fqdn" placeholder="example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="inputVersionsUrl">Versions URL (optional)</label>
+                    <input type="text" class="form-control" id="inputVersionsUrl" name="boxVersionsUrl" placeholder="">
+                </div>
+                <button type="submit" class="btn btn-default">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+
+$(function () {
+    $('#setupForm').submit(function( event ) {
+        console.log('--- submit');
+
+        event.preventDefault();
+
+        var data = {
+            fqdn: $('#inputDomain').val(),
+            boxVersionsUrl: $('#inputVersionsUrl').val()
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '/api/v1/setup',
+            data: JSON.stringify(data),
+            success: function (data) { console.log('data: ' + data); },
+            contentType: 'application/json'
+        });
+    });
+});
+
+</script>
+
+</body>
+
+</html>
