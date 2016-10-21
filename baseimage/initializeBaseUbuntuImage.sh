@@ -196,7 +196,8 @@ systemctl enable cron
 
 echo "=== Prepare installer revision - ${INSTALLER_REVISION}) ==="
 rm -rf /tmp/box && mkdir -p /tmp/box
-curl "https://git.cloudron.io/cloudron/box/repository/archive.tar.gz?ref=${INSTALLER_REVISION}" | tar xvf - -C /tmp/box
+curl "https://git.cloudron.io/cloudron/box/repository/archive.tar.gz?ref=${INSTALLER_REVISION}" | tar zxvf - --strip-components=1 -C /tmp/box
+mkdir -p "${INSTALLER_SOURCE_DIR}"
 cp -rf /tmp/box/installer/* "${INSTALLER_SOURCE_DIR}" && rm -rf /tmp/box
 echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
 
