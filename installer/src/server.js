@@ -26,6 +26,7 @@ exports = module.exports = {
 var PROVISION_CONFIG_FILE_JSON = '/root/userdata.json';
 var PROVISION_CONFIG_FILE_JS = '/root/userdata.js';
 var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
+var BOX_VERSIONS_URL = 'https://s3.amazonaws.com/prod-cloudron-releases/versions.json';
 
 var gHttpServer = null; // update server; used for updates
 
@@ -51,16 +52,19 @@ function provision(callback) {
         if (!tmp) return retry('Provisioning data invalid');
 
         // translate to expected format
-        userData.sourceTarballUrl = tmp.sourceTarballUrl;
-        userData.data = { fqdn: tmp.fqdn };
+        userData = { data: tmp };
     }
 
     if (!userData) return retry('No user data file found. Waiting for it...');
 
     // validate the bare minimum
-    if (!userData.sourceTarballUrl || typeof userData.sourceTarballUrl !== 'string') return retry('sourceTarballUrl in user data has to be a non-empty string');
     if (!userData.data || typeof userData.data !== 'object') return retry('user data misses "data" object');
     if (!userData.data.fqdn || typeof userData.data.fqdn !== 'string') return retry('fqdn in user data has to be a non-empty string');
+
+    // set the fallback
+    if (!userData.data.boxVersionsUrl) userData.data.boxVersionsUrl = BOX_VERSIONS_URL;
+
+    if (typeof userData.data.boxVersionsUrl !== 'string') return retry('boxVersionsUrl in user data has to be a non-empty string');
 
     installer.provision(userData, callback);
 }
