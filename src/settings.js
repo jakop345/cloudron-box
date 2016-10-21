@@ -83,7 +83,7 @@ var gDefaults = (function () {
         key: '',
         backupFolder: '/var/backups'
     };
-    result[exports.TLS_CONFIG_KEY] = { provider: 'caas' };
+    result[exports.TLS_CONFIG_KEY] = { provider: 'letsencrypt-prod' };
     result[exports.UPDATE_CONFIG_KEY] = { prerelease: false };
     result[exports.APPSTORE_CONFIG_KEY] = {};
     result[exports.MAIL_CONFIG_KEY] = { enabled: false };
