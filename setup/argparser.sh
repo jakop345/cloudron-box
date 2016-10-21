@@ -41,7 +41,9 @@ while true; do
     --data)
         # these params must be valid in all cases
         arg_fqdn=$(echo "$2" | $json fqdn)
+
         arg_is_custom_domain=$(echo "$2" | $json isCustomDomain)
+        [[ "${arg_is_custom_domain}" == "" ]] && arg_is_custom_domain="true"
 
         # only update/restore have this valid (but not migrate)
         arg_api_server_origin=$(echo "$2" | $json apiServerOrigin)
