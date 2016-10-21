@@ -47,8 +47,13 @@ while true; do
 
         # only update/restore have this valid (but not migrate)
         arg_api_server_origin=$(echo "$2" | $json apiServerOrigin)
+        [[ "${arg_api_server_origin}" == "" ]] && arg_api_server_origin="https://api.cloudron.io"
         arg_web_server_origin=$(echo "$2" | $json webServerOrigin)
+        [[ "${arg_web_server_origin}" == "" ]] && arg_web_server_origin="https://cloudron.io"
         arg_box_versions_url=$(echo "$2" | $json boxVersionsUrl)
+        [[ "${arg_box_versions_url}" == "" ]] && arg_box_versions_url="https://s3.amazonaws.com/prod-cloudron-releases/versions.json"
+
+        # TODO check if an where this is used
         arg_version=$(echo "$2" | $json version)
 
         # read possibly empty parameters here
