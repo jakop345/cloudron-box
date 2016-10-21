@@ -166,7 +166,7 @@ function startSetupServer(callback) {
     gSetupServer = http.createServer(app);
     gSetupServer.on('error', console.error);
 
-    gSetupServer.listen(2021, '127.0.0.1', callback);
+    gSetupServer.listen(80, '0.0.0.0', callback);
 }
 
 function stopSetupServer(callback) {

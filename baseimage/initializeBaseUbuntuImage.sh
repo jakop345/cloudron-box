@@ -166,6 +166,8 @@ fi
 echo "==== Install nginx ===="
 apt-get -y install nginx-full
 [[ "$(nginx -v 2>&1)" == *"nginx/1.10."* ]] || die "Expecting nginx version to be 1.10.x"
+systemctl disable nginx
+systemctl stop nginx
 
 echo "==== Install build-essential ===="
 apt-get -y install build-essential rcconf
