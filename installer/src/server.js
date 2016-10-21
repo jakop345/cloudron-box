@@ -23,7 +23,8 @@ exports = module.exports = {
     stop: stop
 };
 
-var PROVISION_CONFIG_FILE = '/root/userdata.json';
+var PROVISION_CONFIG_FILE_JSON = '/root/userdata.json';
+var PROVISION_CONFIG_FILE_JS = '/root/userdata.js';
 var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
 
 var gHttpServer = null; // update server; used for updates
@@ -34,22 +35,34 @@ function provision(callback) {
         return callback(null); // already provisioned
     }
 
-    async.retry({ times: 100, interval: 5000 }, function (callback) {
-        if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
-            console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
-            return callback(new Error('No provisioning data found'));
-        }
+    var userData = null;
 
-        var userData = safe.require(PROVISION_CONFIG_FILE);
-        if (!userData) return callback(new Error('Provisioning data invalid'));
+    function retry(error) {
+        if (error) console.error(error);
+        setTimeout(provision.bind(null, callback), 5000);
+    }
 
-        callback(null, userData);
-    }, function (error, userData) {
-        if (error) return callback(error);
+    // check for .json file then .js
+    if (fs.existsSync(PROVISION_CONFIG_FILE_JSON)) {
+        userData = safe.require(PROVISION_CONFIG_FILE_JSON);
+        if (!userData) return retry('Provisioning data invalid');
+    } else if (fs.existsSync(PROVISION_CONFIG_FILE_JS)) {
+        var tmp = safe.require(PROVISION_CONFIG_FILE_JS);
+        if (!tmp) return retry('Provisioning data invalid');
 
-        // TODO can we somehow verify the data to some extent?
-        installer.provision(userData, callback);
-    });
+        // translate to expected format
+        userData.sourceTarballUrl = tmp.sourceTarballUrl;
+        userData.data = { fqdn: tmp.fqdn };
+    }
+
+    if (!userData) return retry('No user data file found. Waiting for it...');
+
+    // validate the bare minimum
+    if (!userData.sourceTarballUrl || typeof userData.sourceTarballUrl !== 'string') return retry('sourceTarballUrl in user data has to be a non-empty string');
+    if (!userData.data || typeof userData.data !== 'object') return retry('user data misses "data" object');
+    if (!userData.data.fqdn || typeof userData.data.fqdn !== 'string') return retry('fqdn in user data has to be a non-empty string');
+
+    installer.provision(userData, callback);
 }
 
 function update(req, res, next) {
