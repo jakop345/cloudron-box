@@ -305,3 +305,6 @@ apt-get -y install unbound
 
 # required so we can connect to this machine since port 22 is blocked by iptables by now
 systemctl reload sshd
+
+systemctl start cloudron-installer
+
