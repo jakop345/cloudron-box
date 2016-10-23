@@ -14,6 +14,9 @@
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
+    <!-- fontawesome -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+
 </head>
 
 <body>
@@ -23,19 +26,35 @@
         <div class="col-md-offset-2 col-md-8">
             <h1>Cloudron Setup</h1>
 
-            <h4>Prior to submitting this form, setup a wildcard or at least a <i><b>my.</b>example.com<i> DNS record, pointing to this IP!</h4>
 
-            <form id="setupForm">
-                <div class="form-group">
-                    <label for="inputDomain">Domain</label>
-                    <input type="text" class="form-control" id="inputDomain" name="fqdn" placeholder="example.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="inputVersionsUrl">Versions URL (optional)</label>
-                    <input type="text" class="form-control" id="inputVersionsUrl" name="boxVersionsUrl" placeholder="">
-                </div>
-                <button type="submit" class="btn btn-default">Submit</button>
-            </form>
+            <div id="setupForm">
+                <form>
+                    <div class="form-group">
+                        <label for="inputDomain">Domain</label>
+                        <input type="text" class="form-control" id="inputDomain" name="fqdn" placeholder="example.com" required>
+                    </div>
+                    <a data-toggle="collapse" href="#collapseExample">Advanced</a><br/>
+                    <div class="collapse" id="collapseExample">
+                        <div class="form-group">
+                            <label for="inputVersionsUrl">Versions URL (optional)</label>
+                            <input type="text" class="form-control" id="inputVersionsUrl" name="boxVersionsUrl" placeholder="">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-default pull-right">Next</button>
+                </form>
+            </div>
+            <div id="waitForDNS" style="display: none;">
+                <center>
+                    <br/>
+                    <h4>Now setup a wildcard or at least a <b>my.<span id="fqdn_placeholder"></span></b> DNS record, pointing to <b><span id="ip_placeholder"></span></b></h4>
+                    <br/>
+                    <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i><br/>
+                    <br/>
+                    <i>Waiting for DNS to be setup</i>
+                    <br/><br/>
+                    <button type="button" class="btn btn-default" id="backButton">Back</button>
+                </center>
+            </div>
         </div>
     </div>
 </div>
@@ -43,11 +62,23 @@
 <script>
 
 $(function () {
-    $('#setupForm').submit(function( event ) {
-        console.log('--- submit');
+    'use strict';
 
-        event.preventDefault();
+    $('#backButton').on('click', function () {
+        showForm();
+    });
 
+    function hideForm() {
+        $('#setupForm').hide();
+        $('#waitForDNS').show();
+    }
+
+    function showForm() {
+        $('#waitForDNS').hide();
+        $('#setupForm').show();
+    }
+
+    function setup() {
         var data = {
             fqdn: $('#inputDomain').val(),
             boxVersionsUrl: $('#inputVersionsUrl').val()
@@ -60,6 +91,32 @@ $(function () {
             success: function (data) { console.log('data: ' + data); },
             contentType: 'application/json'
         });
+    }
+
+    function waitForDNS(fqdn, ip) {
+        $('#fqdn_placeholder').text(fqdn);
+        $('#ip_placeholder').text(ip);
+
+        hideForm();
+
+        var data = {
+            fqdn: fqdn,
+            ip: ip
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '/api/v1/dns',
+            data: JSON.stringify(data),
+            success: function (data) { console.log('data: ' + data); },
+            contentType: 'application/json'
+        });
+    }
+
+    $('#setupForm').submit(function( event ) {
+        event.preventDefault();
+
+        waitForDNS($('#inputDomain').val(), location.hostname);
     });
 });
 
