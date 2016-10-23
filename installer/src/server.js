@@ -7,6 +7,7 @@
 var assert = require('assert'),
     async = require('async'),
     debug = require('debug')('installer:server'),
+    dns = require('dns'),
     express = require('express'),
     fs = require('fs'),
     http = require('http'),
@@ -130,7 +131,7 @@ function setup(req, res, next) {
 
     if (!req.body.fqdn || typeof req.body.fqdn !== 'string') return next(new HttpError(400, 'No fqdn provided'));
 
-    debug('setup: received from box %j', req.body);
+    debug('setup: %j', req.body);
 
     var data = {
         fqdn: req.body.fqdn
@@ -142,6 +143,27 @@ function setup(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(201, {}));
+    });
+}
+
+function dnsReady(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (!req.body.fqdn || typeof req.body.fqdn !== 'string') return next(new HttpError(400, 'No fqdn provided'));
+    if (!req.body.ip || typeof req.body.ip !== 'string') return next(new HttpError(400, 'No ip provided'));
+
+    debug('dnsReady: %j', req.body);
+
+    dns.resolve4('my.' + req.body.fqdn, function (error, result) {
+        if (error) return next(new HttpError(409, 'Not yet ready'));
+
+        var sync = result.some(function (a) {
+            return a === req.body.ip;
+        });
+
+        if (!sync) return next(new HttpError(409, 'Not yet ready'));
+
+        next(new HttpError(200, {}));
     });
 }
 
@@ -161,12 +183,13 @@ function startSetupServer(callback) {
        .use(router)
        .use(lastMile());
 
+    router.post('/api/v1/dns', dnsReady);
     router.post('/api/v1/setup', setup);
 
     gSetupServer = http.createServer(app);
     gSetupServer.on('error', console.error);
 
-    gSetupServer.listen(80, '0.0.0.0', callback);
+    gSetupServer.listen(process.env.SETUP_PORT || 80, '0.0.0.0', callback);
 }
 
 function stopSetupServer(callback) {
