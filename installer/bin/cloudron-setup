@@ -8,19 +8,21 @@ readonly PROVISION_FILEPATH="/root/userdata.json"
 # TODO add restore arguments (accessable url and encryption key)
 domain=""
 provider="generic"
+versionsUrl="https://s3.amazonaws.com/prod-cloudron-releases/versions.json"
 
 # Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
 # brew install gnu-getopt to get the GNU getopt on OS X
 [[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 readonly GNU_GETOPT
 
-args=$(${GNU_GETOPT} -o "" -l "domain:,provider:," -n "$0" -- "$@")
+args=$(${GNU_GETOPT} -o "" -l "domain:,provider:,versions-url:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
     --domain) domain="$2"; shift 2;;
     --provider) provider="$2"; shift 2;;
+    --versions-url) versionsUrl="$2"; shift 2;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -36,6 +38,7 @@ fi
 cat > "${PROVISION_FILEPATH}" <<EOF
 {
     "data": {
+        "boxVersionsUrl": "${versionsUrl}",
         "fqdn": "${domain}",
         "provider": "${provider}"
     }
