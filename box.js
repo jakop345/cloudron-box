@@ -43,6 +43,7 @@ async.series([
         console.error('Error starting server', error);
         process.exit(1);
     }
+    console.log('Cloudron is up and running');
 });
 
 var NOOP_CALLBACK = function () { };

@@ -4,27 +4,30 @@ set -eu -o pipefail
 
 readonly PROVISION_FILEPATH="/root/userdata.json"
 
-# TODO do we allow specifying version?
-# TODO add restore arguments (accessable url and encryption key)
+# change this to a hash when we make a upgrade release
+readonly INSTALLER_REVISION=master
+readonly INIT_BASESYSTEM_SCRIPT_URL="https://git.cloudron.io/cloudron/box/raw/${INSTALLER_REVISION}/baseimage/initializeBaseUbuntuImage.sh"
+
 domain=""
 provider="generic"
-versionsUrl="https://s3.amazonaws.com/prod-cloudron-releases/versions.json"
+restoreKey=""
+restoreUrl=""
 tlsProvider="letsencrypt-prod"
+versionsUrl="https://s3.amazonaws.com/prod-cloudron-releases/versions.json"
+version=""
 
-# Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
-# brew install gnu-getopt to get the GNU getopt on OS X
-[[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
-readonly GNU_GETOPT
-
-args=$(${GNU_GETOPT} -o "" -l "domain:,provider:,versions-url:,tls-provider:" -n "$0" -- "$@")
+args=$(getopt -o "" -l "domain:,provider:,restore-key:,restore-url:,tls-provider:,version:,versions-url:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
     --domain) domain="$2"; shift 2;;
     --provider) provider="$2"; shift 2;;
-    --versions-url) versionsUrl="$2"; shift 2;;
+    --restore-key) restoreKey="$2"; shift 2;;
+    --restore-url) restoreUrl="$2"; shift 2;;
     --tls-provider) tlsProvider="$2"; shift 2;;
+    --version) version="$2"; shift 2;;
+    --versions-url) versionsUrl="$2"; shift 2;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -35,7 +38,12 @@ if [[ -z "${domain}" ]]; then
     exit 1
 fi
 
-# TODO validate input
+echo "Downloading initialization script"
+curl "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh
+
+echo "Installing dependancies"
+/bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}"
+rm /tmp/initializeBaseUbuntuImage.sh
 
 cat > "${PROVISION_FILEPATH}" <<EOF
 {
@@ -43,14 +51,27 @@ cat > "${PROVISION_FILEPATH}" <<EOF
         "boxVersionsUrl": "${versionsUrl}",
         "fqdn": "${domain}",
         "provider": "${provider}",
+        "restoreKey": "${restoreKey}",
+        "restoreUrl": "${restoreUrl}",
         "tlsConfig": {
             "provider": "${tlsProvider}"
-        }
+        },
+        "version": "${version}"
     }
 }
 EOF
 
-# TODO print further instructions
-echo "The Cloudron is being initialized"
-echo "Create DNS record for this ip if not done already"
-echo "Once DNS is ready, visit https://my.${domain} to finish setup"
+# install box code
+systemctl start cloudron-installer
+
+echo -n "Waiting for cloudron to be ready"
+while true; do
+    echo -n "."
+    if journalctl -u box -a | grep -q "Cloudron is up and running"; then
+        break
+    fi
+    sleep 10
+done
+
+echo "Visit https://my.${domain} to finish setup"
+
