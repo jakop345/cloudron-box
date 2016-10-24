@@ -43,7 +43,7 @@ cat > "${PROVISION_FILEPATH}" <<EOF
         "boxVersionsUrl": "${versionsUrl}",
         "fqdn": "${domain}",
         "provider": "${provider}",
-        "tls_config": {
+        "tlsConfig": {
             "provider": "${tlsProvider}"
         }
     }
