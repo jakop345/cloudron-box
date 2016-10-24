@@ -228,7 +228,7 @@ systemctl start cloudron.target
 sleep 2 # give systemd sometime to start the processes
 
 set_progress "85" "Reloading nginx"
-if systemctl is-enabled nginx;
+if systemctl is-enabled nginx; then
     nginx -s reload
 else
     systemctl enable nginx
