@@ -45,7 +45,12 @@ iptables -P OUTPUT ACCEPT
 # NOTE: keep these in sync with src/apps.js validatePortBindings
 # allow ssh, http, https, ping, dns
 iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,202,443,587,993,4190 -j ACCEPT
+# caas has ssh on port 202
+if [[ "${PROVIDER}" == "caas" ]]; then
+    iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,202,443,587,993,4190 -j ACCEPT
+else
+    iptables -A INPUT -p tcp -m tcp -m multiport --dports 25,80,22,443,587,993,4190 -j ACCEPT
+fi
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
 iptables -A INPUT -p udp --sport 53 -j ACCEPT
@@ -292,11 +297,15 @@ setfacl -n -m u:${USER}:r /var/log/journal/*/system.journal
 echo "==== Install ssh ==="
 apt-get -y install openssh-server
 # https://stackoverflow.com/questions/4348166/using-with-sed on why ? must be escaped
-sed -e 's/^#\?Port .*/Port 202/g' \
-    -e 's/^#\?PermitRootLogin .*/PermitRootLogin without-password/g' \
+sed -e 's/^#\?PermitRootLogin .*/PermitRootLogin without-password/g' \
     -e 's/^#\?PermitEmptyPasswords .*/PermitEmptyPasswords no/g' \
     -e 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/g' \
     -i /etc/ssh/sshd_config
+
+# caas has ssh on port 202
+if [[ "${PROVIDER}" == "caas" ]]; then
+    sed -e 's/^#\?Port .*/Port 202/g' -i /etc/ssh/sshd_config
+fi
 
 # DO uses Google nameservers by default. This causes RBL queries to fail (host 2.0.0.127.zen.spamhaus.org)
 # We do not use dnsmasq because it is not a recursive resolver and defaults to the value in the interfaces file (which is Google DNS!)
