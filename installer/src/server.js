@@ -7,7 +7,6 @@
 var assert = require('assert'),
     async = require('async'),
     debug = require('debug')('installer:server'),
-    dns = require('dns'),
     express = require('express'),
     fs = require('fs'),
     http = require('http'),
@@ -17,7 +16,6 @@ var assert = require('assert'),
     json = require('body-parser').json,
     lastMile = require('connect-lastmile'),
     morgan = require('morgan'),
-    path = require('path'),
     safe = require('safetydance');
 
 exports = module.exports = {
@@ -31,7 +29,6 @@ var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
 var BOX_VERSIONS_URL = 'https://s3.amazonaws.com/prod-cloudron-releases/versions.json';
 
 var gHttpServer = null; // update server; used for updates
-var gSetupServer = null; // setup server; only used for initial setup
 
 function provision(callback) {
     if (fs.existsSync(CLOUDRON_CONFIG_FILE)) {
@@ -43,9 +40,6 @@ function provision(callback) {
 
     function retry(error) {
         if (error) console.error(error);
-
-        if (!gSetupServer) startSetupServer(function () { debug('Setup Server started.'); });
-
         setTimeout(provision.bind(null, callback), 5000);
     }
 
@@ -71,8 +65,6 @@ function provision(callback) {
     if (!userData.data.boxVersionsUrl) userData.data.boxVersionsUrl = BOX_VERSIONS_URL;
 
     if (typeof userData.data.boxVersionsUrl !== 'string') return retry('boxVersionsUrl in user data has to be a non-empty string');
-
-    stopSetupServer(function () { debug('Setup Server stopped.'); });
 
     installer.provision(userData, callback);
 }
@@ -124,83 +116,6 @@ function stopUpdateServer(callback) {
 
     gHttpServer.close(callback);
     gHttpServer = null;
-}
-
-function setup(req, res, next) {
-    assert.strictEqual(typeof req.body, 'object');
-
-    if (!req.body.fqdn || typeof req.body.fqdn !== 'string') return next(new HttpError(400, 'No fqdn provided'));
-
-    debug('setup: %j', req.body);
-
-    var data = {
-        fqdn: req.body.fqdn
-    };
-
-    if (req.body.boxVersionsUrl && typeof req.body.boxVersionsUrl === 'string') data.boxVersionsUrl = req.body.boxVersionsUrl;
-
-    fs.writeFile(PROVISION_CONFIG_FILE_JSON, JSON.stringify({ data: data }), function (error) {
-        if (error) return next(new HttpError(500, error));
-
-        next(new HttpSuccess(201, {}));
-    });
-}
-
-function dnsReady(req, res, next) {
-    assert.strictEqual(typeof req.body, 'object');
-
-    if (!req.body.fqdn || typeof req.body.fqdn !== 'string') return next(new HttpError(400, 'No fqdn provided'));
-    if (!req.body.ip || typeof req.body.ip !== 'string') return next(new HttpError(400, 'No ip provided'));
-
-    debug('dnsReady: %j', req.body);
-
-    dns.resolve4('my.' + req.body.fqdn, function (error, result) {
-        if (error) return next(new HttpError(409, 'Not yet ready'));
-
-        var sync = result.some(function (a) {
-            return a === req.body.ip;
-        });
-
-        if (!sync) return next(new HttpError(409, 'Not yet ready'));
-
-        next(new HttpError(200, {}));
-    });
-}
-
-function startSetupServer(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    debug('Starting setup server');
-
-    var app = express();
-
-    var router = new express.Router();
-
-    if (process.env.NODE_ENV !== 'test') app.use(morgan('dev', { immediate: false }));
-
-    app.use(express.static(path.join(__dirname, '../www/')))
-       .use(json({ strict: true }))
-       .use(router)
-       .use(lastMile());
-
-    router.post('/api/v1/dns', dnsReady);
-    router.post('/api/v1/setup', setup);
-
-    gSetupServer = http.createServer(app);
-    gSetupServer.on('error', console.error);
-
-    gSetupServer.listen(process.env.SETUP_PORT || 80, '0.0.0.0', callback);
-}
-
-function stopSetupServer(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    debug('Stopping setup server');
-
-    if (!gSetupServer) return callback(null);
-
-    gSetupServer.close(callback);
-    gSetupServer = null;
 }
 
 function start(callback) {
