@@ -9,13 +9,14 @@ readonly PROVISION_FILEPATH="/root/userdata.json"
 domain=""
 provider="generic"
 versionsUrl="https://s3.amazonaws.com/prod-cloudron-releases/versions.json"
+tlsProvider="letsencrypt-prod"
 
 # Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
 # brew install gnu-getopt to get the GNU getopt on OS X
 [[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 readonly GNU_GETOPT
 
-args=$(${GNU_GETOPT} -o "" -l "domain:,provider:,versions-url:" -n "$0" -- "$@")
+args=$(${GNU_GETOPT} -o "" -l "domain:,provider:,versions-url:,tls-provider:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
@@ -23,6 +24,7 @@ while true; do
     --domain) domain="$2"; shift 2;;
     --provider) provider="$2"; shift 2;;
     --versions-url) versionsUrl="$2"; shift 2;;
+    --tls-provider) tlsProvider="$2"; shift 2;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -40,7 +42,10 @@ cat > "${PROVISION_FILEPATH}" <<EOF
     "data": {
         "boxVersionsUrl": "${versionsUrl}",
         "fqdn": "${domain}",
-        "provider": "${provider}"
+        "provider": "${provider}",
+        "tls_config": {
+            "provider": "${tlsProvider}"
+        }
     }
 }
 EOF
