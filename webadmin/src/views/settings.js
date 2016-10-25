@@ -7,6 +7,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
     $scope.backupConfig = {};
+    $scope.dnsConfig = {};
     $scope.appstoreConfig = {};
 
     $scope.mailConfig = null;
@@ -364,6 +365,14 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     }
 
+    function getDnsConfig() {
+        Client.getDnsConfig(function (error, dnsConfig) {
+            if (error) return console.error(error);
+
+            $scope.dnsConfig = dnsConfig;
+        });
+    }
+
     $scope.toggleEmail = function () {
         Client.setMailConfig({ enabled: !$scope.mailConfig.enabled }, function (error) {
             if (error) return console.error(error);
@@ -469,6 +478,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         fetchBackups();
         getMailConfig();
         getBackupConfig();
+        getDnsConfig();
 
         if ($scope.config.provider === 'caas') {
             getPlans();

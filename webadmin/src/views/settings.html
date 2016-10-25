@@ -261,11 +261,11 @@
     </div>
     <br/>
     <div class="row">
-        <p class="col-md-12" ng-show="!config.isCustomDomain && !config.isDev">
-            <b>Email can only be enabled for custom domains.</b>
+        <p class="col-md-12" ng-show="!config.isDev && (dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
+            <b>Email can only be enabled for custom domains with a DNS provider setup.</b>
         </p>
 
-        <div class="col-md-12" ng-show="config.isCustomDomain || config.isDev">
+        <div class="col-md-12" ng-show="config.isDev || !(dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
             <button ng-class="mailConfig.enabled ? 'btn btn-danger pull-right' : 'btn btn-primary pull-right'" ng-click="toggleEmail()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
         </div>
     </div>
