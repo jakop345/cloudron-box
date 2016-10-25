@@ -148,7 +148,7 @@ function isConfigured(callback) {
 
         if (!dnsConfig) return callback(null, false);
 
-        var isConfigured = (config.isCustomDomain() && (dnsConfig.provider === 'route53' || dnsConfig.provider === 'digitalocean')) ||
+        var isConfigured = (config.isCustomDomain() && (dnsConfig.provider === 'route53' || dnsConfig.provider === 'digitalocean' || dnsConfig.provider === 'noop')) ||
                         (!config.isCustomDomain() && dnsConfig.provider === 'caas');
 
         callback(null, isConfigured);
