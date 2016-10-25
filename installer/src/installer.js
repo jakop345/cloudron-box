@@ -77,14 +77,19 @@ function ensureVersion(args, callback) {
 
         if (!versions || typeof versions !== 'object') return callback(new Error('versions is not in valid format:' + safe.error));
 
-        var latestVersion = Object.keys(versions).sort(semver.compare).pop();
-        debug('ensureVersion: Latest version is %s etag:%s', latestVersion, result.header['etag']);
+        var requestedVersion = args.data.version;
+        if (!requestedVersion) {
+            var latestVersion = Object.keys(versions).sort(semver.compare).pop();
+            requestedVersion = latestVersion;
+        }
 
-        if (!versions[latestVersion]) return callback(new Error('No version available'));
-        if (!versions[latestVersion].sourceTarballUrl) return callback(new Error('No sourceTarballUrl specified'));
+        debug('ensureVersion: Latest version is %s etag:%s', requestedVersion, result.header['etag']);
 
-        args.sourceTarballUrl = versions[latestVersion].sourceTarballUrl;
-        args.data.version = latestVersion;
+        if (!versions[requestedVersion]) return callback(new Error('No version available'));
+        if (!versions[requestedVersion].sourceTarballUrl) return callback(new Error('No sourceTarballUrl specified'));
+
+        args.sourceTarballUrl = versions[requestedVersion].sourceTarballUrl;
+        args.data.version = requestedVersion;
 
         callback(null, args);
     });
