@@ -59,6 +59,7 @@ var assert = require('assert'),
     CronJob = require('cron').CronJob,
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:settings'),
+    digitalocean = require('./dns/digitalocean.js'),
     dns = require('native-dns'),
     moment = require('moment-timezone'),
     paths = require('./paths.js'),
@@ -301,6 +302,31 @@ function validateRoute53Config(domain, dnsConfig, callback) {
     });
 }
 
+function validateDigitalOceanConfig(domain, dnsConfig, callback) {
+    const zoneName = domain;
+
+    if (process.env.BOX_ENV === 'test') return callback();
+
+    sysinfo.getIp(function (error, ip) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, 'Error getting IP:' + error.message));
+
+        dns.resolveNs(zoneName, function (error, nameservers) {
+            if (error || !nameservers) return callback(error || new Error('Unable to get nameservers'));
+
+            digitalocean.upsert(dnsConfig, zoneName, 'my', 'A', [ ip ], function (error, changeId) {
+                if (error && error.reason === SubdomainError.ACCESS_DENIED) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Error adding A record. Access denied'));
+                if (error && error.reason === SubdomainError.NOT_FOUND) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Domain not found'));
+                if (error && error.reason === SubdomainError.EXTERNAL_ERROR) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Error adding A record:' + error.message));
+                if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+                debug('validateDigitalOceanConfig: A record added with change id %s', changeId);
+
+                callback();
+            });
+        });
+    });
+}
+
 function setDnsConfig(dnsConfig, callback) {
     assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
@@ -337,7 +363,8 @@ function setDnsConfig(dnsConfig, callback) {
             provider: dnsConfig.provider,
             token: dnsConfig.token
         };
-        validator = function (digitaloceanConfig, next) { return next(); };
+
+        validator = validateDigitalOceanConfig.bind(null, dnsConfig.domain || config.fqdn());
     } else {
         return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be route53, digitalocean, noop or caas'));
     }
