@@ -51,7 +51,7 @@ fi
 
 echo ""
 echo "##############################################"
-echo "###       Cloudron Setup (${version})      ###"
+echo "        Cloudron Setup (${version})           "
 echo "##############################################"
 echo ""
 echo " Follow setup logs in a second terminal with:"
