@@ -6,7 +6,7 @@ set -u -o pipefail
 readonly INSTALLER_REVISION=master
 readonly INIT_BASESYSTEM_SCRIPT_URL="https://git.cloudron.io/cloudron/box/raw/${INSTALLER_REVISION}/baseimage/initializeBaseUbuntuImage.sh"
 readonly INSTALLER_SOURCE_DIR="/home/yellowtent/installer"
-readonly LOG_FILE="/var/logs/cloudron-setup.log"
+readonly LOG_FILE="/var/log/cloudron-setup.log"
 
 domain=""
 provider="generic"
