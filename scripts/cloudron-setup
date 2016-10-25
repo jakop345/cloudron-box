@@ -38,17 +38,26 @@ if [[ -z "${domain}" ]]; then
     exit 1
 fi
 
-echo "Downloading initialization script"
+echo "##############################################"
+echo "###             Cloudron Setup             ###"
+echo "##############################################"
+echo ""
+echo " This will take a bit."
+echo " Follow setup logs in a second terminal with:"
+echo " $ tail -f ${LOG_FILE}"
+echo ""
+
+echo "=> Downloading initialization script"
 curl "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh
 
-echo "Installing dependancies ... (this takes some time)"
+echo "=> Installing dependancies ... (this takes some time)"
 /bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}" &>> "${LOG_FILE}"
 rm /tmp/initializeBaseUbuntuImage.sh
 
 # start the update server
 systemctl start cloudron-installer
 
-echo "Get sourcetarball url from version"
+echo "=> Get sourcetarball url from version"
 NPM_BIN=$(npm bin -g)
 sourceTarballUrl=$(${NPM_BIN}/cloudron-version --out tarballUrl --versions-url "${versionsUrl}" --version "${version}")
 version=$(${NPM_BIN}/cloudron-version --out version --versions-url "${versionsUrl}" --version "${version}")
@@ -67,10 +76,10 @@ read -d '' data <<EOF
 }
 EOF
 
-echo "Run installer.sh with ${sourceTarballUrl} ... (this takes some time)"
+echo "=> Run installer.sh with ${sourceTarballUrl} ... (this takes some time)"
 ${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}" &>> "${LOG_FILE}"
 
-echo -n "Waiting for cloudron to be ready"
+echo -n "=> Waiting for cloudron to be ready"
 while true; do
     echo -n "."
     if journalctl -u box -a | grep -q "Cloudron is up and running"; then
@@ -79,4 +88,6 @@ while true; do
     sleep 10
 done
 
+echo ""
 echo "Visit https://my.${domain} to finish setup"
+echo ""
