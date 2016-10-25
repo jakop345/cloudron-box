@@ -6,6 +6,7 @@ set -u -o pipefail
 readonly INSTALLER_REVISION=master
 readonly INIT_BASESYSTEM_SCRIPT_URL="https://git.cloudron.io/cloudron/box/raw/${INSTALLER_REVISION}/baseimage/initializeBaseUbuntuImage.sh"
 readonly INSTALLER_SOURCE_DIR="/home/yellowtent/installer"
+readonly LOG_FILE="/var/logs/cloudron-setup.log"
 
 domain=""
 provider="generic"
@@ -40,8 +41,8 @@ fi
 echo "Downloading initialization script"
 curl "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh
 
-echo "Installing dependancies"
-/bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}"
+echo "Installing dependancies ... (this takes some time)"
+/bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}" &>> "${LOG_FILE}"
 rm /tmp/initializeBaseUbuntuImage.sh
 
 # start the update server
@@ -66,8 +67,8 @@ read -d '' data <<EOF
 }
 EOF
 
-echo "Run installer.sh with ${sourceTarballUrl}"
-${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}"
+echo "Run installer.sh with ${sourceTarballUrl} ... (this takes some time)"
+${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}" &>> "${LOG_FILE}"
 
 echo -n "Waiting for cloudron to be ready"
 while true; do
