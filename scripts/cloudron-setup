@@ -38,17 +38,6 @@ if [[ -z "${domain}" ]]; then
     exit 1
 fi
 
-echo "=> Checking version"
-NPM_BIN=$(npm bin -g 2>/dev/null)
-if ! version=$(${NPM_BIN}/cloudron-version --out version --versions-url "${versionsUrl}" --version "${version}"); then
-    echo "No such version ${version}"
-    exit 1
-fi
-if ! sourceTarballUrl=$(${NPM_BIN}/cloudron-version --out tarballUrl --versions-url "${versionsUrl}" --version "${version}"); then
-    echo "No source code for version ${version}"
-    exit 1
-fi
-
 echo ""
 echo "##############################################"
 echo "        Cloudron Setup (${version})           "
@@ -71,10 +60,21 @@ if ! /bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${prov
 fi
 rm /tmp/initializeBaseUbuntuImage.sh
 
+echo "=> Checking version"
+NPM_BIN=$(npm bin -g 2>/dev/null)
+if ! version=$(${NPM_BIN}/cloudron-version --out version --versions-url "${versionsUrl}" --version "${version}"); then
+    echo "No such version ${version}"
+    exit 1
+fi
+if ! sourceTarballUrl=$(${NPM_BIN}/cloudron-version --out tarballUrl --versions-url "${versionsUrl}" --version "${version}"); then
+    echo "No source code for version ${version}"
+    exit 1
+fi
+
 # start the update server
 systemctl start cloudron-installer
 
-read -d '' data <<EOF
+data=$(cat <<EOF
 {
     "boxVersionsUrl": "${versionsUrl}",
     "fqdn": "${domain}",
@@ -87,8 +87,9 @@ read -d '' data <<EOF
     "version": "${version}"
 }
 EOF
+)
 
-echo "=> Run installer.sh with ${sourceTarballUrl} ... (this takes some time)"
+echo "=> Run installer.sh for version ${version} with  ${sourceTarballUrl} ... (this takes some time)"
 if ! ${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}" &>> "${LOG_FILE}"; then
     echo "Failed to install cloudron. See ${LOG_FILE} for details"
     exit 1
