@@ -74,9 +74,17 @@
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.fqdn }}</td>
                 </tr>
 
-                <tr>
+                <tr ng-hide="dnsConfig.provider === 'noop'">
                     <td class="text-muted" style="vertical-align: top;">DNS Provider</td>
                     <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ dnsConfig.provider }}</td>
+                </tr>
+
+                <tr ng-show="dnsConfig.provider === 'noop'">
+                    <td colspan="2">
+                        <br/>
+                        No DNS provider configured. All DNS records need to be setup manually.
+                        To avoid manual setup for each installed app, setup a wildcard DNS record or configure an external DNS provider.
+                    </td>
                 </tr>
 
                 <tr ng-show="config.isCustomDomain && dnsConfig.provider === 'route53'">
