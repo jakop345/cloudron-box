@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
-/* jslint node: true */
-
 'use strict';
 
 var assert = require('assert'),
     debug = require('debug')('installer:server'),
     express = require('express'),
+    fs = require('fs'),
     http = require('http'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
@@ -71,8 +70,21 @@ function stop(callback) {
     gHttpServer = null;
 }
 
+function provisionCaaS(callback) {
+    var PROVISION_CONFIG_FILE = '/root/userdata.json';
+
+    if (fs.existsSync(PROVISION_CONFIG_FILE)) {
+        var userData = require(PROVISION_CONFIG_FILE);
+        installer.provision(userData, callback);
+    }
+}
+
 if (require.main === module) {
-    start(function (error) {
-        if (error) console.error(error);
+    provisionCaaS(function (error) {
+        if (error) return console.error(error);
+
+        start(function (error) {
+            if (error) console.error(error);
+        });
     });
 }
