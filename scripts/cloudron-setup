@@ -48,7 +48,10 @@ echo " $ tail -f ${LOG_FILE}"
 echo ""
 
 echo "=> Downloading initialization script"
-curl "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh
+if ! curl -s "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh; then
+    echo "Could not download initialization script"
+    exit 1
+fi
 
 echo "=> Installing dependencies ... (this takes some time)"
 if ! /bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}" &>> "${LOG_FILE}"; then
@@ -80,7 +83,10 @@ read -d '' data <<EOF
 EOF
 
 echo "=> Run installer.sh with ${sourceTarballUrl} ... (this takes some time)"
-${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}" &>> "${LOG_FILE}"
+if ! ${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}" &>> "${LOG_FILE}"; then
+    echo "Failed to install cloudron. See ${LOG_FILE} for details"
+    exit 1
+fi
 
 echo -n "=> Waiting for cloudron to be ready"
 while true; do
