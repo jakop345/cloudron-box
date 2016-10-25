@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu -o pipefail
+set -u -o pipefail
 
 # change this to a hash when we make a upgrade release
 readonly INSTALLER_REVISION=master
