@@ -38,11 +38,11 @@ if [[ -z "${domain}" ]]; then
     exit 1
 fi
 
+echo ""
 echo "##############################################"
 echo "###             Cloudron Setup             ###"
 echo "##############################################"
 echo ""
-echo " This will take a bit."
 echo " Follow setup logs in a second terminal with:"
 echo " $ tail -f ${LOG_FILE}"
 echo ""
@@ -50,7 +50,7 @@ echo ""
 echo "=> Downloading initialization script"
 curl "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh
 
-echo "=> Installing dependancies ... (this takes some time)"
+echo "=> Installing dependencies ... (this takes some time)"
 /bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}" &>> "${LOG_FILE}"
 rm /tmp/initializeBaseUbuntuImage.sh
 
