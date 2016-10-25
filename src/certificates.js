@@ -89,6 +89,8 @@ function getApi(app, callback) {
 }
 
 function installAdminCertificate(callback) {
+    if (process.env.BOX_ENV === 'test') return callback();
+
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
 
