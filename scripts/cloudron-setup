@@ -54,17 +54,15 @@ version=$(${NPM_BIN}/cloudron-version --out version --versions-url "${versionsUr
 
 read -d '' data <<EOF
 {
-    "data": {
-        "boxVersionsUrl": "${versionsUrl}",
-        "fqdn": "${domain}",
-        "provider": "${provider}",
-        "restoreKey": "${restoreKey}",
-        "restoreUrl": "${restoreUrl}",
-        "tlsConfig": {
-            "provider": "${tlsProvider}"
-        },
-        "version": "${version}"
-    }
+    "boxVersionsUrl": "${versionsUrl}",
+    "fqdn": "${domain}",
+    "provider": "${provider}",
+    "restoreKey": "${restoreKey}",
+    "restoreUrl": "${restoreUrl}",
+    "tlsConfig": {
+        "provider": "${tlsProvider}"
+    },
+    "version": "${version}"
 }
 EOF
 
