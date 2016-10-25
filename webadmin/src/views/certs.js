@@ -6,6 +6,12 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
     $scope.config = Client.getConfig();
     $scope.dnsConfig = null;
 
+    $scope.dnsProvider = [
+        { name: 'Manual/Wildcard', value: 'noop' },
+        { name: 'AWS Route53', value: 'route53' },
+        { name: 'Digital Ocean', value: 'digitalocean' }
+    ];
+
     $scope.defaultCert = {
         error: null,
         success: false,
