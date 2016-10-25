@@ -64,7 +64,7 @@ rm /tmp/initializeBaseUbuntuImage.sh
 systemctl start cloudron-installer
 
 echo "=> Get sourcetarball url from version"
-NPM_BIN=$(npm bin -g)
+NPM_BIN=$(npm bin -g 2>/dev/null)
 sourceTarballUrl=$(${NPM_BIN}/cloudron-version --out tarballUrl --versions-url "${versionsUrl}" --version "${version}")
 version=$(${NPM_BIN}/cloudron-version --out version --versions-url "${versionsUrl}" --version "${version}")
 
