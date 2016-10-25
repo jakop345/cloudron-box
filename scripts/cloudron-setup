@@ -2,11 +2,10 @@
 
 set -eu -o pipefail
 
-readonly PROVISION_FILEPATH="/root/userdata.json"
-
 # change this to a hash when we make a upgrade release
 readonly INSTALLER_REVISION=master
 readonly INIT_BASESYSTEM_SCRIPT_URL="https://git.cloudron.io/cloudron/box/raw/${INSTALLER_REVISION}/baseimage/initializeBaseUbuntuImage.sh"
+readonly INSTALLER_SOURCE_DIR="/home/yellowtent/installer"
 
 domain=""
 provider="generic"
@@ -45,7 +44,7 @@ echo "Installing dependancies"
 /bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}"
 rm /tmp/initializeBaseUbuntuImage.sh
 
-cat > "${PROVISION_FILEPATH}" <<EOF
+read -d '' data <<EOF
 {
     "data": {
         "boxVersionsUrl": "${versionsUrl}",
@@ -61,8 +60,14 @@ cat > "${PROVISION_FILEPATH}" <<EOF
 }
 EOF
 
-# install box code
+# start the update server
 systemctl start cloudron-installer
+
+echo "Get sourcetarball url from version"
+sourceTarballUrl=$(cloudron-version --out tarballUrl --versions-url "${versionsUrl}" --version "${version}")
+
+echo "Run installer.sh with ${sourceTarballUrl}"
+${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}"
 
 echo -n "Waiting for cloudron to be ready"
 while true; do
@@ -74,4 +79,3 @@ while true; do
 done
 
 echo "Visit https://my.${domain} to finish setup"
-
