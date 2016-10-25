@@ -38,9 +38,20 @@ if [[ -z "${domain}" ]]; then
     exit 1
 fi
 
+echo "=> Checking version"
+NPM_BIN=$(npm bin -g 2>/dev/null)
+if ! version=$(${NPM_BIN}/cloudron-version --out version --versions-url "${versionsUrl}" --version "${version}"); then
+    echo "No such version ${version}"
+    exit 1
+fi
+if ! sourceTarballUrl=$(${NPM_BIN}/cloudron-version --out tarballUrl --versions-url "${versionsUrl}" --version "${version}"); then
+    echo "No source code for version ${version}"
+    exit 1
+fi
+
 echo ""
 echo "##############################################"
-echo "###             Cloudron Setup             ###"
+echo "###       Cloudron Setup (${version})      ###"
 echo "##############################################"
 echo ""
 echo " Follow setup logs in a second terminal with:"
@@ -62,11 +73,6 @@ rm /tmp/initializeBaseUbuntuImage.sh
 
 # start the update server
 systemctl start cloudron-installer
-
-echo "=> Get sourcetarball url from version"
-NPM_BIN=$(npm bin -g 2>/dev/null)
-sourceTarballUrl=$(${NPM_BIN}/cloudron-version --out tarballUrl --versions-url "${versionsUrl}" --version "${version}")
-version=$(${NPM_BIN}/cloudron-version --out version --versions-url "${versionsUrl}" --version "${version}")
 
 read -d '' data <<EOF
 {
