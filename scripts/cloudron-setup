@@ -80,8 +80,10 @@ data=$(cat <<EOF
     "boxVersionsUrl": "${versionsUrl}",
     "fqdn": "${domain}",
     "provider": "${provider}",
-    "restoreKey": "${restoreKey}",
-    "restoreUrl": "${restoreUrl}",
+    "restore": {
+        "url": "${restoreUrl}",
+        "key": "${restoreKey}"
+    },
     "tlsConfig": {
         "provider": "${tlsProvider}"
     },
