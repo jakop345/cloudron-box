@@ -144,6 +144,13 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
             }
 
             $scope.dnsCredentials.busy = false;
+
+            // reload the dns config
+            Client.getDnsConfig(function (error, result) {
+                if (error) return console.error(error);
+
+                $scope.dnsConfig = result;
+            });
         });
     };
 
