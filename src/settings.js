@@ -325,6 +325,11 @@ function setDnsConfig(dnsConfig, callback) {
             provider: dnsConfig.provider
         };
         validator = function (caasConfig, next) { return next(); };
+    } else if (dnsConfig.provider === 'noop') {
+        credentials = {
+            provider: dnsConfig.provider
+        };
+        validator = function (noopConfig, next) { return next(); };
     } else if (dnsConfig.provider === 'digitalocean') {
         if (typeof dnsConfig.token !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'token must be a string'));
 
@@ -334,7 +339,7 @@ function setDnsConfig(dnsConfig, callback) {
         };
         validator = function (digitaloceanConfig, next) { return next(); };
     } else {
-        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be route53, digitalocean or caas'));
+        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be route53, digitalocean, noop or caas'));
     }
 
     validator(credentials, function (error) {
