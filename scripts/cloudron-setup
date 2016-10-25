@@ -13,7 +13,7 @@ restoreKey=""
 restoreUrl=""
 tlsProvider="letsencrypt-prod"
 versionsUrl="https://s3.amazonaws.com/prod-cloudron-releases/versions.json"
-version=""
+version="latest"
 
 args=$(getopt -o "" -l "domain:,provider:,restore-key:,restore-url:,tls-provider:,version:,versions-url:" -n "$0" -- "$@")
 eval set -- "${args}"
@@ -44,6 +44,13 @@ echo "Installing dependancies"
 /bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}"
 rm /tmp/initializeBaseUbuntuImage.sh
 
+# start the update server
+systemctl start cloudron-installer
+
+echo "Get sourcetarball url from version"
+sourceTarballUrl=$(cloudron-version --out tarballUrl --versions-url "${versionsUrl}" --version "${version}")
+version=$(cloudron-version --out version --versions-url "${versionsUrl}" --version "${version}")
+
 read -d '' data <<EOF
 {
     "data": {
@@ -59,12 +66,6 @@ read -d '' data <<EOF
     }
 }
 EOF
-
-# start the update server
-systemctl start cloudron-installer
-
-echo "Get sourcetarball url from version"
-sourceTarballUrl=$(cloudron-version --out tarballUrl --versions-url "${versionsUrl}" --version "${version}")
 
 echo "Run installer.sh with ${sourceTarballUrl}"
 ${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}"
