@@ -649,3 +649,10 @@
 * Improve invitation emails
 * Fix bug where mailbox name was generated incorrectly for nake domain (#81)
 
+[0.60.0]
+* Implement new approach to selfhosting. `cloudron machine create` is now deprecated.
+  Please see the [selfhosting guide](https://cloudron.io/references/selfhosting.html)
+  for more details
+* Send email to admins if backup fails
+* Add UI to set digitalocean as DNS provider
+
