@@ -16,12 +16,13 @@ tlsProvider="letsencrypt-prod"
 versionsUrl="https://s3.amazonaws.com/prod-cloudron-releases/versions.json"
 version="latest"
 
-args=$(getopt -o "" -l "domain:,provider:,restore-key:,restore-url:,tls-provider:,version:,versions-url:" -n "$0" -- "$@")
+args=$(getopt -o "" -l "domain:,help,provider:,restore-key:,restore-url:,tls-provider:,version:,versions-url:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
     --domain) domain="$2"; shift 2;;
+    --help) echo "See https://cloudron.io/references/selfhosting.html on how to install Cloudron"; exit 0;;
     --provider) provider="$2"; shift 2;;
     --restore-key) restoreKey="$2"; shift 2;;
     --restore-url) restoreUrl="$2"; shift 2;;
