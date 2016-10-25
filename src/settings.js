@@ -283,7 +283,7 @@ function validateRoute53Config(domain, dnsConfig, callback) {
 
                 if (!_.isEqual(zone.DelegationSet.NameServers.sort(), nameservers.sort())) {
                     debug('validateRoute53Config: %j and %j do not match', nameservers, zone.DelegationSet.NameServers);
-                    return callback(new Error('domain nameservers are not set to route53'));
+                    return callback(new SettingsError(SettingsError.BAD_FIELD, 'Domain nameservers are not set to Route53'));
                 }
 
                 route53.upsert(dnsConfig, zoneName, 'my', 'A', [ ip ], function (error, changeId) {
