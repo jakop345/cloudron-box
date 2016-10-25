@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -u -o pipefail
+set -eu -o pipefail
 
 # change this to a hash when we make a upgrade release
 readonly INSTALLER_REVISION=master
@@ -51,7 +51,10 @@ echo "=> Downloading initialization script"
 curl "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh
 
 echo "=> Installing dependencies ... (this takes some time)"
-/bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}" &>> "${LOG_FILE}"
+if ! /bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}" &>> "${LOG_FILE}"; then
+    echo "Init script failed. See ${LOG_FILE} for details"
+    exit 1
+fi
 rm /tmp/initializeBaseUbuntuImage.sh
 
 # start the update server
