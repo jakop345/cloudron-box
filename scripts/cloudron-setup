@@ -99,7 +99,7 @@ fi
 echo -n "=> Waiting for cloudron to be ready"
 while true; do
     echo -n "."
-    if journalctl -u box -a | grep -q "platformReady: configured, resuming tasks"; then
+    if journalctl -u box -a | grep "platformReady: configured, resuming tasks" >/dev/null; then
         break
     fi
     sleep 10
