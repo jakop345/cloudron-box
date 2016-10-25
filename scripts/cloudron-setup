@@ -82,7 +82,7 @@ ${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTar
 echo -n "=> Waiting for cloudron to be ready"
 while true; do
     echo -n "."
-    if journalctl -u box -a | grep -q "Cloudron is up and running"; then
+    if journalctl -u box -a | grep -q "platformReady: configured, resuming tasks"; then
         break
     fi
     sleep 10
