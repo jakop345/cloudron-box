@@ -208,6 +208,9 @@ echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
 cd "${INSTALLER_SOURCE_DIR}" && while ! npm install --production; do sleep 1; done
 chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
+echo "==== Install cloudron-version tool ===="
+npm install -g cloudron-version@0.1.0
+
 echo "==== Install installer systemd script ===="
 cat > /etc/systemd/system/cloudron-installer.service <<EOF
 [Unit]
