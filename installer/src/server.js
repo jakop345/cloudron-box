@@ -70,20 +70,21 @@ function stop(callback) {
     gHttpServer = null;
 }
 
-function provisionCaaS() {
+function provisionCaaS(callback) {
     var PROVISION_CONFIG_FILE = '/root/userdata.json';
 
-    if (!fs.existsSync(PROVISION_CONFIG_FILE)) setTimeout(provisionCaaS, 5000);
-
-    var userData = require(PROVISION_CONFIG_FILE);
-    fs.unlinkSync(PROVISION_CONFIG_FILE);
-    installer.provision(userData, function (error) { console.error(error); });
+    if (fs.existsSync(PROVISION_CONFIG_FILE)) {
+        var userData = require(PROVISION_CONFIG_FILE);
+        installer.provision(userData, callback);
+    }
 }
 
 if (require.main === module) {
-    provisionCaaS();
+    provisionCaaS(function (error) {
+        if (error) return console.error(error);
 
-    start(function (error) {
-        if (error) console.error(error);
+        start(function (error) {
+            if (error) console.error(error);
+        });
     });
 }
