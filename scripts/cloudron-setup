@@ -9,7 +9,7 @@ readonly INSTALLER_SOURCE_DIR="/home/yellowtent/installer"
 readonly LOG_FILE="/var/log/cloudron-setup.log"
 
 domain=""
-provider="generic"
+provider=""
 restoreKey=""
 restoreUrl=""
 tlsProvider="letsencrypt-prod"
@@ -36,6 +36,11 @@ done
 
 if [[ -z "${domain}" ]]; then
     echo "--domain is required"
+    exit 1
+fi
+
+if [[ -z "${provider}" ]]; then
+    echo "--provider is required ('generic', 'scaleway', 'ec2')"
     exit 1
 fi
 
