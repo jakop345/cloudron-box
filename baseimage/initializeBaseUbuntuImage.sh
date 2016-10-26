@@ -27,7 +27,7 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 
 echo "=== Upgrade ==="
-apt-get update
+apt-get update -y
 apt-get dist-upgrade -y
 apt-get install -y curl
 
