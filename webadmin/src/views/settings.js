@@ -328,7 +328,11 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                         } else if (error.message.indexOf('ECONNREFUSED') !== -1) {
                             $scope.configureBackup.error.generic = 'Unknown region';
                             $scope.configureBackup.error.region = true;
-                            $scope.configureBackup.region = '';
+                            $scope.configureBackupForm.region.$setPristine();
+                            $('#inputConfigureBackupRegion').focus();
+                        } else if (error.message.toLowerCase() === 'wrong region') {
+                            $scope.configureBackup.error.generic = 'Wrong S3 Region';
+                            $scope.configureBackup.error.region = true;
                             $scope.configureBackupForm.region.$setPristine();
                             $('#inputConfigureBackupRegion').focus();
                         } else {
