@@ -16,7 +16,7 @@
 
                         <div class="form-group" ng-show="dnsConfig.provider !== 'caas'">
                             <label class="control-label" for="dnsCredentialsProvider">DNS API Provider</label>
-                            <select class="form-control" id="dnsCredentialsProvider" ng-model="dnsCredentials.provider" ng-options="a.value as a.name for a in dnsProvider" ng-change="updateFilter()">
+                            <select class="form-control" id="dnsCredentialsProvider" ng-model="dnsCredentials.provider" ng-options="a.value as a.name for a in dnsProvider">
                             </select>
                         </div>
 
