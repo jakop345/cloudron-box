@@ -18,6 +18,7 @@ var assert = require('assert'),
     AWS = require('aws-sdk'),
     safe = require('safetydance'),
     SettingsError = require('../settings.js').SettingsError,
+    shell = require('../shell.js'),
     superagent = require('superagent');
 
 function getBackupCredentials(apiConfig, callback) {
@@ -164,6 +165,8 @@ function testConfig(apiConfig, callback) {
     if (typeof apiConfig.prefix !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'prefix must be a string'));
 
     // attempt to upload and delete a file with new credentials
+    // First use the javascript api, to get better feedback, then use aws cli tool
+    // The javascript api always autodetects the correct settings, regardless of the region provided, the cli tool does not
     getBackupCredentials(apiConfig, function (error, credentials) {
         if (error) return callback(error);
 
@@ -185,7 +188,17 @@ function testConfig(apiConfig, callback) {
             s3.deleteObject(params, function (error) {
                 if (error) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, error.message));
 
-                callback();
+                // now perform the same as what we do in the backup shell scripts
+                var BACKUP_TEST_CMD = require('path').join(__dirname, '../scripts/backuptests3.sh');
+                var tmpUrl = 's3://' + apiConfig.bucket + '/' + apiConfig.prefix + '/testfile';
+                var args = [ tmpUrl, apiConfig.accessKeyId, apiConfig.secretAccessKey, apiConfig.region ];
+
+                // if this fails the region is wrong, otherwise we would have failed earlier.
+                shell.exec('backupTestS3', BACKUP_TEST_CMD, args, function (error) {
+                    if (error) return callback(new SettingsError(SettingsError.EXTERNAL_ERROR, 'Wrong region'));
+
+                    callback();
+                });
             });
         });
     });
