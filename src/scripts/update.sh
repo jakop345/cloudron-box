@@ -30,7 +30,7 @@ echo "Updating Cloudron with ${sourceTarballUrl}" &>> "${LOG_FILE}"
 echo "${data}" &>> "${LOG_FILE}"
 
 echo "=> Run installer.sh"
-if ! ${INSTALLER_SOURCE_DIR}/src/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}" &>> "${LOG_FILE}"; then
+if ! ${INSTALLER_SOURCE_DIR}/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}" &>> "${LOG_FILE}"; then
     echo "Failed to install cloudron. See ${LOG_FILE} for details"
     exit 1
 fi
