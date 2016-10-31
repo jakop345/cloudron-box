@@ -225,7 +225,7 @@ function initializeExpressSync() {
     return httpServer;
 }
 
-// provides hooks for the 'installer'
+// provides local webhooks for sysadmins
 function initializeSysadminExpressSync() {
     var app = express();
     var httpServer = http.createServer(app);
