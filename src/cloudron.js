@@ -60,7 +60,7 @@ var apps = require('./apps.js'),
     _ = require('underscore');
 
 var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
-    INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update',
+    UPDATE_CMD = path.join(__dirname, 'scripts/update.sh'),
     RETIRE_CMD = path.join(__dirname, 'scripts/retire.sh');
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
@@ -580,49 +580,39 @@ function doUpdate(boxUpdateInfo, callback) {
     backups.backupBoxAndApps({ userId: null, username: 'updater' }, function (error) {
         if (error) return updateError(error);
 
-        // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
-        var args = {
-            sourceTarballUrl: boxUpdateInfo.sourceTarballUrl,
+        // NOTE: this data is opaque and will be passed through the installer.sh
+        var data= {
+            provider: config.provider(),
+            token: config.token(),
+            apiServerOrigin: config.apiServerOrigin(),
+            webServerOrigin: config.webServerOrigin(),
+            fqdn: config.fqdn(),
+            tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+            tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+            isCustomDomain: config.isCustomDomain(),
+            isDemo: config.isDemo(),
 
-            // this data is opaque to the installer
-            data: {
-                provider: config.provider(),
+            appstore: {
+                token: config.token(),
+                apiServerOrigin: config.apiServerOrigin()
+            },
+            caas: {
                 token: config.token(),
                 apiServerOrigin: config.apiServerOrigin(),
-                webServerOrigin: config.webServerOrigin(),
-                fqdn: config.fqdn(),
-                tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
-                tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
-                isCustomDomain: config.isCustomDomain(),
-                isDemo: config.isDemo(),
+                webServerOrigin: config.webServerOrigin()
+            },
 
-                appstore: {
-                    token: config.token(),
-                    apiServerOrigin: config.apiServerOrigin()
-                },
-                caas: {
-                    token: config.token(),
-                    apiServerOrigin: config.apiServerOrigin(),
-                    webServerOrigin: config.webServerOrigin()
-                },
-
-                version: boxUpdateInfo.version,
-                boxVersionsUrl: config.get('boxVersionsUrl')
-            }
+            version: boxUpdateInfo.version,
+            boxVersionsUrl: config.get('boxVersionsUrl')
         };
 
-        debug('updating box %j', args);
+        debug('updating box %s %j', boxUpdateInfo.sourceTarballUrl, data);
 
-        superagent.post(INSTALLER_UPDATE_URL).send(args).timeout(30 * 1000).end(function (error, result) {
-            if (error && !error.response) return updateError(error);
-            if (result.statusCode !== 202) return updateError(new Error('Error initiating update: ' + JSON.stringify(result.body)));
+        shell.sudoDetached('update', [ UPDATE_CMD, boxUpdateInfo.sourceTarballUrl, JSON.stringify(data) ], function (error) {
+            if (error) return updateError(error);
 
-            progress.set(progress.UPDATE, 10, 'Updating cloudron software');
-
-            callback(null);
+            // Do not add any code here. The installer script will stop the box code any instant
         });
-
-        // Do not add any code here. The installer script will stop the box code any instant
     });
 }
 
