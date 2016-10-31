@@ -304,7 +304,7 @@ To restore a Cloudron from a specific backup:
 
 You can SSH into your Cloudron and collect logs:
 
-* `journalctl -a -u box -u cloudron-installer` to get debug output of box related code.
+* `journalctl -a -u box` to get debug output of box related code.
 * `docker ps` will give you the list of containers. The addon containers are named as `mail`, `postgresql`,
    `mysql` etc. If you want to get a specific container's log output, `journalctl -a CONTAINER_ID=<container_id>`.
 
