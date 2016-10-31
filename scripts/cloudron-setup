@@ -77,9 +77,6 @@ if ! sourceTarballUrl=$(${NPM_BIN}/cloudron-version --out tarballUrl --versions-
     exit 1
 fi
 
-# start the update server
-systemctl start cloudron-installer
-
 data=$(cat <<EOF
 {
     "boxVersionsUrl": "${versionsUrl}",

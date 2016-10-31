@@ -25,9 +25,6 @@ fi
 echo "Stopping apps"
 systemctl stop docker # stop the apps
 
-echo "Stopping installer"
-systemctl stop cloudron-installer # stop the installer
-
 # do this at the end since stopping the box will kill this script as well
 echo "Stopping Cloudron Smartserver"
 "${BOX_SRC_DIR}/setup/stop.sh"
