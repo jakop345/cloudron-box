@@ -210,26 +210,6 @@ chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 echo "==== Install cloudron-version tool ===="
 npm install -g cloudron-version@0.1.1
 
-echo "==== Install installer systemd script ===="
-cat > /etc/systemd/system/cloudron-installer.service <<EOF
-[Unit]
-Description=Cloudron Installer
-; journald crashes result in a EPIPE in node. Cannot ignore it as it results in loss of logs.
-BindsTo=systemd-journald.service
-After=box-setup.service
-
-[Service]
-Type=idle
-ExecStart="${INSTALLER_SOURCE_DIR}/src/server.js"
-Environment="DEBUG=installer*,connect-lastmile"
-; kill any child (installer.sh) as well
-KillMode=control-group
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
 # Restore iptables before docker
 echo "==== Install iptables-restore systemd script ===="
 cat > /etc/systemd/system/iptables-restore.service <<EOF
@@ -266,7 +246,6 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable cloudron-installer
 systemctl enable iptables-restore
 systemctl enable box-setup
 
