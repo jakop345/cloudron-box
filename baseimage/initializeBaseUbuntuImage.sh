@@ -202,10 +202,8 @@ rm -rf /tmp/box && mkdir -p /tmp/box
 curl "https://git.cloudron.io/cloudron/box/repository/archive.tar.gz?ref=${INSTALLER_REVISION}" | tar zxvf - --strip-components=1 -C /tmp/box
 mkdir -p "${INSTALLER_SOURCE_DIR}"
 cp -rf /tmp/box/installer/* "${INSTALLER_SOURCE_DIR}" && rm -rf /tmp/box
-echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
-
-cd "${INSTALLER_SOURCE_DIR}" && while ! npm install --production; do sleep 1; done
 chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
+echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
 
 echo "==== Install cloudron-version tool ===="
 npm install -g cloudron-version@0.1.1
