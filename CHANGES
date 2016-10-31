@@ -661,3 +661,5 @@
 * Fix bug in Cloudron plan listing
 * Improved storage provider interface
 
+[0.70.0]
+* Remove standalone installer daemon
