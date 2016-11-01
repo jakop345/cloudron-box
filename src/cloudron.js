@@ -608,7 +608,7 @@ function doUpdate(boxUpdateInfo, callback) {
 
         debug('updating box %s %j', boxUpdateInfo.sourceTarballUrl, data);
 
-        shell.sudoDetached('update', [ UPDATE_CMD, boxUpdateInfo.sourceTarballUrl, JSON.stringify(data) ], function (error) {
+        shell.sudo('update', [ UPDATE_CMD, boxUpdateInfo.sourceTarballUrl, JSON.stringify(data) ], function (error) {
             if (error) return updateError(error);
 
             // Do not add any code here. The installer script will stop the box code any instant
