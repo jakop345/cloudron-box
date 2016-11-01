@@ -2,6 +2,11 @@
 
 set -eu -o pipefail
 
+if [[ ${EUID} -ne 0 ]]; then
+    echo "This script should be run as root." > /dev/stderr
+    exit 1
+fi
+
 # change this to a hash when we make a upgrade release
 readonly INSTALLER_REVISION=master
 readonly INIT_BASESYSTEM_SCRIPT_URL="https://git.cloudron.io/cloudron/box/raw/${INSTALLER_REVISION}/baseimage/initializeBaseUbuntuImage.sh"

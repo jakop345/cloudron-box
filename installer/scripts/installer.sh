@@ -2,6 +2,11 @@
 
 set -eu -o pipefail
 
+if [[ ${EUID} -ne 0 ]]; then
+    echo "This script should be run as root." > /dev/stderr
+    exit 1
+fi
+
 readonly BOX_SRC_DIR=/home/yellowtent/box
 readonly DATA_DIR=/home/yellowtent/data
 readonly CLOUDRON_CONF=/home/yellowtent/configs/cloudron.conf
@@ -41,6 +46,10 @@ while true; do
     echo "Failed to download source tarball, trying again"
     sleep 5
 done
+
+# ensure ownership baked into the tarball is overwritten
+chown -R root.root "${box_src_tmp_dir}"
+
 while true; do
     # for reasons unknown, the dtrace package will fail. but rebuilding second time will work
     if cd "${box_src_tmp_dir}" && npm rebuild; then break; fi
