@@ -52,7 +52,11 @@ chown -R root.root "${box_src_tmp_dir}"
 
 while true; do
     # for reasons unknown, the dtrace package will fail. but rebuilding second time will work
-    if cd "${box_src_tmp_dir}" && npm rebuild; then break; fi
+
+    # We need --unsafe-perm as we run as root and the folder is owned by root,
+    # however by default npm drops privileges for npm rebuild
+    # https://docs.npmjs.com/misc/config#unsafe-perm
+    if cd "${box_src_tmp_dir}" && npm rebuild --unsafe-perm; then break; fi
     echo "Failed to rebuild, trying again"
     sleep 5
 done
