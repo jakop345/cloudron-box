@@ -77,6 +77,9 @@ if ! sourceTarballUrl=$(${NPM_BIN}/cloudron-version --out tarballUrl --versions-
     exit 1
 fi
 
+echo "=> Run base init service"
+systemctl start box-setup
+
 data=$(cat <<EOF
 {
     "boxVersionsUrl": "${versionsUrl}",
