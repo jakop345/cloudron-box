@@ -192,7 +192,7 @@ as soon as possible.
 
 Provide S3 backup credentials in the `Settings` page.
 
-Create a bucket in S3. The bucket can be setup to periodically delete old backups by
+Create a bucket in S3 (You have to have an account at [AWS](https://aws.amazon.com/)). The bucket can be setup to periodically delete old backups by
 adding a lifecycle rule using the AWS console. S3 supports both permanent deletion
 or moving objects to the cheaper Glacier storage class based on an age attribute.
 With the current daily backup schedule a setting of two days should be sufficient
