@@ -8,7 +8,8 @@ if [[ ${EUID} -ne 0 ]]; then
 fi
 
 readonly INSTALLER_SOURCE_DIR="/home/yellowtent/installer"
-readonly LOG_FILE="/var/log/cloudron-update.log"
+readonly UPDATER_SERVICE="cloudron-updater"
+readonly DATA_FILE="/tmp/cloudron-update-data.json"
 
 if [[ $# == 1 && "$1" == "--check" ]]; then
     echo "OK"
@@ -23,14 +24,17 @@ fi
 readonly sourceTarballUrl="${1}"
 readonly data="${2}"
 
-echo " " &>> "${LOG_FILE}"
-echo "============ update marker ============" &>> "${LOG_FILE}"
-echo " " &>> "${LOG_FILE}"
-echo "Updating Cloudron with ${sourceTarballUrl}" &>> "${LOG_FILE}"
-echo "${data}" &>> "${LOG_FILE}"
+echo "Updating Cloudron with ${sourceTarballUrl}"
+echo "${data}"
 
-echo "=> Run installer.sh"
-if ! ${INSTALLER_SOURCE_DIR}/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}" &>> "${LOG_FILE}"; then
+# Save user data in file, to avoid argument length limit with systemd-run
+echo "${data}" > "${DATA_FILE}"
+
+echo "=> Run installer.sh as cloudron-updater.service"
+if ! systemd-run --unit "${UPDATER_SERVICE}" ${INSTALLER_SOURCE_DIR}/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data-file "${DATA_FILE}"; then
     echo "Failed to install cloudron. See ${LOG_FILE} for details"
     exit 1
 fi
+
+echo "=> service ${UPDATER_SERVICE} started."
+echo "=> See logs with journalctl -u ${UPDATER_SERVICE} -f"
