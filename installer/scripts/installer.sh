@@ -41,16 +41,21 @@ done
 box_src_tmp_dir=$(mktemp -dt box-src-XXXXXX)
 echo "Downloading box code from ${arg_source_tarball_url} to ${box_src_tmp_dir}"
 
-while true; do
+for try in `seq 1 10`; do
     if $curl -L "${arg_source_tarball_url}" | tar -zxf - -C "${box_src_tmp_dir}"; then break; fi
     echo "Failed to download source tarball, trying again"
     sleep 5
 done
 
+if [[ ${try} -eq 10 ]]; then
+    echo "Release tarball download failed"
+    exit 3
+fi
+
 # ensure ownership baked into the tarball is overwritten
 chown -R root.root "${box_src_tmp_dir}"
 
-while true; do
+for try in `seq 1 10`; do
     # for reasons unknown, the dtrace package will fail. but rebuilding second time will work
 
     # We need --unsafe-perm as we run as root and the folder is owned by root,
@@ -60,6 +65,11 @@ while true; do
     echo "Failed to rebuild, trying again"
     sleep 5
 done
+
+if [[ ${try} -eq 10 ]]; then
+    echo "npm rebuild failed"
+    exit 4
+fi
 
 if [[ "${is_update}" == "yes" ]]; then
     echo "Setting up update splash screen"
