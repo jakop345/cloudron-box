@@ -23,20 +23,26 @@ chmod +x /home/yellowtent/provision.sh
 
 arg_source_tarball_url=""
 arg_data=""
+arg_data_file=""
 
-args=$(getopt -o "" -l "sourcetarballurl:,data:" -n "$0" -- "$@")
+args=$(getopt -o "" -l "sourcetarballurl:,data:,data-file:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
     --sourcetarballurl) arg_source_tarball_url="$2";;
     --data) arg_data="$2";;
+    --data-file) arg_data_file="$2";;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
 
     shift 2
 done
+
+if [[ ! -z ${arg_data_file} ]]; then
+    arg_data=$(cat "${arg_data_file}")
+fi
 
 box_src_tmp_dir=$(mktemp -dt box-src-XXXXXX)
 echo "Downloading box code from ${arg_source_tarball_url} to ${box_src_tmp_dir}"
