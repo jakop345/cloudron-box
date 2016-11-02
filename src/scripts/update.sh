@@ -27,6 +27,9 @@ readonly data="${2}"
 echo "Updating Cloudron with ${sourceTarballUrl}"
 echo "${data}"
 
+echo "=> reset service ${UPDATER_SERVICE} status in case it failed"
+systemctl reset-failed "${UPDATER_SERVICE}"
+
 # Save user data in file, to avoid argument length limit with systemd-run
 echo "${data}" > "${DATA_FILE}"
 
