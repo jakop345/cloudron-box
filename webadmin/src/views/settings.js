@@ -406,7 +406,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             if (error) return console.error(error);
 
             var found = false;
-            var SIZE_SLUGS = [ '512mb', '1gb', '2gb', '4gb', '8gb', '16bg', '32gb', '48gb', '64gb' ];
+            var SIZE_SLUGS = [ '512mb', '1gb', '2gb', '4gb', '8gb', '16gb', '32gb', '48gb', '64gb' ];
             result = result.filter(function (size) {
                 // only show plans bigger than the current size
                 if (found) return true;
