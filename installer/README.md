@@ -20,7 +20,7 @@ Two arguments need to be supplied in this order:
  2. JSON object which contains the user-data `--data`
 
 
-## box-setup.sh
+## cloudron-system-setup.sh
 
 This is the systemd unit file script hook, which persists Cloudron updates.
 Mostly it revolves around setting up various parts of the filesystem, like btrfs

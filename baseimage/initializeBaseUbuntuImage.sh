@@ -116,7 +116,7 @@ if ! grep -q loop.ko /lib/modules/`uname -r`/modules.builtin; then
     echo "loop" >> /etc/modules
     modprobe loop
 fi
-truncate -s "8192m" "${USER_DATA_FILE}" # 8gb start (this will get resized dynamically by box-setup.service)
+truncate -s "8192m" "${USER_DATA_FILE}" # 8gb start (this will get resized dynamically by cloudron-system-setup.service)
 mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
 mkdir -p "${USER_DATA_DIR}"
 mount -t btrfs -o loop,nosuid "${USER_DATA_FILE}" ${USER_DATA_DIR}
@@ -227,8 +227,8 @@ EOF
 # Allocate swap files
 # https://bbs.archlinux.org/viewtopic.php?id=194792 ensures this runs after do-resize.service
 # On ubuntu ec2 we use cloud-init https://wiki.archlinux.org/index.php/Cloud-init
-echo "==== Install box-setup systemd script ===="
-cat > /etc/systemd/system/box-setup.service <<EOF
+echo "==== Install cloudron-system-setup systemd script ===="
+cat > /etc/systemd/system/cloudron-system-setup.service <<EOF
 [Unit]
 Description=Box Setup
 Before=docker.service collectd.service mysql.service sshd.service nginx.service
@@ -236,7 +236,7 @@ After=cloud-init.service
 
 [Service]
 Type=oneshot
-ExecStart="${INSTALLER_SOURCE_DIR}/systemd/box-setup.sh"
+ExecStart="${INSTALLER_SOURCE_DIR}/systemd/cloudron-system-setup.sh"
 RemainAfterExit=yes
 
 [Install]
@@ -245,7 +245,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable iptables-restore
-systemctl enable box-setup
+systemctl enable cloudron-system-setup
 
 # Configure systemd
 sed -e "s/^#SystemMaxUse=.*$/SystemMaxUse=100M/" \

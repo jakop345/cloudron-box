@@ -973,7 +973,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var needed = app.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT; // RAM+Swap
         var used = this.getInstalledApps().reduce(function (prev, cur) { return prev + (cur.memoryLimit || cur.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT); }, 0);
         var roundedMemory = Math.round(this.getConfig().memory / (1024 * 1024 * 1024)) * 1024 * 1024 * 1024; // round to nearest GB
-        var totalMemory = roundedMemory * 1.2; // box-setup.sh creates equal amount of swap. 1.2 factor is arbitrary
+        var totalMemory = roundedMemory * 1.2; // cloudron-system-setup.sh creates equal amount of swap. 1.2 factor is arbitrary
         var available = (totalMemory || 0) - used;
 
         console.log(needed, used, roundedMemory, totalMemory, available);
