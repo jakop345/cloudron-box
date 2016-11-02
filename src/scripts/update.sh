@@ -28,7 +28,9 @@ echo "Updating Cloudron with ${sourceTarballUrl}"
 echo "${data}"
 
 echo "=> reset service ${UPDATER_SERVICE} status in case it failed"
-systemctl reset-failed "${UPDATER_SERVICE}"
+if systemctl reset-failed "${UPDATER_SERVICE}"; then
+    echo "=> service has failed earlier"
+fi
 
 # Save user data in file, to avoid argument length limit with systemd-run
 echo "${data}" > "${DATA_FILE}"
@@ -41,3 +43,13 @@ fi
 
 echo "=> service ${UPDATER_SERVICE} started."
 echo "=> See logs with journalctl -u ${UPDATER_SERVICE} -f"
+
+while true; do
+    if systemctl is-failed "${UPDATER_SERVICE}"; then
+        echo "=> ${UPDATER_SERVICE} has failed"
+        exit 1
+    fi
+
+    sleep 5
+    # this loop will stop once the update process stopped the box unit and thus terminating this child process
+done
