@@ -656,3 +656,8 @@
 * Send email to admins if backup fails
 * Add UI to set digitalocean as DNS provider
 
+[0.60.1]
+* Apply less strict hostname checking for email
+* Fix bug in Cloudron plan listing
+* Improved storage provider interface
+
