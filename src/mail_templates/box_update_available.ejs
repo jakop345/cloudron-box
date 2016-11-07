@@ -22,24 +22,26 @@ your Cloudron
 
 <h3>Dear <%= cloudronName %> Admin,</h3>
 
-<p>
-    Version <b><%= newBoxVersion %></b> for Cloudron <%= fqdn %> is now available!
-</p>
+<div style="width: 650px; text-align: left;">
+    <p>
+        Version <b><%= newBoxVersion %></b> for Cloudron <%= fqdn %> is now available!
+    </p>
 
-<p>
-    Your Cloudron will update automatically tonight.<br/>
-    Alternately, update immediately <a href="<%= webadminUrl %>">here</a>.
-</p>
+    <p>
+        Your Cloudron will update automatically tonight.<br/>
+        Alternately, update immediately <a href="<%= webadminUrl %>">here</a>.
+    </p>
 
-<h5>Changelog:</h5>
-<ul>
-<% for (var i = 0; i < changelogHTML.length; i++) { %>
-    <li><%- changelogHTML[i] %></li>
-<% } %>
-</ul>
+    <h5>Changelog:</h5>
+    <ul>
+    <% for (var i = 0; i < changelogHTML.length; i++) { %>
+        <li><%- changelogHTML[i] %></li>
+    <% } %>
+    </ul>
 
-<br/>
-<br/>
+    <br/>
+    <br/>
+</div>
 
 <div style="font-size: 10px; color: #333333; background: #ffffff;">
     Powered by <a href="https://cloudron.io">Cloudron</a>.
