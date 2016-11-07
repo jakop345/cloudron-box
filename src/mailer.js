@@ -393,29 +393,37 @@ function boxUpdateAvailable(newBoxVersion, changelog) {
     getAdminEmails(function (error, adminEmails) {
         if (error) return console.log('Error getting admins', error);
 
-        var templateData = {
-            fqdn: config.fqdn(),
-            webadminUrl: config.adminOrigin(),
-            newBoxVersion: newBoxVersion,
-            changelog: changelog,
-            cloudronAvatarUrl: config.adminOrigin() + '/api/v1/cloudron/avatar'
-        };
+        settings.getCloudronName(function (error, cloudronName) {
+            if (error) {
+                console.error(error);
+                cloudronName = 'Cloudron';
+            }
 
-        var templateDataText = JSON.parse(JSON.stringify(templateData));
-        templateDataText.format = 'text';
+            var templateData = {
+                fqdn: config.fqdn(),
+                webadminUrl: config.adminOrigin(),
+                newBoxVersion: newBoxVersion,
+                changelog: changelog,
+                cloudronName: cloudronName,
+                cloudronAvatarUrl: config.adminOrigin() + '/api/v1/cloudron/avatar'
+            };
 
-        var templateDataHTML = JSON.parse(JSON.stringify(templateData));
-        templateDataHTML.format = 'html';
+            var templateDataText = JSON.parse(JSON.stringify(templateData));
+            templateDataText.format = 'text';
 
-         var mailOptions = {
-            from: mailConfig().from,
-            to: adminEmails.join(', '),
-            subject: util.format('%s has a new update available', config.fqdn()),
-            text: render('box_update_available.ejs', templateDataText),
-            html: render('box_update_available.ejs', templateDataHTML)
-        };
+            var templateDataHTML = JSON.parse(JSON.stringify(templateData));
+            templateDataHTML.format = 'html';
 
-        enqueue(mailOptions);
+             var mailOptions = {
+                from: mailConfig().from,
+                to: adminEmails.join(', '),
+                subject: util.format('%s has a new update available', config.fqdn()),
+                text: render('box_update_available.ejs', templateDataText),
+                html: render('box_update_available.ejs', templateDataHTML)
+            };
+
+            enqueue(mailOptions);
+        });
     });
 }
 
