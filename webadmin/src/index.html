@@ -112,6 +112,7 @@
                         <br/>
                         <br/>
                     </div>
+
                     <div ng-show="installedApps | readyToUpdate">
                         <b ng-show="config.update.box.upgrade" class="text-danger">
                             This update upgrades the base system and will cause some application downtime.<br/>
@@ -122,6 +123,7 @@
                             <li ng-repeat="change in config.update.box.changelog">{{change}}</li>
                         </ul>
                         <br/>
+                        <p ng-show="update.error.generic" class="text-danger">{{ update.error.generic }}</p>
                         <div ng-hide="config.provider !== 'caas' && config.update.box.upgrade">
                             <fieldset>
                                 <form name="update_form" role="form" ng-submit="doUpdate()" autocomplete="off">
