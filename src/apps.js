@@ -69,6 +69,7 @@ var addons = require('./addons.js'),
     split = require('split'),
     superagent = require('superagent'),
     taskmanager = require('./taskmanager.js'),
+    updateChecker = require('./updatechecker.js'),
     url = require('url'),
     util = require('util'),
     uuid = require('node-uuid'),
@@ -682,6 +683,9 @@ function update(appId, data, auditSource, callback) {
                 taskmanager.restartAppTask(appId);
 
                 eventlog.add(eventlog.ACTION_APP_UPDATE, auditSource, { appId: appId, toManifest: manifest, fromManifest: app.manifest, force: data.force });
+
+                // clear update indicator, if update fails, it will come back through the update checker
+                updateChecker.resetAppUpdateInfo(appId);
 
                 callback(null);
             });

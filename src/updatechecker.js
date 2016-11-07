@@ -5,7 +5,8 @@ exports = module.exports = {
     checkBoxUpdates: checkBoxUpdates,
 
     getUpdateInfo: getUpdateInfo,
-    resetUpdateInfo: resetUpdateInfo
+    resetUpdateInfo: resetUpdateInfo,
+    resetAppUpdateInfo: resetAppUpdateInfo
 };
 
 var apps = require('./apps.js'),
@@ -42,8 +43,17 @@ function getUpdateInfo() {
 }
 
 function resetUpdateInfo() {
-    gAppUpdateInfo = { };
     gBoxUpdateInfo = null;
+    resetAppUpdateInfo();
+}
+
+// If no appId provided all apps are reset
+function resetAppUpdateInfo(appId) {
+    if (!appId) {
+        gAppUpdateInfo = {};
+    } else {
+        delete gAppUpdateInfo[appId];
+    }
 }
 
 function getAppUpdate(app, callback) {
