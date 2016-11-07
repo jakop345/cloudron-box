@@ -2590,6 +2590,11 @@
       "from": "semver@>=4.3.6 <5.0.0",
       "resolved": "https://registry.npmjs.org/semver/-/semver-4.3.6.tgz"
     },
+    "showdown": {
+      "version": "1.4.4",
+      "from": "showdown@*",
+      "resolved": "https://registry.npmjs.org/showdown/-/showdown-1.4.4.tgz"
+    },
     "split": {
       "version": "1.0.0",
       "from": "split@>=1.0.0 <2.0.0",
@@ -2748,17 +2753,17 @@
     },
     "ursa": {
       "version": "0.9.4",
-      "from": "ursa@>=0.9.3 <0.10.0",
+      "from": "https://registry.npmjs.org/ursa/-/ursa-0.9.4.tgz",
       "resolved": "https://registry.npmjs.org/ursa/-/ursa-0.9.4.tgz",
       "dependencies": {
         "bindings": {
           "version": "1.2.1",
-          "from": "bindings@>=1.2.1 <2.0.0",
+          "from": "https://registry.npmjs.org/bindings/-/bindings-1.2.1.tgz",
           "resolved": "https://registry.npmjs.org/bindings/-/bindings-1.2.1.tgz"
         },
         "nan": {
           "version": "2.4.0",
-          "from": "nan@>=2.3.3 <3.0.0",
+          "from": "https://registry.npmjs.org/nan/-/nan-2.4.0.tgz",
           "resolved": "https://registry.npmjs.org/nan/-/nan-2.4.0.tgz"
         }
       }
