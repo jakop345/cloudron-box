@@ -44,6 +44,7 @@ var assert = require('assert'),
     path = require('path'),
     safe = require('safetydance'),
     settings = require('./settings.js'),
+    showdown = require('showdown'),
     smtpTransport = require('nodemailer-smtp-transport'),
     users = require('./user.js'),
     util = require('util'),
@@ -399,11 +400,14 @@ function boxUpdateAvailable(newBoxVersion, changelog) {
                 cloudronName = 'Cloudron';
             }
 
+            var converter = new showdown.Converter();
+
             var templateData = {
                 fqdn: config.fqdn(),
                 webadminUrl: config.adminOrigin(),
                 newBoxVersion: newBoxVersion,
                 changelog: changelog,
+                changelogHTML: changelog.map(function (e) { return converter.makeHtml(e); }),
                 cloudronName: cloudronName,
                 cloudronAvatarUrl: config.adminOrigin() + '/api/v1/cloudron/avatar'
             };
