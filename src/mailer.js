@@ -393,11 +393,26 @@ function boxUpdateAvailable(newBoxVersion, changelog) {
     getAdminEmails(function (error, adminEmails) {
         if (error) return console.log('Error getting admins', error);
 
+        var templateData = {
+            fqdn: config.fqdn(),
+            webadminUrl: config.adminOrigin(),
+            newBoxVersion: newBoxVersion,
+            changelog: changelog,
+            cloudronAvatarUrl: config.adminOrigin() + '/api/v1/cloudron/avatar'
+        };
+
+        var templateDataText = JSON.parse(JSON.stringify(templateData));
+        templateDataText.format = 'text';
+
+        var templateDataHTML = JSON.parse(JSON.stringify(templateData));
+        templateDataHTML.format = 'html';
+
          var mailOptions = {
             from: mailConfig().from,
             to: adminEmails.join(', '),
             subject: util.format('%s has a new update available', config.fqdn()),
-            text: render('box_update_available.ejs', { fqdn: config.fqdn(), webadminUrl: config.adminOrigin(), newBoxVersion: newBoxVersion, changelog: changelog, format: 'text' })
+            text: render('box_update_available.ejs', templateDataText),
+            html: render('box_update_available.ejs', templateDataHTML)
         };
 
         enqueue(mailOptions);

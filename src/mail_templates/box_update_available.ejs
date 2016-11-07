@@ -16,5 +16,35 @@ your Cloudron
 
 <% } else { %>
 
+<center>
+
+<img src="<%= cloudronAvatarUrl %>" width="128px" height="128px"/>
+
+<h3>Dear Admin,</h3>
+
+<p>
+    Version <%= newBoxVersion %> of Cloudron <%= fqdn %> is now available!
+</p>
+
+<p>
+    Your Cloudron will update automatically tonight. Alternately, update immediately at <%= webadminUrl %>.
+</p>
+
+<h5>Changelog:</h5>
+<ul>
+<% for (var i = 0; i < changelog.length; i++) { %>
+    <li><%- changelog[i] %></li>
+<% } %>
+</ul>
+
+<br/>
+<br/>
+
+<div style="font-size: 10px; color: #333333; background: #ffffff;">
+    Powered by <a href="https://cloudron.io">Cloudron</a>.
+</div>
+
+</center>
+
 <% } %>
 
