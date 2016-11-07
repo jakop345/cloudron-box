@@ -120,7 +120,7 @@
                         <p>New version: <b>{{config.update.box.version}}</b></p>
                         <p>Recent Changes:</p>
                         <ul>
-                            <li ng-repeat="change in config.update.box.changelog">{{change}}</li>
+                            <li ng-repeat="change in config.update.box.changelog" ng-bind-html="change | markdown2html"></li>
                         </ul>
                         <br/>
                         <p ng-show="update.error.generic" class="text-danger">{{ update.error.generic }}</p>
