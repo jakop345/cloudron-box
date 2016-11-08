@@ -269,7 +269,10 @@ case an update fails, it can be [restored](/references/selfhosting.html#restore)
 
 An **upgrade** requires a new OS image and thus involves creating the Cloudron from scratch.
 This process involves creating a new server with the latest code and restoring it from the
-last backup.
+last backup. Currently only Cloudrons using the **S3 backup storage** support upgrades.
+Read more about [backup storage](#s3), otherwise contact us in our [chat](https://chat.cloudron.io).
+
+To upgrade follow these steps closely:
 
 * Create a new backup - `cloudron machine backup create <domain>`
 
