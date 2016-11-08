@@ -251,7 +251,7 @@ you can apply for removal of your IP by filling out a form at the DNSBL manager 
 * Finally, check your spam score at [mail-tester.com](https://www.mail-tester.com/). The Cloudron
 should get 100%, if not please let us know.
 
-# Update
+# Updates
 
 Apps installed from the Cloudron Store are automatically updated every night.
 
