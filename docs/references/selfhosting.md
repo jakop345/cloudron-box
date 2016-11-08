@@ -275,14 +275,23 @@ last backup.
 
 * List the latest backup - `cloudron machine backup list <domain>`
 
-* Make the latest box backup public (this can be done from the S3 console). Also, copy the URL of
-  the latest backup for use as the `restore-url` below.
+* Make the latest box backup public. This can be done from the AWS S3 console as seen here:
+
+  <img src="/docs/img/aws_backup_public.png" class="shadow haze"><br/>
+
+* Copy the new public URL of the latest backup for use as the `--restore-url` below.
 
 * Create a new Cloudron by following the [installing](/references/selfhosting.html#installing) section.
-  When running the setup script, pass in the `version`, `restore-key` and `restore-url` flags.
-  The `version` field is displayed in the upgrade dialog in the web ui.
+  When running the setup script, pass in the `--restore-key` and `--restore-url` flags.
+  The `--restore-key` is the backup encryption key. It can be displayed with `cloudron machine info`
 
-* Make the box backup private, once the upgrade is complete.
+Similar to the initial installation, a Cloudron upgrade looks like:
+```
+$ ssh root@newserverip
+> wget https://git.cloudron.io/cloudron/box/raw/master/scripts/cloudron-setup
+> chmod +x cloudron-setup
+> ./cloudron-setup --domain <domain> --provider <digitalocean|ec2|generic|scaleway> --restore-key <encryptionKey> --restore-url <publicS3Url>
+```
 
 # Restore
 
