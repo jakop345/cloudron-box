@@ -278,11 +278,13 @@ To upgrade follow these steps closely:
 
 * List the latest backup - `cloudron machine backup list <domain>`
 
-* Make the latest box backup public. This can be done from the AWS S3 console as seen here:
+* Make the latest box backup (files starting with `backup_`) public. This can be done from the AWS S3 console as seen here:
 
   <img src="/docs/img/aws_backup_public.png" class="shadow haze"><br/>
 
 * Copy the new public URL of the latest backup for use as the `--restore-url` below.
+
+  <img src="/docs/img/aws_backup_link.png" class="shadow haze"><br/>
 
 * Create a new Cloudron by following the [installing](/references/selfhosting.html#installing) section.
   When running the setup script, pass in the `--restore-key` and `--restore-url` flags.
@@ -295,6 +297,8 @@ $ ssh root@newserverip
 > chmod +x cloudron-setup
 > ./cloudron-setup --domain <domain> --provider <digitalocean|ec2|generic|scaleway> --restore-key <encryptionKey> --restore-url <publicS3Url>
 ```
+
+ * Finally, once you see the newest version being displayed in your Cloudron webinterface, you can safely delete the old server instance.
 
 # Restore
 
