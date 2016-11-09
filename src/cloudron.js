@@ -488,12 +488,7 @@ function update(boxUpdateInfo, auditSource, callback) {
     progress.set(progress.UPDATE, 0, 'Starting');
 
     // initiate the update/upgrade but do not wait for it
-    if (config.version().match(/[-+]/) !== null && config.version().replace(/[-+].*/, '') === boxUpdateInfo.version) {
-        doShortCircuitUpdate(boxUpdateInfo, function (error) {
-            if (error) debug('Short-circuit update failed', error);
-            locker.unlock(locker.OP_BOX_UPDATE);
-        });
-    } else if (boxUpdateInfo.upgrade) {
+    if (boxUpdateInfo.upgrade) {
         debug('Starting upgrade');
         doUpgrade(boxUpdateInfo, function (error) {
             if (error) {
@@ -521,6 +516,15 @@ function updateToLatest(auditSource, callback) {
 
     var boxUpdateInfo = updateChecker.getUpdateInfo().box;
     if (!boxUpdateInfo) return callback(new CloudronError(CloudronError.ALREADY_UPTODATE, 'No update available'));
+
+    // check if this is just a version number change
+    if (config.version().match(/[-+]/) !== null && config.version().replace(/[-+].*/, '') === boxUpdateInfo.version) {
+        doShortCircuitUpdate(boxUpdateInfo, function (error) {
+            if (error) debug('Short-circuit update failed', error);
+        });
+
+        return callback(null);
+    }
 
     if (boxUpdateInfo.upgrade && config.provider() !== 'caas') return callback(new CloudronError(CloudronError.SELF_UPGRADE_NOT_SUPPORTED));
 
