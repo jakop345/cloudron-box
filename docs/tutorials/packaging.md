@@ -331,7 +331,7 @@ See https://git.cloudron.io/cloudron/tutorial-ldap for a simple example of how t
 For apps that are single user can skip Single Sign-On support by setting the `"singleUser": true`
 in the manifest. By doing so, the Cloudron will installer will show a dialog to choose a user.
 
-For app that have no user management at all, the Cloudron implements an `OAuth proxy` that 
+For app that have no user management at all, the Cloudron implements an `OAuth proxy` that
 optionally lets the Cloudron admin make the app visible only for logged in users.
 
 # Best practices
@@ -408,10 +408,19 @@ the `start.sh` script does the following:
 
 The app's main process must handle SIGTERM and forward it as required to child processes. bash does not
 automatically forward signals to child processes. For this reason, when using a startup shell script,
-remember to use exec <app> as the last line. Doing so will replace bash with your program and allows 
+remember to use exec <app> as the last line. Doing so will replace bash with your program and allows
 your program to handle signals as required.
 
 # Beta Testing
+
+## Metadata
+
+Publishing to the Cloudron Store requires apps to have meta data specified in the `CloudronManifest.json`.
+
+The `cloudron` tool will notify if any such information is missing, prior to uploading.
+See more information for each field [here](/references/manifest.html).
+
+## Upload for Testing
 
 Once your app is ready, you can upload it to the store for `beta testing` by
 other Cloudron users. This can be done using:
@@ -442,7 +451,7 @@ The cloudron.io team will review the app and publish the app to the store.
 ## Versioning
 
 To create an update for an app, simply bump up the [semver version](/references/manifest.html#version) field in
-the manifest and publish a new version to the store. 
+the manifest and publish a new version to the store.
 
 The Cloudron chooses the next app version to update to based on the following algorithm:
 * Choose the maximum `patch` version matching the app's current `major` and `minor` version.
@@ -461,7 +470,7 @@ The Cloudron admins get notified by email for any major or minor app releases.
 ## Failed updates
 
 The Cloudron always makes a backup of the app before making an update. Should the
-update fail, the user can restore to the backup (which will also restore the app's 
+update fail, the user can restore to the backup (which will also restore the app's
 code to the previous version).
 
 # Cloudron Button
