@@ -254,6 +254,8 @@ function setupOauth(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
+    if (!app.sso) return callback(null);
+
     var appId = app.id;
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
@@ -295,6 +297,8 @@ function setupSimpleAuth(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
+
+    if (!app.sso) return callback(null);
 
     var appId = app.id;
     var scope = 'profile';
@@ -369,6 +373,8 @@ function setupLdap(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
+
+    if (!app.sso) return callback(null);
 
     var env = [
         'LDAP_SERVER=172.18.0.1',
