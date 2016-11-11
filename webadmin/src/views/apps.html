@@ -66,14 +66,6 @@
 
                         <br/>
 
-                        <div class="form-group" ng-show="appConfigure.app.manifest.singleUser">
-                            <label class="control-label">User</label>
-                            <p>
-                                This is a single user application.<br/><br/>
-                                Access is granted to <b>{{ renderAccessRestrictionUser(appConfigure.app.accessRestriction.users[0]) }}</b>.
-                            </p>
-                        </div>
-
                         <div class="form-group" ng-show="appConfigure.app.manifest.customAuth">
                             <label class="control-label">Access control</label>
                             <p>
@@ -89,7 +81,7 @@
                             </p>
                         </div>
 
-                        <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser || appConfigure.app.manifest.customAuth || appConfigure.app.manifest.addons.email">
+                        <div class="form-group" ng-hide="appConfigure.app.manifest.customAuth || appConfigure.app.manifest.addons.email">
                             <label class="control-label">Access control</label>
                             <div class="radio" ng-show="appConfigure.needsOAuthProxy">
                                 <label>
