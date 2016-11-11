@@ -31,7 +31,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         accessRestrictionOption: 'any',
         accessRestriction: { users: [], groups: [] },
         xFrameOptions: '',
-        needsOAuthProxy: false,
 
         isAccessRestrictionValid: function () {
             var tmp = $scope.appConfigure.accessRestriction;
@@ -95,7 +94,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.accessRestrictionOption = 'any';
         $scope.appConfigure.accessRestriction = { users: [], groups: [] };
         $scope.appConfigure.xFrameOptions = '';
-        $scope.appConfigure.needsOAuthProxy = false;
 
         $scope.appConfigureForm.$setPristine();
         $scope.appConfigureForm.$setUntouched();
@@ -198,13 +196,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             $scope.appConfigure.memoryTicks.unshift(app.manifest.memoryLimit);
         }
 
-        var manifest = app.manifest;
-        $scope.appConfigure.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth'] || manifest.addons['email'] || manifest.customAuth);
-        if ($scope.appConfigure.needsOAuthProxy && !app.oauthProxy) {
-            $scope.appConfigure.accessRestrictionOption = 'unrestricted';
-        } else {
-            $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'groups' : 'any';
-        }
+        $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'groups' : 'any';
 
         // fill the portBinding structures. There might be holes in the app.portBindings, which signalizes a disabled port
         for (var env in $scope.appConfigure.portBindingsInfo) {
@@ -243,8 +235,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             cert: $scope.appConfigure.certificateFile,
             key: $scope.appConfigure.keyFile,
             xFrameOptions: $scope.appConfigure.xFrameOptions ? ('ALLOW-FROM ' + $scope.appConfigure.xFrameOptions) : 'SAMEORIGIN',
-            memoryLimit: $scope.appConfigure.memoryLimit === $scope.appConfigure.memoryTicks[0] ? 0 : $scope.appConfigure.memoryLimit,
-            oauthProxy:  $scope.appConfigure.needsOAuthProxy && $scope.appConfigure.accessRestrictionOption !== 'unrestricted'
+            memoryLimit: $scope.appConfigure.memoryLimit === $scope.appConfigure.memoryTicks[0] ? 0 : $scope.appConfigure.memoryLimit
         };
 
         Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, data, function (error) {

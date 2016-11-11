@@ -36,7 +36,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         keyFileName: '',
         accessRestrictionOption: 'any',
         accessRestriction: { users: [], groups: [] },
-        needsOAuthProxy: false,
         optionalSso: false,
 
         isAccessRestrictionValid: function () {
@@ -65,7 +64,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.keyFileName = '';
             $scope.appInstall.accessRestrictionOption = 'any';
             $scope.appInstall.accessRestriction = { users: [], groups: [] };
-            $scope.appInstall.needsOAuthProxy = false;
             $scope.appInstall.optionalSso = false;
 
             $('#collapseInstallForm').collapse('hide');
@@ -108,7 +106,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.accessRestriction = app.accessRestriction || { users: [], groups: [] };
 
             var manifest = app.manifest;
-            $scope.appInstall.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth'] || manifest.addons['email'] || manifest.customAuth);
             $scope.appInstall.optionalSso = !!manifest.optionalSso;
             $scope.appInstall.accessRestrictionOption = 'any';
 
@@ -144,7 +141,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 accessRestriction: accessRestriction,
                 cert: $scope.appInstall.certificateFile,
                 key: $scope.appInstall.keyFile,
-                oauthProxy:  $scope.appInstall.needsOAuthProxy && $scope.appInstall.accessRestrictionOption !== 'unrestricted',
                 sso: $scope.appInstall.optionalSso  && $scope.appInstall.accessRestriction == 'nosso'
             };
 
