@@ -125,6 +125,7 @@ function installApp(req, res, next) {
     if (data.xFrameOptions && typeof data.xFrameOptions !== 'string') return next(new HttpError(400, 'xFrameOptions must be a string'));
 
     if ('oauthProxy' in data && typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
+    if ('sso' in data && typeof data.sso !== 'boolean') return next(new HttpError(400, 'sso must be a boolean'));
 
     debug('Installing app :%j', data);
 

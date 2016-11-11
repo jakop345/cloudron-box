@@ -445,7 +445,8 @@ function install(data, auditSource, callback) {
         memoryLimit = data.memoryLimit || 0,
         altDomain = data.altDomain || null,
         xFrameOptions = data.xFrameOptions || 'SAMEORIGIN',
-        oauthProxy = data.oauthProxy === true;
+        oauthProxy = data.oauthProxy === true,
+        sso = 'sso' in data ? data.sso : null;
 
     assert(data.appStoreId || data.manifest); // atleast one of them is required
 
@@ -472,6 +473,8 @@ function install(data, auditSource, callback) {
 
         error = validateXFrameOptions(xFrameOptions);
         if (error) return callback(error);
+
+        if ('sso' in data && !('optionalAuth' in manifest)) return callback(new AppsError(AppsError.BAD_FIELD, 'sso can only be specified for apps with optionalAuth'));
 
         if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
 
@@ -502,7 +505,8 @@ function install(data, auditSource, callback) {
                 memoryLimit: memoryLimit,
                 altDomain: altDomain,
                 xFrameOptions: xFrameOptions,
-                oauthProxy: oauthProxy
+                oauthProxy: oauthProxy,
+                sso: sso
             };
 
             var from = (location ? location : manifest.title.toLowerCase().replace(/[^a-zA-Z0-9]/g, '')) + '.app';
