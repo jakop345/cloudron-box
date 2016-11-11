@@ -38,6 +38,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         accessRestriction: { users: [], groups: [] },
         accessRestrictionSingleUser: null,
         needsOAuthProxy: false,
+        optionalSso: false,
 
         isAccessRestrictionValid: function () {
             var tmp = $scope.appInstall.accessRestriction;
@@ -67,6 +68,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.accessRestriction = { users: [], groups: [] };
             $scope.appInstall.accessRestrictionSingleUser = null;
             $scope.appInstall.needsOAuthProxy = false;
+            $scope.appInstall.optionalSso = false;
 
             $('#collapseInstallForm').collapse('hide');
             $('#collapseResourceConstraint').collapse('hide');
@@ -110,6 +112,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             var manifest = app.manifest;
             $scope.appInstall.needsOAuthProxy = !(manifest.addons['ldap'] || manifest.addons['oauth'] || manifest.addons['simpleauth'] || manifest.addons['email'] || manifest.customAuth);
+            $scope.appInstall.optionalSso = !!manifest.optionalSso;
             $scope.appInstall.accessRestrictionOption = 'any';
 
             // set default ports
@@ -146,7 +149,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 accessRestriction: accessRestriction,
                 cert: $scope.appInstall.certificateFile,
                 key: $scope.appInstall.keyFile,
-                oauthProxy:  $scope.appInstall.needsOAuthProxy && ($scope.appInstall.app.manifest.singleUser || $scope.appInstall.accessRestrictionOption !== 'unrestricted')
+                oauthProxy:  $scope.appInstall.needsOAuthProxy && ($scope.appInstall.app.manifest.singleUser || $scope.appInstall.accessRestrictionOption !== 'unrestricted'),
+                sso: $scope.appInstall.optionalSso  && $scope.appInstall.accessRestriction == 'nosso'
             };
 
             Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, data, function (error) {
