@@ -84,6 +84,12 @@
                                     Unrestricted
                                 </label>
                             </div>
+                            <div class="radio" ng-show="appInstall.optionalSso">
+                                <label>
+                                    <input type="radio" ng-model="appInstall.accessRestrictionOption" value="nosso">
+                                    Disable Cloudron SSO
+                                </label>
+                            </div>
                         </div>
 
                         <br/>
