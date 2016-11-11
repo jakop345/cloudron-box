@@ -268,7 +268,8 @@ Required: no
 The `mediaLinks` field contains an array of links that the Cloudron Store uses to display a slide show of pictures
 and videos of the application.
 
-All links are preferably https.
+They have to be publicly reachable via `https` and should have an aspect ratio of 3 to 1.
+For example `600px by 200px` (with/height).
 
 ```
   "mediaLinks": [
