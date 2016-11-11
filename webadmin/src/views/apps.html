@@ -83,12 +83,6 @@
 
                         <div class="form-group" ng-hide="appConfigure.app.manifest.customAuth || appConfigure.app.manifest.addons.email">
                             <label class="control-label">Access control</label>
-                            <div class="radio" ng-show="appConfigure.needsOAuthProxy">
-                                <label>
-                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="unrestricted">
-                                    Unrestricted
-                                </label>
-                            </div>
                             <div class="radio">
                                 <label>
                                     <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="any">
