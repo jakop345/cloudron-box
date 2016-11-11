@@ -56,7 +56,6 @@ APP_MANIFEST.dockerImage = TEST_IMAGE;
 
 var APP_MANIFEST_1 = JSON.parse(fs.readFileSync(__dirname + '/../../../../test-app/CloudronManifest.json', 'utf8'));
 APP_MANIFEST_1.dockerImage = TEST_IMAGE;
-APP_MANIFEST_1.singleUser = true;
 
 var USERNAME = 'superadmin', PASSWORD = 'Foobar?1337', EMAIL ='admin@me.com';
 var USER_1_ID = null, USERNAME_1 = 'user', EMAIL_1 ='user@me.com';
@@ -390,28 +389,6 @@ describe('Apps', function () {
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.message).to.eql('accessRestriction is required');
-                done();
-            });
-        });
-
-        it('app install fails - accessRestriction no users not allowed', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/apps/install')
-                   .query({ access_token: token })
-                   .send({ manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: null })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(400);
-                expect(res.body.message).to.eql('accessRestriction must specify one user');
-                done();
-            });
-        });
-
-        it('app install fails - accessRestriction too many users not allowed', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/apps/install')
-                   .query({ access_token: token })
-                   .send({ manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: { users: [ 'one', 'two' ] } })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(400);
-                expect(res.body.message).to.eql('accessRestriction must specify one user');
                 done();
             });
         });

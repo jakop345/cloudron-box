@@ -136,7 +136,6 @@ function installApp(req, res, next) {
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BILLING_REQUIRED) return next(new HttpError(402, 'Billing required'));
         if (error && error.reason === AppsError.BAD_CERTIFICATE) return next(new HttpError(400, error.message));
-        if (error && error.reason === AppsError.USER_REQUIRED) return next(new HttpError(400, 'accessRestriction must specify one user'));
         if (error && error.reason === AppsError.EXTERNAL_ERROR) return next(new HttpError(503, error.message));
         if (error) return next(new HttpError(500, error));
 

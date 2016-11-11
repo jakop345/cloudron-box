@@ -106,7 +106,6 @@ AppsError.PORT_RESERVED = 'Port Reserved';
 AppsError.PORT_CONFLICT = 'Port Conflict';
 AppsError.BILLING_REQUIRED = 'Billing Required';
 AppsError.ACCESS_DENIED = 'Access denied';
-AppsError.USER_REQUIRED = 'User required';
 AppsError.BAD_CERTIFICATE = 'Invalid certificate';
 
 // Hostname validation comes from RFC 1123 (section 2.1)
@@ -477,10 +476,6 @@ function install(data, auditSource, callback) {
         if ('sso' in data && !('optionalAuth' in manifest)) return callback(new AppsError(AppsError.BAD_FIELD, 'sso can only be specified for apps with optionalAuth'));
 
         if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
-
-        // singleUser mode requires accessRestriction to contain exactly one user
-        if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
-        if (manifest.singleUser && accessRestriction.users.length !== 1) return callback(new AppsError(AppsError.USER_REQUIRED));
 
         var appId = uuid.v4();
 
