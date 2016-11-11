@@ -60,7 +60,7 @@ var assert = require('assert'),
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId',
     'apps.accessRestrictionJson', 'apps.lastBackupId', 'apps.oldConfigJson', 'apps.memoryLimit', 'apps.altDomain',
-    'apps.xFrameOptions', 'apps.oauthProxy' ].join(',');
+    'apps.xFrameOptions', 'apps.oauthProxy', 'apps.sso' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 
@@ -98,6 +98,7 @@ function postProcess(result) {
     result.xFrameOptions = result.xFrameOptions || 'SAMEORIGIN';
 
     result.oauthProxy = !!result.oauthProxy; // make it bool
+    result.sso = !!result.sso; // make it bool
 }
 
 function get(id, callback) {
