@@ -31,6 +31,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         accessRestrictionOption: 'any',
         accessRestriction: { users: [], groups: [] },
         xFrameOptions: '',
+        customAuth: false,
 
         isAccessRestrictionValid: function () {
             var tmp = $scope.appConfigure.accessRestriction;
@@ -94,6 +95,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.accessRestrictionOption = 'any';
         $scope.appConfigure.accessRestriction = { users: [], groups: [] };
         $scope.appConfigure.xFrameOptions = '';
+        $scope.appConfigure.customAuth = false;
 
         $scope.appConfigureForm.$setPristine();
         $scope.appConfigureForm.$setUntouched();
@@ -183,6 +185,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
         $scope.appConfigure.memoryLimit = app.memoryLimit || app.manifest.memoryLimit || (256 * 1024 * 1024);
         $scope.appConfigure.xFrameOptions = app.xFrameOptions.indexOf('ALLOW-FROM') === 0 ? app.xFrameOptions.split(' ')[1] : '';
+        $scope.appConfigure.customAuth = !(app.manifest.addons['simpleauth'] || app.manifest.addons['ldap'] || app.manifest.addons['oauth']);
 
         // create ticks starting from manifest memory limit
         $scope.appConfigure.memoryTicks = [

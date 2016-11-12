@@ -35,7 +35,7 @@
                             </ng-form>
                         </div>
 
-                        <div class="form-group" ng-show="appInstall.app.manifest.customAuth">
+                        <div class="form-group" ng-show="appInstall.customAuth">
                             <label class="control-label">Access control</label>
                             <p>
                                 This app has it's own access control and does not integrate with Cloudron Auth.
@@ -50,7 +50,7 @@
                             </p>
                         </div>
 
-                        <div class="form-group" ng-hide="appInstall.app.manifest.customAuth || appInstall.app.manifest.addons.email">
+                        <div class="form-group" ng-hide="appInstall.customAuth || appInstall.app.manifest.addons.email">
                             <label class="control-label">Access control</label>
                             <div class="radio">
                                 <label>

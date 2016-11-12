@@ -127,23 +127,6 @@ Example:
   "contactEmail": "support@testapp.com"
 ```
 
-## customAuth
-
-Type: boolean
-
-Required: no
-
-The `customAuth` field can be set to true to indicate that the app does not integrate with
-Cloudron user management. Use of this flag is strongly discouraged and is only meant to be
-a stopgap measure until the app integrates with Cloudron user management.
-
-When set, all access controls for the app are disabled in the Cloudron Admin UI.
-
-Example:
-```
-  "customAuth": true
-```
-
 ## description
 
 Type: markdown string

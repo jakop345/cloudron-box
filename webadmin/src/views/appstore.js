@@ -36,6 +36,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         keyFileName: '',
         accessRestrictionOption: 'any',
         accessRestriction: { users: [], groups: [] },
+        customAuth: false,
         optionalSso: false,
 
         isAccessRestrictionValid: function () {
@@ -65,6 +66,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.accessRestrictionOption = 'any';
             $scope.appInstall.accessRestriction = { users: [], groups: [] };
             $scope.appInstall.optionalSso = false;
+            $scope.appInstall.customAuth = false;
 
             $('#collapseInstallForm').collapse('hide');
             $('#collapseResourceConstraint').collapse('hide');
@@ -107,6 +109,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             var manifest = app.manifest;
             $scope.appInstall.optionalSso = !!manifest.optionalSso;
+            $scope.appInstall.customAuth = !(manifest.addons['simpleauth'] || manifest.addons['ldap'] || manifest.addons['oauth']);
             $scope.appInstall.accessRestrictionOption = 'any';
 
             // set default ports
