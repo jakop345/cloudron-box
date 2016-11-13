@@ -47,6 +47,14 @@ fi
 if [[ -z "${provider}" ]]; then
     echo "--provider is required (generic, scaleway, ec2, digitalocean)"
     exit 1
+elif [[  \
+            "${provider}" != "generic" && \
+            "${provider}" != "scaleway" && \
+            "${provider}" != "ec2" && \
+            "${provider}" != "digitalocean" \
+        ]]; then
+    echo "--provider must be one of: generic, scaleway, ec2, digitalocean"
+    exit 1
 fi
 
 if [[ -z "${encryptionKey}" ]]; then
