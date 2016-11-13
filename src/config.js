@@ -81,7 +81,6 @@ function initConfig() {
     data.smtpPort = 2525; // // this value comes from mail container
     data.sysadminPort = 3001;
     data.ldapPort = 3002;
-    data.oauthProxyPort = 3003;
     data.simpleAuthPort = 3004;
     data.provider = 'caas';
     data.appBundle = [ ];

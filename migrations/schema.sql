@@ -63,7 +63,6 @@ CREATE TABLE IF NOT EXISTS apps(
     location VARCHAR(128) NOT NULL UNIQUE,
     dnsRecordId VARCHAR(512),
     accessRestrictionJson TEXT, // { users: [ ], groups: [ ] }
-    oauthProxy BOOLEAN DEFAULT 0,
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     memoryLimit BIGINT DEFAULT 0,
     altDomain VARCHAR(256),

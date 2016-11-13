@@ -12,8 +12,6 @@ exports = module.exports = {
     _unconfigureNginx: unconfigureNginx,
     _createVolume: createVolume,
     _deleteVolume: deleteVolume,
-    _allocateOAuthProxyCredentials: allocateOAuthProxyCredentials,
-    _removeOAuthProxyCredentials: removeOAuthProxyCredentials,
     _verifyManifest: verifyManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
@@ -153,34 +151,6 @@ function deleteVolume(app, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     shell.sudo('deleteVolume', [ RMAPPDIR_CMD, app.id ], callback);
-}
-
-function allocateOAuthProxyCredentials(app, callback) {
-    assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    if (!app.oauthProxy) return callback(null);
-
-    debugApp(app, 'Creating oauth proxy credentials');
-
-    var redirectURI = 'https://' + config.appFqdn(app.location);
-    var scope = 'profile';
-
-    clients.add(app.id, clients.TYPE_PROXY, redirectURI, scope, callback);
-}
-
-function removeOAuthProxyCredentials(app, callback) {
-    assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    clients.delByAppIdAndType(app.id, clients.TYPE_PROXY, function (error) {
-        if (error && error.reason !== ClientsError.NOT_FOUND) {
-            debugApp(app, 'Error removing OAuth client id', error);
-            return callback(error);
-        }
-
-        callback(null);
-    });
 }
 
 function addCollectdProfile(app, callback) {
@@ -393,16 +363,12 @@ function install(app, callback) {
         addons.teardownAddons.bind(null, app, app.manifest.addons),
         deleteVolume.bind(null, app),
         unregisterSubdomain.bind(null, app, app.location),
-        removeOAuthProxyCredentials.bind(null, app),
         // removeIcon.bind(null, app), // do not remove icon for non-appstore installs
 
         reserveHttpPort.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '20, Downloading icon' }),
         downloadIcon.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '25, Creating OAuth proxy credentials' }),
-        allocateOAuthProxyCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Registering subdomain' }),
         registerSubdomain.bind(null, app),
@@ -497,16 +463,12 @@ function restore(app, callback) {
 
              docker.deleteImage(app.oldConfig.manifest, done);
         },
-        removeOAuthProxyCredentials.bind(null, app),
         removeIcon.bind(null, app),
 
         reserveHttpPort.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
         downloadIcon.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '50, Create OAuth proxy credentials' }),
-        allocateOAuthProxyCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '55, Registering subdomain' }), // ip might change during upgrades
         registerSubdomain.bind(null, app),
@@ -568,12 +530,8 @@ function configure(app, callback) {
             if (!app.oldConfig || app.oldConfig.location === app.location) return next();
             unregisterSubdomain(app, app.oldConfig.location, next);
         },
-        removeOAuthProxyCredentials.bind(null, app),
 
         reserveHttpPort.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '30, Create OAuth proxy credentials' }),
-        allocateOAuthProxyCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '35, Registering subdomain' }),
         registerSubdomain.bind(null, app),
@@ -713,9 +671,6 @@ function uninstall(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '60, Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app, app.location),
-
-        updateApp.bind(null, app, { installationProgress: '70, Remove OAuth credentials' }),
-        removeOAuthProxyCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '80, Cleanup icon' }),
         removeIcon.bind(null, app),
