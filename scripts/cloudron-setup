@@ -45,7 +45,7 @@ if [[ -z "${domain}" ]]; then
 fi
 
 if [[ -z "${provider}" ]]; then
-    echo "--provider is required ('generic', 'scaleway', 'ec2', 'digitalocean')"
+    echo "--provider is required (generic, scaleway, ec2, digitalocean)"
     exit 1
 fi
 
