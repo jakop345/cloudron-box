@@ -111,6 +111,8 @@ data=$(cat <<EOF
         "provider": "${tlsProvider}"
     },
     "backupConfig" : {
+        "provider": "filesystem",
+        "backupFolder": "/var/backups",
         "key": "${encryptionKey}"
     },
     "version": "${version}"
