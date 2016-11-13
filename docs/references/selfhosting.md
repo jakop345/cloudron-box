@@ -89,7 +89,7 @@ SSH into your server:
 ```
 # wget https://git.cloudron.io/cloudron/box/raw/master/scripts/cloudron-setup
 # chmod +x cloudron-setup
-# ./cloudron-setup --domain <domain> --provider <digitalocean|ec2|generic|scaleway>
+# ./cloudron-setup --domain <domain> --provider <digitalocean|ec2|generic|scaleway> --encryption-key <key>
 ```
 
 The setup will take around 10-15 minutes.
@@ -106,6 +106,8 @@ choose `generic`. If the Cloudron does not complete initialization, it may mean 
 we have to add some vendor specific quirks. Please open a
 [bug report](https://git.cloudron.io/cloudron/box/issues) in that case.
 
+* `--encryption-key` is the key to be used for encrypting backup data.
+
 Optional arguments used for update and restore:
 
 * `--version` is the version of Cloudron to install. By default, the setup script installs
@@ -113,7 +115,6 @@ the latest version. This is useful when restoring a Cloudron from a backup.
 
 * `--restore-url` is an URL to the backup to restore to.
 
-* `--restore-key` is the encryption key to use for unpacking the backup.
 
 ## Finish setup
 
@@ -287,15 +288,15 @@ To upgrade follow these steps closely:
   <img src="/docs/img/aws_backup_link.png" class="shadow haze"><br/>
 
 * Create a new Cloudron by following the [installing](/references/selfhosting.html#installing) section.
-  When running the setup script, pass in the `--restore-key` and `--restore-url` flags.
-  The `--restore-key` is the backup encryption key. It can be displayed with `cloudron machine info`
+  When running the setup script, pass in the `--encryption-key` and `--restore-url` flags.
+  The `--encryption-key` is the backup encryption key. It can be displayed with `cloudron machine info`
 
 Similar to the initial installation, a Cloudron upgrade looks like:
 ```
 $ ssh root@newserverip
 > wget https://git.cloudron.io/cloudron/box/raw/master/scripts/cloudron-setup
 > chmod +x cloudron-setup
-> ./cloudron-setup --domain <domain> --provider <digitalocean|ec2|generic|scaleway> --restore-key <encryptionKey> --restore-url <publicS3Url>
+> ./cloudron-setup --domain <domain> --provider <digitalocean|ec2|generic|scaleway> --encryption-key <key> --restore-url <publicS3Url>
 ```
 
  * Finally, once you see the newest version being displayed in your Cloudron webinterface, you can safely delete the old server instance.
