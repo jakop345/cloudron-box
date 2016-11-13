@@ -49,6 +49,11 @@ if [[ -z "${provider}" ]]; then
     exit 1
 fi
 
+if [[ -z "${encryptionKey}" ]]; then
+    echo "--encryption-key is required"
+    exit 1
+fi
+
 echo ""
 echo "##############################################"
 echo "        Cloudron Setup (${version})           "
