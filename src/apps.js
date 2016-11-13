@@ -149,7 +149,6 @@ function validatePortBindings(portBindings, tcpPorts) {
         config.get('sysadminPort'), /* sysadmin app server (lo) */
         config.get('smtpPort'), /* internal smtp port (lo) */
         config.get('ldapPort'), /* ldap server (lo) */
-        config.get('oauthProxyPort'), /* oauth proxy server (lo) */
         config.get('simpleAuthPort'), /* simple auth server (lo) */
         3306, /* mysql (lo) */
         4190, /* managesieve */
@@ -476,7 +475,6 @@ function install(data, auditSource, callback) {
         memoryLimit = data.memoryLimit || 0,
         altDomain = data.altDomain || null,
         xFrameOptions = data.xFrameOptions || 'SAMEORIGIN',
-        oauthProxy = data.oauthProxy === true,
         sso = 'sso' in data ? data.sso : null;
 
     assert(data.appStoreId || data.manifest); // atleast one of them is required
@@ -532,7 +530,6 @@ function install(data, auditSource, callback) {
                 memoryLimit: memoryLimit,
                 altDomain: altDomain,
                 xFrameOptions: xFrameOptions,
-                oauthProxy: oauthProxy,
                 sso: sso
             };
 
@@ -610,10 +607,6 @@ function configure(appId, data, auditSource, callback) {
             values.xFrameOptions = data.xFrameOptions;
             error = validateXFrameOptions(values.xFrameOptions);
             if (error) return callback(error);
-        }
-
-        if ('oauthProxy' in data) {
-            values.oauthProxy = data.oauthProxy;
         }
 
         // save cert to data/box/certs. TODO: move this to apptask when we have a real task queue

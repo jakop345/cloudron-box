@@ -49,8 +49,7 @@ function configureApp(app, certFilePath, keyFilePath, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var sourceDir = path.resolve(__dirname, '..');
-    var oauthProxy = app.oauthProxy;
-    var endpoint = oauthProxy ? 'oauthproxy' : 'app';
+    var endpoint = 'app';
     var vhost = app.altDomain || config.appFqdn(app.location);
 
     var data = {

@@ -544,7 +544,6 @@ describe('database', function () {
             memoryLimit: 4294967296,
             altDomain: null,
             xFrameOptions: 'DENY',
-            oauthProxy: false,
             sso: true
         };
         var APP_1 = {
@@ -566,7 +565,6 @@ describe('database', function () {
             memoryLimit: 0,
             altDomain: null,
             xFrameOptions: 'SAMEORIGIN',
-            oauthProxy: false,
             sso: true
         };
 

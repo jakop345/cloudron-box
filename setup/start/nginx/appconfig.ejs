@@ -80,9 +80,6 @@ server {
             index  index.html index.htm;
         }
 
-<% } else if ( endpoint === 'oauthproxy' ) { %>
-        proxy_pass http://127.0.0.1:3003;
-        proxy_set_header   X-Cloudron-Proxy-Port   <%= port %>;
 <% } else if ( endpoint === 'app' ) { %>
         proxy_pass http://127.0.0.1:<%= port %>;
 <% } else if ( endpoint === 'splash' ) { %>

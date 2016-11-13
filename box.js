@@ -14,7 +14,6 @@ var appHealthMonitor = require('./src/apphealthmonitor.js'),
     async = require('async'),
     config = require('./src/config.js'),
     ldap = require('./src/ldap.js'),
-    oauthproxy = require('./src/oauthproxy.js'),
     server = require('./src/server.js'),
     simpleauth = require('./src/simpleauth.js');
 
@@ -37,7 +36,6 @@ async.series([
     ldap.start,
     simpleauth.start,
     appHealthMonitor.start,
-    oauthproxy.start
 ], function (error) {
     if (error) {
         console.error('Error starting server', error);
@@ -52,7 +50,6 @@ process.on('SIGINT', function () {
     server.stop(NOOP_CALLBACK);
     ldap.stop(NOOP_CALLBACK);
     simpleauth.stop(NOOP_CALLBACK);
-    oauthproxy.stop(NOOP_CALLBACK);
     setTimeout(process.exit.bind(process), 3000);
 });
 
@@ -60,6 +57,5 @@ process.on('SIGTERM', function () {
     server.stop(NOOP_CALLBACK);
     ldap.stop(NOOP_CALLBACK);
     simpleauth.stop(NOOP_CALLBACK);
-    oauthproxy.stop(NOOP_CALLBACK);
     setTimeout(process.exit.bind(process), 3000);
 });

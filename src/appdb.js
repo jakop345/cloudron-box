@@ -60,7 +60,7 @@ var assert = require('assert'),
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId',
     'apps.accessRestrictionJson', 'apps.lastBackupId', 'apps.oldConfigJson', 'apps.memoryLimit', 'apps.altDomain',
-    'apps.xFrameOptions', 'apps.oauthProxy', 'apps.sso' ].join(',');
+    'apps.xFrameOptions', 'apps.sso' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 
@@ -97,7 +97,6 @@ function postProcess(result) {
     // TODO remove later once all apps have this attribute
     result.xFrameOptions = result.xFrameOptions || 'SAMEORIGIN';
 
-    result.oauthProxy = !!result.oauthProxy; // make it bool
     result.sso = !!result.sso; // make it bool
 }
 
@@ -185,12 +184,11 @@ function add(id, appStoreId, manifest, location, portBindings, data, callback) {
     var xFrameOptions = data.xFrameOptions || '';
     var installationState = data.installationState || exports.ISTATE_PENDING_INSTALL;
     var lastBackupId = data.lastBackupId || null; // used when cloning
-    var oauthProxy = data.oauthProxy || false;
 
     var queries = [ ];
     queries.push({
-        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain, xFrameOptions, lastBackupId, oauthProxy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        args: [ id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain, xFrameOptions, lastBackupId, oauthProxy ]
+        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain, xFrameOptions, lastBackupId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        args: [ id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, memoryLimit, altDomain, xFrameOptions, lastBackupId ]
     });
 
     Object.keys(portBindings).forEach(function (env) {
