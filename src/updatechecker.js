@@ -140,8 +140,14 @@ function checkAppUpdates(callback) {
                     return iteratorDone();  // continue to next
                 }
 
-                if (!updateInfo || !safe.query(updateInfo, 'manifest.version')) {
-                    debug('Skipping null or malformed update of app %s. got %j', app.id, updateInfo);
+                // skip if no next version is found
+                if (!updateInfo) {
+                    delete gAppUpdateInfo[app.id];
+                    return iteratorDone();
+                }
+
+                if (!safe.query(updateInfo, 'manifest.version')) {
+                    debug('Skipping malformed update of app %s. got %j', app.id, updateInfo);
                     delete gAppUpdateInfo[app.id];
                     return iteratorDone();
                 }
