@@ -361,24 +361,42 @@ function purchase(appId, appstoreId, callback) {
 
     if (appstoreId === '') return callback(null);
 
-    // Skip for caas at the moment
-    if (config.provider() === 'caas') return callback(null);
+    function purchaseWithAppstoreConfig(appstoreConfig) {
+        assert.strictEqual(typeof appstoreConfig.userId, 'string');
+        assert.strictEqual(typeof appstoreConfig.cloudronId, 'string');
+        assert.strictEqual(typeof appstoreConfig.token, 'string');
 
-    settings.getAppstoreConfig(function (error, result) {
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-        if (!result.token) return callback(new AppsError(AppsError.BILLING_REQUIRED));
-
-        var url = config.apiServerOrigin() + '/api/v1/users/' + result.userId + '/cloudrons/' + result.cloudronId + '/apps/' + appId;
+        var url = config.apiServerOrigin() + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons/' + appstoreConfig.cloudronId + '/apps/' + appId;
         var data = { appstoreId: appstoreId };
 
-        superagent.post(url).send(data).query({ accessToken: result.token }).timeout(30 * 1000).end(function (error, result) {
+        superagent.post(url).send(data).query({ accessToken: appstoreConfig.token }).timeout(30 * 1000).end(function (error, result) {
             if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
             if (result.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND));
             if (result.statusCode !== 201 && result.statusCode !== 200) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
 
             callback(null);
         });
-    });
+    }
+
+    // Caas Cloudrons do not store appstore credentials in their local database
+    if (config.provider() === 'caas') {
+        var url = config.apiServerOrigin() + '/api/v1/exchangeBoxTokenWithUserToken';
+        var data = { appstoreId: appstoreId };
+
+        superagent.post(url).send(data).query({ token: config.token() }).timeout(30 * 1000).end(function (error, result) {
+            if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
+            if (result.statusCode !== 201) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
+
+            purchaseWithAppstoreConfig(result);
+        });
+    } else {
+        settings.getAppstoreConfig(function (error, result) {
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+            if (!result.token) return callback(new AppsError(AppsError.BILLING_REQUIRED));
+
+            purchaseWithAppstoreConfig(result);
+        });
+    }
 }
 
 function unpurchase(appId, appstoreId, callback) {
@@ -388,12 +406,10 @@ function unpurchase(appId, appstoreId, callback) {
 
     if (appstoreId === '') return callback(null);
 
-    // Skip for caas at the moment
-    if (config.provider() === 'caas') return callback(null);
-
-    settings.getAppstoreConfig(function (error, appstoreConfig) {
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-        if (!appstoreConfig.token) return callback(new AppsError(AppsError.BILLING_REQUIRED));
+    function unpurchaseWithAppstoreConfig(appstoreConfig) {
+        assert.strictEqual(typeof appstoreConfig.userId, 'string');
+        assert.strictEqual(typeof appstoreConfig.cloudronId, 'string');
+        assert.strictEqual(typeof appstoreConfig.token, 'string');
 
         var url = config.apiServerOrigin() + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons/' + appstoreConfig.cloudronId + '/apps/' + appId;
 
@@ -408,7 +424,27 @@ function unpurchase(appId, appstoreId, callback) {
                 callback(null);
             });
         });
-    });
+    }
+
+    // Caas Cloudrons do not store appstore credentials in their local database
+    if (config.provider() === 'caas') {
+        var url = config.apiServerOrigin() + '/api/v1/exchangeBoxTokenWithUserToken';
+        var data = { appstoreId: appstoreId };
+
+        superagent.post(url).send(data).query({ token: config.token() }).timeout(30 * 1000).end(function (error, result) {
+            if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
+            if (result.statusCode !== 201) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
+
+            unpurchaseWithAppstoreConfig(result);
+        });
+    } else {
+        settings.getAppstoreConfig(function (error, result) {
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+            if (!result.token) return callback(new AppsError(AppsError.BILLING_REQUIRED));
+
+            unpurchaseWithAppstoreConfig(result);
+        });
+    }
 }
 
 function downloadManifest(appStoreId, manifest, callback) {
