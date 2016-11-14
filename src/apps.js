@@ -387,7 +387,7 @@ function purchase(appId, appstoreId, callback) {
             if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
             if (result.statusCode !== 201) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
 
-            purchaseWithAppstoreConfig(result);
+            purchaseWithAppstoreConfig(result.body);
         });
     } else {
         settings.getAppstoreConfig(function (error, result) {
@@ -435,7 +435,7 @@ function unpurchase(appId, appstoreId, callback) {
             if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
             if (result.statusCode !== 201) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
 
-            unpurchaseWithAppstoreConfig(result);
+            unpurchaseWithAppstoreConfig(result.body);
         });
     } else {
         settings.getAppstoreConfig(function (error, result) {
