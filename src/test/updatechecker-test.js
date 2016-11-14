@@ -323,10 +323,6 @@ describe('updatechecker - checkAppUpdates', function () {
     it('does not offer old version', function (done) {
         nock.cleanAll();
 
-        var scope = nock('http://localhost:4444')
-            .post('/api/v1/appupdates')
-            .reply(200, { appVersions: { 'io.cloudron.app': { manifest: { version: '0.1.0' } } } });
-
         updatechecker.checkAppUpdates(function (error) {
             expect(!error).to.be.ok();
             expect(updatechecker.getUpdateInfo().apps).to.eql({ });
