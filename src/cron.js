@@ -23,6 +23,7 @@ var gAutoupdaterJob = null,
     gBoxUpdateCheckerJob = null,
     gAppUpdateCheckerJob = null,
     gHeartbeatJob = null,
+    gAliveJob = null,
     gBackupJob = null,
     gCleanupTokensJob = null,
     gCleanupBackupsJob = null,
@@ -52,6 +53,12 @@ function initialize(callback) {
         start: true
     });
     cloudron.sendHeartbeat(); // latest unpublished version of CronJob has runOnInit
+
+    gAliveJob = new CronJob({
+        cronTime: '00 */1 * * * *', // every minute
+        onTick: cloudron.sendAliveStatus,
+        start: true
+    });
 
     if (cloudron.isConfiguredSync()) {
         recreateJobs(callback);
@@ -206,6 +213,9 @@ function uninitialize(callback) {
 
     if (gHeartbeatJob) gHeartbeatJob.stop();
     gHeartbeatJob = null;
+
+    if (gAliveJob) gAliveJob.stop();
+    gAliveJob = null;
 
     if (gBackupJob) gBackupJob.stop();
     gBackupJob = null;
