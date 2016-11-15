@@ -381,9 +381,7 @@ function purchase(appId, appstoreId, callback) {
     // Caas Cloudrons do not store appstore credentials in their local database
     if (config.provider() === 'caas') {
         var url = config.apiServerOrigin() + '/api/v1/exchangeBoxTokenWithUserToken';
-        var data = { appstoreId: appstoreId };
-
-        superagent.post(url).send(data).query({ token: config.token() }).timeout(30 * 1000).end(function (error, result) {
+        superagent.post(url).query({ token: config.token() }).timeout(30 * 1000).end(function (error, result) {
             if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
             if (result.statusCode !== 201) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
 
@@ -429,9 +427,7 @@ function unpurchase(appId, appstoreId, callback) {
     // Caas Cloudrons do not store appstore credentials in their local database
     if (config.provider() === 'caas') {
         var url = config.apiServerOrigin() + '/api/v1/exchangeBoxTokenWithUserToken';
-        var data = { appstoreId: appstoreId };
-
-        superagent.post(url).send(data).query({ token: config.token() }).timeout(30 * 1000).end(function (error, result) {
+        superagent.post(url).query({ token: config.token() }).timeout(30 * 1000).end(function (error, result) {
             if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
             if (result.statusCode !== 201) return callback(new AppsError(AppsError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
 
