@@ -347,7 +347,7 @@ function sendHeartbeat() {
 function sendAliveStatus(callback) {
     if (typeof callback !== 'function') {
         callback = function (error) {
-            if (error && error.reason !== CloudronError.BILLING_REQUIRED && error.reason !== CloudronError.BILLING_REQUIRED) console.error(error);
+            if (error && error.reason !== CloudronError.INTERNAL_ERROR) console.error(error);
             else if (error) debug(error);
         };
     }
@@ -386,7 +386,7 @@ function sendAliveStatus(callback) {
     } else {
         settings.getAppstoreConfig(function (error, result) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-            if (!result.token) return callback(new CloudronError(CloudronError.BILLING_REQUIRED));
+            if (!result.token) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'not registered yet'));
 
             sendAliveStatusWithAppstoreConfig(result);
         });
