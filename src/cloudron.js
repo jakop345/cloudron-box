@@ -10,6 +10,7 @@ exports = module.exports = {
     getStatus: getStatus,
 
     sendHeartbeat: sendHeartbeat,
+    sendAliveStatus: sendAliveStatus,
 
     updateToLatest: updateToLatest,
     reboot: reboot,
@@ -341,6 +342,55 @@ function sendHeartbeat() {
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with %s %s', result.statusCode, result.text);
         else debug('Heartbeat sent to %s', url);
     });
+}
+
+function sendAliveStatus(callback) {
+    if (typeof callback !== 'function') {
+        callback = function (error) {
+            if (error && error.reason !== CloudronError.BILLING_REQUIRED && error.reason !== CloudronError.BILLING_REQUIRED) console.error(error);
+            else if (error) debug(error);
+        };
+    }
+
+    function sendAliveStatusWithAppstoreConfig(appstoreConfig) {
+        assert.strictEqual(typeof appstoreConfig.userId, 'string');
+        assert.strictEqual(typeof appstoreConfig.cloudronId, 'string');
+        assert.strictEqual(typeof appstoreConfig.token, 'string');
+
+        var url = config.apiServerOrigin() + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons/' + appstoreConfig.cloudronId;
+        var data = {
+            domain: config.fqdn(),
+            version: config.version()
+        };
+
+        superagent.post(url).send(data).query({ accessToken: appstoreConfig.token }).timeout(30 * 1000).end(function (error, result) {
+            if (error && !error.response) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error));
+            if (result.statusCode === 404) return callback(new CloudronError(CloudronError.NOT_FOUND));
+            if (result.statusCode !== 201) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('Sending alive status failed. %s %j', result.status, result.body)));
+
+            callback(null);
+        });
+    }
+
+    // Caas Cloudrons do not store appstore credentials in their local database
+    if (config.provider() === 'caas') {
+        if (!config.token()) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'no token set'));
+
+        var url = config.apiServerOrigin() + '/api/v1/exchangeBoxTokenWithUserToken';
+        superagent.post(url).query({ token: config.token() }).timeout(30 * 1000).end(function (error, result) {
+            if (error && !error.response) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error));
+            if (result.statusCode !== 201) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('App purchase failed. %s %j', result.status, result.body)));
+
+            sendAliveStatusWithAppstoreConfig(result.body);
+        });
+    } else {
+        settings.getAppstoreConfig(function (error, result) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+            if (!result.token) return callback(new CloudronError(CloudronError.BILLING_REQUIRED));
+
+            sendAliveStatusWithAppstoreConfig(result);
+        });
+    }
 }
 
 function ensureDkimKeySync() {
