@@ -663,3 +663,7 @@
 
 [0.70.0]
 * Remove standalone installer daemon
+
+[0.70.1]
+* Add additional platform healthcheck
+
