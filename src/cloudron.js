@@ -360,7 +360,8 @@ function sendAliveStatus(callback) {
         var url = config.apiServerOrigin() + '/api/v1/users/' + appstoreConfig.userId + '/cloudrons/' + appstoreConfig.cloudronId;
         var data = {
             domain: config.fqdn(),
-            version: config.version()
+            version: config.version(),
+            provider: config.provider()
         };
 
         superagent.post(url).send(data).query({ accessToken: appstoreConfig.token }).timeout(30 * 1000).end(function (error, result) {
