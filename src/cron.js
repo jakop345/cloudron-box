@@ -55,7 +55,7 @@ function initialize(callback) {
     cloudron.sendHeartbeat(); // latest unpublished version of CronJob has runOnInit
 
     gAliveJob = new CronJob({
-        cronTime: '00 */1 * * * *', // every minute
+        cronTime: '00 23 * * * *', // every hour on a somewhat odd 23 minute after full probably should be randomly spread out over a day?
         onTick: cloudron.sendAliveStatus,
         start: true
     });
