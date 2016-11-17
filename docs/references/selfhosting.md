@@ -98,12 +98,12 @@ above. Doing this will allow the Cloudron to start up with a valid TLS certifica
 
 ## Run setup
 
-SSH into your server:
+SSH into your server and run the following commands:
 
 ```
-# wget https://git.cloudron.io/cloudron/box/raw/master/scripts/cloudron-setup
-# chmod +x cloudron-setup
-# ./cloudron-setup --domain <domain> --provider <digitalocean|ec2|generic|scaleway> --encryption-key <key>
+wget https://git.cloudron.io/cloudron/box/raw/master/scripts/cloudron-setup
+chmod +x cloudron-setup
+./cloudron-setup --domain <domain> --provider <digitalocean|ec2|generic|scaleway> --encryption-key <key>
 ```
 
 The setup will take around 10-15 minutes.
