@@ -71,13 +71,19 @@ echo " Follow setup logs in a second terminal with:"
 echo " $ tail -f ${LOG_FILE}"
 echo ""
 
+echo "=> Installing setup dependencies ..."
+if ! apt-get install curl -y &>> "${LOG_FILE}"; then
+    echo "Could not install curl"
+    exit 1
+fi
+
 echo "=> Downloading initialization script"
 if ! curl -s "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh; then
     echo "Could not download initialization script"
     exit 1
 fi
 
-echo "=> Installing dependencies ... (this takes some time)"
+echo "=> Installing base dependencies ... (this takes some time)"
 if ! /bin/bash /tmp/initializeBaseUbuntuImage.sh "${INSTALLER_REVISION}" "${provider}" &>> "${LOG_FILE}"; then
     echo "Init script failed. See ${LOG_FILE} for details"
     exit 1
