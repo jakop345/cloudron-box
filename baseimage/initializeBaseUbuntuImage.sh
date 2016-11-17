@@ -274,15 +274,15 @@ setfacl -n -m u:${USER}:r /var/log/journal/*/system.journal
 
 echo "==== Install ssh ==="
 apt-get -y install openssh-server
-# https://stackoverflow.com/questions/4348166/using-with-sed on why ? must be escaped
-sed -e 's/^#\?PermitRootLogin .*/PermitRootLogin without-password/g' \
-    -e 's/^#\?PermitEmptyPasswords .*/PermitEmptyPasswords no/g' \
-    -e 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/g' \
-    -i /etc/ssh/sshd_config
 
-# caas has ssh on port 202
+# caas has ssh on port 202 and we disable password login
 if [[ "${PROVIDER}" == "caas" ]]; then
-    sed -e 's/^#\?Port .*/Port 202/g' -i /etc/ssh/sshd_config
+    # https://stackoverflow.com/questions/4348166/using-with-sed on why ? must be escaped
+    sed -e 's/^#\?PermitRootLogin .*/PermitRootLogin without-password/g' \
+        -e 's/^#\?PermitEmptyPasswords .*/PermitEmptyPasswords no/g' \
+        -e 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/g' \
+        -e 's/^#\?Port .*/Port 202/g' \
+        -i /etc/ssh/sshd_config
 fi
 
 # DO uses Google nameservers by default. This causes RBL queries to fail (host 2.0.0.127.zen.spamhaus.org)

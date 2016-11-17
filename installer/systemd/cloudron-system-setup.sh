@@ -12,9 +12,6 @@ disk_device="$(for d in $(find /dev -type b); do [ "$(mountpoint -d /)" = "$(mou
 
 existing_swap=$(cat /proc/meminfo | grep SwapTotal | awk '{ printf "%.0f", $2/1024 }')
 
-# allow root access over ssh
-sed -e 's/.* \(ssh-rsa.*\)/\1/' -i /root/.ssh/authorized_keys
-
 # all sizes are in mb
 readonly physical_memory=$(free -m | awk '/Mem:/ { print $2 }')
 readonly swap_size=$((${physical_memory} - ${existing_swap})) # if you change this, fix enoughResourcesAvailable() in client.js
@@ -50,4 +47,3 @@ umount "${USER_DATA_DIR}" || true
 truncate -s "${home_data_size}m" "${USER_DATA_FILE}" # this will shrink it if the file had existed. this is useful when running this script on a live system
 mount -t btrfs -o loop,nosuid "${USER_DATA_FILE}" ${USER_DATA_DIR}
 btrfs filesystem resize max "${USER_DATA_DIR}"
-
