@@ -45,6 +45,20 @@ See [#14](https://git.cloudron.io/cloudron/cloudron-cli/issues/14) for more info
 
 The CLI tool does not work on Windows. Please contact us on our [chat](https://chat.cloudron.io) if you want to help with Windows support.
 
+# Provider
+
+Both DigitalOcean and EC2 from Amazon Web Services are frequently tested by us.
+
+In addition to those, the Cloudron community has successfully installed the platform on those providers:
+* [hosttech](https://www.hosttech.ch/)
+* [Linode](https://www.linode.com/)
+* [OVH](https://www.ovh.com/)
+* [Scaleway](https://www.scaleway.com/)
+* [So you Start](https://www.soyoustart.com/)
+* [Vultr](https://www.vultr.com/)
+
+Please let us know if any of them requires tweaks or adjustments.
+
 # Installing
 
 ## Choose Domain
