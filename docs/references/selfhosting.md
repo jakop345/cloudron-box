@@ -143,6 +143,8 @@ already! In this unlikely case, simply delete the server and start over.
 
 Once the setup is done, you can access the admin page in the future at `https://my.<domain>`.
 
+**If apps do not start after installation, a server restart may be required to let bootloader changes come into action.**
+
 ## DNS
 
 Cloudron has to be given the API credentials for configuring your domain under `Certs & Domains`
