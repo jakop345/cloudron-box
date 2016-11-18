@@ -1166,14 +1166,24 @@ describe('database', function () {
         });
 
         it('delByCreationTime succeeds', function (done) {
-            eventlogdb.delByCreationTime(new Date(), function (error) {
+            async.each([ 'persistent.event', 'transient.event', 'anothertransient.event', 'anotherpersistent.event' ], function (e, callback) {
+                eventlogdb.add('someid' + Math.random(), e, { ip: '1.2.3.4' }, { appId: 'thatapp' }, callback);
+            }, function (error) {
                 expect(error).to.be(null);
 
-                eventlogdb.getAllPaged(null, null, 1, 1, function (error, results) {
-                    expect(error).to.be(null);
-                    expect(results.length).to.be(0);
+                var actions = [ 'anotherpersistent.event', 'persistent.event' ];
 
-                    done();
+                eventlogdb.delByCreationTime(new Date(), actions, function (error) {
+                    expect(error).to.be(null);
+
+                    eventlogdb.getAllPaged(null, null, 1, 100, function (error, results) {
+                        expect(error).to.be(null);
+                        expect(results.length).to.be(2);
+                        expect(results[1].action).to.be.eql('persistent.event');
+                        expect(results[0].action).to.be.eql('anotherpersistent.event');
+
+                        done();
+                    });
                 });
             });
         });

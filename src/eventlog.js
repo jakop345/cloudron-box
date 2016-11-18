@@ -105,10 +105,17 @@ function getAllPaged(action, search, page, perPage, callback) {
 function cleanup(callback) {
     callback = callback || NOOP_CALLBACK;
 
-     var d = new Date();
-     d.setDate(d.getDate() - 7); // 7 days ago
+    var d = new Date();
+    d.setDate(d.getDate() - 7); // 7 days ago
 
-    eventlogdb.delByCreationTime(d, function (error) {
+    // only cleanup high frequency events
+    var actions = [
+        exports.ACTION_USER_LOGIN,
+        exports.ACTION_BACKUP_START,
+        exports.ACTION_BACKUP_FINISH
+    ];
+
+    eventlogdb.delByCreationTime(d, actions, function (error) {
         if (error) return callback(new EventLogError(EventLogError.INTERNAL_ERROR, error));
 
         callback(null);
