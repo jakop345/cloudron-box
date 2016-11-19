@@ -1179,6 +1179,7 @@ describe('database', function () {
                     eventlogdb.getAllPaged(null, null, 1, 100, function (error, results) {
                         expect(error).to.be(null);
                         expect(results.length).to.be(2);
+                        results = results.sort(function (x, y) { return x.action > y.action }); // because equal timestamp gives random ordering
                         expect(results[1].action).to.be.eql('persistent.event');
                         expect(results[0].action).to.be.eql('anotherpersistent.event');
 
