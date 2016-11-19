@@ -503,7 +503,7 @@ function install(data, auditSource, callback) {
         error = validateXFrameOptions(xFrameOptions);
         if (error) return callback(error);
 
-        if ('sso' in data && !('optionalAuth' in manifest)) return callback(new AppsError(AppsError.BAD_FIELD, 'sso can only be specified for apps with optionalAuth'));
+        if ('sso' in data && !('optionalSso' in manifest)) return callback(new AppsError(AppsError.BAD_FIELD, 'sso can only be specified for apps with optionalSso'));
 
         if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
 
