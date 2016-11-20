@@ -104,15 +104,12 @@ fi
 echo "=> Run base init service"
 systemctl start cloudron-system-setup
 
-data=$(cat <<EOF
+if [[ -z "${restoreUrl}" ]]; then
+    data=$(cat <<EOF
 {
     "boxVersionsUrl": "${versionsUrl}",
     "fqdn": "${domain}",
-    "provider": "${provider}",
-    "restore": {
-        "url": "${restoreUrl}",
-        "key": "${encryptionKey}"
-    },
+    "provider": "${provider}"
     "tlsConfig": {
         "provider": "${tlsProvider}"
     },
@@ -123,8 +120,24 @@ data=$(cat <<EOF
     },
     "version": "${version}"
 }
-EOF
-)
+EOF)
+else
+    data=$(cat <<EOF
+{
+    "boxVersionsUrl": "${versionsUrl}",
+    "fqdn": "${domain}",
+    "provider": "${provider}",
+    "restore": {
+        "url": "${restoreUrl}",
+        "key": "${encryptionKey}"
+    },
+    "tlsConfig": {
+        "provider": "${tlsProvider}"
+    }
+    "version": "${version}"
+}
+EOF)
+fi
 
 echo "=> Run installer.sh for version ${version} with  ${sourceTarballUrl} ... (this takes some time)"
 if ! ${INSTALLER_SOURCE_DIR}/scripts/installer.sh --sourcetarballurl "${sourceTarballUrl}" --data "${data}" &>> "${LOG_FILE}"; then
