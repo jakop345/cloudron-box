@@ -109,7 +109,7 @@ if [[ -z "${restoreUrl}" ]]; then
 {
     "boxVersionsUrl": "${versionsUrl}",
     "fqdn": "${domain}",
-    "provider": "${provider}"
+    "provider": "${provider}",
     "tlsConfig": {
         "provider": "${tlsProvider}"
     },
