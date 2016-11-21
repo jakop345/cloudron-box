@@ -64,7 +64,7 @@
                                     Restrict to groups
                                 </label>
                             </div>
-                            <div ng-show="groups.length <= 1">No groups available. Create groups to restrict access to them first.</div>
+                            <div ng-show="groups.length <= 1">No groups available. Create groups to restrict access to them first.<br/><br/></div>
                             <div class="has-error" ng-show="appInstall.accessRestrictionOption === 'groups' && !appInstall.isAccessRestrictionValid()">Select at least one group</div>
                             <div>
                                 <div>
@@ -76,7 +76,7 @@
                             <div class="radio" ng-show="appInstall.optionalSso">
                                 <label>
                                     <input type="radio" ng-model="appInstall.accessRestrictionOption" value="nosso">
-                                    Disable Cloudron SSO
+                                    Disable Cloudron user management for this app
                                 </label>
                             </div>
                         </div>
