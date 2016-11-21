@@ -457,34 +457,37 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     };
 
     function hashChangeListener() {
-        var appId = $location.path().slice('/appstore/'.length);
-        var version = $location.search().version;
+        // event listener is called from DOM not angular, need to use $apply
+        $scope.$apply(function () {
+            var appId = $location.path().slice('/appstore/'.length);
+            var version = $location.search().version;
 
-        if (appId) {
-            if (version) {
-                AppStore.getAppByIdAndVersion(appId, version, function (error, result) {
-                    if (error) {
-                        $scope.showAppNotFound(appId, version);
-                        console.error(error);
-                        return;
-                    }
+            if (appId) {
+                if (version) {
+                    AppStore.getAppByIdAndVersion(appId, version, function (error, result) {
+                        if (error) {
+                            $scope.showAppNotFound(appId, version);
+                            console.error(error);
+                            return;
+                        }
 
-                    $scope.appInstall.show(result);
-                });
-            } else {
-                var found = $scope.apps.filter(function (app) {
-                    return (app.id === appId) && (version ? version === app.manifest.version : true);
-                });
-
-                if (found.length) {
-                    $scope.appInstall.show(found[0]);
+                        $scope.appInstall.show(result);
+                    });
                 } else {
-                    $scope.showAppNotFound(appId, null);
+                    var found = $scope.apps.filter(function (app) {
+                        return (app.id === appId) && (version ? version === app.manifest.version : true);
+                    });
+
+                    if (found.length) {
+                        $scope.appInstall.show(found[0]);
+                    } else {
+                        $scope.showAppNotFound(appId, null);
+                    }
                 }
+            } else {
+                $scope.appInstall.reset();
             }
-        } else {
-            $scope.appInstall.reset();
-        }
+        });
     }
 
     function fetchUsers() {
@@ -548,7 +551,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.apps = apps;
 
             // show install app dialog immediately if an app id was passed in the query
-            hashChangeListener();
+            // hashChangeListener calls $apply, so make sure we don't double digest here
+            setTimeout(hashChangeListener, 1);
 
             if ($scope.user.admin) {
                 fetchUsers();
