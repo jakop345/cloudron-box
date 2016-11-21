@@ -6,40 +6,73 @@
 
     <title> Cloudron App Error </title>
 
-    <!-- Theme CSS -->
-    <link href="theme.css" rel="stylesheet" type="text/css">
-
     <!-- external fonts and CSS -->
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Use static style as we can't include local stylesheets -->
+    <style>
+
+        html {
+            height: 100%;
+            width: 100%;
+            padding: 0;
+        }
+
+        body {
+            background-color: white;
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        .wrapper {
+            display: table;
+            width: 100%;
+            height: 100%;
+        }
+
+        .content {
+            display: table-cell;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        footer {
+            background-color: #EFEFEF;
+            bottom: 0;
+            width: 100%;
+            color: #555;
+            font-size: 14px;
+            padding: 5px;
+            z-index: 1000;
+            position: fixed;
+        }
+
+    </style>
+
 </head>
 
-<body class="status-page">
+<body>
 
 <div class="wrapper">
     <div class="content">
-        <img src="/img/logo_inverted_192.png"/>
-
-        <h3> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong </h3>
-        This app is currently not running. <a id="appLink" href="">Please retry later</a>.
-
-        <footer>
-            <span class="text-muted"><a href="mailto: support@cloudron.io">Contact Support</a> - Copyright &copy; Cloudron 2015-16</span>
-        </footer>
+        <h1><i class="fa fa-frown-o fa-fw text-danger"></i></h1>
+        <h2>Something has gone wrong</h2>
+        This app is currently not running. Try refreshing the page.
     </div>
 </div>
 
-<script>
-
-    (function () {
-        'use strict';
-
-        var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (i) { var b = i.indexOf('='); return [i.slice(0, b), i.slice(b+1)]; }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
-
-        document.getElementById('appLink').href = search.referrer;
-    })();
-
-</script>
+<!-- Footer -->
+<footer class="text-center ng-cloak">
+    <span class="text-muted"><a href="https://cloudron.io" target="_blank">Cloudron</a> &copy; 2015-16 </span>
+    <span class="text-muted"><a href="https://chat.cloudron.io" target="_blank">Live Chat <i class="fa fa-comments"></i></a></span>
+</footer>
 
 </body>
 </html>

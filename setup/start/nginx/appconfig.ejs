@@ -43,9 +43,10 @@ server {
     proxy_set_header Connection $connection_upgrade;
 
     # only serve up the status page if we get proxy gateway errors
-    error_page 502 503 504 @appstatus;
-    location @appstatus {
-        return 307 <%= adminOrigin %>/appstatus.html?referrer=https://$host$request_uri;
+    root <%= sourceDir %>/webadmin/dist;
+    error_page 502 503 504 /appstatus.html;
+    location /appstatus.html {
+        internal;
     }
 
     location / {
