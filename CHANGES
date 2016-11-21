@@ -667,3 +667,7 @@
 [0.70.1]
 * Add additional platform healthcheck
 
+[0.80.0]
+* Add optional SSO for apps
+* Improve app status page
+
