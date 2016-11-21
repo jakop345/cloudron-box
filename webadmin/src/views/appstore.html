@@ -64,7 +64,7 @@
                                     Restrict to groups
                                 </label>
                             </div>
-                            <div ng-show="groups.length <= 1">No groups available. Create groups to restrict access to them first.<br/><br/></div>
+                            <div ng-show="groups.length <= 1">No groups available. <a href="#/users">Create groups</a> to restrict access to them.<br/><br/></div>
                             <div class="has-error" ng-show="appInstall.accessRestrictionOption === 'groups' && !appInstall.isAccessRestrictionValid()">Select at least one group</div>
                             <div>
                                 <div>
