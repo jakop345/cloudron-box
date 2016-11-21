@@ -528,4 +528,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             $(this).find("[autofocus]:first").focus();
         });
     });
+
+    $('.modal-backdrop').remove();
 }]);

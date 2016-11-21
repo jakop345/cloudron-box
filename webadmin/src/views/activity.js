@@ -62,4 +62,6 @@ angular.module('Application').controller('ActivityController', ['$scope', '$loca
     Client.onReady(function () {
         fetchEventLogs();
     });
+
+    $('.modal-backdrop').remove();
 }]);

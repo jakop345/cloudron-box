@@ -228,4 +228,6 @@ angular.module('Application').controller('TokensController', ['$scope', 'Client'
             $(this).find("[autofocus]:first").focus();
         });
     });
+
+    $('.modal-backdrop').remove();
 }]);

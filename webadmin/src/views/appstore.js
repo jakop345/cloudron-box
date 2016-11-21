@@ -582,4 +582,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $(this).find("[autofocus]:first").focus();
         });
     });
+
+    $('.modal-backdrop').remove();
 }]);

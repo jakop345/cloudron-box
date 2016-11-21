@@ -198,4 +198,6 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
             $(this).find("[autofocus]:first").focus();
         });
     });
+
+    $('.modal-backdrop').remove();
 }]);

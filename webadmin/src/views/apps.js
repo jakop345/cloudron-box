@@ -524,4 +524,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             $(this).find("[autofocus]:first").focus();
         });
     });
+
+    $('.modal-backdrop').remove();
 }]);

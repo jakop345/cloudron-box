@@ -192,4 +192,6 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
     Client.onReady($scope.updateMemorySystemChart);
     Client.onReady($scope.updateMemoryAppsChart);
     Client.onReady($scope.setMemoryApp.bind(null, 'system'));
+
+    $('.modal-backdrop').remove();
 }]);

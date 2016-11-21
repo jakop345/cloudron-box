@@ -37,4 +37,6 @@ angular.module('Application').controller('SupportController', ['$scope', '$locat
             $scope.feedback.busy = false;
         });
     };
+
+    $('.modal-backdrop').remove();
 }]);

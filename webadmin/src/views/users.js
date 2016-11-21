@@ -440,4 +440,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $(this).find("[autofocus]:first").focus();
         });
     });
+
+    $('.modal-backdrop').remove();
 }]);

@@ -241,4 +241,6 @@ angular.module('Application').controller('AccountController', ['$scope', 'Client
             $(this).find("[autofocus]:first").focus();
         });
     });
+
+    $('.modal-backdrop').remove();
 }]);
