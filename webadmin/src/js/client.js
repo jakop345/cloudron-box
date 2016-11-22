@@ -307,7 +307,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             portBindings: config.portBindings,
             accessRestriction: config.accessRestriction,
             cert: config.cert,
-            key: config.key
+            key: config.key,
+            sso: config.sso
         };
 
         post('/api/v1/apps/install', data).success(function (data, status) {
