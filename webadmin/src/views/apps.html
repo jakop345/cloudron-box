@@ -73,6 +73,13 @@
                             </p>
                         </div>
 
+                        <div class="form-group" ng-show="!appConfigure.customAuth && appConfigure.app.sso === false">
+                            <label class="control-label">Access control</label>
+                            <p>
+                                This app is configured to use it's own access control and does not integrate with Cloudron Auth.
+                            </p>
+                        </div>
+
                         <div class="form-group" ng-show="appConfigure.app.manifest.addons.email">
                             <label class="control-label">Access control</label>
                             <p>
@@ -81,7 +88,7 @@
                             </p>
                         </div>
 
-                        <div class="form-group" ng-hide="appConfigure.customAuth || appConfigure.app.manifest.addons.email">
+                        <div class="form-group" ng-hide="appConfigure.customAuth || appConfigure.app.manifest.addons.email || appConfigure.app.sso === false">
                             <label class="control-label">Access control</label>
                             <div class="radio">
                                 <label>
