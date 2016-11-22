@@ -144,7 +144,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 accessRestriction: accessRestriction,
                 cert: $scope.appInstall.certificateFile,
                 key: $scope.appInstall.keyFile,
-                sso: $scope.appInstall.optionalSso  && $scope.appInstall.accessRestriction == 'nosso'
+                sso: $scope.appInstall.optionalSso  && $scope.appInstall.accessRestrictionOption == 'nosso'
             };
 
             Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, data, function (error) {
