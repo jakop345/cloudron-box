@@ -525,6 +525,17 @@ function install(data, auditSource, callback) {
         purchase(appId, appStoreId, function (error) {
             if (error) return callback(error);
 
+            // FIXME revise this once customAuth is gone
+            if (sso === null) {
+                if (manifest.customAuth) {
+                    sso = false;
+                } else if (manifest.addons['simpleauth'] || manifest.addons['ldap'] || manifest.addons['oauth']) {
+                    sso = true;
+                } else {
+                    sso = false;
+                }
+            }
+
             var data = {
                 accessRestriction: accessRestriction,
                 memoryLimit: memoryLimit,
