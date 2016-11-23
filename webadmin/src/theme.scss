@@ -7,6 +7,7 @@ $brand-danger:                              #d9534f !default;
 
 $body-bg:                                   #E5E5E5;
 $font-family-sans-serif:                    Roboto, Helvetica, Arial, sans-serif;
+$font-family-heading:                       Roboto-Light, Helvetica, Arial, sans-serif;
 
 $navbar-default-link-color:                 #428BCA !default;
 $navbar-default-link-hover-color:           #62bdfc !default;
@@ -48,6 +49,11 @@ $table-border-color:                        transparent !default;
 
 @font-face {
     font-family: Roboto;
+    src: url(3rdparty/Roboto-Regular.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Light;
     src: url(3rdparty/Roboto-Light.ttf);
 }
 
@@ -151,6 +157,10 @@ sup {
 
 sup.help a {
     color: #757c82;
+}
+
+h1, h2, h3 {
+    font-family: $font-family-heading;
 }
 
 // ----------------------------
