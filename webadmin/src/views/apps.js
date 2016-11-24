@@ -485,6 +485,10 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         return app.manifest && app.manifest.postInstallMessage;
     };
 
+    $scope.hasConfigurePath = function (app) {
+        return app.manifest && app.manifest.configurePath;
+    };
+
     function fetchUsers() {
         Client.getUsers(function (error, users) {
             if (error) {

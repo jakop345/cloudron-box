@@ -178,6 +178,17 @@ app.filter('applicationLink', function() {
     };
 });
 
+app.filter('configureLink', function() {
+    return function(app) {
+        if (app.manifest.configurePath && app.installationState === ISTATES.INSTALLED && app.health === HSTATES.HEALTHY) {
+            console.log('===', app.manifest.configurePath)
+            return 'https://' + app.fqdn + (app.manifest.configurePath[0] !== '/' ? '/' : '') + app.manifest.configurePath;
+        } else {
+            return '';
+        }
+    };
+});
+
 app.filter('prettyHref', function () {
     return function (input) {
         if (!input) return input;

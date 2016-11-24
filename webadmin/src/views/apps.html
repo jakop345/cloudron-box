@@ -409,10 +409,12 @@
                             <a href="" ng-click="showConfigure(app)" title="Configure App"><i class="fa fa-wrench scale"></i></a>
                         </div>
 
+                        <div ng-show="hasConfigurePath(app)">
+                            <a ng-href="{{app | configureLink}}" target="_blank" title="Configuration Page"><i class="fa fa-share scale"></i></a>
+                        </div>
+
                         <div ng-show="hasPostInstallMessage(app)">
-                            <a href="" ng-click="showPostInstall(app)">
-                                <i class="fa fa-info-circle scale"></i>
-                            </a>
+                            <a href="" ng-click="showPostInstall(app)" title="Information"><i class="fa fa-info-circle scale"></i></a>
                         </div>
                     </div>
 
