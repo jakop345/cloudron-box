@@ -239,6 +239,7 @@ app.filter('postInstallMessage', function () {
     var SSO_MARKER = '=== sso ===';
 
     return function (text, app) {
+        if (!text) return '';
         if (!app) return text;
 
         var parts = text.split(SSO_MARKER);
