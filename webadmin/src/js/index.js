@@ -235,6 +235,21 @@ app.filter('markdown2html', function () {
     };
 });
 
+app.filter('postInstallMessage', function () {
+    var SSO_MARKER = '=== sso ===';
+
+    return function (text, app) {
+        if (!app) return text;
+
+        var parts = text.split(SSO_MARKER);
+        if (parts.length === 1) return text;
+
+        if (app.sso) return parts[1];
+        else return parts[0];
+    };
+});
+
+
 // keep this in sync with eventlog.js
 var ACTION_ACTIVATE = 'cloudron.activate';
 var ACTION_APP_CONFIGURE = 'app.configure';
