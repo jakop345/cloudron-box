@@ -71,6 +71,12 @@ echo " Follow setup logs in a second terminal with:"
 echo " $ tail -f ${LOG_FILE}"
 echo ""
 
+echo "=> Update package repositories ..."
+if ! apt-get update &>> "${LOG_FILE}"; then
+    echo "Could not update package repositories"
+    exit 1
+fi
+
 echo "=> Installing setup dependencies ..."
 if ! apt-get install curl -y &>> "${LOG_FILE}"; then
     echo "Could not install curl"
