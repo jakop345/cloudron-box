@@ -11,7 +11,10 @@ var assert = require('assert'),
 function getIp(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    try {
+    // replace 1.2.3.4 with the public IP to reach the server
+    return callback(null, '1.2.3.4');
+
+    /*try {
         var interfaces = os.networkInterfaces();
         // https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/
         for (var ifname in interfaces) {
@@ -25,6 +28,6 @@ function getIp(callback) {
         return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, new Error('Could not find interface')));
     } catch (e) {
         return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, e));
-    }
+    }*/
 }
 
