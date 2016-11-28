@@ -1165,6 +1165,36 @@ describe('database', function () {
             });
         });
 
+        it('getAllPaged succeeds with source search', function (done) {
+            eventlogdb.getAllPaged(null, '1.2.3.4', 1, 1, function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.be.an(Array);
+                expect(results.length).to.be(1);
+
+                expect(results[0].id).to.be('someid');
+                expect(results[0].action).to.be('some.event');
+                expect(results[0].source).to.be.eql({ ip: '1.2.3.4' });
+                expect(results[0].data).to.be.eql({ appId: 'thatapp' });
+
+                done();
+            });
+        });
+
+        it('getAllPaged succeeds with data search', function (done) {
+            eventlogdb.getAllPaged(null, 'thatapp', 1, 1, function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.be.an(Array);
+                expect(results.length).to.be(1);
+
+                expect(results[0].id).to.be('someid');
+                expect(results[0].action).to.be('some.event');
+                expect(results[0].source).to.be.eql({ ip: '1.2.3.4' });
+                expect(results[0].data).to.be.eql({ appId: 'thatapp' });
+
+                done();
+            });
+        });
+
         it('delByCreationTime succeeds', function (done) {
             async.each([ 'persistent.event', 'transient.event', 'anothertransient.event', 'anotherpersistent.event' ], function (e, callback) {
                 eventlogdb.add('someid' + Math.random(), e, { ip: '1.2.3.4' }, { appId: 'thatapp' }, callback);
