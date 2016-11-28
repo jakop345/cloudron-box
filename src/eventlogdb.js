@@ -49,7 +49,7 @@ function getAllPaged(action, search, page, perPage, callback) {
     var query = 'SELECT ' + EVENTLOGS_FIELDS + ' FROM eventlog';
 
     if (action || search) query += ' WHERE';
-    if (search) query += ' data LIKE ' + mysql.escape('%' + search + '%');
+    if (search) query += ' (source LIKE ' + mysql.escape('%' + search + '%') + ' OR data LIKE ' + mysql.escape('%' + search + '%') + ')';
     if (action && search) query += ' AND ';
 
     if (action) {
