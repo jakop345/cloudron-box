@@ -26,15 +26,22 @@ angular.module('Application').controller('ActivityController', ['$scope', '$loca
         { name: 'user.update', value: 'user.update' }
     ];
 
+    $scope.pageItemCount = [
+        { name: 'Show 2 per page', value: 2 },
+        { name: 'Show 20 per page', value: 20 },
+        { name: 'Show 50 per page', value: 50 },
+        { name: 'Show 100 per page', value: 100 }
+    ];
+
     $scope.currentPage = 1;
-    $scope.pageItems = 20;
+    $scope.pageItems = $scope.pageItemCount[0];
     $scope.action = '';
     $scope.search = '';
 
     function fetchEventLogs() {
         $scope.busy = true;
 
-        Client.getEventLogs($scope.action ? $scope.action.value : null, $scope.search || null, $scope.currentPage, $scope.pageItems, function (error, eventLogs) {
+        Client.getEventLogs($scope.action ? $scope.action.value : null, $scope.search || null, $scope.currentPage, $scope.pageItems.value, function (error, eventLogs) {
             $scope.busy = false;
 
             if (error) return console.error(error);
@@ -55,7 +62,8 @@ angular.module('Application').controller('ActivityController', ['$scope', '$loca
         fetchEventLogs();
     };
 
-    $scope.updateFilter = function () {
+    $scope.updateFilter = function (fresh) {
+        if (fresh) $scope.currentPage = 1;
         fetchEventLogs();
     };
 

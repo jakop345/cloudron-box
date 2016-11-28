@@ -14,6 +14,8 @@
       <select class="form-control" ng-model="action" ng-options="a.name for a in actions" ng-change="updateFilter()">
         <option value="">-- all actions --</option>
       </select>
+      <select class="form-control" ng-model="pageItems" ng-options="a.name for a in pageItemCount" ng-change="updateFilter(true)">
+      </select>
     </div>
     <div class="pagination pull-right">
       <button class="btn btn-default btn-outline" ng-click="showPrevPage()" ng-disabled="busy || currentPage <= 1"><i class="fa fa-angle-double-left"></i> prev</button>
