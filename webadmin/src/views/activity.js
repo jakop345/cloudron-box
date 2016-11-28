@@ -27,7 +27,6 @@ angular.module('Application').controller('ActivityController', ['$scope', '$loca
     ];
 
     $scope.pageItemCount = [
-        { name: 'Show 2 per page', value: 2 },
         { name: 'Show 20 per page', value: 20 },
         { name: 'Show 50 per page', value: 50 },
         { name: 'Show 100 per page', value: 100 }
