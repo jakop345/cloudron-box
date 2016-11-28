@@ -11,38 +11,23 @@
     <!-- Theme CSS -->
     <link href="theme.css" rel="stylesheet" type="text/css">
 
-    <!-- external fonts and CSS -->
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-
     <!-- jQuery-->
     <script src="3rdparty/js/jquery.min.js"></script>
 
-    <!-- Bootstrap Core JavaScript -->
-    <script src="3rdparty/js/bootstrap.min.js"></script>
-
-    <!-- Angularjs scripts -->
-    <script src="3rdparty/js/angular.min.js"></script>
-    <script src="3rdparty/js/angular-loader.min.js"></script>
-
     <script>
 
-        'use strict';
+        $(function () {
+            'use strict';
 
-        // create main application module
-        var app = angular.module('Application', []);
-
-        // FIXME this does not work with custom domains!
-        function detectApiOrigin() {
             var host = window.location.host;
-            var tmp = host.split('.')[0];
-            if (tmp.indexOf('-') === -1) return 'https://my-' + host;
-            else return 'https://my' + tmp.slice(tmp.indexOf('-')) + host.slice(tmp.length);
-        }
 
-        app.controller('Controller', ['$scope', function ($scope) {
-            $scope.apiOrigin = detectApiOrigin();
-            $scope.cloudronAvatar = $scope.apiOrigin + '/api/v1/cloudron/avatar';
-        }]);
+            // Special case the caas domains
+            if (host.match(/.*\.cloudron\.(me|eu|de)$/) || host.match(/.*\.selfhost\.io$/)) {
+                $('#settings-link').attr('href', '//my-' + host);
+            } else {
+                $('#settings-link').attr('href', '//my.' + host);
+            }
+        });
 
     </script>
 </head>
@@ -52,15 +37,15 @@
 <div class="wrapper">
     <div class="content">
         <h1>
-            <img width="48" height="48" ng-src="{{ cloudronAvatar || '/img/logo_inverted_192.png' }}" onerror="this.src = '/img/logo_inverted_192.png'"/>
+            <img width="48" height="48" src="/api/v1/cloudron/avatar" onerror="this.src = '/img/logo_inverted_192.png'"/>
             <span style="padding-left:10px">Cloudron</span>
         </h1>
         <br/>
         <h4>There is no app configured for this domain.</h4>
-        <h4>Use the <a ng-href="{{apiOrigin}}">settings panel</a> and install an app leaving the location empty.</h4>
+        <h4>Use the <a id="settings-link">settings panel</a> and install an app leaving the location empty.</h4>
 
         <footer>
-            <span class="text-muted"><a href="mailto: support@cloudron.io">Contact Support</a> - Copyright &copy; <a href="https://cloudron.io" target="_blank">Cloudron</a> 2015-16</span>
+            <span class="text-muted"><a href="mailto: support@cloudron.io">Contact Support</a> - Copyright &copy; <a href="https://cloudron.io" target="_blank">Cloudron</a> 2016</span>
         </footer>
     </div>
 </div>
