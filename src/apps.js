@@ -866,7 +866,8 @@ function clone(appId, data, auditSource, callback) {
                     memoryLimit: app.memoryLimit,
                     accessRestriction: app.accessRestriction,
                     xFrameOptions: app.xFrameOptions,
-                    lastBackupId: backupId
+                    lastBackupId: backupId,
+                    sso: !!app.sso
                 };
 
                 var from = (location ? location : manifest.title.toLowerCase().replace(/[^a-zA-Z0-9]/g, '')) + '.app';
