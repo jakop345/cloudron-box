@@ -50,10 +50,11 @@ function isChangeSynced(domain, value, type, nameserver, callback) {
 
                 debug('isChangeSynced: ns: %s (%s), name:%s Actual:%j Expecting:%s', nameserver, nsIp, domain, answer, value);
 
-                if ((type === 'A' && answer[0].address === value) ||
-                    (type === 'CNAME' && answer[0].data === value)) {
-                    return iteratorCallback(true); // done!
-                }
+                var match = answer.some(function (a) {
+                    return ((type === 'A' && a.address === value) || (type === 'CNAME' && a.data === value));
+                });
+
+                if (match) return iteratorCallback(true); // done!
 
                 iteratorCallback(false);
             });
