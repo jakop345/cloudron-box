@@ -57,9 +57,9 @@ restoreUrl=""
 tlsProvider="letsencrypt-prod"
 versionsUrl="https://s3.amazonaws.com/prod-cloudron-releases/versions.json"
 version="latest"
-apiServerOrigin="https://api.cloudron.io"
+apiServer="https://api.cloudron.io"
 
-args=$(getopt -o "" -l "domain:,help,provider:,encryption-key:,restore-url:,tls-provider:,version:,versions-url:,api-server-origin:" -n "$0" -- "$@")
+args=$(getopt -o "" -l "domain:,help,provider:,encryption-key:,restore-url:,tls-provider:,version:,versions-url:,api-server:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
@@ -72,7 +72,7 @@ while true; do
     --tls-provider) tlsProvider="$2"; shift 2;;
     --version) version="$2"; shift 2;;
     --versions-url) versionsUrl="$2"; shift 2;;
-    --api-server-origin) apiServerOrigin="$2"; shift 2;;
+    --api-server) apiServer="$2"; shift 2;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -117,8 +117,8 @@ if ! apt-get update &>> "${LOG_FILE}"; then
 fi
 
 echo "=> Installing setup dependencies ..."
-if ! apt-get install curl dig -y &>> "${LOG_FILE}"; then
-    echo "Could not install curl"
+if ! apt-get install curl dnsutils -y &>> "${LOG_FILE}"; then
+    echo "Could not install setup dependencies (curl and dnsutils)"
     exit 1
 fi
 
@@ -164,7 +164,7 @@ if [[ -z "${restoreUrl}" ]]; then
     "boxVersionsUrl": "${versionsUrl}",
     "fqdn": "${domain}",
     "provider": "${provider}",
-    "apiServerOrigin": "${apiServerOrigin}",
+    "apiServerOrigin": "${apiServer}",
     "tlsConfig": {
         "provider": "${tlsProvider}"
     },
@@ -183,7 +183,7 @@ else
     "boxVersionsUrl": "${versionsUrl}",
     "fqdn": "${domain}",
     "provider": "${provider}",
-    "apiServerOrigin": "${apiServerOrigin}",
+    "apiServerOrigin": "${apiServer}",
     "restore": {
         "url": "${restoreUrl}",
         "key": "${encryptionKey}"
