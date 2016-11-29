@@ -124,10 +124,17 @@ fi
 
 ip=$(dig a "my.${domain}" +short)
 echo ""
-echo "Found DNS A record for my.${domain} with ${ip}"
+if [[ -z "${ip}" ]]; then
+    echo "No DNS A record found for my.${domain}"
+    echo "First create a new DNS A record for my.${domain} pointing to the public ip address of this server."
+    exit 1
+fi
+
+echo "Found DNS A record for my.${domain} pointing to:"
+echo "${ip}"
 echo ""
 if ! ask "Is this correct?"; then
-    echo "Please ensure that the A record for my.${domain} is pointing to the correct public address of this server."
+    echo "Please ensure that the A record for my.${domain} is pointing to the correct public ip address of this server."
 fi
 echo ""
 
