@@ -5,26 +5,30 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    os = require('os'),
+    async = require('async'),
+    config = require('../config.js'),
+    superagent = require('superagent'),
     SysInfoError = require('../sysinfo.js').SysInfoError;
 
 function getIp(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    try {
-        var interfaces = os.networkInterfaces();
-        // https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/
-        for (var ifname in interfaces) {
-            if (!ifname.match(/^(en|eth)/)) continue;
-
-            for (var obj of interfaces[ifname]) { // array
-                if (obj.family === 'IPv4') return callback(null, obj.address);
+    async.retry({ times: 10, interval: 5000 }, function (callback) {
+        superagent.get(config.apiServerOrigin() + '/api/v1/helper/public_ip').timeout(30 * 1000).end(function (error, result) {
+            if (error || result.statusCode !== 200) {
+                console.error('Error getting IP', error);
+                return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'Unable to contact api server'));
             }
-        }
+            if (!result.body && !result.body.ip) {
+                console.error('Unexpected answer. No "ip" found in response body.', result.body);
+                return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, 'No IP found in body'));
+            }
 
-        return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, new Error('Could not find interface')));
-    } catch (e) {
-        return callback(new SysInfoError(SysInfoError.INTERNAL_ERROR, e));
-    }
+            callback(null, result.body.ip);
+        });
+    }, function (error, result) {
+        if (error) return callback(error);
+
+        callback(null, result);
+    });
 }
-

@@ -43,7 +43,7 @@ function getApi(callback) {
     switch (config.provider()) {
         case '': return callback(null, caas);   // current fallback for caas
         case 'caas': return callback(null, caas);
-        case 'digitalocean': return callback(null, caas);
+        case 'digitalocean': return callback(null, generic);
         case 'ec2': return callback(null, ec2);
         case 'scaleway': return callback(null, scaleway);
         case 'generic': return callback(null, generic);
