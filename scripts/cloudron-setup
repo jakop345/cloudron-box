@@ -7,6 +7,43 @@ if [[ ${EUID} -ne 0 ]]; then
     exit 1
 fi
 
+ask() {
+    # http://djm.me/ask
+    local prompt default REPLY
+
+    while true; do
+
+        if [ "${2:-}" = "Y" ]; then
+            prompt="Y/n"
+            default=Y
+        elif [ "${2:-}" = "N" ]; then
+            prompt="y/N"
+            default=N
+        else
+            prompt="y/n"
+            default=
+        fi
+
+        # Ask the question (not using "read -p" as it uses stderr not stdout)
+        echo -n "$1 [$prompt] "
+
+        # Read the answer (use /dev/tty in case stdin is redirected from somewhere else)
+        read REPLY </dev/tty
+
+        # Default?
+        if [ -z "$REPLY" ]; then
+            REPLY=$default
+        fi
+
+        # Check if the reply is valid
+        case "$REPLY" in
+            Y*|y*) return 0 ;;
+            N*|n*) return 1 ;;
+        esac
+
+    done
+}
+
 # change this to a hash when we make a upgrade release
 readonly INSTALLER_REVISION=master
 readonly INIT_BASESYSTEM_SCRIPT_URL="https://git.cloudron.io/cloudron/box/raw/${INSTALLER_REVISION}/baseimage/initializeBaseUbuntuImage.sh"
@@ -80,10 +117,19 @@ if ! apt-get update &>> "${LOG_FILE}"; then
 fi
 
 echo "=> Installing setup dependencies ..."
-if ! apt-get install curl -y &>> "${LOG_FILE}"; then
+if ! apt-get install curl dig -y &>> "${LOG_FILE}"; then
     echo "Could not install curl"
     exit 1
 fi
+
+ip=$(dig a "my.${domain}" +short)
+echo ""
+echo "Found DNS A record for my.${domain} with ${ip}"
+echo ""
+if ! ask "Is this correct?"; then
+    echo "Please ensure that the A record for my.${domain} is pointing to the correct public address of this server."
+fi
+echo ""
 
 echo "=> Downloading initialization script"
 if ! curl -s "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh; then
