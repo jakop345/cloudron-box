@@ -135,6 +135,7 @@ echo "${ip}"
 echo ""
 if ! ask "Is this correct?"; then
     echo "Please ensure that the A record for my.${domain} is pointing to the correct public ip address of this server."
+    exit 1
 fi
 echo ""
 
