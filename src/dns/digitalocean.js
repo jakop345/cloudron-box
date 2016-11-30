@@ -8,6 +8,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    async = require('async'),
     debug = require('debug')('box:dns/digitalocean'),
     SubdomainError = require('../subdomains.js').SubdomainError,
     superagent = require('superagent'),
@@ -56,48 +57,57 @@ function upsert(dnsConfig, zoneName, subdomain, type, values, callback) {
     getInternal(dnsConfig, zoneName, subdomain, type, function (error, result) {
         if (error) return callback(error);
 
-        // FIXME currently we only support one record!
+        // used to track available records to update instead of create
+        var i = 0;
 
-        var value = values[0];
-        var priority = null;
+        async.eachSeries(values, function (value, callback) {
+            var priority = null;
 
-        if (type === 'MX') {
-            priority = values[0].split(' ')[0];
-            value = values[0].split(' ')[1];
-        }
+            if (type === 'MX') {
+                priority = value.split(' ')[0];
+                value = value.split(' ')[1];
+            }
 
-        var data = {
-            type: type,
-            name: subdomain,
-            data: value,
-            priority: priority
-        };
+            var data = {
+                type: type,
+                name: subdomain,
+                data: value,
+                priority: priority
+            };
 
-        if (result.length === 0) {
-            superagent.post(DIGITALOCEAN_ENDPOINT + '/v2/domains/' + zoneName + '/records')
-              .set('Authorization', 'Bearer ' + dnsConfig.token)
-              .send(data)
-              .timeout(30 * 1000)
-              .end(function (error, result) {
-                if (error && !error.response) return callback(error);
-                if (result.statusCode === 403 || result.statusCode === 401) return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, util.format('%s %j', result.statusCode, result.body)));
-                if (result.statusCode !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
+            if (i >= result.length) {
+                superagent.post(DIGITALOCEAN_ENDPOINT + '/v2/domains/' + zoneName + '/records')
+                  .set('Authorization', 'Bearer ' + dnsConfig.token)
+                  .send(data)
+                  .timeout(30 * 1000)
+                  .end(function (error, result) {
+                    if (error && !error.response) return callback(error);
+                    if (result.statusCode === 403 || result.statusCode === 401) return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, util.format('%s %j', result.statusCode, result.body)));
+                    if (result.statusCode !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
 
-                return callback(null, 'unused');
-            });
-        } else {
-            superagent.put(DIGITALOCEAN_ENDPOINT + '/v2/domains/' + zoneName + '/records/' + result[0].id)
-              .set('Authorization', 'Bearer ' + dnsConfig.token)
-              .send(data)
-              .timeout(30 * 1000)
-              .end(function (error, result) {
-                if (error && !error.response) return callback(error);
-                if (result.statusCode === 403 || result.statusCode === 401) return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, util.format('%s %j', result.statusCode, result.body)));
-                if (result.statusCode !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
+                    return callback(null);
+                });
+            } else {
+                superagent.put(DIGITALOCEAN_ENDPOINT + '/v2/domains/' + zoneName + '/records/' + result[i].id)
+                  .set('Authorization', 'Bearer ' + dnsConfig.token)
+                  .send(data)
+                  .timeout(30 * 1000)
+                  .end(function (error, result) {
+                    // increment, as we have consumed the record
+                    ++i;
 
-                return callback(null, 'unused');
-            });
-        }
+                    if (error && !error.response) return callback(error);
+                    if (result.statusCode === 403 || result.statusCode === 401) return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, util.format('%s %j', result.statusCode, result.body)));
+                    if (result.statusCode !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
+
+                    return callback(null);
+                });
+            }
+        }, function (error) {
+            if (error) return callback(error);
+
+            callback(null, 'unused');
+        });
     });
 }
 
