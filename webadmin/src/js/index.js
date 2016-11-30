@@ -106,6 +106,7 @@ app.filter('activeOAuthClients', function () {
 
 app.filter('prettyAppMessage', function () {
     return function (message) {
+        if (message === 'ETRYAGAIN') return 'Ensure that the DNS record for this location is setup correctly.';
         return message;
     };
 });
