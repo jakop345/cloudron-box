@@ -104,6 +104,12 @@ app.filter('activeOAuthClients', function () {
     };
 });
 
+app.filter('prettyAppMessage', function () {
+    return function (message) {
+        return message;
+    };
+});
+
 app.filter('installationActive', function () {
     return function(app) {
         if (app.installationState === ISTATES.ERROR) return false;

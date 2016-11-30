@@ -239,7 +239,7 @@
             </div>
             <div class="modal-body">
                 <p><b>There was an error:</b></p>
-                <p>{{appError.app.installationProgress}}</p>
+                <p>{{appError.app.message | prettyAppMessage }}</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
@@ -354,7 +354,7 @@
 
     <div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
         <div class="col-sm-1 grid-item" ng-repeat="app in installedApps | orderBy:'location'">
-            <div style="background-color: white;" class="highlight grid-item-content" uib-tooltip="{{ app.message }}">
+            <div style="background-color: white;" class="highlight grid-item-content" uib-tooltip="{{ app.message | prettyAppMessage }}">
                 <a ng-href="{{app | applicationLink}}" ng-click="(app | installError) === true && showError(app)" target="_blank">
                     <div class="grid-item-top">
                         <div class="row">
