@@ -163,8 +163,7 @@ describe('dns provider', function () {
             });
         });
 
-        // FIXME not supported https://git.cloudron.io/cloudron/box/issues/99
-        xit('upsert multiple record succeeds', function (done) {
+        it('upsert multiple record succeeds', function (done) {
             nock.cleanAll();
 
             var DOMAIN_RECORD_0 = {
@@ -179,25 +178,15 @@ describe('dns provider', function () {
 
             var DOMAIN_RECORD_1 = {
                 id: 3352893,
-                type: 'A',
-                name: 'test',
+                type: 'TXT',
+                name: '@',
                 data: '1.2.3.4',
                 priority: null,
                 port: null,
                 weight: null
             };
 
-            var DOMAIN_RECORD_2 = {
-                id: 3352893,
-                type: 'TXT',
-                name: '@',
-                data: 'something',
-                priority: null,
-                port: null,
-                weight: null
-            };
-
-            var DOMAIN_RECORD_2_NEW = {
+            var DOMAIN_RECORD_1_NEW = {
                 id: 3352893,
                 type: 'TXT',
                 name: '@',
@@ -207,22 +196,56 @@ describe('dns provider', function () {
                 weight: null
             };
 
+            var DOMAIN_RECORD_2 = {
+                id: 3352894,
+                type: 'TXT',
+                name: '@',
+                data: 'something',
+                priority: null,
+                port: null,
+                weight: null
+            };
+
+            var DOMAIN_RECORD_2_NEW = {
+                id: 3352894,
+                type: 'TXT',
+                name: '@',
+                data: 'somethingnew',
+                priority: null,
+                port: null,
+                weight: null
+            };
+
+            var DOMAIN_RECORD_3_NEW = {
+                id: 3352895,
+                type: 'TXT',
+                name: '@',
+                data: 'thirdnewone',
+                priority: null,
+                port: null,
+                weight: null
+            };
+
             var req1 = nock(DIGITALOCEAN_ENDPOINT).filteringRequestBody(function () { return false; })
                 .get('/v2/domains/localhost/records')
                 .reply(200, { domain_records: [ DOMAIN_RECORD_0, DOMAIN_RECORD_1, DOMAIN_RECORD_2 ] });
             var req2 = nock(DIGITALOCEAN_ENDPOINT).filteringRequestBody(function () { return false; })
+                .put('/v2/domains/localhost/records/' + DOMAIN_RECORD_1.id)
+                .reply(200, { domain_records: DOMAIN_RECORD_1_NEW });
+            var req3 = nock(DIGITALOCEAN_ENDPOINT).filteringRequestBody(function () { return false; })
                 .put('/v2/domains/localhost/records/' + DOMAIN_RECORD_2.id)
                 .reply(200, { domain_records: DOMAIN_RECORD_2_NEW });
-            var req3 = nock(DIGITALOCEAN_ENDPOINT).filteringRequestBody(function () { return false; })
+            var req4 = nock(DIGITALOCEAN_ENDPOINT).filteringRequestBody(function () { return false; })
                 .post('/v2/domains/localhost/records')
                 .reply(201, { domain_records: DOMAIN_RECORD_2_NEW });
 
-            subdomains.upsert('', 'TXT', [ DOMAIN_RECORD_2_NEW.data, 'anothervalue' ], function (error, result) {
+            subdomains.upsert('', 'TXT', [ DOMAIN_RECORD_2_NEW.data, DOMAIN_RECORD_1_NEW.data, DOMAIN_RECORD_3_NEW.data ], function (error, result) {
                 expect(error).to.eql(null);
                 expect(result).to.eql('unused');
                 expect(req1.isDone()).to.be.ok();
                 expect(req2.isDone()).to.be.ok();
                 expect(req3.isDone()).to.be.ok();
+                expect(req4.isDone()).to.be.ok();
 
                 done();
             });
