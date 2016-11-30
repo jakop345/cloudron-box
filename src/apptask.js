@@ -305,9 +305,18 @@ function waitForDnsPropagation(app, callback) {
 
             if (result !== 'done') return retryCallback(new Error(util.format('app:%s not ready yet: %s', app.id, result)));
 
-            retryCallback(null, result);
+            retryCallback(null);
         });
-    }, callback);
+    }, function (error) {
+        if (error) return callback(error);
+
+        // finally validate with waitForDns
+        sysinfo.getIp(function (error, ip) {
+            if (error) return callback(error);
+
+            waitForDns(config.appFqdn(app.location), ip, 'A', { interval: 5000, times: 30 }, callback);
+        });
+    });
 }
 
 function waitForAltDomainDnsPropagation(app, callback) {
