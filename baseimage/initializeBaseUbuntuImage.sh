@@ -29,7 +29,7 @@ export DEBIAN_FRONTEND=noninteractive
 echo "=== Upgrade ==="
 apt-get -o Dpkg::Options::="--force-confdef" update -y
 apt-get -o Dpkg::Options::="--force-confdef" dist-upgrade -y
-apt-get install -y curl
+apt-get install -y curl iptables
 
 # Setup firewall before everything. docker creates it's own chain and the -X below will remove it
 # Do NOT use iptables-persistent because it's startup ordering conflicts with docker
