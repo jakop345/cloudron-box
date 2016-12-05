@@ -211,7 +211,7 @@ if ! ${INSTALLER_SOURCE_DIR}/scripts/installer.sh --sourcetarballurl "${sourceTa
     exit 1
 fi
 
-echo -n "=> Waiting for cloudron to be ready"
+echo -n "=> Waiting for cloudron to be ready (also takes some time) "
 while true; do
     echo -n "."
     if journalctl -u box -a | grep "platformReady: configured, resuming tasks" >/dev/null; then
