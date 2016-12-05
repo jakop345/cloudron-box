@@ -198,7 +198,7 @@ else
     },
     "tlsConfig": {
         "provider": "${tlsProvider}"
-    }
+    },
     "version": "${version}"
 }
 EOF
