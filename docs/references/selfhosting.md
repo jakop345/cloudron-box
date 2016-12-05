@@ -122,12 +122,20 @@ we have to add some vendor specific quirks. Please open a
 
 * `--encryption-key` is the key to be used for encrypting backup data.
 
+Optional arguments for installation:
+
+* `--tls-provider` is the name of the SSL/TLS certificate backend. Defaults to Let's encrypt.
+If Let's encrypt is not wanted, specifying `fallback` will always use the fallback wildcard certificate.
+Initially a self-signed one is provided, which can be overwritten later in the admin interface.
+This may be useful for non-public installations.
+
 Optional arguments used for update and restore:
 
 * `--version` is the version of Cloudron to install. By default, the setup script installs
 the latest version. This is useful when restoring a Cloudron from a backup.
 
 * `--restore-url` is an URL to the backup to restore to.
+
 
 
 ## Finish setup

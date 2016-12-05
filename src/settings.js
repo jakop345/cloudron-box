@@ -397,8 +397,8 @@ function setTlsConfig(tlsConfig, callback) {
     assert.strictEqual(typeof tlsConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (tlsConfig.provider !== 'caas' && tlsConfig.provider.indexOf('le-') !== 0) {
-        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be caas or le-*'));
+    if (tlsConfig.provider !== 'fallback' && tlsConfig.provider !== 'caas' && tlsConfig.provider.indexOf('le-') !== 0) {
+        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be caas, fallback or le-*'));
     }
 
     settingsdb.set(exports.TLS_CONFIG_KEY, JSON.stringify(tlsConfig), function (error) {

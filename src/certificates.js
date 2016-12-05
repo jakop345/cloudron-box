@@ -23,6 +23,7 @@ var acme = require('./cert/acme.js'),
     constants = require('./constants.js'),
     debug = require('debug')('box:src/certificates'),
     eventlog = require('./eventlog.js'),
+    fallback = require('./cert/fallback.js'),
     fs = require('fs'),
     mailer = require('./mailer.js'),
     nginx = require('./nginx.js'),
@@ -65,6 +66,8 @@ function getApi(app, callback) {
 
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
+
+        if (tlsConfig.provider === 'fallback') callback(null, fallback, {});
 
         // use acme if we have altDomain or the tlsConfig is not caas
         var api = (app.altDomain || tlsConfig.provider) !== 'caas' ? acme : caas;
