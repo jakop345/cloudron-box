@@ -55,7 +55,14 @@ console.log(' ClientSecret: %s', oauth.clientSecret);
 console.log(' Cloudron API: %s', oauth.apiOrigin || 'default');
 console.log();
 
+
 gulp.task('js-index', function () {
+    // needs special treatment for error handling
+    var uglifyer = uglify();
+    uglifyer.on('error', function (error) {
+        console.error(error);
+    });
+
     gulp.src([
         'webadmin/src/js/index.js',
         'webadmin/src/js/client.js',
@@ -66,25 +73,37 @@ gulp.task('js-index', function () {
         .pipe(ejs({ oauth: oauth }, { ext: '.js' }))
         .pipe(sourcemaps.init())
         .pipe(concat('index.js', { newLine: ';' }))
-        .pipe(uglify())
+        .pipe(uglifyer)
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist/js'));
 });
 
 gulp.task('js-setup', function () {
+    // needs special treatment for error handling
+    var uglifyer = uglify();
+    uglifyer.on('error', function (error) {
+        console.error(error);
+    });
+
     gulp.src(['webadmin/src/js/setup.js', 'webadmin/src/js/client.js'])
         .pipe(ejs({ oauth: oauth }, { ext: '.js' }))
         .pipe(sourcemaps.init())
         .pipe(concat('setup.js', { newLine: ';' }))
-        .pipe(uglify())
+        .pipe(uglifyer)
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist/js'));
 });
 
 gulp.task('js-update', function () {
+    // needs special treatment for error handling
+    var uglifyer = uglify();
+    uglifyer.on('error', function (error) {
+        console.error(error);
+    });
+
     gulp.src(['webadmin/src/js/update.js'])
         .pipe(sourcemaps.init())
-        .pipe(uglify())
+        .pipe(uglifyer)
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist/js'))
         .pipe(gulp.dest('setup/splash/website/js'));
