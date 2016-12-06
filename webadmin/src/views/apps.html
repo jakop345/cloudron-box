@@ -171,6 +171,7 @@
                 </fieldset>
             </div>
             <div class="modal-footer ">
+                <button type="button" class="btn btn-default pull-left" ng-click="restartApp(appConfigure.app)" ng-disabled="restartAppBusy"><i class="fa fa-spinner fa-pulse" ng-show="restartAppBusy"></i> Restart</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || appConfigure.busy || (appConfigure.accessRestrictionOption === 'groups' && !appConfigure.isAccessRestrictionValid()) || !appConfigure.isAltDomainValid()"><i class="fa fa-spinner fa-pulse" ng-show="appConfigure.busy"></i> Save</button>
             </div>

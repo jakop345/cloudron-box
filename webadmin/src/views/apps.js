@@ -9,6 +9,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.user = Client.getUserInfo();
     $scope.groups = [];
     $scope.users = [];
+    $scope.restartAppBusy = false;
 
     $scope.appConfigure = {
         busy: false,
@@ -487,6 +488,41 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
     $scope.hasConfigurePath = function (app) {
         return app.manifest && app.manifest.configurePath;
+    };
+
+    $scope.restartApp = function (app) {
+        $scope.restartAppBusy = true;
+
+        function waitUntilStopped(callback) {
+            Client.refreshInstalledApps(function (error) {
+                if (error) return callback(error);
+
+                Client.getApp(app.id, function (error, result) {
+                    if (error) return callback(error);
+
+                    if (result.runState === 'stopped') return callback();
+                    setTimeout(waitUntilStopped.bind(null, callback), 2000);
+                });
+            });
+        }
+
+        Client.stopApp(app.id, function (error) {
+            $scope.restartAppBusy = false;
+
+            if (error) return console.error('Failed to stop app.', error);
+
+            // close dialog to allow user see the app restarting
+            $('#appConfigureModal').modal('hide');
+            $scope.reset();
+
+            waitUntilStopped(function (error) {
+                if (error) return console.error('Failed to get app status.', error);
+
+                Client.startApp(app.id, function (error) {
+                    if (error) console.error('Failed to start app.', error);
+                });
+            });
+        });
     };
 
     function fetchUsers() {
