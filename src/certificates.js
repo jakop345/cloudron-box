@@ -67,7 +67,7 @@ function getApi(app, callback) {
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
 
-        if (tlsConfig.provider === 'fallback') callback(null, fallback, {});
+        if (tlsConfig.provider === 'fallback') return callback(null, fallback, {});
 
         // use acme if we have altDomain or the tlsConfig is not caas
         var api = (app.altDomain || tlsConfig.provider) !== 'caas' ? acme : caas;
