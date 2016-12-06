@@ -272,6 +272,11 @@ chown root:systemd-journal /var/log/journal
 systemctl restart systemd-journald
 setfacl -n -m u:${USER}:r /var/log/journal/*/system.journal
 
+# DO uses Google nameservers by default. This causes RBL queries to fail (host 2.0.0.127.zen.spamhaus.org)
+# We do not use dnsmasq because it is not a recursive resolver and defaults to the value in the interfaces file (which is Google DNS!)
+echo "==== Install unbound DNS ==="
+apt-get -y install unbound
+
 echo "==== Install ssh ==="
 apt-get -y install openssh-server
 
@@ -283,13 +288,7 @@ if [[ "${PROVIDER}" == "caas" ]]; then
         -e 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/g' \
         -e 's/^#\?Port .*/Port 202/g' \
         -i /etc/ssh/sshd_config
+
+    # required so we can connect to this machine since port 22 is blocked by iptables by now
+    systemctl reload sshd
 fi
-
-# DO uses Google nameservers by default. This causes RBL queries to fail (host 2.0.0.127.zen.spamhaus.org)
-# We do not use dnsmasq because it is not a recursive resolver and defaults to the value in the interfaces file (which is Google DNS!)
-echo "==== Install unbound DNS ==="
-apt-get -y install unbound
-
-# required so we can connect to this machine since port 22 is blocked by iptables by now
-systemctl reload sshd
-
