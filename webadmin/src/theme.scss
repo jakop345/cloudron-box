@@ -313,6 +313,10 @@ h1, h2, h3 {
         background-color: $navbar-default-link-hover-color;
         color: white;
     }
+
+    & > i {
+        width: 30px;
+    }
 }
 
 
