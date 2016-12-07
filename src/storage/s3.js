@@ -48,7 +48,7 @@ function getBoxBackupDetails(apiConfig, id, callback) {
     var region = apiConfig.region || 'us-east-1';
 
     var details = {
-        backupScriptArguments: [ 's3', s3Url, apiConfig.accessKeyId, apiConfig.secretAccessKey, region, apiConfig.key ]
+        backupScriptArguments: [ 's3', s3Url, apiConfig.accessKeyId, apiConfig.secretAccessKey, region, apiConfig.endpoint || '', apiConfig.key ]
     };
 
     callback(null, details);
@@ -66,7 +66,7 @@ function getAppBackupDetails(apiConfig, appId, dataId, configId, callback) {
     var region = apiConfig.region || 'us-east-1';
 
     var details = {
-        backupScriptArguments: [ 's3', appId, s3ConfigUrl, s3DataUrl, apiConfig.accessKeyId, apiConfig.secretAccessKey, region, apiConfig.key ]
+        backupScriptArguments: [ 's3', appId, s3ConfigUrl, s3DataUrl, apiConfig.accessKeyId, apiConfig.secretAccessKey, region, apiConfig.endpoint || '', apiConfig.key ]
     };
 
     callback(null, details);
@@ -191,7 +191,7 @@ function testConfig(apiConfig, callback) {
                 // now perform the same as what we do in the backup shell scripts
                 var BACKUP_TEST_CMD = require('path').join(__dirname, '../scripts/backuptests3.sh');
                 var tmpUrl = 's3://' + apiConfig.bucket + '/' + apiConfig.prefix + '/testfile';
-                var args = [ tmpUrl, apiConfig.accessKeyId, apiConfig.secretAccessKey, apiConfig.region ];
+                var args = [ tmpUrl, credentials.accessKeyId, credentials.secretAccessKey, credentials.region, credentials.endpoint || '' ];
 
                 // if this fails the region is wrong, otherwise we would have failed earlier.
                 shell.exec('backupTestS3', BACKUP_TEST_CMD, args, function (error) {

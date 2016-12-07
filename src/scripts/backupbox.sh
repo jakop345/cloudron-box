@@ -14,8 +14,8 @@ fi
 
 
 # verify argument count
-if [[ "$1" == "s3" && $# -lt 6 ]]; then
-    echo "Usage: backupbox.sh s3 <s3 url> <access key id> <access key> <region> <password> [session token]"
+if [[ "$1" == "s3" && $# -lt 7 ]]; then
+    echo "Usage: backupbox.sh s3 <s3 url> <access key id> <access key> <region> <endpoint> <password> [session token]"
     exit 1
 fi
 
@@ -31,10 +31,11 @@ if [[ "$1" == "s3" ]]; then
     export AWS_ACCESS_KEY_ID="$3"
     export AWS_SECRET_ACCESS_KEY="$4"
     export AWS_DEFAULT_REGION="$5"
-    readonly password="$6"
+    readonly endpoint_url="$6"
+    readonly password="$7"
 
     if [ $# -gt 6 ]; then
-        export AWS_SESSION_TOKEN="$7"
+        export AWS_SESSION_TOKEN="$8"
     fi
 fi
 
@@ -63,11 +64,17 @@ if [[ "$1" == "s3" ]]; then
         echo "Uploading backup to ${s3_url} (try ${try})"
         error_log=$(mktemp)
 
+        # may be empty
+        optional_args=""
+        if [ -n "${endpoint_url}" ]; then
+            optional_args="--endpoint-url ${endpoint_url}"
+        fi
+
         # use aws instead of curl because curl will always read entire stream memory to set Content-Length
         # aws will do multipart upload
         if tar -czf - -C "${box_snapshot_dir}" . \
                | openssl aes-256-cbc -e -pass "pass:${password}" \
-               | aws s3 cp - "${s3_url}" 2>"${error_log}"; then
+               | aws ${optional_args} s3 cp - "${s3_url}" 2>"${error_log}"; then
             break
         fi
         cat "${error_log}" && rm "${error_log}"

@@ -15,8 +15,8 @@ fi
 readonly DATA_DIR="${HOME}/data"
 
 # verify argument count
-if [[ "$1" == "s3" && $# -lt 8 ]]; then
-    echo "Usage: backupapp.sh s3 <appId> <s3 config url> <s3 data url> <access key id> <access key> <region> <password> [session token]"
+if [[ "$1" == "s3" && $# -lt 9 ]]; then
+    echo "Usage: backupapp.sh s3 <appId> <s3 config url> <s3 data url> <access key id> <access key> <region> <endpoint> <password> [session token]"
     exit 1
 fi
 
@@ -36,10 +36,11 @@ if [[ "$1" == "s3" ]]; then
     export AWS_ACCESS_KEY_ID="$5"
     export AWS_SECRET_ACCESS_KEY="$6"
     export AWS_DEFAULT_REGION="$7"
-    readonly password="$8"
+    readonly endpoint_url="$8"
+    readonly password="$9"
 
-    if [ $# -gt 8 ]; then
-        export AWS_SESSION_TOKEN="$9"
+    if [ $# -gt 9 ]; then
+        export AWS_SESSION_TOKEN="$10"
     fi
 fi
 
@@ -61,6 +62,12 @@ btrfs subvolume snapshot -r "${app_data_dir}" "${app_data_snapshot}"
 try=0
 
 if [[ "$1" == "s3" ]]; then
+    # may be empty
+    optional_args=""
+    if [ -n "${endpoint_url}" ]; then
+        optional_args="--endpoint-url ${endpoint_url}"
+    fi
+
     # Upload config.json first because uploading tarball might take a lot of time, leading to token expiry
     for try in `seq 1 5`; do
         echo "Uploading config.json to ${s3_config_url} (try ${try})"
@@ -69,7 +76,7 @@ if [[ "$1" == "s3" ]]; then
         # use aws instead of curl because curl will always read entire stream memory to set Content-Length
         # aws will do multipart upload
         if cat "${app_data_snapshot}/config.json" \
-               |  aws s3 cp - "${s3_config_url}" 2>"${error_log}"; then
+               |  aws ${optional_args} s3 cp - "${s3_config_url}" 2>"${error_log}"; then
             break
         fi
         cat "${error_log}" && rm "${error_log}"
@@ -87,7 +94,7 @@ if [[ "$1" == "s3" ]]; then
 
         if tar -czf - -C "${app_data_snapshot}" . \
                | openssl aes-256-cbc -e -pass "pass:${password}" \
-               |  aws s3 cp - "${s3_data_url}" 2>"${error_log}"; then
+               |  aws ${optional_args} s3 cp - "${s3_data_url}" 2>"${error_log}"; then
             break
         fi
         cat "${error_log}" && rm "${error_log}"
