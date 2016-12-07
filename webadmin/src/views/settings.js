@@ -275,6 +275,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         accessKeyId: '',
         secretAccessKey: '',
         region: '',
+        endpoint: '',
 
         show: function () {
             $scope.configureBackup.error = {};
@@ -285,6 +286,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             $scope.configureBackup.region = $scope.backupConfig.region;
             $scope.configureBackup.accessKeyId = $scope.backupConfig.accessKeyId;
             $scope.configureBackup.secretAccessKey = $scope.backupConfig.secretAccessKey;
+            $scope.configureBackup.endpoint = $scope.backupConfig.endpoint;
 
             $('#configureBackupModal').modal('show');
         },
@@ -302,6 +304,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             };
 
             if ($scope.configureBackup.region) backupConfig.region = $scope.configureBackup.region;
+            if ($scope.configureBackup.endpoint) backupConfig.endpoint = $scope.configureBackup.endpoint;
 
             Client.setBackupConfig(backupConfig, function (error) {
                 $scope.configureBackup.busy = false;
