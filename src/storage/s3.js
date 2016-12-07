@@ -29,12 +29,13 @@ function getBackupCredentials(apiConfig, callback) {
 
     var credentials = {
         signatureVersion: 'v4',
+        s3ForcePathStyle: true,
         accessKeyId: apiConfig.accessKeyId,
         secretAccessKey: apiConfig.secretAccessKey,
         region: apiConfig.region || 'us-east-1'
     };
 
-    if (apiConfig.endpoint) credentials.endpoint = new AWS.Endpoint(apiConfig.endpoint);
+    if (apiConfig.endpoint) credentials.endpoint = apiConfig.endpoint;
 
     callback(null, credentials);
 }

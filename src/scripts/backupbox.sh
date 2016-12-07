@@ -34,7 +34,7 @@ if [[ "$1" == "s3" ]]; then
     readonly endpoint_url="$6"
     readonly password="$7"
 
-    if [ $# -gt 6 ]; then
+    if [ $# -gt 7 ]; then
         export AWS_SESSION_TOKEN="$8"
     fi
 fi
