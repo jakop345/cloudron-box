@@ -83,7 +83,7 @@ function unconfigureApp(app, callback) {
 
     var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
-        debug('Error removing nginx configuration of "%s": %s', vhost, safe.error.message);
+        if (safe.error.code !== 'ENOENT') debug('Error removing nginx configuration of "%s": %s', vhost, safe.error.message);
         return callback(null);
     }
 
