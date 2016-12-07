@@ -672,3 +672,7 @@
 * Improve app status page
 * Several webinterface improvements
 
+[0.80.1]
+* Improved DNS handling
+* Better error messages in UI
+
