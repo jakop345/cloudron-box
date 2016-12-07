@@ -14,14 +14,31 @@
     <div class="row shadow memory-app-container">
         <h2>Disk Usage</h2>
         <br/>
-        <div class="col-md-offset-4 col-md-4">
-            <h4>Data <span class="badge">{{ diskUsage['box'].sum }} GB</span></h4>
-            <canvas id="boxDiskUsageChart" width="200" height="200"></canvas>
+        <div class="col-md-offset-2 col-md-4">
+            <h4>App Data <span class="badge">{{ diskUsage['data'].sum }} GB</span></h4>
+            <canvas id="dataDiskUsageChart" width="200" height="200"></canvas>
             <p>
-                <span class="text-success">Free {{ diskUsage['box'].free }} GB</span>
+                <span class="text-success">Free {{ diskUsage['data'].free }} GB</span>
                 &nbsp;
-                <span class="text-primary">Used {{ diskUsage['box'].used }} GB</span>
+                <span class="text-primary">Used {{ diskUsage['data'].used }} GB</span>
             </p>
+        </div>
+        <div class="col-md-4">
+            <h4>System <span class="badge">{{ diskUsage['system'].sum }} GB</span></h4>
+            <canvas id="systemDiskUsageChart" width="200" height="200"></canvas>
+            <p>
+                <span class="text-success">Free {{ diskUsage['system'].free }} GB</span>
+                &nbsp;
+                <span class="text-primary">Used {{ diskUsage['system'].used }} GB</span>
+            </p>
+        </div>
+        <div class="col-md-2" style="text-align: justify;">
+            <h4>Description</h4>
+            App Data shows the virtual disk usage for application user data.
+            The full App Data disk size may not be entirely accounted for in the overall System usage numbers, depending on the utilization.
+            <br/>
+            <br/>
+            The System disk size includes application images, which may consume the majority of disk space. Running low on system disk space may indicate that too many apps are installed.
         </div>
     </div>
 

@@ -105,11 +105,15 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         Client.graphs([
             'averageSeries(collectd.localhost.df-loop*.df_complex-free)',
             'averageSeries(collectd.localhost.df-loop*.df_complex-reserved)',
-            'averageSeries(collectd.localhost.df-loop*.df_complex-used)'
+            'averageSeries(collectd.localhost.df-loop*.df_complex-used)',
+            'averageSeries(collectd.localhost.df-*d*.df_complex-free)',
+            'averageSeries(collectd.localhost.df-*d*.df_complex-reserved)',
+            'averageSeries(collectd.localhost.df-*d*.df_complex-used)'
         ], '-1min', function (error, data) {
             if (error) return console.log(error);
 
-            renderDisk('box', data[0], data[1], data[2]);
+            renderDisk('data', data[0], data[1], data[2]);
+            renderDisk('system', data[3], data[4], data[5]);
         });
     };
 
