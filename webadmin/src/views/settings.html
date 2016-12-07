@@ -126,7 +126,7 @@
                         <!-- S3 -->
                         <div class="form-group" ng-class="{ 'has-error': configureBackup.error.endpoint }">
                             <label class="control-label" for="inputConfigureBackupEndpoint">Endpoint (optional)</label>
-                            <input type="text" class="form-control" ng-model="configureBackup.endpoint" id="inputConfigureBackupEndpoint" name="endpoint" ng-disabled="configureBackup.busy" placeholder="leave empty if using AWS S3">
+                            <input type="text" class="form-control" ng-model="configureBackup.endpoint" id="inputConfigureBackupEndpoint" name="endpoint" ng-disabled="configureBackup.busy" placeholder="Leave empty if using AWS S3">
                         </div>
 
                         <div class="form-group" ng-class="{ 'has-error': configureBackup.error.bucket }">
@@ -136,7 +136,7 @@
 
                         <div class="form-group" ng-class="{ 'has-error': configureBackup.error.prefix }">
                             <label class="control-label" for="inputConfigureBackupPrefix">Prefix</label>
-                            <input type="text" class="form-control" ng-model="configureBackup.prefix" id="inputConfigureBackupPrefix" name="prefix" ng-disabled="configureBackup.busy" required>
+                            <input type="text" class="form-control" ng-model="configureBackup.prefix" id="inputConfigureBackupPrefix" name="prefix" ng-disabled="configureBackup.busy" placeholder="Prefix for all backup file names" required>
                         </div>
 
                         <div class="form-group" ng-class="{ 'has-error': configureBackup.error.region }">
