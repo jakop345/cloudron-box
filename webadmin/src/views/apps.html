@@ -102,7 +102,7 @@
                                     Restrict to groups <span class="label label-danger" ng-show="appConfigure.accessRestrictionOption === 'groups' && !appConfigure.isAccessRestrictionValid()">Select at least one group</span>
                                 </label>
                             </div>
-                            <div ng-show="groups.length <= 1" style="margin-left: 20px;">No groups available. <a href="#/users">Create groups first.</a></div>
+                            <div ng-show="groups.length <= 1" style="margin-left: 20px;">No groups available. <a href="#/users">Create groups</a></div>
                             <div>
                                 <div style="margin-left: 20px;">
                                     <span ng-repeat="group in groups | ignoreAdminGroup">
