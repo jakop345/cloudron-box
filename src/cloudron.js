@@ -21,6 +21,8 @@ exports = module.exports = {
 
     checkDiskSpace: checkDiskSpace,
 
+    readDkimPublicKeySync: readDkimPublicKeySync,
+
     events: new (require('events').EventEmitter)(),
 
     EVENT_ACTIVATED: 'activated',

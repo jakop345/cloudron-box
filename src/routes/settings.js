@@ -10,6 +10,8 @@ exports = module.exports = {
     getCloudronAvatar: getCloudronAvatar,
     setCloudronAvatar: setCloudronAvatar,
 
+    getExpectedDnsRecords: getExpectedDnsRecords,
+
     getDnsConfig: getDnsConfig,
     setDnsConfig: setDnsConfig,
 
@@ -144,6 +146,14 @@ function getCloudronAvatar(req, res, next) {
 
         res.set('Content-Type', 'image/png');
         res.status(200).send(avatar);
+    });
+}
+
+function getExpectedDnsRecords(req, res, next) {
+    settings.getExpectedDnsRecords(function (error, records) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, records));
     });
 }
 

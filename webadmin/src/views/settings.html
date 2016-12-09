@@ -282,18 +282,39 @@
 <div class="card" style="margin-bottom: 15px;">
     <div class="row">
         <div class="col-md-12">
-            <p>Cloudron has a built-in email server that allows users to send and receive email for your domain. Apps can still send email regardless of this setting.</p>
+            <span>Cloudron has a built-in email server that allows users to send and receive email for your domain. Apps can still send email regardless of this setting. When enabled, your DNS will be configured automatically.</span>
             <p>The <a href="https://cloudron.io/references/usermanual.html#email" target="_blank">User manual</a> has information on how to setup your mail client.</p>
         </div>
     </div>
     <br/>
     <div class="row">
         <div class="col-md-12" ng-show="!config.isDev && (dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
-            <b>Email can only be enabled for custom domains with a DNS provider setup.</b>
+            <button ng-class="mailConfig.enabled ? 'btn btn-danger pull-right' : 'btn btn-primary pull-right'" ng-click="toggleEmail()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <p class="col-md-12" ng-show="!config.isDev && (dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
+            Please make sure to set the following DNS records for <b><tt>{{ config.fqdn }}</tt></b> to guarentee proper email functionality.
         </div>
 
-        <div class="col-md-12" ng-show="config.isDev || !(dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
-            <button ng-class="mailConfig.enabled ? 'btn btn-danger pull-right' : 'btn btn-primary pull-right'" ng-click="email.toggle()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
+        <div class="col-xs-12">
+            <div ng-repeat="record in expectedDnsRecordsTypes">
+               <div class="row">
+                    <div class="col-xs-12">
+                        <h4 class="text-muted">{{ record.name }} record <i ng-class="expectedDnsRecords[record.value].status ? 'fa fa-check-circle text-success' : 'fa fa-exclamation-triangle text-danger'" aria-hidden="true"></i></h4>
+                        <a href="" data-toggle="collapse" data-parent="#accordion" data-target="#collapse_dns_{{ record.value }}">Advanced</a>
+                        <div id="collapse_dns_{{ record.value }}" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <p>Subdomain: <b ng-click-select><tt>{{ expectedDnsRecords[record.value].subdomain }}</tt></b></p>
+                                <p>Record type: <b ng-click-select><tt>{{ expectedDnsRecords[record.value].type }}</tt></b></p>
+                                <p style="overflow: auto; white-space: nowrap;">Expected value: <b ng-click-select><tt>{{ expectedDnsRecords[record.value].expected }}</tt></b></p>
+                                <p style="overflow: auto; white-space: nowrap;">Current value: <b ng-click-select><tt>{{ expectedDnsRecords[record.value].value ? expectedDnsRecords[record.value].value : '[not set]' }}</tt></b></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

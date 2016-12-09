@@ -117,6 +117,18 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                 Client.notify('Backup Configuration', 'Please setup an external backup storage to avoid data loss', true, 'info', actionScope);
             }
         });
+
+        // Check if all DNS records are set up properly
+        Client.getExpectedDnsRecords(function (error, result) {
+            if (error) return console.error(error);
+
+            if (!result.spf.status || !result.dkim.status) {
+                var actionScope = $scope.$new(true);
+                actionScope.action = '/#/settings';
+
+                Client.notify('DNS Configuration', 'Please setup all required DNS records to guarantee correct mail delivery', true, 'info', actionScope);
+            }
+        });
     }
 
     Client.getStatus(function (error, status) {

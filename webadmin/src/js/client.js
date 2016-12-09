@@ -442,6 +442,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.getExpectedDnsRecords = function (callback) {
+        get('/api/v1/settings/expected_dns_records').success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.setAppstoreConfig = function (config, callback) {
         var data = config;
 

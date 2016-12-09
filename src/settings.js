@@ -3,6 +3,8 @@
 exports = module.exports = {
     SettingsError: SettingsError,
 
+    getExpectedDnsRecords: getExpectedDnsRecords,
+
     getAutoupdatePattern: getAutoupdatePattern,
     setAutoupdatePattern: setAutoupdatePattern,
 
@@ -61,12 +63,15 @@ var assert = require('assert'),
     debug = require('debug')('box:settings'),
     digitalocean = require('./dns/digitalocean.js'),
     dns = require('native-dns'),
+    cloudron = require('./cloudron.js'),
+    CloudronError = cloudron.CloudronError,
     moment = require('moment-timezone'),
     paths = require('./paths.js'),
     route53 = require('./dns/route53.js'),
     safe = require('safetydance'),
     settingsdb = require('./settingsdb.js'),
-    SubdomainError = require('./subdomains.js').SubdomainError,
+    subdomains = require('./subdomains.js'),
+    SubdomainError = subdomains.SubdomainError,
     superagent = require('superagent'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
@@ -120,6 +125,50 @@ SettingsError.INTERNAL_ERROR = 'Internal Error';
 SettingsError.EXTERNAL_ERROR = 'External Error';
 SettingsError.NOT_FOUND = 'Not Found';
 SettingsError.BAD_FIELD = 'Bad Field';
+
+function getExpectedDnsRecords(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    var records = {};
+
+    // DKIM
+    var DKIM_SELECTOR = 'cloudron';
+    var dkimKey = cloudron.readDkimPublicKeySync();
+    if (!dkimKey) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, new Error('Failed to read dkim public key')));
+    records.dkim = {subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', expected: 'v=DKIM1; t=s; p=' + dkimKey, value: null, status: false};
+
+    dns.resolveTxt(records.dkim.subdomain + '.' + config.fqdn(), function (error, txtRecords) {
+        if (error) return callback(error);
+        for (var i = 0; i < txtRecords.length; i++) {
+            records.dkim.value = txtRecords[i].join(" ");
+            records.dkim.status = (records.dkim.value == records.dkim.value);
+            break;
+        }
+
+        // SPF
+        records.spf = {subdomain: '', type: 'TXT', value: null, expected: null, status: false};
+        dns.resolveTxt(config.fqdn(), function (error, txtRecords) {
+            if (error) return callback(error);
+            var i;
+            for (i = 0; i < txtRecords.length; i++) {
+                if (txtRecords[i].join(" ").indexOf('v=spf1 ') !== 0) continue; // not SPF
+                records.spf.value = txtRecords[i].join(" ");
+                records.spf.status = records.spf.value.indexOf(' a:' + config.adminFqdn() + ' ') !== -1;
+                break;
+            }
+
+            if (records.spf.status) {
+                records.spf.expected = records.spf.value;
+            } else if (i == txtRecords.length) {
+                records.spf.expected = 'v=spf1 a:' + config.adminFqdn() + ' ~all';
+            } else {
+                records.spf.expected = 'v=spf1 a:' + config.adminFqdn() + ' ' + records.spf.value.slice('v=spf1 '.length);
+            }
+            return callback(null, records);
+        });
+
+    });
+}
 
 function setAutoupdatePattern(pattern, callback) {
     assert.strictEqual(typeof pattern, 'string');

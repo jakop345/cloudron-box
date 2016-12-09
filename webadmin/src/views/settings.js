@@ -8,6 +8,11 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.config = Client.getConfig();
     $scope.backupConfig = {};
     $scope.dnsConfig = {};
+    $scope.expectedDnsRecords = {};
+    $scope.expectedDnsRecordsTypes = [
+        { name: 'DKIM', value: 'dkim' },
+        { name: 'SPF', value: 'spf' }
+    ];
     $scope.appstoreConfig = {};
 
     $scope.mailConfig = null;
@@ -423,6 +428,14 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     }
 
+    function getExpectedDnsRecords() {
+        Client.getExpectedDnsRecords(function (error, dnsRecords) {
+            if (error) return console.error(error);
+
+            $scope.expectedDnsRecords = dnsRecords;
+        });
+    }
+
     function getPlans() {
         AppStore.getSizes(function (error, result) {
             if (error) return console.error(error);
@@ -521,6 +534,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         getMailConfig();
         getBackupConfig();
         getDnsConfig();
+        getExpectedDnsRecords();
 
         if ($scope.config.provider === 'caas') {
             getPlans();
