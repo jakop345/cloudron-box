@@ -50,6 +50,7 @@ The CLI tool does not work on Windows. Please contact us on our [chat](https://c
 Both DigitalOcean and EC2 from Amazon Web Services are frequently tested by us.
 
 In addition to those, the Cloudron community has successfully installed the platform on those providers:
+* [Amazon Lightsail](https://amazonlightsail.com/)
 * [hosttech](https://www.hosttech.ch/)
 * [Linode](https://www.linode.com/)
 * [OVH](https://www.ovh.com/)
@@ -116,7 +117,8 @@ work fine. Choosing a domain name at any other level like `cloudron.example.com`
 work.
 
 * `--provider` is the name of your VPS provider. If the name is not on the list, simply
-choose `generic`. If the Cloudron does not complete initialization, it may mean that
+choose `generic`. The `generic` provider mostly will work fine.
+If the Cloudron does not complete initialization, it may mean that
 we have to add some vendor specific quirks. Please open a
 [bug report](https://git.cloudron.io/cloudron/box/issues) in that case.
 
