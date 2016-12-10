@@ -504,6 +504,8 @@ function install(data, auditSource, callback) {
         if (error) return callback(error);
 
         if ('sso' in data && !('optionalSso' in manifest)) return callback(new AppsError(AppsError.BAD_FIELD, 'sso can only be specified for apps with optionalSso'));
+        // if sso was unspecified, enable it by default if possible
+        if (sso === null) sso = manifest.addons['simpleauth'] || manifest.addons['ldap'] || manifest.addons['oauth'];
 
         if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
 
@@ -524,17 +526,6 @@ function install(data, auditSource, callback) {
 
         purchase(appId, appStoreId, function (error) {
             if (error) return callback(error);
-
-            // FIXME revise this once customAuth is gone
-            if (sso === null) {
-                if (manifest.customAuth) {
-                    sso = false;
-                } else if (manifest.addons['simpleauth'] || manifest.addons['ldap'] || manifest.addons['oauth']) {
-                    sso = true;
-                } else {
-                    sso = false;
-                }
-            }
 
             var data = {
                 accessRestriction: accessRestriction,
