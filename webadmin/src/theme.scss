@@ -151,12 +151,13 @@ html {
     margin-top: 0;
 }
 
-sup {
-    top: -1.3em;
-}
-
-sup.help a {
+.help {
     color: #757c82;
+    font-size: 14px;
+
+    &:hover {
+        color: $navbar-default-link-hover-color;
+    }
 }
 
 h1, h2, h3 {
