@@ -34,7 +34,7 @@ Here is an example manifest:
   "contactEmail": "support@clourdon.io",
   "icon": "file://icon.png",
   "tags": [ "test", "collaboration" ],
-  "mediaLinks": [ "www.youtube.com/watch?v=dQw4w9WgXcQ" ]
+  "mediaLinks": [ "https://images.rapgenius.com/fd0175ef780e2feefb30055be9f2e022.520x343x1.jpg" ]
 }
 ```
 
@@ -248,15 +248,14 @@ Type: array of urls
 
 Required: no
 
-The `mediaLinks` field contains an array of links that the Cloudron Store uses to display a slide show of pictures
-and videos of the application.
+The `mediaLinks` field contains an array of links that the Cloudron Store uses to display a slide show of pictures of the application.
 
 They have to be publicly reachable via `https` and should have an aspect ratio of 3 to 1.
 For example `600px by 200px` (with/height).
 
 ```
   "mediaLinks": [
-    "www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "https://s3.amazonaws.com/cloudron-app-screenshots/org.owncloud.cloudronapp/556f6a1d82d5e27a7c4fca427ebe6386d373304f/2.jpg",
     "https://images.rapgenius.com/fd0175ef780e2feefb30055be9f2e022.520x343x1.jpg"
   ]
 ```
