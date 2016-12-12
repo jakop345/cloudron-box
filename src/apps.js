@@ -505,7 +505,7 @@ function install(data, auditSource, callback) {
 
         if ('sso' in data && !('optionalSso' in manifest)) return callback(new AppsError(AppsError.BAD_FIELD, 'sso can only be specified for apps with optionalSso'));
         // if sso was unspecified, enable it by default if possible
-        if (sso === null) sso = manifest.addons['simpleauth'] || manifest.addons['ldap'] || manifest.addons['oauth'];
+        if (sso === null) sso = !!manifest.addons['simpleauth'] || !!manifest.addons['ldap'] || !!manifest.addons['oauth'];
 
         if (altDomain !== null && !validator.isFQDN(altDomain)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid alt domain'));
 
