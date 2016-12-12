@@ -311,16 +311,16 @@ The intended use of this field is to display some post installation steps that t
 complete the installation. For example, displaying the default admin credentials and informing the user to
 to change it.
 
-## singleUser
+## optionalSso
 
 Type: boolean
 
 Required: no
 
-The `singleUser` field can be set to true for apps that are meant to be used only a single user.
+The `optionalSso` field can be set to true for apps that can be installed optionally without using the Cloudron user management.
 
-When set, the Cloudron will display a user selection dialog at installation time. The selected user is the sole user
-who can access the app.
+This only applies if any Cloudron auth related addons are used. When set, the Cloudron will not inject the auth related addon environment variables.
+Any app startup scripts have to be able to deal with missing env variables in this case.
 
 ## tagline
 
