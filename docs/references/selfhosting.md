@@ -215,9 +215,9 @@ By default, backups reside in `/var/backups`. Having backups reside in the same 
 server instance is dangerous and it must be changed to an external storage location like `S3`
 as soon as possible.
 
-### S3
+### Amazon S3
 
-Provide S3 backup credentials in the `Settings` page.
+Provide S3 backup credentials in the `Settings` page and leave the endpoint field empty.
 
 Create a bucket in S3 (You have to have an account at [AWS](https://aws.amazon.com/)). The bucket can be setup to periodically delete old backups by
 adding a lifecycle rule using the AWS console. S3 supports both permanent deletion
@@ -246,6 +246,32 @@ for most use-cases.
     ]
 }
 ```
+
+### Minio S3
+
+[Minio](https://minio.io/) is a distributed object storage server, providing the same API as Amazon S3.
+Since Cloudron supports S3, any API compatible solution should be supported as well, if this is not the case, let us know.
+
+Minio can be setup, by following the [installation instructions](https://docs.minio.io/) on any server, which is reachable by the Cloudron.
+Do not setup Minio on the same server as the Cloudron, this will inevitably result in data loss, if backups are stored on the same instance.
+
+Once setup, minio will print the necessary information, like login credentials, region and endpoints in its logs.
+
+```
+$ ./minio server ./storage
+
+Endpoint:  http://192.168.10.113:9000  http://127.0.0.1:9000
+AccessKey: GFAWYNJEY7PUSLTHYHT6
+SecretKey: /fEWk66E7GsPnzE1gohqKDovaytLcxhr0tNWnv3U
+Region:    us-east-1
+```
+
+First create a new bucket for the backups, using the minio commandline tools or the webinterface. The bucket has to have **read and write** permissions.
+
+The information to be copied to the Cloudron's backup settings form may look similar to:
+
+<img src="/docs/img/minio_backup_config.png" class="shadow"><br/>
+
 
 # Email
 
