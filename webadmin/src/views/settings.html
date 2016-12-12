@@ -62,7 +62,9 @@
                 <h4 class="modal-title">Cloudron Email Server</h4>
             </div>
             <div class="modal-body" ng-show="dnsConfig.provider === 'noop'">
-                No DNS provider is setup. The Cloudron cannot create necessary DNS records automatically.
+                No DNS provider is setup. The Cloudron cannot create necessary DNS records automatically.<br/>
+                <br/>
+                Contact us for help how to configure DNS manually by <a href="mailto:support@cloudron.io">Email</a> or <a href="https://chat.cloudron.io" target="_blank">Chat</a>
             </div>
             <div class="modal-body" ng-show="dnsConfig.provider !== 'noop'">
                 The Cloudron will setup Email related DNS records automatically.
