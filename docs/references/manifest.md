@@ -83,7 +83,7 @@ Example:
 
 Type: markdown string
 
-Required: no
+Required: no (required for submitting to the Cloudron Store)
 
 The `changelog` field contains the changes in this version of the application. This string
 can be a markdown style bulleted list.
@@ -205,7 +205,7 @@ Example:
 
 Type: local image filename
 
-Required: no
+Required: no (required for submitting to the Cloudron Store)
 
 The `icon` field is used to display the application icon/logo in the Cloudron Store. Icons are expected
 to be square of size 256x256.
@@ -246,7 +246,7 @@ Required: yes
 
 Type: array of urls
 
-Required: no
+Required: no (required for submitting to the Cloudron Store)
 
 The `mediaLinks` field contains an array of links that the Cloudron Store uses to display a slide show of pictures of the application.
 
@@ -326,7 +326,7 @@ who can access the app.
 
 Type: one-line string
 
-Required: no
+Required: no (required for submitting to the Cloudron Store)
 
 The `tagline` is used by the Cloudron Store to display a single line short description of the application.
 
@@ -338,7 +338,7 @@ The `tagline` is used by the Cloudron Store to display a single line short descr
 
 Type: Array of strings
 
-Required: no
+Required: no (required for submitting to the Cloudron Store)
 
 The `tags` are used by the Cloudron Store for filtering searches by keyword.
 
