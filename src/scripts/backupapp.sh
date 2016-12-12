@@ -40,7 +40,7 @@ if [[ "$1" == "s3" ]]; then
     readonly password="$9"
 
     if [ $# -gt 9 ]; then
-        export AWS_SESSION_TOKEN="$10"
+        export AWS_SESSION_TOKEN="${10}"
     fi
 fi
 
