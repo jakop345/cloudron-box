@@ -83,6 +83,9 @@ if [[ "${is_update}" == "yes" ]]; then
     ${BOX_SRC_DIR}/setup/stop.sh # stop the old code
 fi
 
+# ensure we are not inside the source directory, which we will remove now
+cd /root
+
 # switch the codes
 rm -rf "${BOX_SRC_DIR}"
 mv "${box_src_tmp_dir}" "${BOX_SRC_DIR}"
