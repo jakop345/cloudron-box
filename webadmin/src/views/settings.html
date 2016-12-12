@@ -54,6 +54,29 @@
     </div>
 </div>
 
+<!-- Modal enable email -->
+<div class="modal fade" id="enableEmailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Cloudron Email Server</h4>
+            </div>
+            <div class="modal-body" ng-show="dnsConfig.provider === 'noop'">
+                No DNS provider is setup. The Cloudron cannot create necessary DNS records automatically.
+            </div>
+            <div class="modal-body" ng-show="dnsConfig.provider !== 'noop'">
+                The Cloudron will setup Email related DNS records automatically.
+                If this domain is already configured for Email with some other provider, it will <b>overwrite</b> those records, potentially breaking the setup.
+                Disabling Cloudron Email later will <b>not</b> put the old records back.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="email.enable()">Enable</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal backup -->
 <div class="modal fade" id="createBackupModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -257,21 +280,18 @@
 <div class="card" style="margin-bottom: 15px;">
     <div class="row">
         <div class="col-md-12">
-            <span>Cloudron has a built-in email server that allows users to send and receive email for your domain. Apps can still send email regardless of this setting. When enabled, your DNS will be configured automatically.</span>
-        </div>
-        <br/>
-        <div class="col-md-12">
-            The <a href="https://cloudron.io/references/usermanual.html#email" target="_blank">User manual</a> has information on how to setup your mail client.
+            <p>Cloudron has a built-in email server that allows users to send and receive email for your domain. Apps can still send email regardless of this setting.</p>
+            <p>The <a href="https://cloudron.io/references/usermanual.html#email" target="_blank">User manual</a> has information on how to setup your mail client.</p>
         </div>
     </div>
     <br/>
     <div class="row">
-        <p class="col-md-12" ng-show="!config.isDev && (dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
+        <div class="col-md-12" ng-show="!config.isDev && (dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
             <b>Email can only be enabled for custom domains with a DNS provider setup.</b>
-        </p>
+        </div>
 
         <div class="col-md-12" ng-show="config.isDev || !(dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
-            <button ng-class="mailConfig.enabled ? 'btn btn-danger pull-right' : 'btn btn-primary pull-right'" ng-click="toggleEmail()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
+            <button ng-class="mailConfig.enabled ? 'btn btn-danger pull-right' : 'btn btn-primary pull-right'" ng-click="email.toggle()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
         </div>
     </div>
 </div>

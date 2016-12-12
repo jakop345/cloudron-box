@@ -265,6 +265,33 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         }
     };
 
+    $scope.email = {
+        toggle: function () {
+            if ($scope.mailConfig.enabled) return $scope.email.disable();
+
+            // show warning first
+            $('#enableEmailModal').modal('show');
+        },
+
+        enable: function () {
+            $('#enableEmailModal').modal('hide');
+
+            Client.setMailConfig({ enabled: true }, function (error) {
+                if (error) return console.error(error);
+
+                $scope.mailConfig.enabled = true;
+            });
+        },
+
+        disable: function () {
+            Client.setMailConfig({ enabled: false }, function (error) {
+                if (error) return console.error(error);
+
+                $scope.mailConfig.enabled = false;
+            });
+        }
+    };
+
     $scope.configureBackup = {
         busy: false,
         error: {},
@@ -395,14 +422,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             $scope.dnsConfig = dnsConfig;
         });
     }
-
-    $scope.toggleEmail = function () {
-        Client.setMailConfig({ enabled: !$scope.mailConfig.enabled }, function (error) {
-            if (error) return console.error(error);
-
-            $scope.mailConfig.enabled = !$scope.mailConfig.enabled;
-        });
-    };
 
     function getPlans() {
         AppStore.getSizes(function (error, result) {
