@@ -89,7 +89,7 @@
     "istanbul": "*",
     "js2xmlparser": "^1.0.0",
     "mocha": "*",
-    "nock": "^3.4.0",
+    "nock": "^9.0.2",
     "node-sass": "^3.0.0-alpha.0",
     "request": "^2.65.0",
     "sinon": "^1.12.2",
