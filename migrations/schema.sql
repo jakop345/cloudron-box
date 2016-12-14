@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS apps(
     manifestJson TEXT,
     httpPort INTEGER,                        // this is the nginx proxy port and not manifest.httpPort
     location VARCHAR(128) NOT NULL UNIQUE,
-    dnsRecordId VARCHAR(512),
+    dnsRecordId VARCHAR(512),   // obsolete
     accessRestrictionJson TEXT, // { users: [ ], groups: [ ] }
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     memoryLimit BIGINT DEFAULT 0,
