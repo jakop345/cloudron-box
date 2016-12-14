@@ -155,6 +155,9 @@ function getEmailDnsRecords(callback) {
     dns.resolveTxt(records.dkim.subdomain + '.' + config.fqdn(), function (error, txtRecords) {
         if (error) return callback(error);
 
+        // ensure this is an array resolveTxt() returns undefined if no records are found
+        txtRecords = txtRecords || [];
+
         for (var i = 0; i < txtRecords.length; i++) {
             records.dkim.value = txtRecords[i].join(' ');
             records.dkim.status = (records.dkim.value == records.dkim.value);
@@ -164,6 +167,9 @@ function getEmailDnsRecords(callback) {
         // check if SPF is already setup
         dns.resolveTxt(config.fqdn(), function (error, txtRecords) {
             if (error) return callback(error);
+
+            // ensure this is an array resolveTxt() returns undefined if no records are found
+            txtRecords = txtRecords || [];
 
             var i;
             for (i = 0; i < txtRecords.length; i++) {
