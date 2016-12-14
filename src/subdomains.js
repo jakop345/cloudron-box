@@ -51,6 +51,7 @@ function api(provider) {
         case 'route53': return require('./dns/route53.js');
         case 'digitalocean': return require('./dns/digitalocean.js');
         case 'noop': return require('./dns/noop.js');
+        case 'manual': return require('./dns/manual.js');
         default: return null;
     }
 }
