@@ -3,7 +3,7 @@
 exports = module.exports = {
     SettingsError: SettingsError,
 
-    getExpectedDnsRecords: getExpectedDnsRecords,
+    getEmailDnsRecords: getEmailDnsRecords,
 
     getAutoupdatePattern: getAutoupdatePattern,
     setAutoupdatePattern: setAutoupdatePattern,
@@ -126,7 +126,7 @@ SettingsError.EXTERNAL_ERROR = 'External Error';
 SettingsError.NOT_FOUND = 'Not Found';
 SettingsError.BAD_FIELD = 'Bad Field';
 
-function getExpectedDnsRecords(callback) {
+function getEmailDnsRecords(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var records = {};
