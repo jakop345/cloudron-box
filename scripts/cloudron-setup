@@ -127,17 +127,20 @@ echo ""
 if [[ -z "${ip}" ]]; then
     echo "No DNS A record found for my.${domain}"
     echo "First create a new DNS A record for my.${domain} pointing to the public ip address of this server."
-    exit 1
+    if ! ask "Continue anyway?" "N"; then
+        echo "Please ensure that the A record for my.${domain} is pointing to the correct public ip address of this server."
+        exit 1
+    fi
+else
+    echo "Found DNS A record for my.${domain} pointing to:"
+    echo "${ip}"
+    echo ""
+    if ! ask "Is this correct?"; then
+        echo "Please ensure that the A record for my.${domain} is pointing to the correct public ip address of this server."
+        exit 1
+    fi
+    echo ""
 fi
-
-echo "Found DNS A record for my.${domain} pointing to:"
-echo "${ip}"
-echo ""
-if ! ask "Is this correct?"; then
-    echo "Please ensure that the A record for my.${domain} is pointing to the correct public ip address of this server."
-    exit 1
-fi
-echo ""
 
 echo "=> Downloading initialization script"
 if ! curl -s "${INIT_BASESYSTEM_SCRIPT_URL}" > /tmp/initializeBaseUbuntuImage.sh; then
