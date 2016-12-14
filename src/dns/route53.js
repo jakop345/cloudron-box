@@ -5,6 +5,7 @@ exports = module.exports = {
     get: get,
     del: del,
     getChangeStatus: getChangeStatus,
+    waitForDns: require('./waitfordns.js'),
 
     // not part of "dns" interface
     getHostedZone: getHostedZone

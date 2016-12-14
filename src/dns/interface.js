@@ -10,7 +10,8 @@ exports = module.exports = {
     upsert: upsert,
     get: get,
     del: del,
-    getChangeStatus: getChangeStatus
+    getChangeStatus: getChangeStatus,
+    waitForDns: require('./waitfordns.js')
 };
 
 var assert = require('assert'),

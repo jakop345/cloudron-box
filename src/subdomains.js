@@ -5,6 +5,7 @@ module.exports = exports = {
     status: status,
     upsert: upsert,
     get: get,
+    waitForDns: waitForDns,
 
     SubdomainError: SubdomainError
 };
@@ -106,6 +107,20 @@ function remove(subdomain, type, values, callback) {
 
             callback(null);
         });
+    });
+}
+
+function waitForDns(domain, value, type, options, callback) {
+    assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof value, 'string');
+    assert(type === 'A' || type === 'CNAME');
+    assert(options && typeof options === 'object'); // { interval: 5000, times: 50000 }
+    assert.strictEqual(typeof callback, 'function');
+
+    settings.getDnsConfig(function (error, dnsConfig) {
+        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
+
+        api(dnsConfig.provider).waitForDns(domain, value, type, options, callback); // FIXME: translate to SubdomainError
     });
 }
 

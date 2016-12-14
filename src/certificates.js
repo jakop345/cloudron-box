@@ -31,10 +31,10 @@ var acme = require('./cert/acme.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     settings = require('./settings.js'),
+    subdomains = require('./subdomains.js'),
     sysinfo = require('./sysinfo.js'),
     user = require('./user.js'),
     util = require('util'),
-    waitForDns = require('./waitfordns.js'),
     x509 = require('x509');
 
 function CertificatesError(reason, errorOrMessage) {
@@ -102,7 +102,7 @@ function installAdminCertificate(callback) {
         sysinfo.getIp(function (error, ip) {
             if (error) return callback(error);
 
-            waitForDns(config.adminFqdn(), ip, 'A', { interval: 30000, times: 50000 }, function (error) {
+            subdomains.waitForDns(config.adminFqdn(), ip, 'A', { interval: 30000, times: 50000 }, function (error) {
                 if (error) return callback(error);
 
                 ensureCertificate({ location: constants.ADMIN_LOCATION }, function (error, certFilePath, keyFilePath) {
