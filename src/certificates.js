@@ -97,7 +97,7 @@ function installAdminCertificate(callback) {
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
 
-        if (tlsConfig.provider === 'caas') return callback();
+        if (tlsConfig.provider === 'caas' || tlsConfig.provider === 'fallback') return callback();
 
         sysinfo.getIp(function (error, ip) {
             if (error) return callback(error);
