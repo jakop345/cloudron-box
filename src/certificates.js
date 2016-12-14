@@ -94,25 +94,19 @@ function getApi(app, callback) {
 function installAdminCertificate(callback) {
     if (process.env.BOX_ENV === 'test') return callback();
 
-    settings.getTlsConfig(function (error, tlsConfig) {
+    sysinfo.getIp(function (error, ip) {
         if (error) return callback(error);
 
-        if (tlsConfig.provider === 'caas' || tlsConfig.provider === 'fallback') return callback();
-
-        sysinfo.getIp(function (error, ip) {
+        subdomains.waitForDns(config.adminFqdn(), ip, 'A', { interval: 30000, times: 50000 }, function (error) {
             if (error) return callback(error);
 
-            subdomains.waitForDns(config.adminFqdn(), ip, 'A', { interval: 30000, times: 50000 }, function (error) {
-                if (error) return callback(error);
+            ensureCertificate({ location: constants.ADMIN_LOCATION }, function (error, certFilePath, keyFilePath) {
+                if (error) { // currently, this can never happen
+                    debug('Error obtaining certificate. Proceed anyway', error);
+                    return callback();
+                }
 
-                ensureCertificate({ location: constants.ADMIN_LOCATION }, function (error, certFilePath, keyFilePath) {
-                    if (error) { // currently, this can never happen
-                        debug('Error obtaining certificate. Proceed anyway', error);
-                        return callback();
-                    }
-
-                    nginx.configureAdmin(certFilePath, keyFilePath, callback);
-                });
+                nginx.configureAdmin(certFilePath, keyFilePath, callback);
             });
         });
     });
