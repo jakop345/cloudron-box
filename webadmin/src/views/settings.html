@@ -62,7 +62,7 @@
                 <h4 class="modal-title">Cloudron Email Server</h4>
             </div>
             <div class="modal-body" ng-show="dnsConfig.provider === 'noop'">
-                No DNS provider is setup. The Cloudron cannot create necessary DNS records automatically.<br/>
+                No DNS provider is setup. Required DNS records will be displayed and have to be manually setup.<br/>
                 <br/>
                 Contact us for help how to configure DNS manually by <a href="mailto:support@cloudron.io">Email</a> or <a href="https://chat.cloudron.io" target="_blank">Chat</a>
             </div>
@@ -282,23 +282,15 @@
 <div class="card" style="margin-bottom: 15px;">
     <div class="row">
         <div class="col-md-12">
-            <span>Cloudron has a built-in email server that allows users to send and receive email for your domain. Apps can still send email regardless of this setting. When enabled, your DNS will be configured automatically.</span>
-            <p>The <a href="https://cloudron.io/references/usermanual.html#email" target="_blank">User manual</a> has information on how to setup your mail client.</p>
+            Cloudron has a built-in email server that allows users to send and receive email for your domain. Apps can still send email regardless of this setting.
+            The <a href="https://cloudron.io/references/usermanual.html#email" target="_blank">User manual</a> has information on how to setup your mail client.
         </div>
     </div>
     <br/>
     <div class="row">
-        <div class="col-md-12" ng-show="!config.isDev && (dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
-            <button ng-class="mailConfig.enabled ? 'btn btn-danger pull-right' : 'btn btn-primary pull-right'" ng-click="toggleEmail()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
-        </div>
-    </div>
-    <br/>
-    <div class="row">
-        <p class="col-md-12" ng-show="!config.isDev && (dnsConfig.provider === 'noop' || dnsConfig.provider === 'caas')">
+        <div class="col-md-12" ng-show="mailConfig.enabled && dnsConfig.provider === 'noop'">
             Please make sure to set the following DNS records for <b><tt>{{ config.fqdn }}</tt></b> to guarentee proper email functionality.
-        </div>
 
-        <div class="col-xs-12">
             <div ng-repeat="record in expectedDnsRecordsTypes">
                <div class="row">
                     <div class="col-xs-12">
@@ -315,6 +307,12 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-md-12" ng-show="dnsConfig.provider !== 'caas'">
+            <button ng-class="mailConfig.enabled ? 'btn btn-danger pull-right' : 'btn btn-primary pull-right'" ng-click="email.toggle()" ng-enabled="mailConfig">{{ mailConfig.enabled ? "Disable Email" : "Enable Email" }}</button>
         </div>
     </div>
 </div>
