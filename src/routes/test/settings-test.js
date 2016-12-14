@@ -238,7 +238,7 @@ describe('Settings API', function () {
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                expect(res.body).to.eql({ provider: 'noop' });
+                expect(res.body).to.eql({ provider: 'manual' });
                 done();
             });
         });

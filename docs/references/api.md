@@ -1099,7 +1099,7 @@ This is currently internal API and is documented here for completeness.
 Response(200):
 ```
 {
-  "provider": <string>  // 'caas' or 'route53' or 'digitalocean'
+  "provider": <string>  // 'caas' or 'route53' or 'digitalocean' or 'noop' or 'manual'
 }
 ```
 
