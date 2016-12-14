@@ -8,6 +8,7 @@
 var appdb = require('../../appdb.js'),
     async = require('async'),
     child_process = require('child_process'),
+    cloudron = require('../../cloudron.js'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
@@ -17,8 +18,7 @@ var appdb = require('../../appdb.js'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
     fs = require('fs'),
-    nock = require('nock'),
-    userdb = require('../../userdb.js');
+    nock = require('nock');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
@@ -521,6 +521,207 @@ describe('Settings API', function () {
                 expect(scope1.isDone()).to.be.ok();
                 expect(res.statusCode).to.equal(202);
                 expect(res.body).to.eql({ userId: 'nebulon', token: 'someothertoken', cloudronId: 'cloudron1' });
+
+                done();
+            });
+        });
+    });
+
+    describe('email DNS records', function () {
+        var resolveTxt = null;
+        var dnsAnswerQueue = [];
+
+        before(function (done) {
+            var dns = require('native-dns');
+
+            // replace dns resolveTxt()
+            resolveTxt = dns.resolveTxt;
+            dns.resolveTxt = function (hostname, callback) {
+                expect(hostname).to.be.a('string');
+                expect(callback).to.be.a('function');
+
+                if (dnsAnswerQueue.length === 0) return callback(new Error('no mock answer'));
+
+                callback(null, dnsAnswerQueue.shift());
+            };
+
+            done();
+        });
+
+        after(function (done) {
+            var dns = require('native-dns');
+
+            dns.resolveTxt = resolveTxt;
+
+            done();
+        });
+
+        it('fails without dns error', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/settings/email_dns_records')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(500);
+                done();
+            });
+        });
+
+        it('succeeds without existing answers', function (done) {
+            dnsAnswerQueue.push([]);
+            dnsAnswerQueue.push([]);
+
+            superagent.get(SERVER_URL + '/api/v1/settings/email_dns_records')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.dkim).to.be.an('object');
+                expect(res.body.spf).to.be.an('object');
+
+                expect(res.body.dkim.subdomain).to.eql('cloudron._domainkey');
+                expect(res.body.dkim.type).to.eql('TXT');
+                expect(res.body.dkim.value).to.eql(null);
+                expect(res.body.dkim.expected).to.eql('v=DKIM1; t=s; p=' + cloudron.readDkimPublicKeySync());
+                expect(res.body.dkim.status).to.eql(false);
+
+                expect(res.body.spf.subdomain).to.eql('');
+                expect(res.body.spf.type).to.eql('TXT');
+                expect(res.body.spf.value).to.eql(null);
+                expect(res.body.spf.expected).to.eql('v=spf1 a:my-foobar.com ~all');
+                expect(res.body.spf.status).to.eql(false);
+
+                done();
+            });
+        });
+
+        it('succeeds with existing dkim', function (done) {
+            dnsAnswerQueue.push([['v=DKIM1;', 't=s;', 'p=' + cloudron.readDkimPublicKeySync()]]);
+            dnsAnswerQueue.push([]);
+
+            superagent.get(SERVER_URL + '/api/v1/settings/email_dns_records')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.dkim).to.be.an('object');
+                expect(res.body.spf).to.be.an('object');
+
+                expect(res.body.dkim.subdomain).to.eql('cloudron._domainkey');
+                expect(res.body.dkim.type).to.eql('TXT');
+                expect(res.body.dkim.value).to.eql('v=DKIM1; t=s; p=' + cloudron.readDkimPublicKeySync());
+                expect(res.body.dkim.expected).to.eql('v=DKIM1; t=s; p=' + cloudron.readDkimPublicKeySync());
+                expect(res.body.dkim.status).to.eql(true);
+
+                expect(res.body.spf.subdomain).to.eql('');
+                expect(res.body.spf.type).to.eql('TXT');
+                expect(res.body.spf.value).to.eql(null);
+                expect(res.body.spf.expected).to.eql('v=spf1 a:my-foobar.com ~all');
+                expect(res.body.spf.status).to.eql(false);
+
+                done();
+            });
+        });
+
+        it('succeeds with existing spf', function (done) {
+            dnsAnswerQueue.push([]);
+            dnsAnswerQueue.push([['v=spf1', 'a:my-foobar.com', '~all']]);
+
+            superagent.get(SERVER_URL + '/api/v1/settings/email_dns_records')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.dkim).to.be.an('object');
+                expect(res.body.spf).to.be.an('object');
+
+                expect(res.body.dkim.subdomain).to.eql('cloudron._domainkey');
+                expect(res.body.dkim.type).to.eql('TXT');
+                expect(res.body.dkim.value).to.eql(null);
+                expect(res.body.dkim.expected).to.eql('v=DKIM1; t=s; p=' + cloudron.readDkimPublicKeySync());
+                expect(res.body.dkim.status).to.eql(false);
+
+                expect(res.body.spf.subdomain).to.eql('');
+                expect(res.body.spf.type).to.eql('TXT');
+                expect(res.body.spf.value).to.eql('v=spf1 a:my-foobar.com ~all');
+                expect(res.body.spf.expected).to.eql('v=spf1 a:my-foobar.com ~all');
+                expect(res.body.spf.status).to.eql(true);
+
+                done();
+            });
+        });
+
+        it('succeeds with existing extra spf', function (done) {
+            dnsAnswerQueue.push([]);
+            dnsAnswerQueue.push([['v=spf1', 'a:my-example.com', '~all']]);
+
+            superagent.get(SERVER_URL + '/api/v1/settings/email_dns_records')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.dkim).to.be.an('object');
+                expect(res.body.spf).to.be.an('object');
+
+                expect(res.body.dkim.subdomain).to.eql('cloudron._domainkey');
+                expect(res.body.dkim.type).to.eql('TXT');
+                expect(res.body.dkim.value).to.eql(null);
+                expect(res.body.dkim.expected).to.eql('v=DKIM1; t=s; p=' + cloudron.readDkimPublicKeySync());
+                expect(res.body.dkim.status).to.eql(false);
+
+                expect(res.body.spf.subdomain).to.eql('');
+                expect(res.body.spf.type).to.eql('TXT');
+                expect(res.body.spf.value).to.eql('v=spf1 a:my-example.com ~all');
+                expect(res.body.spf.expected).to.eql('v=spf1 a:my-foobar.com a:my-example.com ~all');
+                expect(res.body.spf.status).to.eql(false);
+
+                done();
+            });
+        });
+
+        it('succeeds with wrong dkim', function (done) {
+            dnsAnswerQueue.push([['v=DKIM1;', 't=s;', 'p=foobar']]);
+            dnsAnswerQueue.push([]);
+
+            superagent.get(SERVER_URL + '/api/v1/settings/email_dns_records')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.dkim).to.be.an('object');
+                expect(res.body.spf).to.be.an('object');
+
+                expect(res.body.dkim.subdomain).to.eql('cloudron._domainkey');
+                expect(res.body.dkim.type).to.eql('TXT');
+                expect(res.body.dkim.value).to.eql('v=DKIM1; t=s; p=foobar');
+                expect(res.body.dkim.expected).to.eql('v=DKIM1; t=s; p=' + cloudron.readDkimPublicKeySync());
+                expect(res.body.dkim.status).to.eql(false);
+
+                expect(res.body.spf.subdomain).to.eql('');
+                expect(res.body.spf.type).to.eql('TXT');
+                expect(res.body.spf.value).to.eql(null);
+                expect(res.body.spf.expected).to.eql('v=spf1 a:my-foobar.com ~all');
+                expect(res.body.spf.status).to.eql(false);
+
+                done();
+            });
+        });
+
+        it('succeeds with existing spf and dkim', function (done) {
+            dnsAnswerQueue.push([['v=DKIM1;', 't=s;', 'p=' + cloudron.readDkimPublicKeySync()]]);
+            dnsAnswerQueue.push([['v=spf1', 'a:my-foobar.com', '~all']]);
+
+            superagent.get(SERVER_URL + '/api/v1/settings/email_dns_records')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.dkim).to.be.an('object');
+                expect(res.body.spf).to.be.an('object');
+
+                expect(res.body.dkim.subdomain).to.eql('cloudron._domainkey');
+                expect(res.body.dkim.type).to.eql('TXT');
+                expect(res.body.dkim.value).to.eql('v=DKIM1; t=s; p=' + cloudron.readDkimPublicKeySync());
+                expect(res.body.dkim.expected).to.eql('v=DKIM1; t=s; p=' + cloudron.readDkimPublicKeySync());
+                expect(res.body.dkim.status).to.eql(true);
+
+                expect(res.body.spf.subdomain).to.eql('');
+                expect(res.body.spf.type).to.eql('TXT');
+                expect(res.body.spf.value).to.eql('v=spf1 a:my-foobar.com ~all');
+                expect(res.body.spf.expected).to.eql('v=spf1 a:my-foobar.com ~all');
+                expect(res.body.spf.status).to.eql(true);
 
                 done();
             });
