@@ -271,6 +271,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     };
 
     $scope.email = {
+        refreshBusy: false,
+
         toggle: function () {
             if ($scope.mailConfig.enabled) return $scope.email.disable();
 
@@ -293,6 +295,16 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 if (error) return console.error(error);
 
                 $scope.mailConfig.enabled = false;
+            });
+        },
+
+        refresh: function () {
+            $scope.email.refreshBusy = true;
+
+            getExpectedDnsRecords(function (error) {
+                if (error) console.error(error);
+
+                $scope.email.refreshBusy = false;
             });
         }
     };
@@ -428,11 +440,15 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     }
 
-    function getExpectedDnsRecords() {
+    function getExpectedDnsRecords(callback) {
+        callback = callback || function (error) { if (error) console.error(error); };
+
         Client.getExpectedDnsRecords(function (error, dnsRecords) {
-            if (error) return console.error(error);
+            if (error) return callback(error);
 
             $scope.expectedDnsRecords = dnsRecords;
+
+            callback(null);
         });
     }
 

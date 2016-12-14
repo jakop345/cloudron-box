@@ -294,7 +294,10 @@
             <div ng-repeat="record in expectedDnsRecordsTypes">
                <div class="row">
                     <div class="col-xs-12">
-                        <h4 class="text-muted">{{ record.name }} record <i ng-class="expectedDnsRecords[record.value].status ? 'fa fa-check-circle text-success' : 'fa fa-exclamation-triangle text-danger'" aria-hidden="true"></i></h4>
+                        <h4 class="text-muted">
+                            {{ record.name }} record <i ng-class="expectedDnsRecords[record.value].status ? 'fa fa-check-circle text-success' : 'fa fa-exclamation-triangle text-danger'" aria-hidden="true"></i>
+                            <button class="btn btn-xs btn-default" ng-click="email.refresh()" ng-disabled="email.refreshBusy" ng-show="!expectedDnsRecords[record.value].status"><i class="fa fa-refresh" ng-class="{ 'fa-pulse': email.refreshBusy }"></i></button>
+                        </h4>
                         <a href="" data-toggle="collapse" data-parent="#accordion" data-target="#collapse_dns_{{ record.value }}">Advanced</a>
                         <div id="collapse_dns_{{ record.value }}" class="panel-collapse collapse">
                             <div class="panel-body">
