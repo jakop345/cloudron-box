@@ -160,7 +160,7 @@ function getEmailDnsRecords(callback) {
 
         for (var i = 0; i < txtRecords.length; i++) {
             records.dkim.value = txtRecords[i].join(' ');
-            records.dkim.status = (records.dkim.value == records.dkim.value);
+            records.dkim.status = (records.dkim.value === records.dkim.expected);
             break;
         }
 
