@@ -7,7 +7,8 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
     $scope.dnsConfig = null;
 
     $scope.dnsProvider = [
-        { name: 'Manual/Wildcard', value: 'noop' },
+        { name: 'Manual/Wildcard', value: 'manual' },
+        { name: 'No-op', value: 'noop' },
         { name: 'AWS Route53', value: 'route53' },
         { name: 'Digital Ocean', value: 'digitalocean' }
     ];
