@@ -4,7 +4,7 @@ exports = module.exports = {
     upsert: upsert,
     get: get,
     del: del,
-    waitForDns: require('./waitfordns.js')
+    waitForDns: waitForDns
 };
 
 var assert = require('assert'),
@@ -46,4 +46,15 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
 
     return callback();
 }
+
+function waitForDns(domain, value, type, options, callback) {
+    assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof value, 'string');
+    assert(type === 'A' || type === 'CNAME');
+    assert(options && typeof options === 'object'); // { interval: 5000, times: 50000 }
+    assert.strictEqual(typeof callback, 'function');
+
+    callback();
+}
+
 
