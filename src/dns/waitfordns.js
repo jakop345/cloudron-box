@@ -4,8 +4,9 @@ exports = module.exports = waitForDns;
 
 var assert = require('assert'),
     async = require('async'),
-    debug = require('debug')('box:src/waitfordns'),
+    debug = require('debug')('box:dns/waitfordns'),
     dns = require('native-dns'),
+    SubdomainError = require('../subdomains.js').SubdomainError,
     tld = require('tldjs');
 
 // the first arg to callback is not an error argument; this is required for async.every
@@ -80,12 +81,12 @@ function waitForDns(domain, value, type, options, callback) {
         debug('waitForDNS: %s attempt %s.', domain, attempt++);
 
         dns.resolveNs(zoneName, function (error, nameservers) {
-            if (error || !nameservers) return retryCallback(error || new Error('Unable to get nameservers'));
+            if (error || !nameservers) return retryCallback(error || new SubdomainError(SubdomainError.EXTERNAL_ERROR, 'Unable to get nameservers'));
 
             async.every(nameservers, isChangeSynced.bind(null, domain, value, type), function (synced) {
                 debug('waitForIp: %s %s ns: %j', domain, synced ? 'done' : 'not done', nameservers);
 
-                retryCallback(synced ? null : new Error('ETRYAGAIN'));
+                retryCallback(synced ? null : new SubdomainError(SubdomainError.EXTERNAL_ERROR, 'ETRYAGAIN'));
             });
         });
     }, function retryDone(error) {

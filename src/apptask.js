@@ -54,7 +54,6 @@ var addons = require('./addons.js'),
     superagent = require('superagent'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
-    waitForDns = require('./waitfordns.js'),
     _ = require('underscore');
 
 var COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
@@ -297,25 +296,10 @@ function waitForDnsPropagation(app, callback) {
         return callback(null);
     }
 
-    async.retry({ interval: 5000, times: 120 }, function checkStatus(retryCallback) {
-        subdomains.status(app.dnsRecordId, function (error, result) {
-            if (error) return retryCallback(new Error('Failed to get dns record status : ' + error.message));
-
-            debugApp(app, 'waitForDnsPropagation: dnsRecordId:%s status:%s', app.dnsRecordId, result);
-
-            if (result !== 'done') return retryCallback(new Error(util.format('app:%s not ready yet: %s', app.id, result)));
-
-            retryCallback(null);
-        });
-    }, function (error) {
+    sysinfo.getIp(function (error, ip) {
         if (error) return callback(error);
 
-        // finally validate with waitForDns
-        sysinfo.getIp(function (error, ip) {
-            if (error) return callback(error);
-
-            waitForDns(config.appFqdn(app.location), ip, 'A', { interval: 5000, times: 30 }, callback);
-        });
+        subdomains.waitForDns(config.appFqdn(app.location), ip, 'A', { interval: 5000, times: 120 }, callback);
     });
 }
 
@@ -324,7 +308,7 @@ function waitForAltDomainDnsPropagation(app, callback) {
 
     // try for 10 minutes before giving up. this allows the user to "reconfigure" the app in the case where
     // an app has an external domain and cloudron is migrated to custom domain.
-    waitForDns(app.altDomain, config.appFqdn(app.location), 'CNAME', { interval: 10000, times: 60 }, callback);
+    subdomains.waitForDns(app.altDomain, config.appFqdn(app.location), 'CNAME', { interval: 10000, times: 60 }, callback);
 }
 
 // updates the app object and the database

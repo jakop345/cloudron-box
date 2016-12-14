@@ -5,18 +5,15 @@ module.exports = exports = {
     status: status,
     upsert: upsert,
     get: get,
+    waitForDns: waitForDns,
 
     SubdomainError: SubdomainError
 };
 
 var assert = require('assert'),
-    caas = require('./dns/caas.js'),
     config = require('./config.js'),
-    digitalocean = require('./dns/digitalocean.js'),
-    route53 = require('./dns/route53.js'),
     settings = require('./settings.js'),
-    util = require('util'),
-    noopDns = require('./dns/noop.js');
+    util = require('util');
 
 function SubdomainError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -51,10 +48,10 @@ function api(provider) {
     assert.strictEqual(typeof provider, 'string');
 
     switch (provider) {
-        case 'caas': return caas;
-        case 'route53': return route53;
-        case 'digitalocean': return digitalocean;
-        case 'noop': return noopDns;
+        case 'caas': return require('./dns/caas.js');
+        case 'route53': return require('./dns/route53.js');
+        case 'digitalocean': return require('./dns/digitalocean.js');
+        case 'noop': return require('./dns/noop.js');
         default: return null;
     }
 }
@@ -106,6 +103,20 @@ function remove(subdomain, type, values, callback) {
 
             callback(null);
         });
+    });
+}
+
+function waitForDns(domain, value, type, options, callback) {
+    assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof value, 'string');
+    assert(type === 'A' || type === 'CNAME');
+    assert(options && typeof options === 'object'); // { interval: 5000, times: 50000 }
+    assert.strictEqual(typeof callback, 'function');
+
+    settings.getDnsConfig(function (error, dnsConfig) {
+        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
+
+        api(dnsConfig.provider).waitForDns(domain, value, type, options, callback);
     });
 }
 
