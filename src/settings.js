@@ -140,7 +140,7 @@ function getEmailDnsRecords(callback) {
     dns.resolveTxt(records.dkim.subdomain + '.' + config.fqdn(), function (error, txtRecords) {
         if (error) return callback(error);
         for (var i = 0; i < txtRecords.length; i++) {
-            records.dkim.value = txtRecords[i].join(" ");
+            records.dkim.value = txtRecords[i].join(' ');
             records.dkim.status = (records.dkim.value == records.dkim.value);
             break;
         }
@@ -151,8 +151,8 @@ function getEmailDnsRecords(callback) {
             if (error) return callback(error);
             var i;
             for (i = 0; i < txtRecords.length; i++) {
-                if (txtRecords[i].join(" ").indexOf('v=spf1 ') !== 0) continue; // not SPF
-                records.spf.value = txtRecords[i].join(" ");
+                if (txtRecords[i].join(' ').indexOf('v=spf1 ') !== 0) continue; // not SPF
+                records.spf.value = txtRecords[i].join(' ');
                 records.spf.status = records.spf.value.indexOf(' a:' + config.adminFqdn() + ' ') !== -1;
                 break;
             }
