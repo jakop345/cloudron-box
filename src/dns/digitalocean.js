@@ -4,7 +4,6 @@ exports = module.exports = {
     upsert: upsert,
     get: get,
     del: del,
-    getChangeStatus: getChangeStatus,
     waitForDns: require('./waitfordns.js')
 };
 
@@ -172,11 +171,3 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
     });
 }
 
-function getChangeStatus(dnsConfig, changeId, callback) {
-    assert.strictEqual(typeof dnsConfig, 'object');
-    assert.strictEqual(typeof changeId, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    // Digitalocean does not have any way to check that
-    callback(null, 'INSYNC');
-}

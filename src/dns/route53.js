@@ -4,7 +4,6 @@ exports = module.exports = {
     upsert: upsert,
     get: get,
     del: del,
-    getChangeStatus: getChangeStatus,
     waitForDns: require('./waitfordns.js'),
 
     // not part of "dns" interface
@@ -207,22 +206,6 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
 
             callback(null);
         });
-    });
-}
-
-function getChangeStatus(dnsConfig, changeId, callback) {
-    assert.strictEqual(typeof dnsConfig, 'object');
-    assert.strictEqual(typeof changeId, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    if (changeId === '') return callback(null, 'INSYNC');
-
-    var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
-    route53.getChange({ Id: changeId }, function (error, result) {
-        if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
-        if (error) return callback(error);
-
-        callback(null, result.ChangeInfo.Status);
     });
 }
 
