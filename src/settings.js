@@ -58,6 +58,7 @@ exports = module.exports = {
 var assert = require('assert'),
     backups = require('./backups.js'),
     config = require('./config.js'),
+    constants = require('./constants.js'),
     CronJob = require('cron').CronJob,
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:settings'),
@@ -131,24 +132,39 @@ function getEmailDnsRecords(callback) {
 
     var records = {};
 
-    // DKIM
-    var DKIM_SELECTOR = 'cloudron';
     var dkimKey = cloudron.readDkimPublicKeySync();
     if (!dkimKey) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, new Error('Failed to read dkim public key')));
-    records.dkim = {subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', expected: 'v=DKIM1; t=s; p=' + dkimKey, value: null, status: false};
 
+    records.dkim = {
+        subdomain: constants.DKIM_SELECTOR + '._domainkey',
+        type: 'TXT',
+        expected: 'v=DKIM1; t=s; p=' + dkimKey,
+        value: null,
+        status: false
+    };
+
+    records.spf = {
+        subdomain: '',
+        type: 'TXT',
+        value: null,
+        expected: null,
+        status: false
+    };
+
+    // check if DKIM is already setup
     dns.resolveTxt(records.dkim.subdomain + '.' + config.fqdn(), function (error, txtRecords) {
         if (error) return callback(error);
+
         for (var i = 0; i < txtRecords.length; i++) {
             records.dkim.value = txtRecords[i].join(' ');
             records.dkim.status = (records.dkim.value == records.dkim.value);
             break;
         }
 
-        // SPF
-        records.spf = {subdomain: '', type: 'TXT', value: null, expected: null, status: false};
+        // check if SPF is already setup
         dns.resolveTxt(config.fqdn(), function (error, txtRecords) {
             if (error) return callback(error);
+
             var i;
             for (i = 0; i < txtRecords.length; i++) {
                 if (txtRecords[i].join(' ').indexOf('v=spf1 ') !== 0) continue; // not SPF
@@ -159,14 +175,14 @@ function getEmailDnsRecords(callback) {
 
             if (records.spf.status) {
                 records.spf.expected = records.spf.value;
-            } else if (i == txtRecords.length) {
+            } else if (i === txtRecords.length) {
                 records.spf.expected = 'v=spf1 a:' + config.adminFqdn() + ' ~all';
             } else {
                 records.spf.expected = 'v=spf1 a:' + config.adminFqdn() + ' ' + records.spf.value.slice('v=spf1 '.length);
             }
+
             return callback(null, records);
         });
-
     });
 }
 

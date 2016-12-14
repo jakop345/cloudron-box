@@ -467,8 +467,6 @@ function addDnsRecords() {
     }
     gUpdatingDns = true;
 
-    var DKIM_SELECTOR = 'cloudron';
-
     var dkimKey = readDkimPublicKeySync();
     if (!dkimKey) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, new Error('Failed to read dkim public key')));
 
@@ -477,7 +475,7 @@ function addDnsRecords() {
 
         var webadminRecord = { subdomain: constants.ADMIN_LOCATION, type: 'A', values: [ ip ] };
         // t=s limits the domainkey to this domain and not it's subdomains
-        var dkimRecord = { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', values: [ '"v=DKIM1; t=s; p=' + dkimKey + '"' ] };
+        var dkimRecord = { subdomain: constants.DKIM_SELECTOR + '._domainkey', type: 'TXT', values: [ '"v=DKIM1; t=s; p=' + dkimKey + '"' ] };
 
         var records = [ ];
         if (config.isCustomDomain()) {
