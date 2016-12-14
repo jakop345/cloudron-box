@@ -10,7 +10,6 @@ exports = module.exports = {
     upsert: upsert,
     get: get,
     del: del,
-    getChangeStatus: getChangeStatus,
     waitForDns: require('./waitfordns.js')
 };
 
@@ -56,12 +55,3 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
     callback(new Error('not implemented'));
 }
 
-function getChangeStatus(dnsConfig, changeId, callback) {
-    assert.strictEqual(typeof dnsConfig, 'object');
-    assert.strictEqual(typeof changeId, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    // Result: current change state as string. Upstream code checks for 'INSYNC'
-
-    callback(new Error('not implemented'));
-}

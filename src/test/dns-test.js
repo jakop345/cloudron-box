@@ -61,15 +61,6 @@ describe('dns provider', function () {
                 done();
             });
         });
-
-        it('status succeeds', function (done) {
-            subdomains.status('noop-record-id', function (error, result) {
-                expect(error).to.eql(null);
-                expect(result).to.eql('done');
-
-                done();
-            });
-        });
     });
 
     describe('digitalocean', function () {
@@ -329,16 +320,6 @@ describe('dns provider', function () {
                 done();
             });
         });
-
-        it('status succeeds', function (done) {
-            // actually not implemented in the backend
-            subdomains.status('unused', function (error, result) {
-                expect(error).to.eql(null);
-                expect(result).to.eql('done');
-
-                done();
-            });
-        });
     });
 
     describe('route53', function () {
@@ -511,42 +492,6 @@ describe('dns provider', function () {
 
             subdomains.remove('test', 'A', ['1.2.3.4'], function (error) {
                 expect(error).to.eql(null);
-                expect(awsAnswerQueue.length).to.eql(0);
-
-                done();
-            });
-        });
-
-        it('status succeeds for pending', function (done) {
-            awsAnswerQueue.push([null, {
-                ChangeInfo: {
-                    Id: '/change/C2QLKQIWEI0BZF',
-                    Status: 'PENDING',
-                    SubmittedAt: 'Mon Aug 04 2014 17: 44: 49 GMT - 0700(PDT)'
-                }
-            }]);
-
-            subdomains.status('/change/C2QLKQIWEI0BZF', function (error, result) {
-                expect(error).to.eql(null);
-                expect(result).to.eql('pending');
-                expect(awsAnswerQueue.length).to.eql(0);
-
-                done();
-            });
-        });
-
-        it('status succeeds for done', function (done) {
-            awsAnswerQueue.push([null, {
-                ChangeInfo: {
-                    Id: '/change/C2QLKQIWEI0BZF',
-                    Status: 'INSYNC',
-                    SubmittedAt: 'Mon Aug 04 2014 17: 44: 49 GMT - 0700(PDT)'
-                }
-            }]);
-
-            subdomains.status('/change/C2QLKQIWEI0BZF', function (error, result) {
-                expect(error).to.eql(null);
-                expect(result).to.eql('done');
                 expect(awsAnswerQueue.length).to.eql(0);
 
                 done();

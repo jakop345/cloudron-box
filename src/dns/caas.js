@@ -4,7 +4,6 @@ exports = module.exports = {
     upsert: upsert,
     get: get,
     del: del,
-    getChangeStatus: getChangeStatus,
     waitForDns: require('./waitfordns.js')
 };
 
@@ -112,22 +111,3 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
         });
 }
 
-function getChangeStatus(dnsConfig, changeId, callback) {
-    assert.strictEqual(typeof dnsConfig, 'object');
-    assert.strictEqual(typeof changeId, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    if (changeId === '') return callback(null, 'INSYNC');
-
-    superagent
-        .get(config.apiServerOrigin() + '/api/v1/domains/' + config.fqdn() + '/status/' + changeId)
-        .query({ token: dnsConfig.token })
-        .timeout(30 * 1000)
-        .end(function (error, result) {
-            if (error && !error.response) return callback(error);
-            if (result.statusCode !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
-
-            return callback(null, result.body.status);
-        });
-
-}

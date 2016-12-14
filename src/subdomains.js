@@ -2,7 +2,6 @@
 
 module.exports = exports = {
     remove: remove,
-    status: status,
     upsert: upsert,
     get: get,
     waitForDns: waitForDns,
@@ -124,16 +123,3 @@ function waitForDns(domain, value, type, options, callback) {
     });
 }
 
-function status(changeId, callback) {
-    assert.strictEqual(typeof changeId, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    settings.getDnsConfig(function (error, dnsConfig) {
-        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
-
-        api(dnsConfig.provider).getChangeStatus(dnsConfig, changeId, function (error, status) {
-            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
-            callback(null, status === 'INSYNC' ? 'done' : 'pending');
-        });
-    });
-}
