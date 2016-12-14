@@ -117,7 +117,7 @@ work fine. Choosing a domain name at any other level like `cloudron.example.com`
 work.
 
 * `--provider` is the name of your VPS provider. If the name is not on the list, simply
-choose `generic`. The `generic` provider mostly will work fine.
+choose `generic`. In most cases, the `generic` provider mostly will work fine.
 If the Cloudron does not complete initialization, it may mean that
 we have to add some vendor specific quirks. Please open a
 [bug report](https://git.cloudron.io/cloudron/box/issues) in that case.
@@ -127,16 +127,16 @@ we have to add some vendor specific quirks. Please open a
 Optional arguments for installation:
 
 * `--tls-provider` is the name of the SSL/TLS certificate backend. Defaults to Let's encrypt.
-If Let's encrypt is not wanted, specifying `fallback` will always use the fallback wildcard certificate.
+Specifying `fallback` will setup the Cloudron to use the fallback wildcard certificate.
 Initially a self-signed one is provided, which can be overwritten later in the admin interface.
 This may be useful for non-public installations.
 
 Optional arguments used for update and restore:
 
 * `--version` is the version of Cloudron to install. By default, the setup script installs
-the latest version. This is useful when restoring a Cloudron from a backup.
+the latest version. You can set this to an older version when restoring a Cloudron from a backup.
 
-* `--restore-url` is an URL to the backup to restore to.
+* `--restore-url` is a backup URL to restore from.
 
 
 
@@ -153,7 +153,7 @@ already! In this unlikely case, simply delete the server and start over.
 
 Once the setup is done, you can access the admin page in the future at `https://my.<domain>`.
 
-**If apps do not start after installation, a server restart may be required to let bootloader changes come into action.**
+**If apps do not start after installation, a server restart may be required to let bootloader changes take effect.**
 
 ## DNS
 
@@ -211,9 +211,9 @@ The Cloudron creates encrypted backups once a day. Each app is backed up indepen
 backups have the prefix `appbackup_`. The platform state is backed up independently with the
 prefix `backup_`.
 
-By default, backups reside in `/var/backups`. Having backups reside in the same location as the
-server instance is dangerous and it must be changed to an external storage location like `S3`
-as soon as possible.
+By default, backups reside in `/var/backups`. Please note that having backups reside in the same 
+physical machine as the Cloudron server instance is dangerous and it must be changed to 
+an external storage location like `S3` as soon as possible.
 
 ### Amazon S3
 
