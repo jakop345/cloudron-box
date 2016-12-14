@@ -346,16 +346,11 @@ function setDnsConfig(dnsConfig, callback) {
         };
 
         validator = validateRoute53Config.bind(null, dnsConfig.domain || config.fqdn());
-    } else if (dnsConfig.provider === 'caas') {
+    } else if (dnsConfig.provider === 'caas' || dnsConfig.provider === 'noop' || dnsConfig.provider === 'manual') {
         credentials = {
             provider: dnsConfig.provider
         };
         validator = function (caasConfig, next) { return next(); };
-    } else if (dnsConfig.provider === 'noop') {
-        credentials = {
-            provider: dnsConfig.provider
-        };
-        validator = function (noopConfig, next) { return next(); };
     } else if (dnsConfig.provider === 'digitalocean') {
         if (typeof dnsConfig.token !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'token must be a string'));
 
